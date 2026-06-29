@@ -11,7 +11,8 @@
 <style>
   *{ box-sizing:border-box; margin:0; padding:0; }
   html{ scroll-behavior:smooth; }
-  body{ font-family:'Outfit',sans-serif; font-weight:300; color:#22201d; background:#f7f3ed; -webkit-font-smoothing:antialiased; }
+  [data-nav="1"]{ border-bottom:1px solid transparent; }
+body{ font-family:'Outfit',sans-serif; font-weight:300; color:#22201d; background:#f7f3ed; -webkit-font-smoothing:antialiased; }
   ::selection{ background:#bd7a70; color:#f7f3ed; }
   input,textarea,select,button{ font-family:'Outfit',sans-serif; }
   img{ max-width:100%; }
@@ -73,7 +74,7 @@
     /* Fairway Standard (#22201d) → Alignment Band (#1a1916): unify to single dark block */
     section#difference + section{ border-top:none !important; }
     /* Remove frosted-glass blur behind logo on mobile (keep bg for readability) */
-    [data-nav]{ backdrop-filter:none !important; -webkit-backdrop-filter:none !important; box-shadow:none !important; }
+    [data-nav]{ backdrop-filter:none !important; -webkit-backdrop-filter:none !important; box-shadow:none !important; border-bottom:1px solid transparent; }
 
     /* Centre hero copy and CTAs */
     .r-hero-inner{ text-align:center !important; }
@@ -931,7 +932,7 @@
         if ('IntersectionObserver' in window) {
           var bookIO = new IntersectionObserver(function(entries){
             if (entries[0].isIntersecting){ mountBooking(); bookIO.disconnect(); }
-          }, { rootMargin:'200px' });
+          }, { rootMargin:'1200px' });
           bookIO.observe(bookEl);
         } else {
           setTimeout(mountBooking, 3000);
