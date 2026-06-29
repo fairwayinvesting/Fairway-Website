@@ -940,15 +940,14 @@
     }
   }
 
-  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', init)
+  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
   else init();
   window.addEventListener('load', function(){
     _forceTop();
     setTimeout(_forceTop, 200);
     setTimeout(_forceTop, 600);
     setTimeout(_forceTop, 1200);
-  });;
-  else init();
+  });
 })();
 </script>
 <script>
