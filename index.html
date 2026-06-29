@@ -84,6 +84,9 @@
     .r-align-band{ background:#22201d !important; }
   }
 
+  /* Mobile Bottom Line duplicate — visible on mobile, hidden on desktop */
+  @media (min-width: 761px) { .mob-bl-section { display:none !important; } }
+
   /* Small mobile */
 
     /* Trust bar — 3 equal columns on mobile, no slashes */
@@ -743,7 +746,7 @@
 
   <!-- ===================== FINAL CTA / CONTACT ===================== -->
   <!-- Mobile-only Bottom Line — sits after Let's Talk -->
-  <section class="r-mob-show" style="display:none; background:#22201d; color:#f7f3ed;">
+  <section class="mob-bl-section" style="background:#22201d; color:#f7f3ed;">
     <div class="r-wrap r-vpad" style="max-width:920px; margin:0 auto; padding:80px 24px; position:relative; text-align:center;">
       <div>
         <div style="display:inline-flex; align-items:center; gap:12px; margin-bottom:26px;">
