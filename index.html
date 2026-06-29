@@ -925,19 +925,7 @@ body{ font-family:'Outfit',sans-serif; font-weight:300; color:#22201d; backgroun
       window.Lunacal.ns.initialchat('ui',{theme:'dark',styles:{branding:{}},hideEventTypeDetails:false,cssVarsPerTheme:{light:fwVars,dark:fwVars},displayedContent:{image:true,name:true,designation:true,description:true,eventName:true,highlightBar:false},background:{type:'none'},stylePreset:'blueshine'});
     }
     if (document.getElementById('lunacal-booking')) {
-      // Lazy-load: only mount Lunacal when booking section scrolls into view
-      (function(){
-        var bookEl = document.getElementById('lunacal-booking');
-        if (!bookEl) return;
-        if ('IntersectionObserver' in window) {
-          var bookIO = new IntersectionObserver(function(entries){
-            if (entries[0].isIntersecting){ mountBooking(); bookIO.disconnect(); }
-          }, { rootMargin:'1200px' });
-          bookIO.observe(bookEl);
-        } else {
-          setTimeout(mountBooking, 3000);
-        }
-      })();
+      mountBooking();
     }
   }
 
