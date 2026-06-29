@@ -68,6 +68,9 @@
     h2{ font-size:32px !important; line-height:1.14 !important; }
     .r-stack{ flex-direction:column !important; align-items:flex-start !important; text-align:left !important; gap:14px !important; }
     .r-cmp-panel{ text-align:center !important; }
+    .r-mob-hide{ display:none !important; }
+    /* Fairway Standard (#22201d) → Alignment Band (#1a1916): unify to single dark block */
+    section#difference + section{ border-top:none !important; }
     /* Remove frosted-glass blur behind logo on mobile (keep bg for readability) */
     [data-nav]{ backdrop-filter:none !important; -webkit-backdrop-filter:none !important; box-shadow:none !important; }
 
@@ -237,7 +240,7 @@
           </div>
         </div>
       </div>
-      <div data-reveal style="display:flex; flex-direction:column; justify-content:flex-end;">
+      <div data-reveal class="r-mob-hide" style="display:flex; flex-direction:column; justify-content:flex-end;">
         <p style="font-size:19px; font-weight:300; line-height:1.7; color:rgba(34,32,29,0.82); margin-bottom:22px;">Here is what worries people &mdash; rightly. You meet someone impressive, sign on, then get passed to a junior you have never met. You pay upfront before they have shown you anything. And once you have signed, you feel stuck.</p>
         <p style="font-size:19px; font-weight:300; line-height:1.7; color:rgba(34,32,29,0.82); margin-bottom:22px;">Then there is the money you cannot see. Agents quietly paid by developers to move their stock, or charging a percentage so they earn more when you spend more. None of it is on your side.</p>
         <p style="font-size:19px; font-weight:300; line-height:1.7; color:rgba(34,32,29,0.82); margin-bottom:30px;">Fairway strips all of that out. One person, start to finish. You see how I work before committing. And the only person who pays me is you &mdash; in writing.</p>
@@ -427,7 +430,7 @@
   </section>
 
   <!-- ===================== THE DIFFERENCE ===================== -->
-  <section id="difference" style="background:#ece4d8; border-top:1px solid #ddd3c5; border-bottom:1px solid #ddd3c5;">
+  <section id="difference" class="r-mob-hide" style="background:#ece4d8; border-top:1px solid #ddd3c5; border-bottom:1px solid #ddd3c5;">
     <div class="r-wrap r-vpad" style="max-width:1200px; margin:0 auto; padding:120px 44px;">
       <div data-reveal style="max-width:680px; margin:0 auto 56px; text-align:center;">
         <div style="display:inline-flex; align-items:center; gap:12px; margin-bottom:22px;">
