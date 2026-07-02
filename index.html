@@ -57,8 +57,8 @@ body{ font-family:'Outfit',sans-serif; font-weight:300; color:#22201d; backgroun
     .r-table{ grid-template-columns:1fr !important; }
     .r-th{ display:none !important; }
     .r-table > div > div{ padding:16px 20px !important; font-size:14.5px !important; }
-    .r-mic{ grid-template-columns:1fr 1fr !important; grid-template-rows:1fr 1fr !important; height:300px !important; gap:10px !important; }
-    .r-mic > img{ height:100% !important; }
+    .r-mic{ grid-template-columns:1fr 1fr !important; grid-template-rows:auto auto !important; height:auto !important; gap:10px !important; }
+    .r-mic > img{ height:140px !important; object-fit:cover !important; }
     .r-hero-pad{ padding:116px 20px 44px !important; }
     .r-hero-h1{ font-size:38px !important; }
     .r-nav{ padding:14px 20px !important; }
@@ -95,7 +95,8 @@ body{ font-family:'Outfit',sans-serif; font-weight:300; color:#22201d; backgroun
     .r-trust-bar > span{ font-size:11.5px !important; line-height:1.4; }
   @media (max-width: 460px){
     .r-foot, .r-std{ grid-template-columns:1fr !important; }
-    .r-mic{ height:230px !important; gap:8px !important; }
+    .r-mic{ height:auto !important; gap:8px !important; }
+    .r-mic > img{ height:118px !important; }
     .r-hero-h1{ font-size:36px !important; }
     .r-hero-pad{ padding-top:100px !important; }
     .r-nav a[href="#contact"]{ padding:9px 16px !important; font-size:13px !important; }
