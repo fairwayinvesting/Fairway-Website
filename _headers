@@ -1,0 +1,15 @@
+# Hidden pages — block indexing at HTTP level (backs up the noindex meta tags)
+/referral/*
+  X-Robots-Tag: noindex, nofollow
+
+/discovery-call.html
+  X-Robots-Tag: noindex, nofollow
+
+/strategy-session.html
+  X-Robots-Tag: noindex, nofollow
+
+# Security headers for all pages
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin

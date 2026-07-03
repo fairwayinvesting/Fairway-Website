@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /referral/
+
+Sitemap: https://fairwayinvesting.com.au/sitemap.xml
