@@ -1,5 +1,5 @@
 # Hidden pages — block indexing at HTTP level (backs up the noindex meta tags)
-/referral/*
+/p/*
   X-Robots-Tag: noindex, nofollow
 
 /discovery-call.html
