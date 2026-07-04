@@ -9,6 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500;1,9..144,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -63,14 +65,12 @@
     .perf-row{display:grid;grid-template-columns:120px 1fr 1fr;align-items:center;gap:0;padding:18px 0;border-bottom:1px solid rgba(247,243,237,0.07);}
     .perf-bar{height:6px;border-radius:3px;background:#bd7a70;transition:width 1.2s cubic-bezier(0.4,0,0.2,1);}
 
-    /* Static map */
+    /* Map — fully locked, no interaction */
     .static-map-wrap{position:relative;border-radius:16px;overflow:hidden;border:1px solid rgba(247,243,237,0.08);}
-    .static-map-wrap iframe{width:100%;height:380px;border:none;display:block;pointer-events:none;}
-    .static-map-overlay{position:absolute;inset:0;cursor:default;}
-    /* Covers OSM attribution bar — credit appears in data sources footer below */
-    .static-map-attrib-cover{position:absolute;bottom:0;left:0;right:0;height:26px;background:#22201d;}
-    /* Covers OSM +/- zoom buttons (non-functional anyway due to overlay, but visually distracting) */
-    .static-map-zoom-cover{position:absolute;top:10px;left:10px;width:36px;height:72px;background:#22201d;border-radius:6px;}
+    #map{height:400px;display:block;pointer-events:none;}
+    .leaflet-container{font-family:'Outfit',sans-serif;}
+    .fw-tip{background:#1a1916!important;border:1px solid rgba(189,122,112,0.45)!important;color:#f7f3ed!important;font-family:'Outfit',sans-serif!important;font-size:12px!important;font-weight:500!important;padding:5px 12px!important;border-radius:6px!important;box-shadow:0 4px 16px rgba(0,0,0,0.5)!important;white-space:nowrap!important;}
+    .fw-tip::before,.fw-tip.leaflet-tooltip-bottom::before,.fw-tip.leaflet-tooltip-top::before{display:none!important;}
 
     /* Amenity cards */
     .amenity-cat{font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:#bd7a70;margin-bottom:10px;}
@@ -116,7 +116,7 @@
       .r-3col{grid-template-columns:1fr!important;}
       .r-4col{grid-template-columns:1fr 1fr!important;}
       .perf-row{grid-template-columns:80px 1fr 1fr;}
-      .static-map-wrap iframe{height:260px;}
+      #map{height:260px!important;}
       h1{font-size:48px!important;letter-spacing:-1px!important;}
       .chart-wrap{height:220px;}
       .infra-card{padding:20px 18px;}
@@ -211,20 +211,9 @@
       </div>
     </div>
 
-    <!-- Static map (non-interactive) -->
+    <!-- Map — all interaction disabled via JS + CSS pointer-events:none -->
     <div class="static-map-wrap reveal-scale" style="margin-bottom:36px;">
-      <iframe
-        src="https://www.openstreetmap.org/export/embed.html?bbox=144.15%2C-38.45%2C144.75%2C-37.95&amp;layer=mapnik&amp;marker=-38.1499%2C144.3617"
-        loading="lazy"
-        title="Geelong location map"
-        sandbox="allow-scripts allow-same-origin"
-      ></iframe>
-      <!-- Prevents accidental touch/scroll interaction -->
-      <div class="static-map-overlay"></div>
-      <!-- Covers OSM attribution bar; credit moved to data sources footer -->
-      <div class="static-map-attrib-cover"></div>
-      <!-- Covers OSM zoom buttons -->
-      <div class="static-map-zoom-cover"></div>
+      <div id="map"></div>
     </div>
 
     <!-- Amenities grid -->
@@ -887,6 +876,57 @@ const chartObserver = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('canvas').forEach(c => chartObserver.observe(c));
 
+// ─── MAP (fully static, no interaction) ────────────────────────────────────
+const map = L.map('map', {
+  center: [-38.20, 144.42],
+  zoom: 10,
+  zoomControl: false,
+  dragging: false,
+  scrollWheelZoom: false,
+  doubleClickZoom: false,
+  touchZoom: false,
+  tap: false,
+  keyboard: false,
+  attributionControl: true,
+});
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
+  subdomains: 'abcd',
+  maxZoom: 19,
+}).addTo(map);
+
+function mkIcon(color) {
+  return L.divIcon({
+    html: `<div style="width:11px;height:11px;border-radius:50%;background:${color};border:2px solid rgba(247,243,237,0.7);box-shadow:0 2px 10px rgba(0,0,0,0.6);"></div>`,
+    className: '', iconAnchor: [6, 6],
+  });
+}
+
+const pts = [
+  { latlng: [-38.1499, 144.3617], label: 'Geelong CBD',       color: '#bd7a70', perm: true  },
+  { latlng: [-37.8136, 144.9631], label: 'Melbourne CBD',      color: '#cf9b92', perm: true  },
+  { latlng: [-38.2050, 144.3020], label: 'Waurn Ponds',        color: '#bd7a70', perm: false },
+  { latlng: [-38.2650, 144.4180], label: 'Armstrong Creek',    color: '#bd7a70', perm: false },
+  { latlng: [-38.1840, 144.3720], label: 'Deakin University',  color: '#cf9b92', perm: false },
+  { latlng: [-38.1540, 144.3550], label: 'Barwon Health',      color: '#cf9b92', perm: false },
+];
+
+pts.forEach(p => {
+  L.marker(p.latlng, { icon: mkIcon(p.color) })
+    .addTo(map)
+    .bindTooltip(p.label, {
+      permanent: p.perm,
+      direction: 'top',
+      offset: [0, -10],
+      className: 'fw-tip',
+    });
+});
+
+// Dashed line Melbourne → Geelong
+L.polyline([[-37.8136, 144.9631], [-38.1499, 144.3617]], {
+  color: 'rgba(189,122,112,0.5)', weight: 2, dashArray: '6 5',
+}).addTo(map);
 
 </script>
 
