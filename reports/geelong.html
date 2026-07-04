@@ -101,7 +101,10 @@
     .conviction-bar{height:8px;border-radius:100px;background:linear-gradient(90deg,#bd7a70,#cf9b92);transition:width 1.4s cubic-bezier(0.4,0,0.2,1);}
 
     /* Responsive */
+    /* Hide nav label on mobile — keeps back link clean */
+    .nav-area-label{display:inline;}
     @media(max-width:760px){
+      .nav-area-label{display:none;}
       .sec{padding:60px 20px;}
       .nav-inner{padding:14px 20px;}
       .hero-content{padding:0 20px;}
@@ -133,7 +136,7 @@
       <img src="/logo-word.png" alt="Fairway Investing" style="height:22px;width:auto;">
     </a>
     <div style="display:flex;align-items:center;gap:24px;">
-      <span style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.35);">Area Report</span>
+      <span class="nav-area-label" style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.35);">Area Report</span>
       <a href="/" style="font-size:13.5px;color:rgba(247,243,237,0.4);transition:color .2s;" onmouseover="this.style.color='rgba(247,243,237,0.75)'" onmouseout="this.style.color='rgba(247,243,237,0.4)'">&larr; Back to home</a>
     </div>
   </div>
@@ -716,7 +719,7 @@
         </div>
       </div>
       <p style="font-size:17px;font-weight:300;line-height:1.85;color:rgba(247,243,237,0.75);margin-bottom:20px;">Geelong is one of the most compelling regional markets in Australia right now — and I say that based on the data, not sentiment. The combination of genuine yield (not sacrificing cashflow for a growth bet), a massive committed infrastructure pipeline, and a demographic growth story that has years to run is rare to find in the same market at this price point.</p>
-      <p style="font-size:17px;font-weight:300;line-height:1.85;color:rgba(247,243,237,0.75);margin-bottom:32px;">My focus is on the established inner ring — Newtown, Geelong West, Highton — where you benefit from the city's growth without exposure to the new-build supply risk in the outer corridors. A well-selected 3–4 bedroom house in these pockets, bought right, gives you a genuinely strong hold position regardless of what interest rates do in the short term.</p>
+      <p style="font-size:17px;font-weight:300;line-height:1.85;color:rgba(247,243,237,0.75);margin-bottom:32px;">What I look for here is selectivity — not every pocket and not every asset tells the same story. The markets that outperform over the medium term in Geelong are those with genuine scarcity, strong tenant demand, and direct exposure to the infrastructure tailwinds — without being in the new-build corridors where supply is still coming online. The right property, bought at the right price, gives you a strong hold position regardless of what rates do in the short term.</p>
       <div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
           <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.4);">Conviction level</p>
