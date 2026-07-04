@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Melbourne Area Report — Fairway Investing</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="/logo-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500;1,9..144,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/data/markets.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth;overflow-x:hidden;}
+    body{font-family:'Outfit',sans-serif;font-weight:300;color:#22201d;background:#f7f3ed;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+    ::selection{background:#bd7a70;color:#f7f3ed}
+    a{color:inherit;text-decoration:none}
+    .reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease;}
+    .reveal.visible{opacity:1;transform:translateY(0);}
+    .reveal-left{opacity:0;transform:translateX(-28px);transition:opacity .7s ease,transform .7s ease;}
+    .reveal-left.visible{opacity:1;transform:translateX(0);}
+    .reveal-scale{opacity:0;transform:scale(0.94);transition:opacity .6s ease,transform .6s ease;}
+    .reveal-scale.visible{opacity:1;transform:scale(1);}
+    .stat-val{font-family:'Fraunces',serif;font-size:48px;font-weight:400;line-height:1;letter-spacing:-1px;}
+    .stat-label{font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;margin-top:6px;opacity:0.5;}
+    .sec{padding:88px 44px;}
+    .sec-dark{background:#22201d;color:#f7f3ed;}
+    .sec-deeper{background:#1a1916;color:#f7f3ed;}
+    .sec-cream{background:#f7f3ed;}
+    .sec-warm{background:#ede8e0;}
+    .inner{max-width:1060px;margin:0 auto;}
+    .eyebrow{font-size:11.5px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:#bd7a70;margin-bottom:14px;}
+    .sec-h2{font-family:'Fraunces',serif;font-size:38px;font-weight:400;line-height:1.2;letter-spacing:-0.3px;margin-bottom:40px;}
+    .infra-card{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:16px;padding:28px 26px;}
+    .infra-value{font-family:'Fraunces',serif;font-size:28px;font-weight:400;color:#bd7a70;margin-bottom:4px;}
+    .infra-status{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;padding:4px 10px;border-radius:100px;margin-top:10px;}
+    .status-active{background:rgba(189,122,112,0.2);color:#bd7a70;}
+    .status-approved{background:rgba(207,155,146,0.15);color:#cf9b92;}
+    .status-proposed{background:rgba(247,243,237,0.08);color:rgba(247,243,237,0.5);}
+    .chart-wrap{position:relative;height:260px;}
+    .risk-item{display:flex;align-items:flex-start;gap:16px;padding:22px 0;border-bottom:1px solid rgba(34,32,29,0.08);}
+    .risk-item:last-child{border-bottom:none;}
+    .risk-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+    .profile-tag{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid rgba(34,32,29,0.08);border-radius:100px;padding:9px 18px;font-size:14px;font-weight:400;color:#22201d;}
+    .profile-tag .dot{width:8px;height:8px;border-radius:50%;background:#bd7a70;flex-shrink:0;}
+    .perf-row{display:grid;grid-template-columns:120px 1fr 1fr;align-items:center;gap:0;padding:18px 0;border-bottom:1px solid rgba(247,243,237,0.07);}
+    .perf-bar{height:6px;border-radius:3px;background:#bd7a70;transition:width 1.2s cubic-bezier(0.4,0,0.2,1);}
+    .static-map-wrap{position:relative;border-radius:16px;overflow:hidden;border:1px solid rgba(247,243,237,0.08);}
+    #map{height:400px;display:block;pointer-events:none;}
+    .leaflet-container{font-family:'Outfit',sans-serif;}
+    .fw-tip{background:#1a1916!important;border:1px solid rgba(189,122,112,0.45)!important;color:#f7f3ed!important;font-family:'Outfit',sans-serif!important;font-size:12px!important;font-weight:500!important;padding:5px 12px!important;border-radius:6px!important;box-shadow:0 4px 16px rgba(0,0,0,0.5)!important;white-space:nowrap!important;}
+    .fw-tip::before,.fw-tip.leaflet-tooltip-bottom::before,.fw-tip.leaflet-tooltip-top::before{display:none!important;}
+    .amenity-cat{font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:#bd7a70;margin-bottom:10px;}
+    .amenity-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(247,243,237,0.07);}
+    .amenity-item:last-child{border-bottom:none;}
+    .amenity-dot{width:6px;height:6px;border-radius:50%;background:#bd7a70;flex-shrink:0;}
+    nav{position:sticky;top:0;z-index:200;background:#22201d;border-bottom:1px solid rgba(247,243,237,0.08);}
+    .nav-inner{max-width:1200px;margin:0 auto;padding:18px 44px;display:flex;align-items:center;justify-content:space-between;gap:24px;}
+    .hero{min-height:68vh;background:linear-gradient(160deg,#1a1916 0%,#22201d 55%,#2a2420 100%);display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;}
+    .hero-bg-lines{position:absolute;inset:0;opacity:0.04;background-image:repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(247,243,237,0.8) 60px,rgba(247,243,237,0.8) 61px),repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(247,243,237,0.8) 60px,rgba(247,243,237,0.8) 61px);}
+    .hero-content{position:relative;z-index:2;padding:60px 44px 0;}
+    .hero-stats-strip{border-top:1px solid rgba(247,243,237,0.1);margin-top:48px;display:grid;grid-template-columns:repeat(4,1fr);background:rgba(0,0,0,0.25);backdrop-filter:blur(8px);}
+    .hero-stat{padding:22px 28px;border-right:1px solid rgba(247,243,237,0.08);}
+    .hero-stat:last-child{border-right:none;}
+    .hero-stat-val{font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#f7f3ed;line-height:1;}
+    .hero-stat-label{font-size:11px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.4);margin-top:5px;}
+    .data-note{font-size:11.5px;font-weight:300;color:rgba(34,32,29,0.35);margin-top:10px;line-height:1.6;}
+    .data-note-light{font-size:11.5px;font-weight:300;color:rgba(247,243,237,0.3);margin-top:10px;line-height:1.6;}
+    .lukes-take-card{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:20px;padding:40px;}
+    .nav-area-label{display:inline;}
+    @media(max-width:760px){
+      .nav-area-label{display:none;}
+      .sec{padding:60px 20px;}
+      .nav-inner{padding:14px 20px;}
+      .hero-content{padding:0 20px;}
+      .hero-stats-strip{grid-template-columns:1fr 1fr;}
+      .sec-h2{font-size:28px;}
+      .stat-val{font-size:34px;}
+      .r-2col{grid-template-columns:1fr!important;}
+      .r-3col{grid-template-columns:1fr!important;}
+      .r-4col{grid-template-columns:1fr 1fr!important;}
+      .perf-row{grid-template-columns:80px 1fr 1fr;}
+      #map{height:260px!important;}
+      h1{font-size:48px!important;letter-spacing:-1px!important;}
+      .chart-wrap{height:220px;}
+      .infra-card{padding:20px 18px;}
+    }
+    @media(max-width:400px){
+      .r-4col{grid-template-columns:1fr!important;}
+      .hero-stats-strip{grid-template-columns:1fr 1fr;}
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" style="display:flex;align-items:center;gap:12px;">
+      <img src="/logo-icon.png" alt="" style="height:32px;width:auto;">
+      <img src="/logo-word.png" alt="Fairway Investing" style="height:22px;width:auto;">
+    </a>
+    <div style="display:flex;align-items:center;gap:24px;">
+      <span class="nav-area-label" style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.35);">Area Report</span>
+      <a href="/" style="font-size:13.5px;color:rgba(247,243,237,0.4);transition:color .2s;" onmouseover="this.style.color='rgba(247,243,237,0.75)'" onmouseout="this.style.color='rgba(247,243,237,0.4)'">&larr; Back to home</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg-lines"></div>
+  <div class="hero-content">
+    <div style="max-width:1060px;margin:0 auto;">
+      <div class="reveal" style="display:inline-flex;align-items:center;gap:8px;background:rgba(189,122,112,0.15);border:1px solid rgba(189,122,112,0.3);border-radius:100px;padding:6px 16px;margin-bottom:24px;">
+        <span style="width:7px;height:7px;border-radius:50%;background:#bd7a70;display:block;flex-shrink:0;"></span>
+        <span style="font-size:11.5px;font-weight:500;color:#bd7a70;letter-spacing:0.9px;text-transform:uppercase;">Fairway Area Report &nbsp;&middot;&nbsp; Victoria</span>
+      </div>
+      <h1 class="reveal" style="font-family:'Fraunces',serif;font-size:72px;font-weight:400;color:#f7f3ed;line-height:1.05;letter-spacing:-2px;margin-bottom:16px;">Melbourne</h1>
+      <p class="reveal" style="font-size:18px;font-weight:300;color:rgba(247,243,237,0.55);max-width:580px;line-height:1.7;margin-bottom:14px;">Australia's cultural capital · Victoria's economic engine · Population 5.2 million</p>
+      <p class="reveal" style="font-size:15px;font-weight:300;color:rgba(247,243,237,0.3);max-width:560px;line-height:1.8;">A Fairway Investing research report — produced for client use to provide market context across key growth indicators, infrastructure pipeline and supply &amp; demand dynamics.</p>
+    </div>
+  </div>
+  <div class="hero-stats-strip">
+    <div style="max-width:1060px;margin:0 auto;display:contents;">
+      <div class="hero-stat reveal">
+        <div class="hero-stat-val">~$980k</div>
+        <div class="hero-stat-label">Approx. house median</div>
+      </div>
+      <div class="hero-stat reveal">
+        <div class="hero-stat-val">3–4%</div>
+        <div class="hero-stat-label">Indicative gross yield</div>
+      </div>
+      <div class="hero-stat reveal">
+        <div class="hero-stat-val">5.2M</div>
+        <div class="hero-stat-label">Population</div>
+      </div>
+      <div class="hero-stat reveal">
+        <div class="hero-stat-val">1.8%</div>
+        <div class="hero-stat-label">Vacancy rate</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec-dark">
+  <div class="inner">
+    <p class="eyebrow reveal">Location</p>
+    <h2 class="sec-h2 reveal" style="color:#f7f3ed;">Where is Melbourne?</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:start;margin-bottom:44px;" class="r-2col reveal">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:18px 20px;">
+          <p style="font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#bd7a70;">5.2M</p>
+          <p style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);margin-top:4px;">Population</p>
+        </div>
+        <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:18px 20px;">
+          <p style="font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#bd7a70;">3rd</p>
+          <p style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);margin-top:4px;">Most liveable city globally</p>
+        </div>
+        <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:18px 20px;">
+          <p style="font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#bd7a70;">22</p>
+          <p style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);margin-top:4px;">Local government areas</p>
+        </div>
+        <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:18px 20px;">
+          <p style="font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#bd7a70;">Capital City</p>
+          <p style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);margin-top:4px;">of Victoria</p>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:15.5px;font-weight:300;color:rgba(247,243,237,0.55);line-height:1.85;">Melbourne is Australia's second-largest city and consistently rated among the world's most liveable. As Victoria's economic capital, Melbourne supports a deeply diversified economy spanning financial services, education, healthcare, technology, manufacturing, creative industries and one of Australia's strongest international tourism and events sectors. Unlike regional markets, investing in Melbourne requires careful precinct-level analysis — the city encompasses dramatically different market dynamics across its 22 local government areas.</p>
+      </div>
+    </div>
+    <div class="static-map-wrap reveal-scale" style="margin-bottom:36px;">
+      <div id="map"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;" class="r-4col reveal">
+      <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:22px 20px;">
+        <p class="amenity-cat">Education</p>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">University of Melbourne, Monash, RMIT + 8 more</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Extensive private school network (60+ schools)</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">TAFE and vocational training network</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">International student population 200,000+</span></div>
+      </div>
+      <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:22px 20px;">
+        <p class="amenity-cat">Healthcare</p>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Royal Melbourne Hospital</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Alfred Hospital (major trauma)</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Austin Health</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Monash Health</span></div>
+      </div>
+      <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:22px 20px;">
+        <p class="amenity-cat">Retail &amp; dining</p>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">CBD retail precinct and Bourke Street Mall</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Chadstone (southern hemisphere's largest)</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Doncaster and Highpoint shopping centres</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Brunswick, Fitzroy &amp; Richmond lifestyle precincts</span></div>
+      </div>
+      <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:22px 20px;">
+        <p class="amenity-cat">Transport &amp; lifestyle</p>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Metropolitan train, tram and bus network</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Tullamarine Airport (15km from CBD)</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">West Gate and CityLink freeways</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Metro Tunnel (opening 2025)</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec-cream">
+  <div class="inner">
+    <p class="eyebrow reveal">Macro snapshot</p>
+    <h2 class="sec-h2 reveal">Population &amp; demographics</h2>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-bottom:56px;" class="r-4col reveal">
+      <div style="padding:28px 24px;background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+        <div class="stat-val" data-target="5.2" data-prefix="" data-suffix="M" data-decimal="1">0</div>
+        <div class="stat-label">Population</div>
+      </div>
+      <div style="padding:28px 24px;background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+        <div class="stat-val" data-target="2.2" data-prefix="" data-suffix="%" data-decimal="1">0</div>
+        <div class="stat-label">Annual pop. growth</div>
+      </div>
+      <div style="padding:28px 24px;background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+        <div class="stat-val" data-target="37" data-prefix="" data-suffix="">0</div>
+        <div class="stat-label">Median age</div>
+      </div>
+      <div style="padding:28px 24px;background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+        <div class="stat-val" data-target="56" data-prefix="" data-suffix="%">0</div>
+        <div class="stat-label">Owner-occupier rate</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;" class="r-2col reveal">
+      <div>
+        <p style="font-size:14px;font-weight:500;color:rgba(34,32,29,0.5);margin-bottom:20px;letter-spacing:0.05em;">POPULATION GROWTH TREND</p>
+        <div class="chart-wrap"><canvas id="popChart"></canvas></div>
+        <p class="data-note">Source: ABS Regional Population, 2021 Census &amp; projections</p>
+      </div>
+      <div>
+        <p style="font-size:16px;font-weight:300;line-height:1.8;color:rgba(34,32,29,0.7);margin-bottom:18px;">Greater Melbourne has one of the world's strongest long-term population growth profiles for a developed-world city, driven by both international and interstate migration. The University of Melbourne and Monash University alone generate tens of thousands of international students, creating consistent inner-city rental demand. Melbourne's labour market is diversified across services, knowledge economy, healthcare and education — providing resilience through economic cycles.</p>
+        <p style="font-size:16px;font-weight:300;line-height:1.8;color:rgba(34,32,29,0.7);">ABS projections place Greater Melbourne's population at 6.5 million by 2036 — growth that will be partly absorbed by the Suburban Rail Loop's corridor development and partly by continued densification of the inner and middle rings. The infrastructure pipeline is the single most significant factor in determining which precincts will outperform over the next decade.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px;">
+          <div style="background:#fff;border-radius:12px;border:1px solid rgba(34,32,29,0.07);padding:16px 18px;">
+            <p style="font-family:'Fraunces',serif;font-size:22px;font-weight:400;color:#22201d;">65%</p>
+            <p style="font-size:12px;font-weight:300;color:rgba(34,32,29,0.5);margin-top:3px;">Employed full-time</p>
+          </div>
+          <div style="background:#fff;border-radius:12px;border:1px solid rgba(34,32,29,0.07);padding:16px 18px;">
+            <p style="font-family:'Fraunces',serif;font-size:22px;font-weight:400;color:#22201d;">4.0%</p>
+            <p style="font-size:12px;font-weight:300;color:rgba(34,32,29,0.5);margin-top:3px;">Unemployment rate</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec-dark">
+  <div class="inner">
+    <p class="eyebrow reveal">Infrastructure pipeline</p>
+    <h2 class="sec-h2 reveal" style="color:#f7f3ed;">Major approved &amp; committed projects</h2>
+    <div class="reveal" style="display:inline-flex;align-items:baseline;gap:10px;margin-bottom:44px;padding:20px 28px;background:rgba(189,122,112,0.1);border:1px solid rgba(189,122,112,0.2);border-radius:14px;">
+      <span style="font-family:'Fraunces',serif;font-size:42px;font-weight:400;color:#bd7a70;">$60B+</span>
+      <span style="font-size:15px;font-weight:300;color:rgba(247,243,237,0.5);">total committed &amp; approved infrastructure investment</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;" class="r-3col">
+      <div class="infra-card reveal">
+        <div class="infra-value">$12.6B</div>
+        <h3 style="font-size:16px;font-weight:600;color:#f7f3ed;margin-bottom:8px;">Melbourne Metro Tunnel</h3>
+        <p style="font-size:14px;font-weight:300;color:rgba(247,243,237,0.55);line-height:1.65;">Transformational cross-city rail tunnel connecting the Cranbourne-Pakenham and Sunbury lines through new underground stations. Opens new growth corridors along the alignment and significantly increases the network's peak-hour capacity.</p>
+        <div class="infra-status status-proposed">&#9679; Opening 2025</div>
+      </div>
+      <div class="infra-card reveal">
+        <div class="infra-value">$10.7B+</div>
+        <h3 style="font-size:16px;font-weight:600;color:#f7f3ed;margin-bottom:8px;">West Gate Tunnel</h3>
+        <p style="font-size:14px;font-weight:300;color:rgba(247,243,237,0.55);line-height:1.65;">New freeway tunnel under the Maribyrnong River linking the Port of Melbourne to the Western Ring Road, reducing truck and commuter pressure on the West Gate Bridge and improving connectivity for Melbourne's inner-west precincts.</p>
+        <div class="infra-status status-active">&#9679; Under construction</div>
+      </div>
+      <div class="infra-card reveal">
+        <div class="infra-value">$34.5B+</div>
+        <h3 style="font-size:16px;font-weight:600;color:#f7f3ed;margin-bottom:8px;">Suburban Rail Loop (Stage 1)</h3>
+        <p style="font-size:14px;font-weight:300;color:rgba(247,243,237,0.55);line-height:1.65;">Australia's largest infrastructure project: a new rail loop connecting Melbourne's middle suburbs from Cheltenham to Werribee, serving major employment centres without requiring travel through the CBD — permanently reshaping suburban accessibility.</p>
+        <div class="infra-status status-active">&#9679; Stage 1 under construction</div>
+      </div>
+    </div>
+    <p class="data-note-light" style="margin-top:24px;">Sources: Infrastructure Australia, relevant State Government Major Projects Register, local council</p>
+  </div>
+</section>
+
+<section class="sec sec-warm">
+  <div class="inner">
+    <p class="eyebrow reveal">Market conditions</p>
+    <h2 class="sec-h2 reveal">Supply &amp; demand snapshot</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:start;" class="r-2col">
+      <div class="reveal">
+        <p style="font-size:15.5px;font-weight:300;line-height:1.85;color:rgba(34,32,29,0.65);margin-bottom:24px;">The indicators below reflect current conditions across Melbourne's rental and sales markets, drawn from publicly available data including SQM Research and CoreLogic. These signals help frame the short-term supply and demand picture — they are context for understanding the market, not a forecast of returns.</p>
+        <p style="font-size:15.5px;font-weight:300;line-height:1.85;color:rgba(34,32,29,0.65);">As Fairway gains access to additional data feeds, this section will be expanded with more granular, suburb-level indicators.</p>
+      </div>
+      <div class="reveal">
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-size:14px;font-weight:500;color:#22201d;">Rental demand</span>
+              <span style="font-size:13px;font-weight:600;color:#bd7a70;">High</span>
+            </div>
+            <div style="background:rgba(34,32,29,0.08);border-radius:100px;height:6px;"><div style="width:75%;height:6px;border-radius:100px;background:linear-gradient(90deg,#bd7a70,#cf9b92);"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-size:14px;font-weight:500;color:#22201d;">Stock on market</span>
+              <span style="font-size:13px;font-weight:600;color:#bd7a70;">Moderate</span>
+            </div>
+            <div style="background:rgba(34,32,29,0.08);border-radius:100px;height:6px;"><div style="width:45%;height:6px;border-radius:100px;background:linear-gradient(90deg,#bd7a70,#cf9b92);"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-size:14px;font-weight:500;color:#22201d;">Buyer competition</span>
+              <span style="font-size:13px;font-weight:600;color:#bd7a70;">High</span>
+            </div>
+            <div style="background:rgba(34,32,29,0.08);border-radius:100px;height:6px;"><div style="width:78%;height:6px;border-radius:100px;background:linear-gradient(90deg,#bd7a70,#cf9b92);"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-size:14px;font-weight:500;color:#22201d;">Infrastructure pipeline</span>
+              <span style="font-size:13px;font-weight:600;color:#bd7a70;">Very High</span>
+            </div>
+            <div style="background:rgba(34,32,29,0.08);border-radius:100px;height:6px;"><div style="width:98%;height:6px;border-radius:100px;background:linear-gradient(90deg,#bd7a70,#cf9b92);"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-size:14px;font-weight:500;color:#22201d;">Population growth momentum</span>
+              <span style="font-size:13px;font-weight:600;color:#bd7a70;">Very High</span>
+            </div>
+            <div style="background:rgba(34,32,29,0.08);border-radius:100px;height:6px;"><div style="width:88%;height:6px;border-radius:100px;background:linear-gradient(90deg,#bd7a70,#cf9b92);"></div></div>
+          </div>
+        </div>
+        <p style="font-size:12px;font-weight:300;color:rgba(34,32,29,0.35);margin-top:18px;line-height:1.6;">Source: SQM Research, CoreLogic, ABS. Qualitative assessments based on available market data as at July 2026.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec-cream">
+  <div class="inner">
+    <p class="eyebrow reveal">Prices &amp; rents</p>
+    <h2 class="sec-h2 reveal">Median prices, yields &amp; rental trends</h2>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:52px;" class="r-4col reveal">
+      <div style="padding:26px 22px;background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+        <div class="stat-val" data-target="980000" data-prefix="$" data-suffix="" data-format="price">0</div>
+        <div class="stat-label">Approx. house median</div>
+      </div>
+      <div style="padding:26px 22px;background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+        <div class="stat-val" data-target="620000" data-prefix="$" data-suffix="" data-format="price">0</div>
+        <div class="stat-label">Approx. unit median</div>
+      </div>
+      <div style="padding:26px 22px;background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+        <div style="font-family:'Fraunces',serif;font-size:38px;font-weight:400;line-height:1;letter-spacing:-1px;">$550–$750</div>
+        <div class="stat-label">House rent range /wk</div>
+      </div>
+      <div style="padding:26px 22px;background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+        <div style="font-family:'Fraunces',serif;font-size:38px;font-weight:400;line-height:1;letter-spacing:-1px;">$420–$580</div>
+        <div class="stat-label">Unit rent range /wk</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;" class="r-2col">
+      <div class="reveal">
+        <p style="font-size:13px;font-weight:500;color:rgba(34,32,29,0.45);margin-bottom:18px;letter-spacing:0.05em;text-transform:uppercase;">Median house price — 10 year trend</p>
+        <div class="chart-wrap"><canvas id="priceChart"></canvas></div>
+        <p class="data-note">Approx. figures. Source: Suburbtrends / CoreLogic</p>
+      </div>
+      <div class="reveal">
+        <p style="font-size:13px;font-weight:500;color:rgba(34,32,29,0.45);margin-bottom:18px;letter-spacing:0.05em;text-transform:uppercase;">Gross yield trend — houses &amp; units</p>
+        <div class="chart-wrap"><canvas id="yieldChart"></canvas></div>
+        <p class="data-note">Approx. figures. Source: Suburbtrends</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:40px;" class="r-2col reveal">
+      <div style="background:#fff;border:1px solid rgba(34,32,29,0.07);border-radius:16px;padding:28px;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+        <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#bd7a70;margin-bottom:10px;">Houses</p>
+        <p style="font-family:'Fraunces',serif;font-size:36px;font-weight:400;color:#22201d;line-height:1;">3.0–3.8%</p>
+        <p style="font-size:13px;font-weight:300;color:rgba(34,32,29,0.5);margin-top:6px;">Indicative gross yield range</p>
+        <p style="font-size:12px;font-weight:300;color:rgba(34,32,29,0.35);margin-top:8px;line-height:1.6;">Gross yield before ownership expenses (rates, insurance, management, maintenance). Actual returns vary by property.</p>
+      </div>
+      <div style="background:#fff;border:1px solid rgba(34,32,29,0.07);border-radius:16px;padding:28px;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+        <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#bd7a70;margin-bottom:10px;">Units</p>
+        <p style="font-family:'Fraunces',serif;font-size:36px;font-weight:400;color:#22201d;line-height:1;">3.8–4.8%</p>
+        <p style="font-size:13px;font-weight:300;color:rgba(34,32,29,0.5);margin-top:6px;">Indicative gross yield range</p>
+        <p style="font-size:12px;font-weight:300;color:rgba(34,32,29,0.35);margin-top:8px;line-height:1.6;">Gross yield before ownership expenses (rates, insurance, management, maintenance). Actual returns vary by property.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec-dark">
+  <div class="inner">
+    <p class="eyebrow reveal">Supply &amp; demand</p>
+    <h2 class="sec-h2 reveal" style="color:#f7f3ed;">Market conditions at a glance</h2>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:52px;" class="r-4col reveal">
+      <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:16px;padding:24px 20px;">
+        <div class="stat-val" style="font-size:40px;color:#f7f3ed;" data-target="1.8" data-prefix="" data-suffix="%" data-decimal="1">0</div>
+        <div class="stat-label" style="color:rgba(247,243,237,0.4);">Vacancy rate</div>
+      </div>
+      <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:16px;padding:24px 20px;">
+        <div class="stat-val" style="font-size:40px;color:#f7f3ed;" data-target="34" data-prefix="" data-suffix=" days">0</div>
+        <div class="stat-label" style="color:rgba(247,243,237,0.4);">Avg. days on market</div>
+      </div>
+      <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:16px;padding:24px 20px;">
+        <div class="stat-val" style="font-size:40px;color:#f7f3ed;" data-target="65" data-prefix="" data-suffix="%">0</div>
+        <div class="stat-label" style="color:rgba(247,243,237,0.4);">Auction clearance rate</div>
+      </div>
+      <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:16px;padding:24px 20px;">
+        <div class="stat-val" style="font-size:40px;color:#f7f3ed;" data-target="12500" data-prefix="" data-suffix="">0</div>
+        <div class="stat-label" style="color:rgba(247,243,237,0.4);">Properties listed</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;" class="r-2col">
+      <div class="reveal">
+        <p style="font-size:13px;font-weight:500;color:rgba(247,243,237,0.35);margin-bottom:18px;letter-spacing:0.05em;text-transform:uppercase;">Vacancy rate trend</p>
+        <div class="chart-wrap"><canvas id="vacancyChart"></canvas></div>
+        <p class="data-note-light">Source: SQM Research</p>
+      </div>
+      <div class="reveal">
+        <p style="font-size:13px;font-weight:500;color:rgba(247,243,237,0.35);margin-bottom:18px;letter-spacing:0.05em;text-transform:uppercase;">Stock on market (listings count)</p>
+        <div class="chart-wrap"><canvas id="stockChart"></canvas></div>
+        <p class="data-note-light">Source: SQM Research</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec-warm">
+  <div class="inner">
+    <p class="eyebrow reveal">Historical performance</p>
+    <h2 class="sec-h2 reveal">How has this market performed?</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px;" class="r-2col reveal">
+      <div>
+        <div style="background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);overflow:hidden;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+          <div style="padding:18px 22px;border-bottom:1px solid rgba(34,32,29,0.07);background:rgba(189,122,112,0.04);">
+            <p style="font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#bd7a70;">Houses — annualised growth</p>
+          </div>
+          <div class="perf-row" style="padding:15px 22px;border-bottom:1px solid rgba(34,32,29,0.06);">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">1 year</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%;background:#bd7a70;" data-width="20%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">2.0%</span>
+          </div>
+          <div class="perf-row" style="padding:15px 22px;border-bottom:1px solid rgba(34,32,29,0.06);">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">3 years</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%;background:#bd7a70;" data-width="35%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">3.5% p.a.</span>
+          </div>
+          <div class="perf-row" style="padding:15px 22px;border-bottom:1px solid rgba(34,32,29,0.06);">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">5 years</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%;background:#bd7a70;" data-width="62%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">6.2% p.a.</span>
+          </div>
+          <div class="perf-row" style="padding:15px 22px;">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">10 years</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%;background:#bd7a70;" data-width="78%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">7.8% p.a.</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);overflow:hidden;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+          <div style="padding:18px 22px;border-bottom:1px solid rgba(34,32,29,0.07);background:rgba(207,155,146,0.06);">
+            <p style="font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#cf9b92;">Units — annualised growth</p>
+          </div>
+          <div class="perf-row" style="padding:15px 22px;border-bottom:1px solid rgba(34,32,29,0.06);">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">1 year</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%;background:#cf9b92;" data-width="35%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">3.5%</span>
+          </div>
+          <div class="perf-row" style="padding:15px 22px;border-bottom:1px solid rgba(34,32,29,0.06);">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">3 years</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%;background:#cf9b92;" data-width="52%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">5.2% p.a.</span>
+          </div>
+          <div class="perf-row" style="padding:15px 22px;border-bottom:1px solid rgba(34,32,29,0.06);">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">5 years</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%;background:#cf9b92;" data-width="58%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">5.8% p.a.</span>
+          </div>
+          <div class="perf-row" style="padding:15px 22px;">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">10 years</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%;background:#cf9b92;" data-width="55%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">5.5% p.a.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="data-note" style="margin-bottom:40px;">Annualised compound growth rates, Greater Melbourne. Source: CoreLogic / Suburbtrends. Figures are approximate.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;" class="r-2col reveal">
+      <div style="background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);padding:28px;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+        <p style="font-size:13px;font-weight:500;color:#bd7a70;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;">Comparable market precedent</p>
+        <p style="font-size:15.5px;font-weight:300;line-height:1.8;color:rgba(34,32,29,0.7);">Melbourne is one of a small group of global cities — comparable in profile to Toronto, Vienna and Auckland — that combines top-tier liveability, sustained population growth and significant committed infrastructure investment. Unlike most regional markets in this report, Melbourne's price trajectory is partly benchmarked to global comparable cities rather than domestic regional comparisons. Past performance is not a guide to future performance.</p>
+      </div>
+      <div style="background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);padding:28px;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+        <p style="font-size:13px;font-weight:500;color:#bd7a70;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;">Relative affordability</p>
+        <p style="font-size:15.5px;font-weight:300;line-height:1.8;color:rgba(34,32,29,0.7);">At ~$980k median for houses, Melbourne remains materially below Sydney's median (~$1.5M) for a city with comparable global liveability credentials. Interstate migration from Sydney has historically supported Melbourne's demand floor during Sydney market upturns, and the relative value proposition continues to drive tenant and buyer migration from the more expensive Sydney market.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec-cream">
+  <div class="inner">
+    <p class="eyebrow reveal">Investment case</p>
+    <h2 class="sec-h2 reveal">What makes this market compelling?</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;" class="r-2col">
+      <div class="reveal">
+        <p style="font-size:15.5px;font-weight:300;line-height:1.8;color:rgba(34,32,29,0.7);margin-bottom:28px;">Melbourne is a capital city market with some of the world's most significant committed infrastructure investment. The case here is long-term capital growth and diversification — not high yield. The right property, in the right precinct, benefits from generational infrastructure that permanently improves connectivity and liveability for decades.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          <span class="profile-tag"><span class="dot"></span>Capital city depth and market liquidity</span>
+          <span class="profile-tag"><span class="dot"></span>World-class infrastructure investment ($60B+ committed)</span>
+          <span class="profile-tag"><span class="dot"></span>International and interstate migration demand</span>
+          <span class="profile-tag"><span class="dot"></span>University and hospital structural rental anchors</span>
+          <span class="profile-tag"><span class="dot"></span>Long-term capital growth in established precincts</span>
+          <span class="profile-tag"><span class="dot"></span>Lifestyle and liveability premium — globally recognised</span>
+        </div>
+      </div>
+      <div class="reveal">
+        <div style="background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);padding:30px;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+          <p style="font-size:13px;font-weight:500;color:#bd7a70;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;">Indicative price range</p>
+          <p style="font-size:13px;font-weight:300;color:rgba(34,32,29,0.4);margin-bottom:18px;line-height:1.5;">Figures are approximate market context only. The right entry point depends on your specific brief — we'll identify that together.</p>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:14px;border-bottom:1px solid rgba(34,32,29,0.07);">
+              <span style="font-size:14.5px;font-weight:300;color:rgba(34,32,29,0.7);">Houses</span>
+              <span style="font-size:15px;font-weight:600;color:#22201d;">$750k–$1.3M+</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:14.5px;font-weight:300;color:rgba(34,32,29,0.7);">Units</span>
+              <span style="font-size:15px;font-weight:600;color:#22201d;">$480k–$800k+</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec-dark">
+  <div class="inner" style="max-width:760px;">
+    <p class="eyebrow reveal">What to watch</p>
+    <h2 class="sec-h2 reveal" style="color:#f7f3ed;">Risks &amp; conditions to monitor</h2>
+    <div class="reveal">
+      <div class="risk-item" style="border-color:rgba(247,243,237,0.08);">
+        <div class="risk-dot" style="background:#bd7a70;"></div>
+        <div>
+          <p style="font-size:16px;font-weight:500;color:#f7f3ed;margin-bottom:6px;">Lower gross yield</p>
+          <p style="font-size:15px;font-weight:300;color:rgba(247,243,237,0.55);line-height:1.7;">Melbourne's scale and desirability have priced yield down materially. At current prices, gross yields are among the lowest in this report. This is a capital growth market, not an income market — investors seeking strong yield should look to other markets in this report first.</p>
+        </div>
+      </div>
+      <div class="risk-item" style="border-color:rgba(247,243,237,0.08);">
+        <div class="risk-dot" style="background:#cf9b92;"></div>
+        <div>
+          <p style="font-size:16px;font-weight:500;color:#f7f3ed;margin-bottom:6px;">Entry price and serviceability</p>
+          <p style="font-size:15px;font-weight:300;color:rgba(247,243,237,0.55);line-height:1.7;">Melbourne's median price requires significant equity or borrowing capacity. Rate sensitivity is higher at this entry point, and periods of rate-driven market softness can be more pronounced than in lower-priced markets. Financial resilience is important.</p>
+        </div>
+      </div>
+      <div class="risk-item" style="border-color:rgba(247,243,237,0.08);">
+        <div class="risk-dot" style="background:rgba(189,122,112,0.5);"></div>
+        <div>
+          <p style="font-size:16px;font-weight:500;color:#f7f3ed;margin-bottom:6px;">Suburb selection is critical</p>
+          <p style="font-size:15px;font-weight:300;color:rgba(247,243,237,0.55);line-height:1.7;">Melbourne's market is highly heterogeneous. Poor suburb or property selection can result in underperformance that doesn't reflect the broader city trajectory. Professional guidance is more important in this market than any other in this report — the infrastructure premium is precinct-specific, not city-wide.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec-deeper">
+  <div class="inner" style="max-width:860px;">
+    <p class="eyebrow reveal">Fairway's view</p>
+    <h2 class="sec-h2 reveal" style="color:#f7f3ed;">Luke's take</h2>
+    <div class="lukes-take-card reveal">
+      <div style="display:flex;align-items:flex-start;gap:24px;margin-bottom:28px;">
+        <div style="width:64px;height:64px;border-radius:50%;overflow:hidden;border:2px solid #bd7a70;flex-shrink:0;">
+          <img src="/assets/luke.jpg" alt="Luke Clifford" style="width:100%;height:100%;object-fit:cover;object-position:center 12%;display:block;">
+        </div>
+        <div>
+          <p style="font-size:15px;font-weight:500;color:#f7f3ed;">Luke Clifford</p>
+          <p style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.4);margin-top:2px;">Founder, Fairway Investing</p>
+        </div>
+      </div>
+      <p style="font-size:17px;font-weight:300;line-height:1.85;color:rgba(247,243,237,0.75);margin-bottom:20px;">Melbourne is a market where I focus on the long-term infrastructure theme above all else. The Metro Tunnel, the Suburban Rail Loop and the West Gate Tunnel are not short-term catalysts — they are generational investments that will reshape which parts of Melbourne are accessible, and therefore desirable, over the next 20 years. Buying in the right precinct today means buying ahead of that repricing.</p>
+      <p style="font-size:17px;font-weight:300;line-height:1.85;color:rgba(247,243,237,0.75);">The selectivity question in Melbourne is more complex than any other market in this report. Suburb, street, property type, proximity to the infrastructure corridors — each of these decisions has a compounding effect over a long hold. This is where Fairway's research adds the most value: identifying the specific pockets where the price-to-infrastructure-benefit ratio is still compelling, before the market fully prices in what's coming.</p>
+    </div>
+  </div>
+</section>
+
+<section style="background:#1a1916;padding:32px 44px;border-top:1px solid rgba(247,243,237,0.06);">
+  <div class="inner">
+    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:20px;">
+      <div>
+        <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:8px;">Data sources</p>
+        <p style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.35);line-height:1.6;">ABS Regional Population &amp; Census &nbsp;&middot;&nbsp; Infrastructure Australia Pipeline &nbsp;&middot;&nbsp; Victorian Government Major Projects Register &nbsp;&middot;&nbsp; SQM Research &nbsp;&middot;&nbsp; CoreLogic / Suburbtrends &nbsp;&middot;&nbsp; City of Melbourne &nbsp;&middot;&nbsp; Map data &copy; OpenStreetMap contributors</p>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:6px;">Report currency</p>
+        <p style="font-size:13px;font-weight:400;color:#bd7a70;">July 2026</p>
+        <p style="font-size:12px;font-weight:300;color:rgba(247,243,237,0.3);margin-top:4px;">Next update: August 2026</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer style="background:#1a1916;border-top:1px solid rgba(247,243,237,0.07);padding:24px 44px;text-align:center;">
+  <p style="font-size:12px;font-weight:300;color:rgba(247,243,237,0.2);line-height:1.7;">This report is prepared by Fairway Investing for client use only. Data is sourced from third parties and is believed to be reliable but is not guaranteed. Figures are approximate and should be independently verified. This report does not constitute financial advice. &copy; 2026 Fairway Investing Pty Ltd &nbsp;&middot;&nbsp; ABN 68 699 032 598</p>
+</footer>
+
+<script>
+
+const D = window.MARKETS['melbourne'];
+const COPPER = '#bd7a70';
+const COPPER_LIGHT = '#cf9b92';
+const COPPER_ALPHA = 'rgba(189,122,112,0.15)';
+const DARK_GRID = 'rgba(247,243,237,0.07)';
+const LIGHT_GRID = 'rgba(34,32,29,0.07)';
+const DARK_TICK = 'rgba(247,243,237,0.35)';
+const LIGHT_TICK = 'rgba(34,32,29,0.4)';
+
+Chart.defaults.font.family = "'Outfit', sans-serif";
+Chart.defaults.font.weight = '300';
+
+function lineChart(id, labels, datasets, darkBg) {
+  const grid = darkBg ? DARK_GRID : LIGHT_GRID;
+  const tick = darkBg ? DARK_TICK : LIGHT_TICK;
+  return new Chart(document.getElementById(id), {
+    type: 'line', data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 1200, easing: 'easeInOutQuart' },
+      plugins: { legend: { display: datasets.length > 1, labels: { color: tick, font: { size: 12 }, boxWidth: 12, padding: 16 } }, tooltip: { backgroundColor: '#22201d', titleColor: '#f7f3ed', bodyColor: 'rgba(247,243,237,0.65)', padding: 12, cornerRadius: 8 } },
+      scales: { x: { grid: { color: grid }, ticks: { color: tick, font: { size: 11 } } }, y: { grid: { color: grid }, ticks: { color: tick, font: { size: 11 } } } }
+    }
+  });
+}
+
+function barChart(id, labels, data, darkBg) {
+  const grid = darkBg ? DARK_GRID : LIGHT_GRID;
+  const tick = darkBg ? DARK_TICK : LIGHT_TICK;
+  return new Chart(document.getElementById(id), {
+    type: 'bar', data: { labels, datasets: [{ data, backgroundColor: COPPER_ALPHA, borderColor: COPPER, borderWidth: 1.5, borderRadius: 4 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 1200, easing: 'easeInOutQuart' },
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#22201d', titleColor: '#f7f3ed', bodyColor: 'rgba(247,243,237,0.65)', padding: 12, cornerRadius: 8 } },
+      scales: { x: { grid: { color: grid }, ticks: { color: tick, font: { size: 11 } } }, y: { grid: { color: grid }, ticks: { color: tick, font: { size: 11 } } } }
+    }
+  });
+}
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(el => {
+    if (el.isIntersecting) {
+      el.target.classList.add('visible');
+      if (el.target.querySelector && el.target.querySelector('[data-target]'))
+        el.target.querySelectorAll('[data-target]').forEach(animateCounter);
+      if (el.target.hasAttribute('data-target')) animateCounter(el.target);
+      el.target.querySelectorAll && el.target.querySelectorAll('.perf-bar[data-width]').forEach(bar => {
+        setTimeout(() => bar.style.width = bar.dataset.width, 200);
+      });
+    }
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.reveal, .reveal-left, .reveal-scale').forEach(el => observer.observe(el));
+
+function animateCounter(el) {
+  if (el.dataset.animated) return;
+  el.dataset.animated = '1';
+  const target = parseFloat(el.dataset.target);
+  const prefix = el.dataset.prefix || '';
+  const suffix = el.dataset.suffix || '';
+  const decimal = parseInt(el.dataset.decimal || 0);
+  const isPrice = el.dataset.format === 'price';
+  const divisor = parseFloat(el.dataset.divisor || 1);
+  const duration = 1400, start = performance.now();
+  function fmt(val) {
+    val = val / divisor;
+    if (isPrice) {
+      if (val >= 1000000) return prefix + (val/1000000).toFixed(1) + 'M';
+      if (val >= 1000) return prefix + Math.round(val/1000) + 'k';
+      return prefix + Math.round(val) + suffix;
+    }
+    return prefix + (decimal ? val.toFixed(decimal) : Math.round(val)) + suffix;
+  }
+  function step(now) {
+    const p = Math.min((now - start) / duration, 1);
+    el.textContent = fmt(target * (1 - Math.pow(1 - p, 3)));
+    if (p < 1) requestAnimationFrame(step); else el.textContent = fmt(target);
+  }
+  requestAnimationFrame(step);
+}
+
+document.querySelectorAll('[data-target]').forEach(el => observer.observe(el));
+
+const chartObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting && !e.target._chartDone) {
+      e.target._chartDone = true;
+      const id = e.target.id;
+      if (id === 'popChart') lineChart('popChart', D.popYears, [{ label: 'Population', data: D.population, borderColor: COPPER, backgroundColor: COPPER_ALPHA, tension: 0.4, fill: true, pointRadius: 3, pointBackgroundColor: COPPER }], false);
+      if (id === 'priceChart') lineChart('priceChart', D.priceYears, [
+        { label: 'Houses', data: D.housePrice, borderColor: COPPER, backgroundColor: COPPER_ALPHA, tension: 0.4, fill: true, pointRadius: 3, pointBackgroundColor: COPPER },
+        { label: 'Units', data: D.unitPrice, borderColor: COPPER_LIGHT, backgroundColor: 'rgba(207,155,146,0.08)', tension: 0.4, fill: true, borderDash: [5,3], pointRadius: 3, pointBackgroundColor: COPPER_LIGHT }
+      ], false);
+      if (id === 'yieldChart') lineChart('yieldChart', D.yieldYears, [
+        { label: 'Houses', data: D.yieldHouse, borderColor: COPPER, backgroundColor: COPPER_ALPHA, tension: 0.4, fill: true, pointRadius: 3, pointBackgroundColor: COPPER },
+        { label: 'Units', data: D.yieldUnit, borderColor: COPPER_LIGHT, backgroundColor: 'rgba(207,155,146,0.08)', tension: 0.4, fill: false, borderDash: [5,3], pointRadius: 3, pointBackgroundColor: COPPER_LIGHT }
+      ], false);
+      if (id === 'vacancyChart') lineChart('vacancyChart', D.vacYears, [{ label: 'Vacancy %', data: D.vacancy, borderColor: COPPER, backgroundColor: COPPER_ALPHA, tension: 0.4, fill: true, pointRadius: 3, pointBackgroundColor: COPPER }], true);
+      if (id === 'stockChart') barChart('stockChart', D.stockMonths, D.stockVals, true);
+    }
+  });
+}, { threshold: 0.2 });
+
+document.querySelectorAll('canvas').forEach(c => chartObserver.observe(c));
+
+const map = L.map('map', {
+  center: [-37.82, 144.97], zoom: 10,
+  zoomControl: false, dragging: false, scrollWheelZoom: false,
+  doubleClickZoom: false, touchZoom: false, tap: false,
+  keyboard: false, attributionControl: false,
+});
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  subdomains: 'abcd', maxZoom: 19,
+}).addTo(map);
+function mkIcon(color) {
+  return L.divIcon({
+    html: `<div style="width:11px;height:11px;border-radius:50%;background:${color};border:2px solid rgba(247,243,237,0.7);box-shadow:0 2px 10px rgba(0,0,0,0.6);"></div>`,
+    className: '', iconAnchor: [6, 6],
+  });
+}
+const pts = [
+  { latlng: [-37.814, 144.963], label: 'Melbourne CBD', color: '#bd7a70', perm: true },
+  { latlng: [-37.91, 145.134], label: 'Monash University', color: '#cf9b92', perm: false },
+  { latlng: [-37.799, 144.959], label: 'Royal Melbourne Hosp', color: '#cf9b92', perm: false },
+  { latlng: [-37.668, 144.843], label: 'Tullamarine Airport', color: '#cf9b92', perm: false },
+  { latlng: [-38.147, 144.36], label: 'Geelong', color: '#cf9b92', perm: false },
+];
+pts.forEach(p => {
+  L.marker(p.latlng, { icon: mkIcon(p.color) }).addTo(map)
+    .bindTooltip(p.label, { permanent: p.perm, direction: 'top', offset: [0,-10], className: 'fw-tip' });
+});
+
+</script>
+</body>
+</html>
