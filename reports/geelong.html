@@ -9,13 +9,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500;1,9..144,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html{scroll-behavior:smooth;}
-    body{font-family:'Outfit',sans-serif;font-weight:300;color:#22201d;background:#f7f3ed;-webkit-font-smoothing:antialiased;}
+    html{scroll-behavior:smooth;overflow-x:hidden;}
+    body{font-family:'Outfit',sans-serif;font-weight:300;color:#22201d;background:#f7f3ed;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
     ::selection{background:#bd7a70;color:#f7f3ed}
     a{color:inherit;text-decoration:none}
 
@@ -68,9 +66,16 @@
     .perf-row{display:grid;grid-template-columns:120px 1fr 1fr;align-items:center;gap:0;padding:18px 0;border-bottom:1px solid rgba(247,243,237,0.07);}
     .perf-bar{height:6px;border-radius:3px;background:#bd7a70;transition:width 1.2s cubic-bezier(0.4,0,0.2,1);}
 
-    /* Map */
-    #map{height:420px;border-radius:16px;overflow:hidden;}
-    .leaflet-container{font-family:'Outfit',sans-serif;}
+    /* Static map */
+    .static-map-wrap{position:relative;border-radius:16px;overflow:hidden;border:1px solid rgba(247,243,237,0.08);}
+    .static-map-wrap iframe{width:100%;height:380px;border:none;display:block;pointer-events:none;}
+    .static-map-overlay{position:absolute;inset:0;cursor:default;}
+
+    /* Amenity cards */
+    .amenity-cat{font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:#bd7a70;margin-bottom:10px;}
+    .amenity-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(247,243,237,0.07);}
+    .amenity-item:last-child{border-bottom:none;}
+    .amenity-dot{width:6px;height:6px;border-radius:50%;background:#bd7a70;flex-shrink:0;}
 
     /* Nav */
     nav{position:sticky;top:0;z-index:200;background:#22201d;border-bottom:1px solid rgba(247,243,237,0.08);}
@@ -97,17 +102,24 @@
 
     /* Responsive */
     @media(max-width:760px){
-      .sec{padding:60px 24px;}
+      .sec{padding:60px 20px;}
       .nav-inner{padding:14px 20px;}
-      .hero-content{padding:0 24px;}
+      .hero-content{padding:0 20px;}
       .hero-stats-strip{grid-template-columns:1fr 1fr;}
-      .sec-h2{font-size:30px;}
-      .stat-val{font-size:36px;}
+      .sec-h2{font-size:28px;}
+      .stat-val{font-size:34px;}
       .r-2col{grid-template-columns:1fr!important;}
       .r-3col{grid-template-columns:1fr!important;}
       .r-4col{grid-template-columns:1fr 1fr!important;}
-      .perf-row{grid-template-columns:90px 1fr 1fr;}
-      #map{height:300px;}
+      .perf-row{grid-template-columns:80px 1fr 1fr;}
+      .static-map-wrap iframe{height:260px;}
+      h1{font-size:48px!important;letter-spacing:-1px!important;}
+      .chart-wrap{height:220px;}
+      .infra-card{padding:20px 18px;}
+    }
+    @media(max-width:400px){
+      .r-4col{grid-template-columns:1fr!important;}
+      .hero-stats-strip{grid-template-columns:1fr 1fr;}
     }
   </style>
 </head>
@@ -166,33 +178,86 @@
 <!-- LOCATION + MAP -->
 <section class="sec sec-dark">
   <div class="inner">
-    <div style="display:grid;grid-template-columns:1fr 340px;gap:60px;align-items:start;" class="r-2col">
+    <!-- Stats + text row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:start;margin-bottom:44px;" class="r-2col">
       <div>
         <p class="eyebrow reveal">Location</p>
         <h2 class="sec-h2 reveal" style="color:#f7f3ed;">Where is Geelong?</h2>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px;" class="reveal r-2col">
-          <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:20px 22px;">
-            <p style="font-family:'Fraunces',serif;font-size:28px;font-weight:400;color:#bd7a70;">75km</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:28px;" class="reveal">
+          <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:18px 20px;">
+            <p style="font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#bd7a70;">75km</p>
             <p style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);margin-top:4px;">Melbourne CBD</p>
           </div>
-          <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:20px 22px;">
-            <p style="font-family:'Fraunces',serif;font-size:28px;font-weight:400;color:#bd7a70;">~1hr</p>
+          <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:18px 20px;">
+            <p style="font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#bd7a70;">~1hr</p>
             <p style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);margin-top:4px;">By V/Line train</p>
           </div>
-          <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:20px 22px;">
-            <p style="font-family:'Fraunces',serif;font-size:28px;font-weight:400;color:#bd7a70;">65km</p>
+          <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:18px 20px;">
+            <p style="font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#bd7a70;">65km</p>
             <p style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);margin-top:4px;">Melbourne Airport</p>
           </div>
-          <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:20px 22px;">
-            <p style="font-family:'Fraunces',serif;font-size:28px;font-weight:400;color:#bd7a70;">#2</p>
+          <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:18px 20px;">
+            <p style="font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#bd7a70;">#2</p>
             <p style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);margin-top:4px;">Largest city in VIC</p>
           </div>
         </div>
-        <p style="font-size:15.5px;font-weight:300;color:rgba(247,243,237,0.55);line-height:1.8;" class="reveal">Geelong sits at the western edge of Port Phillip Bay, connected to Melbourne by the Princes Freeway and a frequent V/Line rail service. The Geelong Fast Rail project — when completed — will cut that journey to under 30 minutes, fundamentally repositioning this market relative to Melbourne's employment base.</p>
       </div>
-      <div class="reveal-scale" style="border-radius:16px;overflow:hidden;border:1px solid rgba(247,243,237,0.08);">
-        <div id="map"></div>
+      <div class="reveal">
+        <p style="font-size:15.5px;font-weight:300;color:rgba(247,243,237,0.55);line-height:1.85;margin-top:70px;">Geelong sits at the western edge of Port Phillip Bay, connected to Melbourne by the Princes Freeway and a frequent V/Line rail service. The Geelong Fast Rail project — when completed — will cut that journey to under 30 minutes, fundamentally repositioning this market relative to Melbourne's employment base.</p>
       </div>
+    </div>
+
+    <!-- Static map (non-interactive) -->
+    <div class="static-map-wrap reveal-scale" style="margin-bottom:36px;">
+      <iframe
+        src="https://www.openstreetmap.org/export/embed.html?bbox=144.15%2C-38.45%2C144.75%2C-37.95&amp;layer=mapnik&amp;marker=-38.1499%2C144.3617"
+        loading="lazy"
+        title="Geelong location map"
+        sandbox="allow-scripts allow-same-origin"
+      ></iframe>
+      <!-- Invisible overlay prevents accidental touch/scroll interaction -->
+      <div class="static-map-overlay"></div>
+    </div>
+
+    <!-- Amenities grid -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;" class="r-4col reveal">
+
+      <!-- Education -->
+      <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:22px 20px;">
+        <p class="amenity-cat">Education</p>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Deakin University (Waterfront &amp; Waurn Ponds)</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Geelong Grammar School</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">The Geelong College</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Kardinia International College</span></div>
+      </div>
+
+      <!-- Health -->
+      <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:22px 20px;">
+        <p class="amenity-cat">Healthcare</p>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">University Hospital Geelong (Barwon Health)</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">St John of God Hospital</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Epworth Geelong</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Geelong Clinic (mental health)</span></div>
+      </div>
+
+      <!-- Shopping -->
+      <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:22px 20px;">
+        <p class="amenity-cat">Retail &amp; dining</p>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Westfield Geelong (major shopping centre)</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Pakington Street precinct</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Little Malop Street dining strip</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Moorabool Street &amp; Waterfront</span></div>
+      </div>
+
+      <!-- Transport & lifestyle -->
+      <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:22px 20px;">
+        <p class="amenity-cat">Transport &amp; lifestyle</p>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Geelong Train Station (V/Line to Melbourne)</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Princes Freeway (Melb–Geelong)</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">GMHBA Stadium (AFL)</span></div>
+        <div class="amenity-item"><div class="amenity-dot"></div><span style="font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);">Eastern Beach &amp; Waterfront Reserve</span></div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -485,45 +550,80 @@
   <div class="inner">
     <p class="eyebrow reveal">Historical performance</p>
     <h2 class="sec-h2 reveal">How has this market performed?</h2>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:start;" class="r-2col">
-      <div class="reveal">
+
+    <!-- Houses + Units side by side -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px;" class="r-2col reveal">
+
+      <!-- Houses -->
+      <div>
         <div style="background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);overflow:hidden;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
-          <div style="padding:20px 24px;border-bottom:1px solid rgba(34,32,29,0.07);">
-            <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(34,32,29,0.4);">Houses — annualised growth</p>
+          <div style="padding:18px 22px;border-bottom:1px solid rgba(34,32,29,0.07);background:rgba(189,122,112,0.04);">
+            <p style="font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#bd7a70;">Houses — annualised growth</p>
           </div>
-          <div class="perf-row" style="padding:18px 24px;border-bottom:1px solid rgba(34,32,29,0.06);">
-            <span style="font-size:14px;font-weight:500;color:rgba(34,32,29,0.6);">1 year</span>
-            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:6px;"><div class="perf-bar" style="width:0%" data-width="32%"></div></div>
-            <span style="font-size:15px;font-weight:600;color:#22201d;text-align:right;">3.2%</span>
+          <div class="perf-row" style="padding:15px 22px;border-bottom:1px solid rgba(34,32,29,0.06);">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">1 year</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%" data-width="32%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">3.2%</span>
           </div>
-          <div class="perf-row" style="padding:18px 24px;border-bottom:1px solid rgba(34,32,29,0.06);">
-            <span style="font-size:14px;font-weight:500;color:rgba(34,32,29,0.6);">3 years</span>
-            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:6px;"><div class="perf-bar" style="width:0%" data-width="81%"></div></div>
-            <span style="font-size:15px;font-weight:600;color:#22201d;text-align:right;">8.1% p.a.</span>
+          <div class="perf-row" style="padding:15px 22px;border-bottom:1px solid rgba(34,32,29,0.06);">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">3 years</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%" data-width="81%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">8.1% p.a.</span>
           </div>
-          <div class="perf-row" style="padding:18px 24px;border-bottom:1px solid rgba(34,32,29,0.06);">
-            <span style="font-size:14px;font-weight:500;color:rgba(34,32,29,0.6);">5 years</span>
-            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:6px;"><div class="perf-bar" style="width:0%" data-width="93%"></div></div>
-            <span style="font-size:15px;font-weight:600;color:#22201d;text-align:right;">9.3% p.a.</span>
+          <div class="perf-row" style="padding:15px 22px;border-bottom:1px solid rgba(34,32,29,0.06);">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">5 years</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%" data-width="93%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">9.3% p.a.</span>
           </div>
-          <div class="perf-row" style="padding:18px 24px;">
-            <span style="font-size:14px;font-weight:500;color:rgba(34,32,29,0.6);">10 years</span>
-            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:6px;"><div class="perf-bar" style="width:0%" data-width="74%"></div></div>
-            <span style="font-size:15px;font-weight:600;color:#22201d;text-align:right;">7.4% p.a.</span>
+          <div class="perf-row" style="padding:15px 22px;">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">10 years</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%" data-width="74%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">7.4% p.a.</span>
           </div>
         </div>
-        <p class="data-note" style="margin-top:12px;">Annualised compound growth rates, Greater Geelong LGA median house price. Source: CoreLogic / Suburbtrends</p>
       </div>
-      <div class="reveal">
-        <p style="font-size:13px;font-weight:500;color:rgba(34,32,29,0.4);margin-bottom:18px;letter-spacing:0.05em;text-transform:uppercase;">Comparable market context</p>
-        <div style="background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);padding:28px;box-shadow:0 2px 16px rgba(34,32,29,0.04);margin-bottom:20px;">
-          <p style="font-size:13px;font-weight:500;color:#bd7a70;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;">Comparable market precedent</p>
-          <p style="font-size:15.5px;font-weight:300;line-height:1.8;color:rgba(34,32,29,0.7);">Geelong's current profile — affordable entry relative to capital city, major infrastructure committed, strong population growth, tight vacancy — mirrors the fundamentals seen in Ipswich QLD (2019) and Newcastle NSW (2018), both of which delivered 40%+ cumulative growth within 3 years of similar conditions.</p>
+
+      <!-- Units -->
+      <div>
+        <div style="background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);overflow:hidden;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+          <div style="padding:18px 22px;border-bottom:1px solid rgba(34,32,29,0.07);background:rgba(207,155,146,0.06);">
+            <p style="font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#cf9b92;">Units — annualised growth</p>
+          </div>
+          <div class="perf-row" style="padding:15px 22px;border-bottom:1px solid rgba(34,32,29,0.06);">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">1 year</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%;background:#cf9b92;" data-width="20%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">2.0%</span>
+          </div>
+          <div class="perf-row" style="padding:15px 22px;border-bottom:1px solid rgba(34,32,29,0.06);">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">3 years</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%;background:#cf9b92;" data-width="65%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">6.5% p.a.</span>
+          </div>
+          <div class="perf-row" style="padding:15px 22px;border-bottom:1px solid rgba(34,32,29,0.06);">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">5 years</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%;background:#cf9b92;" data-width="76%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">7.6% p.a.</span>
+          </div>
+          <div class="perf-row" style="padding:15px 22px;">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">10 years</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%;background:#cf9b92;" data-width="58%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">5.8% p.a.</span>
+          </div>
         </div>
-        <div style="background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);padding:28px;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
-          <p style="font-size:13px;font-weight:500;color:#bd7a70;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;">Relative affordability</p>
-          <p style="font-size:15.5px;font-weight:300;line-height:1.8;color:rgba(34,32,29,0.7);">At $680k median, Geelong houses trade at a 42% discount to Melbourne's $1.17M median — for a city 75km away with direct rail access. Historical data shows this gap narrows as infrastructure improves and population migrates.</p>
-        </div>
+      </div>
+
+    </div>
+    <p class="data-note" style="margin-bottom:40px;">Annualised compound growth rates, Greater Geelong LGA. Source: CoreLogic / Suburbtrends. Figures are approximate.</p>
+
+    <!-- Comparable markets (full width below tables) -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;" class="r-2col reveal">
+      <div style="background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);padding:28px;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+        <p style="font-size:13px;font-weight:500;color:#bd7a70;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;">Comparable market precedent</p>
+        <p style="font-size:15.5px;font-weight:300;line-height:1.8;color:rgba(34,32,29,0.7);">Geelong's current profile — affordable entry relative to capital city, major infrastructure committed, strong population growth, tight vacancy — mirrors the fundamentals seen in Ipswich QLD (2019) and Newcastle NSW (2018), both of which delivered 40%+ cumulative growth within 3 years of similar conditions.</p>
+      </div>
+      <div style="background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);padding:28px;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+        <p style="font-size:13px;font-weight:500;color:#bd7a70;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;">Relative affordability</p>
+        <p style="font-size:15.5px;font-weight:300;line-height:1.8;color:rgba(34,32,29,0.7);">At $680k median, Geelong houses trade at a 42% discount to Melbourne's $1.17M median — for a city 75km away with direct rail access. Historical data shows this gap narrows as infrastructure improves and population migrates.</p>
       </div>
     </div>
   </div>
@@ -532,18 +632,18 @@
 <!-- INVESTOR PROFILE -->
 <section class="sec sec-cream">
   <div class="inner">
-    <p class="eyebrow reveal">Investor profile</p>
-    <h2 class="sec-h2 reveal">Who does this market suit?</h2>
+    <p class="eyebrow reveal">Investment case</p>
+    <h2 class="sec-h2 reveal">What makes this market compelling?</h2>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;" class="r-2col">
       <div class="reveal">
-        <p style="font-size:15.5px;font-weight:300;line-height:1.8;color:rgba(34,32,29,0.7);margin-bottom:28px;">Geelong is a dual-purpose market — it offers genuine yield now (4.2% houses) with a strong medium-term growth case driven by infrastructure. That makes it suitable for investors across a range of strategies.</p>
+        <p style="font-size:15.5px;font-weight:300;line-height:1.8;color:rgba(34,32,29,0.7);margin-bottom:28px;">Geelong is a dual-purpose market — it delivers genuine rental income today while carrying a strong medium-term growth case driven by infrastructure, population, and affordability dynamics that are difficult to find in the same market at this price point.</p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;">
-          <span class="profile-tag"><span class="dot"></span>Medium–long term hold (5–10yr)</span>
-          <span class="profile-tag"><span class="dot"></span>First investment property</span>
-          <span class="profile-tag"><span class="dot"></span>Portfolio diversification from Sydney/Melbourne</span>
-          <span class="profile-tag"><span class="dot"></span>Cashflow-positive focus</span>
-          <span class="profile-tag"><span class="dot"></span>Infrastructure growth play</span>
-          <span class="profile-tag"><span class="dot"></span>$600k–$750k entry budget</span>
+          <span class="profile-tag"><span class="dot"></span>Income-producing from settlement</span>
+          <span class="profile-tag"><span class="dot"></span>Buy, hold &amp; benefit from infrastructure</span>
+          <span class="profile-tag"><span class="dot"></span>Strong tenant demand, low vacancy</span>
+          <span class="profile-tag"><span class="dot"></span>Capital city proximity without capital city pricing</span>
+          <span class="profile-tag"><span class="dot"></span>Long-term capital growth compounding</span>
+          <span class="profile-tag"><span class="dot"></span>Established inner-ring pockets with genuine scarcity</span>
         </div>
       </div>
       <div class="reveal">
@@ -843,48 +943,7 @@ const gaugeObserver = new IntersectionObserver((entries) => {
 const gaugeWrap = document.getElementById('gauge-wrap');
 if (gaugeWrap) gaugeObserver.observe(gaugeWrap);
 
-// ─── LEAFLET MAP ──────────────────────────────────────────────────────────
-const map = L.map('map', { zoomControl: true, scrollWheelZoom: false }).setView([-38.15, 144.6], 9);
-
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; OpenStreetMap &copy; CARTO',
-  maxZoom: 18
-}).addTo(map);
-
-function customIcon(color) {
-  return L.divIcon({
-    html: `<div style="width:12px;height:12px;border-radius:50%;background:${color};border:2px solid rgba(247,243,237,0.6);box-shadow:0 2px 8px rgba(0,0,0,0.5);"></div>`,
-    className: '', iconAnchor: [6,6]
-  });
-}
-
-const markers = [
-  { coords: [-38.1499, 144.3617], label: 'Geelong CBD', color: '#bd7a70', primary: true },
-  { coords: [-37.8136, 144.9631], label: 'Melbourne CBD', color: '#cf9b92', primary: false },
-  { coords: [-38.2000, 144.3000], label: 'Waurn Ponds', color: '#bd7a70', primary: false },
-  { coords: [-38.2700, 144.4200], label: 'Armstrong Creek', color: '#bd7a70', primary: false },
-  { coords: [-38.1900, 144.3800], label: 'Deakin University', color: '#cf9b92', primary: false },
-  { coords: [-38.1600, 144.3700], label: 'Barwon Health', color: '#cf9b92', primary: false },
-];
-
-markers.forEach(m => {
-  L.marker(m.coords, { icon: customIcon(m.color) })
-    .addTo(map)
-    .bindTooltip(m.label, { permanent: m.primary, direction: 'top', className: 'fw-tooltip', offset: [0, -8] });
-});
-
-// Draw line Melbourne → Geelong
-L.polyline([[-37.8136, 144.9631], [-38.1499, 144.3617]], {
-  color: 'rgba(189,122,112,0.4)', weight: 2, dashArray: '6,6'
-}).addTo(map);
 </script>
-
-<!-- Leaflet tooltip style -->
-<style>
-.fw-tooltip { background:#22201d !important; border:1px solid rgba(189,122,112,0.4) !important; color:#f7f3ed !important; font-family:'Outfit',sans-serif !important; font-size:12px !important; font-weight:400 !important; padding:4px 10px !important; border-radius:6px !important; box-shadow:0 4px 12px rgba(0,0,0,0.4) !important; }
-.fw-tooltip::before { display:none !important; }
-.leaflet-tooltip-top.fw-tooltip::before { display:none !important; }
-</style>
 
 </body>
 </html>
