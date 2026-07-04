@@ -72,6 +72,8 @@
     .static-map-overlay{position:absolute;inset:0;cursor:default;}
     /* Covers OSM attribution bar — credit appears in data sources footer below */
     .static-map-attrib-cover{position:absolute;bottom:0;left:0;right:0;height:26px;background:#22201d;}
+    /* Covers OSM +/- zoom buttons (non-functional anyway due to overlay, but visually distracting) */
+    .static-map-zoom-cover{position:absolute;top:10px;left:10px;width:36px;height:72px;background:#22201d;border-radius:6px;}
 
     /* Amenity cards */
     .amenity-cat{font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:#bd7a70;margin-bottom:10px;}
@@ -224,6 +226,8 @@
       <div class="static-map-overlay"></div>
       <!-- Covers OSM attribution bar; credit moved to data sources footer -->
       <div class="static-map-attrib-cover"></div>
+      <!-- Covers OSM zoom buttons -->
+      <div class="static-map-zoom-cover"></div>
     </div>
 
     <!-- Amenities grid -->
@@ -489,7 +493,7 @@
           <div style="text-align:right;">
             <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(34,32,29,0.4);margin-bottom:8px;">Annual income</p>
             <p style="font-family:'Fraunces',serif;font-size:22px;font-weight:400;color:#22201d;">$23,400</p>
-            <p style="font-size:13px;font-weight:300;color:rgba(34,32,29,0.5);margin-top:4px;">Gross p.a.</p>
+            <p style="font-size:13px;font-weight:300;color:rgba(34,32,29,0.5);margin-top:4px;">Gross p.a. (before expenses)</p>
           </div>
         </div>
       </div>
@@ -503,7 +507,7 @@
           <div style="text-align:right;">
             <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(34,32,29,0.4);margin-bottom:8px;">Annual income</p>
             <p style="font-family:'Fraunces',serif;font-size:22px;font-weight:400;color:#22201d;">$19,760</p>
-            <p style="font-size:13px;font-weight:300;color:rgba(34,32,29,0.5);margin-top:4px;">Gross p.a.</p>
+            <p style="font-size:13px;font-weight:300;color:rgba(34,32,29,0.5);margin-top:4px;">Gross p.a. (before expenses)</p>
           </div>
         </div>
       </div>
@@ -626,7 +630,7 @@
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;" class="r-2col reveal">
       <div style="background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);padding:28px;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
         <p style="font-size:13px;font-weight:500;color:#bd7a70;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;">Comparable market precedent</p>
-        <p style="font-size:15.5px;font-weight:300;line-height:1.8;color:rgba(34,32,29,0.7);">Geelong's current profile — affordable entry relative to capital city, major infrastructure committed, strong population growth, tight vacancy — mirrors the fundamentals seen in Ipswich QLD (2019) and Newcastle NSW (2018), both of which delivered 40%+ cumulative growth within 3 years of similar conditions.</p>
+        <p style="font-size:15.5px;font-weight:300;line-height:1.8;color:rgba(34,32,29,0.7);">Geelong's current profile — affordable entry relative to capital city, major infrastructure committed, strong population growth, tight vacancy — shares characteristics with markets such as Ipswich QLD and Newcastle NSW at comparable stages of their growth cycle. Past performance in those markets is not a guide to future performance in Geelong.</p>
       </div>
       <div style="background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);padding:28px;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
         <p style="font-size:13px;font-weight:500;color:#bd7a70;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;">Relative affordability</p>
@@ -655,19 +659,16 @@
       </div>
       <div class="reveal">
         <div style="background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);padding:30px;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
-          <p style="font-size:13px;font-weight:500;color:#bd7a70;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:18px;">Entry point guidance</p>
+          <p style="font-size:13px;font-weight:500;color:#bd7a70;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;">Indicative price range</p>
+          <p style="font-size:13px;font-weight:300;color:rgba(34,32,29,0.4);margin-bottom:18px;line-height:1.5;">Figures are approximate market context only. The right entry point depends on your specific brief — we'll identify that together.</p>
           <div style="display:flex;flex-direction:column;gap:14px;">
             <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:14px;border-bottom:1px solid rgba(34,32,29,0.07);">
-              <span style="font-size:14.5px;font-weight:300;color:rgba(34,32,29,0.7);">House, 3–4 bed, inner ring</span>
-              <span style="font-size:15px;font-weight:600;color:#22201d;">$620–$780k</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:14px;border-bottom:1px solid rgba(34,32,29,0.07);">
-              <span style="font-size:14.5px;font-weight:300;color:rgba(34,32,29,0.7);">Unit, 2 bed, near transport</span>
-              <span style="font-size:15px;font-weight:600;color:#22201d;">$380–$480k</span>
+              <span style="font-size:14.5px;font-weight:300;color:rgba(34,32,29,0.7);">Houses</span>
+              <span style="font-size:15px;font-weight:600;color:#22201d;">$580k–$800k+</span>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;">
-              <span style="font-size:14.5px;font-weight:300;color:rgba(34,32,29,0.7);">Key pockets</span>
-              <span style="font-size:14px;font-weight:500;color:#22201d;">Newtown, Geelong West,<br>Highton, Belmont</span>
+              <span style="font-size:14.5px;font-weight:300;color:rgba(34,32,29,0.7);">Units</span>
+              <span style="font-size:15px;font-weight:600;color:#22201d;">$350k–$500k+</span>
             </div>
           </div>
         </div>
@@ -723,14 +724,7 @@
         </div>
       </div>
       <p style="font-size:17px;font-weight:300;line-height:1.85;color:rgba(247,243,237,0.75);margin-bottom:20px;">Geelong is one of the most compelling regional markets in Australia right now — and I say that based on the data, not sentiment. The combination of genuine yield (not sacrificing cashflow for a growth bet), a massive committed infrastructure pipeline, and a demographic growth story that has years to run is rare to find in the same market at this price point.</p>
-      <p style="font-size:17px;font-weight:300;line-height:1.85;color:rgba(247,243,237,0.75);margin-bottom:32px;">What I look for here is selectivity — not every pocket and not every asset tells the same story. The markets that outperform over the medium term in Geelong are those with genuine scarcity, strong tenant demand, and direct exposure to the infrastructure tailwinds — without being in the new-build corridors where supply is still coming online. The right property, bought at the right price, gives you a strong hold position regardless of what rates do in the short term.</p>
-      <div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.4);">Conviction level</p>
-          <p style="font-size:13px;font-weight:600;color:#bd7a70;">High — Actively recommending</p>
-        </div>
-        <div class="conviction-bar-wrap"><div class="conviction-bar" style="width:0%" data-width="85%"></div></div>
-      </div>
+      <p style="font-size:17px;font-weight:300;line-height:1.85;color:rgba(247,243,237,0.75);">What I look for here is selectivity — not every pocket and not every asset tells the same story. The markets that outperform over the medium term in Geelong are those with genuine scarcity, strong tenant demand, and direct exposure to the infrastructure tailwinds — without being in the new-build corridors where supply is still coming online. The right property, bought at the right price, gives you a strong hold position regardless of what rates do in the short term.</p>
     </div>
   </div>
 </section>
