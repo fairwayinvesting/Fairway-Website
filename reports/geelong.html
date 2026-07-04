@@ -83,9 +83,9 @@
     .nav-inner{max-width:1200px;margin:0 auto;padding:18px 44px;display:flex;align-items:center;justify-content:space-between;gap:24px;}
 
     /* Hero */
-    .hero{min-height:88vh;background:linear-gradient(160deg,#1a1916 0%,#22201d 55%,#2a2420 100%);display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;}
+    .hero{min-height:68vh;background:linear-gradient(160deg,#1a1916 0%,#22201d 55%,#2a2420 100%);display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;}
     .hero-bg-lines{position:absolute;inset:0;opacity:0.04;background-image:repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(247,243,237,0.8) 60px,rgba(247,243,237,0.8) 61px),repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(247,243,237,0.8) 60px,rgba(247,243,237,0.8) 61px);}
-    .hero-content{position:relative;z-index:2;padding:0 44px 0;}
+    .hero-content{position:relative;z-index:2;padding:60px 44px 0;}
     .hero-stats-strip{border-top:1px solid rgba(247,243,237,0.1);margin-top:48px;display:grid;grid-template-columns:repeat(4,1fr);background:rgba(0,0,0,0.25);backdrop-filter:blur(8px);}
     .hero-stat{padding:22px 28px;border-right:1px solid rgba(247,243,237,0.08);}
     .hero-stat:last-child{border-right:none;}
@@ -154,7 +154,8 @@
         <span style="font-size:11.5px;font-weight:500;color:#bd7a70;letter-spacing:0.9px;text-transform:uppercase;">Fairway Area Report &nbsp;&middot;&nbsp; Victoria</span>
       </div>
       <h1 class="reveal" style="font-family:'Fraunces',serif;font-size:72px;font-weight:400;color:#f7f3ed;line-height:1.05;letter-spacing:-2px;margin-bottom:16px;">Geelong</h1>
-      <p class="reveal" style="font-size:18px;font-weight:300;color:rgba(247,243,237,0.55);max-width:540px;line-height:1.7;">Infrastructure-led growth market &nbsp;&middot;&nbsp; 75km southwest of Melbourne CBD &nbsp;&middot;&nbsp; Victoria's second-largest city</p>
+      <p class="reveal" style="font-size:18px;font-weight:300;color:rgba(247,243,237,0.55);max-width:580px;line-height:1.7;margin-bottom:14px;">Infrastructure-led growth market &nbsp;&middot;&nbsp; 75km southwest of Melbourne CBD &nbsp;&middot;&nbsp; Victoria's second-largest city</p>
+      <p class="reveal" style="font-size:15px;font-weight:300;color:rgba(247,243,237,0.3);max-width:560px;line-height:1.8;">A Fairway Investing research report — produced for client use to provide market context across key growth indicators, infrastructure pipeline and supply &amp; demand dynamics.</p>
     </div>
   </div>
   <div class="hero-stats-strip">
@@ -182,32 +183,31 @@
 <!-- LOCATION + MAP -->
 <section class="sec sec-dark">
   <div class="inner">
-    <!-- Stats + text row -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:start;margin-bottom:44px;" class="r-2col">
-      <div>
-        <p class="eyebrow reveal">Location</p>
-        <h2 class="sec-h2 reveal" style="color:#f7f3ed;">Where is Geelong?</h2>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:28px;" class="reveal">
-          <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:18px 20px;">
-            <p style="font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#bd7a70;">75km</p>
-            <p style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);margin-top:4px;">Melbourne CBD</p>
-          </div>
-          <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:18px 20px;">
-            <p style="font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#bd7a70;">~1hr</p>
-            <p style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);margin-top:4px;">By V/Line train</p>
-          </div>
-          <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:18px 20px;">
-            <p style="font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#bd7a70;">65km</p>
-            <p style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);margin-top:4px;">Melbourne Airport</p>
-          </div>
-          <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:18px 20px;">
-            <p style="font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#bd7a70;">#2</p>
-            <p style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);margin-top:4px;">Largest city in VIC</p>
-          </div>
+    <p class="eyebrow reveal">Location</p>
+    <h2 class="sec-h2 reveal" style="color:#f7f3ed;">Where is Geelong?</h2>
+
+    <!-- Panels and copy side-by-side, both starting at the same row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:start;margin-bottom:44px;" class="r-2col reveal">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:18px 20px;">
+          <p style="font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#bd7a70;">75km</p>
+          <p style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);margin-top:4px;">Melbourne CBD</p>
+        </div>
+        <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:18px 20px;">
+          <p style="font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#bd7a70;">~1hr</p>
+          <p style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);margin-top:4px;">By V/Line train</p>
+        </div>
+        <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:18px 20px;">
+          <p style="font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#bd7a70;">65km</p>
+          <p style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);margin-top:4px;">Melbourne Airport</p>
+        </div>
+        <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:18px 20px;">
+          <p style="font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#bd7a70;">#2</p>
+          <p style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);margin-top:4px;">Largest city in VIC</p>
         </div>
       </div>
-      <div class="reveal">
-        <p style="font-size:15.5px;font-weight:300;color:rgba(247,243,237,0.55);line-height:1.85;margin-top:70px;">Geelong sits at the western edge of Port Phillip Bay, connected to Melbourne by the Princes Freeway and a frequent V/Line rail service. The Geelong Fast Rail project — when completed — will cut that journey to under 30 minutes, fundamentally repositioning this market relative to Melbourne's employment base.</p>
+      <div>
+        <p style="font-size:15.5px;font-weight:300;color:rgba(247,243,237,0.55);line-height:1.85;">Geelong sits at the western edge of Port Phillip Bay, connected to Melbourne by the Princes Freeway and a frequent V/Line rail service. The Geelong Fast Rail project — when completed — will cut that journey to under 30 minutes, fundamentally repositioning this market relative to Melbourne's employment base.</p>
       </div>
     </div>
 
