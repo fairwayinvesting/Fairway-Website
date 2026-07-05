@@ -706,7 +706,7 @@ CSS = """    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
       .nav-area-label{display:none;}
       .sec{padding:60px 20px;}
       .nav-inner{padding:14px 20px;}
-      .hero-content{padding:0 20px;}
+      .hero-content{padding:24px 20px 0;}
       .hero-stats-strip{grid-template-columns:1fr 1fr;}
       .sec-h2{font-size:28px;}
       .stat-val{font-size:34px;}
