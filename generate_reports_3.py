@@ -323,17 +323,18 @@ MARKETS = [
       ),
     ],
     lukes_p1=(
-      'Newcastle is a city that has genuinely arrived — and the market has partially priced that '
-      'in. But I still find compelling opportunities here, particularly in the inner ring and '
-      'around the university precinct, where the liveability offer and employment demand create '
-      'a durable rental market that supports both yield and medium-term capital growth.'
+      'Newcastle has already had its rerating — anyone who bought in 2015 has done well. '
+      'The question I answer for clients now is whether there is still a case at current '
+      'prices. There is, but with much tighter selection than five years ago. The pockets '
+      'that still make sense are where the full benefit of the transformation has not yet '
+      'been priced in — those pockets exist, they are just not the obvious ones.'
     ),
     lukes_p2=(
-      'This is a market where the capital growth thesis is arguably stronger than the income '
-      'thesis at current prices. The urban renewal story, the university expansion and the '
-      'ongoing Sydney cost-push migration mean there are still pockets where the '
-      'price-to-fundamentals ratio makes sense. But selectivity is critical — not all of '
-      'Newcastle tells the same story, and the differences between pockets are significant.'
+      'The trade-off in Newcastle is that the capital growth thesis is stronger than the '
+      'income thesis at current prices. Yields have compressed as the market has matured. '
+      'A slightly lower-yielding property in a genuinely constrained inner-ring pocket '
+      'outperforms a higher-yield outer suburb over the medium term. Newcastle rewards '
+      'precise selection more than any other market on this list.'
     ),
     map_center=[-32.920, 151.780],
     map_zoom=11,

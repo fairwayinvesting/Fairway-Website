@@ -18,7 +18,7 @@
 //
 // Source suggestions: CoreLogic, SQM Research, Suburbtrends, ABS
 // Price/yield/DOM: CoreLogic data via propertyvalue.com.au
-// Vacancy rates: marked [SQM-TBC] — replace with SQM Research postcode lookup
+// Vacancy rates: SQM Research (May 2026)
 // Historical chart arrays: estimated — update with CoreLogic subscription
 // Last updated: July 2026
 // ─────────────────────────────────────────────────────────────────────────────

@@ -316,17 +316,17 @@ MARKETS = [
       ),
     ],
     lukes_p1=(
-      'Townsville is one of the few truly defensive income markets in Australia — defensive '
-      'in the literal sense that the Australian Defence Force creates rental demand that persists '
-      'regardless of what interest rates, consumer sentiment or stock markets are doing. '
-      'That predictability has real value for investors focused on income rather than speculation.'
+      'Townsville is the strongest pure-income market in our QLD coverage, and the 0.6% vacancy '
+      'rate is not a seasonal blip — it reflects a structural imbalance in a city of 200,000 '
+      'people anchored by ADF, a major hospital and JCU. Not relying on one employer or '
+      'one industry — relying on a city with genuine economic depth.'
     ),
     lukes_p2=(
-      'The key here is finding properties that appeal to the professional renter profile — '
-      'defence families, healthcare workers, university staff. These are tenants who maintain '
-      'properties well, pay reliably and have relatively long tenure. The right property in '
-      'the right part of the city can deliver both a strong income position and a compelling '
-      'hold case as the port and urban renewal investment plays out over the medium term.'
+      'What I focus on for Townsville stock is proximity to the employment anchors. The ADF '
+      'barracks, the hospital precinct and JCU each create their own rental catchment of '
+      'tenants who stay longer and maintain properties better than the broader market. In a '
+      'city where the vacancy rate is already this tight, that quality of demand compounds '
+      'meaningfully over a long hold.'
     ),
     map_center=[-19.260, 146.820],
     map_zoom=11,
@@ -494,17 +494,18 @@ MARKETS = [
       ),
     ],
     lukes_p1=(
-      'Mackay is a market I approach with eyes open to the commodity cycle but genuine '
-      'appreciation for the income opportunity. The FIFO workforce that uses Mackay as a home '
-      'base is a high-income, professional renter cohort that is genuinely underserved by '
-      'quality residential rental stock — and that gap creates real value for the right investor.'
+      'Mackay is a market I approach with eyes open to the commodity cycle. The yield at '
+      'current prices reflects a risk premium — and if you believe coal demand is more '
+      'durable than the energy transition narrative suggests, the income position here is '
+      'genuinely exceptional. Anyone who bought in 2012 and held through 2016 understands '
+      'the downside scenario, and that context matters.'
     ),
     lukes_p2=(
-      'The selectivity here is critical. Properties that appeal to healthcare workers and '
-      'professionals in addition to the FIFO base are more resilient through commodity '
-      'downturns. The right asset in the right location can deliver exceptional income even '
-      'through periods of reduced mining activity, because the services economy keeps '
-      'the rental floor intact.'
+      'The way I manage commodity risk in Mackay is through asset selection. Properties that '
+      'appeal to healthcare workers and professionals — not exclusively FIFO accommodation — '
+      'hold their rental value through downturns because the services economy keeps running '
+      'regardless. The right stock in the right part of Mackay is more resilient than the '
+      'headline "mining town" label implies.'
     ),
     map_center=[-21.140, 149.190],
     map_zoom=11,
