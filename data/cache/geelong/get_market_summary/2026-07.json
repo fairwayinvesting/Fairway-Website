@@ -1,0 +1,49 @@
+{
+  "fetchedAt": "2026-07-05T12:00:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "geelong",
+  "tool": "get_market_summary",
+  "params": {
+    "level": "lga",
+    "area_id": ["VIC215"],
+    "limit": 100
+  },
+  "rowsReturned": 2,
+  "data": {
+    "results": [
+      {
+        "area_id": "VIC215",
+        "period_end": "2026-06-30T00:00:00+00:00",
+        "property_type": "house",
+        "bedrooms": "All",
+        "typical_price": 924894.0,
+        "rent": 521.0,
+        "gross_yield": 0.0293,
+        "sales": 417,
+        "annual_sales_volume": 7995,
+        "rentals": 412,
+        "annual_rental_volume": 5557,
+        "estimated_dwellings": 159810,
+        "adult_population": 271057,
+        "confidence": "High"
+      },
+      {
+        "area_id": "VIC215",
+        "period_end": "2026-06-30T00:00:00+00:00",
+        "property_type": "unit",
+        "bedrooms": "All",
+        "typical_price": 730851.0,
+        "rent": 430.0,
+        "gross_yield": 0.0306,
+        "sales": 50,
+        "annual_sales_volume": 1189,
+        "rentals": 120,
+        "annual_rental_volume": 1700,
+        "estimated_dwellings": 159810,
+        "adult_population": 271057,
+        "confidence": "Medium"
+      }
+    ],
+    "total": 2
+  }
+}

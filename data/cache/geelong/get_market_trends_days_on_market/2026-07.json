@@ -1,0 +1,39 @@
+{
+  "fetchedAt": "2026-07-05T12:35:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "geelong",
+  "tool": "get_market_trends_days_on_market",
+  "params": {"level": "lga", "area_id": ["VIC215"], "limit": 26},
+  "rowsReturned": 26,
+  "data": {
+    "results": [
+      {"area_id":"VIC215","period_end":"2026-06-30T00:00:00+00:00","property_type":"unit","dom":42.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2026-06-30T00:00:00+00:00","property_type":"house","dom":31.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2026-05-31T00:00:00+00:00","property_type":"house","dom":28.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2026-05-31T00:00:00+00:00","property_type":"unit","dom":41.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2026-04-30T00:00:00+00:00","property_type":"unit","dom":95.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2026-04-30T00:00:00+00:00","property_type":"house","dom":28.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2026-03-31T00:00:00+00:00","property_type":"house","dom":34.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2026-03-31T00:00:00+00:00","property_type":"unit","dom":48.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2026-02-28T00:00:00+00:00","property_type":"house","dom":31.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2026-02-28T00:00:00+00:00","property_type":"unit","dom":29.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2026-01-31T00:00:00+00:00","property_type":"unit","dom":24.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2026-01-31T00:00:00+00:00","property_type":"house","dom":50.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2025-12-31T00:00:00+00:00","property_type":"house","dom":26.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2025-12-31T00:00:00+00:00","property_type":"unit","dom":49.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2025-11-30T00:00:00+00:00","property_type":"house","dom":26.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2025-11-30T00:00:00+00:00","property_type":"unit","dom":31.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2025-10-31T00:00:00+00:00","property_type":"unit","dom":49.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2025-10-31T00:00:00+00:00","property_type":"house","dom":26.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2025-09-30T00:00:00+00:00","property_type":"unit","dom":47.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2025-09-30T00:00:00+00:00","property_type":"house","dom":26.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2025-08-31T00:00:00+00:00","property_type":"house","dom":28.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2025-08-31T00:00:00+00:00","property_type":"unit","dom":18.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2025-07-31T00:00:00+00:00","property_type":"unit","dom":43.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2025-07-31T00:00:00+00:00","property_type":"house","dom":38.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2025-06-30T00:00:00+00:00","property_type":"house","dom":30.0,"discounting":null},
+      {"area_id":"VIC215","period_end":"2025-06-30T00:00:00+00:00","property_type":"unit","dom":35.0,"discounting":null}
+    ],
+    "total": 26
+  }
+}

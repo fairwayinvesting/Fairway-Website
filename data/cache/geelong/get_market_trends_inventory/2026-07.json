@@ -1,0 +1,26 @@
+{
+  "fetchedAt": "2026-07-05T12:37:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "geelong",
+  "tool": "get_market_trends_inventory",
+  "params": {"level": "lga", "area_id": ["VIC215"], "limit": 13},
+  "rowsReturned": 13,
+  "data": {
+    "results": [
+      {"area_id":"VIC215","period_end":"2026-06-30T00:00:00+00:00","property_type":"house","inventory":2.06},
+      {"area_id":"VIC215","period_end":"2026-06-30T00:00:00+00:00","property_type":"unit","inventory":2.17},
+      {"area_id":"VIC215","period_end":"2026-05-31T00:00:00+00:00","property_type":"unit","inventory":2.28},
+      {"area_id":"VIC215","period_end":"2026-05-31T00:00:00+00:00","property_type":"house","inventory":2.31},
+      {"area_id":"VIC215","period_end":"2026-04-30T00:00:00+00:00","property_type":"unit","inventory":1.88},
+      {"area_id":"VIC215","period_end":"2026-04-30T00:00:00+00:00","property_type":"house","inventory":2.37},
+      {"area_id":"VIC215","period_end":"2026-03-31T00:00:00+00:00","property_type":"house","inventory":2.14},
+      {"area_id":"VIC215","period_end":"2026-03-31T00:00:00+00:00","property_type":"unit","inventory":1.96},
+      {"area_id":"VIC215","period_end":"2026-02-28T00:00:00+00:00","property_type":"unit","inventory":1.87},
+      {"area_id":"VIC215","period_end":"2026-02-28T00:00:00+00:00","property_type":"house","inventory":2.09},
+      {"area_id":"VIC215","period_end":"2026-01-31T00:00:00+00:00","property_type":"house","inventory":2.05},
+      {"area_id":"VIC215","period_end":"2026-01-31T00:00:00+00:00","property_type":"unit","inventory":1.97},
+      {"area_id":"VIC215","period_end":"2025-12-31T00:00:00+00:00","property_type":"house","inventory":2.03}
+    ],
+    "total": 13
+  }
+}

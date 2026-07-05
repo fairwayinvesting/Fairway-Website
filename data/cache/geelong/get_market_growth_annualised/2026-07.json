@@ -1,0 +1,47 @@
+{
+  "fetchedAt": "2026-07-05T12:33:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "geelong",
+  "tool": "get_market_growth_annualised",
+  "params": {"level": "lga", "area_id": ["VIC215"], "limit": 10},
+  "rowsReturned": 2,
+  "data": {
+    "results": [
+      {
+        "area_id": "VIC215",
+        "period_end": "2026-06-30T00:00:00+00:00",
+        "property_type": "house",
+        "price_1y_growth_annualised": 0.0977,
+        "price_3y_growth_annualised": 0.0003,
+        "price_5y_growth_annualised": 0.0408,
+        "price_10y_growth_annualised": 0.0657,
+        "rent_1y_growth_annualised": 0.0378,
+        "rent_3y_growth_annualised": 0.04,
+        "rent_5y_growth_annualised": 0.0515,
+        "rent_10y_growth_annualised": 0.045,
+        "yield_1y_growth_annualised": -0.0546,
+        "yield_3y_growth_annualised": 0.0397,
+        "yield_5y_growth_annualised": 0.0103,
+        "yield_10y_growth_annualised": -0.0193
+      },
+      {
+        "area_id": "VIC215",
+        "period_end": "2026-06-30T00:00:00+00:00",
+        "property_type": "unit",
+        "price_1y_growth_annualised": 0.0316,
+        "price_3y_growth_annualised": -0.0183,
+        "price_5y_growth_annualised": -0.0115,
+        "price_10y_growth_annualised": 0.047,
+        "rent_1y_growth_annualised": 0.0361,
+        "rent_3y_growth_annualised": 0.0419,
+        "rent_5y_growth_annualised": 0.0529,
+        "rent_10y_growth_annualised": 0.0471,
+        "yield_1y_growth_annualised": 0.0043,
+        "yield_3y_growth_annualised": 0.0613,
+        "yield_5y_growth_annualised": 0.0652,
+        "yield_10y_growth_annualised": 0.0001
+      }
+    ],
+    "total": 2
+  }
+}

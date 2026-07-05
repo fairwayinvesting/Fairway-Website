@@ -1,0 +1,23 @@
+{
+  "fetchedAt": "2026-07-05T11:36:38.328278Z",
+  "calendarMonth": "2026-07",
+  "region": "geelong",
+  "tool": "lookup_lgas",
+  "params": {
+    "name": "Greater Geelong",
+    "state_name": "VIC",
+    "limit": 5
+  },
+  "rowsReturned": 1,
+  "data": {
+    "results": [
+      {
+        "lga_pid": "VIC215",
+        "lga_name": "GREATER GEELONG CITY",
+        "state_name": "VIC",
+        "lga_key": "greater-geelong-city"
+      }
+    ],
+    "total": 1
+  }
+}

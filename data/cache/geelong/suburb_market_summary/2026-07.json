@@ -1,0 +1,19 @@
+{
+  "fetchedAt": "2026-07-05T14:05:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "geelong",
+  "tool": "get_market_summary",
+  "params": {"level": "suburb", "area_id": ["all 53 VIC215 localities"], "limit": 200},
+  "rowsReturned": 73,
+  "note": "73 rows returned (some suburbs house-only). Top 8 affordable by house price selected for suburb spotlight: VIC2777 Whittington, VIC1956 Norlane, VIC639 Corio, VIC1921 Newcomb, VIC3002 Armstrong Creek, VIC1106 Grovedale, VIC1488 Leopold, VIC1122 Hamlyn Heights.",
+  "selected_suburbs": [
+    {"loc_pid":"VIC2777","name":"WHITTINGTON","postcode":"3219","house_price":589074,"unit_price":420489,"house_rent":491,"unit_rent":420,"house_yield":0.0433,"unit_yield":0.0519,"house_annual_sales":102,"house_confidence":"High"},
+    {"loc_pid":"VIC1956","name":"NORLANE","postcode":"3214","house_price":598740,"unit_price":439945,"house_rent":427,"unit_rent":424,"house_yield":0.0371,"unit_yield":0.0501,"house_annual_sales":371,"house_confidence":"High"},
+    {"loc_pid":"VIC639","name":"CORIO","postcode":"3214","house_price":627609,"unit_price":431908,"house_rent":449,"unit_rent":372,"house_yield":0.0372,"unit_yield":0.0448,"house_annual_sales":522,"house_confidence":"High"},
+    {"loc_pid":"VIC1921","name":"NEWCOMB","postcode":"3219","house_price":660780,"unit_price":458918,"house_rent":489,"unit_rent":411,"house_yield":0.0385,"unit_yield":0.0466,"house_annual_sales":151,"house_confidence":"High"},
+    {"loc_pid":"VIC3002","name":"ARMSTRONG CREEK","postcode":"3217","house_price":695479,"unit_price":null,"house_rent":529,"unit_rent":null,"house_yield":0.0396,"unit_yield":null,"house_annual_sales":825,"house_confidence":"High"},
+    {"loc_pid":"VIC1106","name":"GROVEDALE","postcode":"3216","house_price":732143,"unit_price":523055,"house_rent":525,"unit_rent":424,"house_yield":0.0373,"unit_yield":0.0422,"house_annual_sales":341,"house_confidence":"High"},
+    {"loc_pid":"VIC1488","name":"LEOPOLD","postcode":"3224","house_price":741440,"unit_price":494085,"house_rent":530,"unit_rent":450,"house_yield":0.0372,"unit_yield":0.0474,"house_annual_sales":350,"house_confidence":"High"},
+    {"loc_pid":"VIC1122","name":"HAMLYN HEIGHTS","postcode":"3215","house_price":755808,"unit_price":479319,"house_rent":523,"unit_rent":436,"house_yield":0.036,"unit_yield":0.0473,"house_annual_sales":148,"house_confidence":"High"}
+  ]
+}

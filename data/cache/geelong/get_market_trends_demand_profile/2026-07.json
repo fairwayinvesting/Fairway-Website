@@ -1,0 +1,38 @@
+{
+  "fetchedAt": "2026-07-05T12:33:30.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "geelong",
+  "tool": "get_market_trends_demand_profile",
+  "params": {"level": "lga", "area_id": ["VIC215"], "limit": 50},
+  "rowsReturned": 25,
+  "data": {
+    "results": [
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"House","bedrooms":"1 bedrooms","sales":68},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"Other","bedrooms":"1 bedrooms","sales":5},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"Rural","bedrooms":"1 bedrooms","sales":0},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"Semidetached","bedrooms":"1 bedrooms","sales":3},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"Unit","bedrooms":"1 bedrooms","sales":266},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"House","bedrooms":"2 bedrooms","sales":784},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"Other","bedrooms":"2 bedrooms","sales":86},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"Rural","bedrooms":"2 bedrooms","sales":0},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"Semidetached","bedrooms":"2 bedrooms","sales":167},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"Unit","bedrooms":"2 bedrooms","sales":1039},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"House","bedrooms":"3 bedrooms","sales":5095},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"Other","bedrooms":"3 bedrooms","sales":78},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"Rural","bedrooms":"3 bedrooms","sales":0},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"Semidetached","bedrooms":"3 bedrooms","sales":248},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"Unit","bedrooms":"3 bedrooms","sales":356},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"House","bedrooms":"4 bedrooms","sales":3827},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"Other","bedrooms":"4 bedrooms","sales":33},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"Rural","bedrooms":"4 bedrooms","sales":0},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"Semidetached","bedrooms":"4 bedrooms","sales":52},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"Unit","bedrooms":"4 bedrooms","sales":30},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"House","bedrooms":"5 bedrooms","sales":435},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"Other","bedrooms":"5 bedrooms","sales":2},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"Rural","bedrooms":"5 bedrooms","sales":0},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"Semidetached","bedrooms":"5 bedrooms","sales":2},
+      {"area_id":"VIC215","period_end":"2026-07-01T00:00:00+00:00","property_type":"Unit","bedrooms":"5 bedrooms","sales":5}
+    ],
+    "total": 25
+  }
+}

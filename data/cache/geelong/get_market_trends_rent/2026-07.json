@@ -1,0 +1,39 @@
+{
+  "fetchedAt": "2026-07-05T12:31:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "geelong",
+  "tool": "get_market_trends_rent",
+  "params": {"level": "lga", "area_id": ["VIC215"], "limit": 26},
+  "rowsReturned": 26,
+  "data": {
+    "results": [
+      {"area_id":"VIC215","period_end":"2026-06-30T00:00:00+00:00","property_type":"unit","bedrooms":"All","median_rent":431,"rentals":119},
+      {"area_id":"VIC215","period_end":"2026-06-30T00:00:00+00:00","property_type":"house","bedrooms":"All","median_rent":522,"rentals":412},
+      {"area_id":"VIC215","period_end":"2026-05-31T00:00:00+00:00","property_type":"unit","bedrooms":"All","median_rent":430,"rentals":120},
+      {"area_id":"VIC215","period_end":"2026-05-31T00:00:00+00:00","property_type":"house","bedrooms":"All","median_rent":521,"rentals":412},
+      {"area_id":"VIC215","period_end":"2026-04-30T00:00:00+00:00","property_type":"unit","bedrooms":"All","median_rent":430,"rentals":122},
+      {"area_id":"VIC215","period_end":"2026-04-30T00:00:00+00:00","property_type":"house","bedrooms":"All","median_rent":520,"rentals":413},
+      {"area_id":"VIC215","period_end":"2026-03-31T00:00:00+00:00","property_type":"house","bedrooms":"All","median_rent":519,"rentals":416},
+      {"area_id":"VIC215","period_end":"2026-03-31T00:00:00+00:00","property_type":"unit","bedrooms":"All","median_rent":430,"rentals":124},
+      {"area_id":"VIC215","period_end":"2026-02-28T00:00:00+00:00","property_type":"unit","bedrooms":"All","median_rent":429,"rentals":125},
+      {"area_id":"VIC215","period_end":"2026-02-28T00:00:00+00:00","property_type":"house","bedrooms":"All","median_rent":517,"rentals":419},
+      {"area_id":"VIC215","period_end":"2026-01-31T00:00:00+00:00","property_type":"house","bedrooms":"All","median_rent":515,"rentals":422},
+      {"area_id":"VIC215","period_end":"2026-01-31T00:00:00+00:00","property_type":"unit","bedrooms":"All","median_rent":428,"rentals":127},
+      {"area_id":"VIC215","period_end":"2025-12-31T00:00:00+00:00","property_type":"unit","bedrooms":"All","median_rent":427,"rentals":129},
+      {"area_id":"VIC215","period_end":"2025-12-31T00:00:00+00:00","property_type":"house","bedrooms":"All","median_rent":513,"rentals":425},
+      {"area_id":"VIC215","period_end":"2025-11-30T00:00:00+00:00","property_type":"unit","bedrooms":"All","median_rent":426,"rentals":131},
+      {"area_id":"VIC215","period_end":"2025-11-30T00:00:00+00:00","property_type":"house","bedrooms":"All","median_rent":511,"rentals":428},
+      {"area_id":"VIC215","period_end":"2025-10-31T00:00:00+00:00","property_type":"house","bedrooms":"All","median_rent":509,"rentals":432},
+      {"area_id":"VIC215","period_end":"2025-10-31T00:00:00+00:00","property_type":"unit","bedrooms":"All","median_rent":424,"rentals":133},
+      {"area_id":"VIC215","period_end":"2025-09-30T00:00:00+00:00","property_type":"house","bedrooms":"All","median_rent":508,"rentals":434},
+      {"area_id":"VIC215","period_end":"2025-09-30T00:00:00+00:00","property_type":"unit","bedrooms":"All","median_rent":422,"rentals":135},
+      {"area_id":"VIC215","period_end":"2025-08-31T00:00:00+00:00","property_type":"unit","bedrooms":"All","median_rent":420,"rentals":137},
+      {"area_id":"VIC215","period_end":"2025-08-31T00:00:00+00:00","property_type":"house","bedrooms":"All","median_rent":506,"rentals":437},
+      {"area_id":"VIC215","period_end":"2025-07-31T00:00:00+00:00","property_type":"unit","bedrooms":"All","median_rent":418,"rentals":138},
+      {"area_id":"VIC215","period_end":"2025-07-31T00:00:00+00:00","property_type":"house","bedrooms":"All","median_rent":504,"rentals":439},
+      {"area_id":"VIC215","period_end":"2025-06-30T00:00:00+00:00","property_type":"unit","bedrooms":"All","median_rent":416,"rentals":139},
+      {"area_id":"VIC215","period_end":"2025-06-30T00:00:00+00:00","property_type":"house","bedrooms":"All","median_rent":503,"rentals":440}
+    ],
+    "total": 26
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "fetchedAt": "2026-07-05T14:15:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "geelong",
+  "tool": "get_market_trends_vacancy",
+  "params": {"level": "suburb", "area_id": ["VIC2777","VIC1956","VIC639","VIC1921","VIC3002","VIC1106","VIC1488","VIC1122"], "period_end_min": "2026-06-01", "period_end_max": "2026-06-30", "limit": 20},
+  "rowsReturned": 16,
+  "data": {"results":[{"area_id":"VIC1106","period_end":"2026-06-30","property_type":"house","vacancy_rate":0.0118},{"area_id":"VIC1122","period_end":"2026-06-30","property_type":"house","vacancy_rate":0.0116},{"area_id":"VIC1488","period_end":"2026-06-30","property_type":"house","vacancy_rate":0.0116},{"area_id":"VIC1921","period_end":"2026-06-30","property_type":"house","vacancy_rate":0.0118},{"area_id":"VIC1956","period_end":"2026-06-30","property_type":"house","vacancy_rate":0.0128},{"area_id":"VIC2777","period_end":"2026-06-30","property_type":"house","vacancy_rate":0.0117},{"area_id":"VIC3002","period_end":"2026-06-30","property_type":"house","vacancy_rate":0.0233},{"area_id":"VIC639","period_end":"2026-06-30","property_type":"house","vacancy_rate":0.0088},{"area_id":"VIC1106","period_end":"2026-06-30","property_type":"unit","vacancy_rate":0.0118},{"area_id":"VIC1122","period_end":"2026-06-30","property_type":"unit","vacancy_rate":0.0116},{"area_id":"VIC1488","period_end":"2026-06-30","property_type":"unit","vacancy_rate":0.0116},{"area_id":"VIC1921","period_end":"2026-06-30","property_type":"unit","vacancy_rate":0.0118},{"area_id":"VIC1956","period_end":"2026-06-30","property_type":"unit","vacancy_rate":0.0128},{"area_id":"VIC2777","period_end":"2026-06-30","property_type":"unit","vacancy_rate":0.0117},{"area_id":"VIC3002","period_end":"2026-06-30","property_type":"unit","vacancy_rate":0.0233},{"area_id":"VIC639","period_end":"2026-06-30","property_type":"unit","vacancy_rate":0.0088}],"total":16}
+}

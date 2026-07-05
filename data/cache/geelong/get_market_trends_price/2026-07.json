@@ -1,0 +1,39 @@
+{
+  "fetchedAt": "2026-07-05T12:30:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "geelong",
+  "tool": "get_market_trends_price",
+  "params": {"level": "lga", "area_id": ["VIC215"], "limit": 26},
+  "rowsReturned": 26,
+  "data": {
+    "results": [
+      {"area_id":"VIC215","period_end":"2026-06-30T00:00:00+00:00","property_type":"unit","bedrooms":"All","typical_price":730851,"sales":50},
+      {"area_id":"VIC215","period_end":"2026-06-30T00:00:00+00:00","property_type":"house","bedrooms":"All","typical_price":924894,"sales":417},
+      {"area_id":"VIC215","period_end":"2026-05-31T00:00:00+00:00","property_type":"unit","bedrooms":"All","typical_price":728234,"sales":55},
+      {"area_id":"VIC215","period_end":"2026-05-31T00:00:00+00:00","property_type":"house","bedrooms":"All","typical_price":919455,"sales":427},
+      {"area_id":"VIC215","period_end":"2026-04-30T00:00:00+00:00","property_type":"unit","bedrooms":"All","typical_price":725617,"sales":60},
+      {"area_id":"VIC215","period_end":"2026-04-30T00:00:00+00:00","property_type":"house","bedrooms":"All","typical_price":914018,"sales":437},
+      {"area_id":"VIC215","period_end":"2026-03-31T00:00:00+00:00","property_type":"house","bedrooms":"All","typical_price":903020,"sales":531},
+      {"area_id":"VIC215","period_end":"2026-03-31T00:00:00+00:00","property_type":"unit","bedrooms":"All","typical_price":721752,"sales":82},
+      {"area_id":"VIC215","period_end":"2026-02-28T00:00:00+00:00","property_type":"unit","bedrooms":"All","typical_price":716288,"sales":74},
+      {"area_id":"VIC215","period_end":"2026-02-28T00:00:00+00:00","property_type":"house","bedrooms":"All","typical_price":893307,"sales":527},
+      {"area_id":"VIC215","period_end":"2026-01-31T00:00:00+00:00","property_type":"house","bedrooms":"All","typical_price":883720,"sales":394},
+      {"area_id":"VIC215","period_end":"2026-01-31T00:00:00+00:00","property_type":"unit","bedrooms":"All","typical_price":712275,"sales":42},
+      {"area_id":"VIC215","period_end":"2025-12-31T00:00:00+00:00","property_type":"unit","bedrooms":"All","typical_price":709427,"sales":97},
+      {"area_id":"VIC215","period_end":"2025-12-31T00:00:00+00:00","property_type":"house","bedrooms":"All","typical_price":872518,"sales":537},
+      {"area_id":"VIC215","period_end":"2025-11-30T00:00:00+00:00","property_type":"unit","bedrooms":"All","typical_price":708596,"sales":96},
+      {"area_id":"VIC215","period_end":"2025-11-30T00:00:00+00:00","property_type":"house","bedrooms":"All","typical_price":866688,"sales":657},
+      {"area_id":"VIC215","period_end":"2025-10-31T00:00:00+00:00","property_type":"house","bedrooms":"All","typical_price":859681,"sales":775},
+      {"area_id":"VIC215","period_end":"2025-10-31T00:00:00+00:00","property_type":"unit","bedrooms":"All","typical_price":709277,"sales":105},
+      {"area_id":"VIC215","period_end":"2025-09-30T00:00:00+00:00","property_type":"house","bedrooms":"All","typical_price":853492,"sales":753},
+      {"area_id":"VIC215","period_end":"2025-09-30T00:00:00+00:00","property_type":"unit","bedrooms":"All","typical_price":709069,"sales":120},
+      {"area_id":"VIC215","period_end":"2025-08-31T00:00:00+00:00","property_type":"unit","bedrooms":"All","typical_price":707857,"sales":98},
+      {"area_id":"VIC215","period_end":"2025-08-31T00:00:00+00:00","property_type":"house","bedrooms":"All","typical_price":849204,"sales":678},
+      {"area_id":"VIC215","period_end":"2025-07-31T00:00:00+00:00","property_type":"unit","bedrooms":"All","typical_price":708123,"sales":103},
+      {"area_id":"VIC215","period_end":"2025-07-31T00:00:00+00:00","property_type":"house","bedrooms":"All","typical_price":845722,"sales":680},
+      {"area_id":"VIC215","period_end":"2025-06-30T00:00:00+00:00","property_type":"unit","bedrooms":"All","typical_price":708450,"sales":98},
+      {"area_id":"VIC215","period_end":"2025-06-30T00:00:00+00:00","property_type":"house","bedrooms":"All","typical_price":842581,"sales":664}
+    ],
+    "total": 26
+  }
+}

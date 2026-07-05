@@ -1,0 +1,39 @@
+{
+  "fetchedAt": "2026-07-05T12:36:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "geelong",
+  "tool": "get_market_trends_clearance_rate",
+  "params": {"level": "lga", "area_id": ["VIC215"], "limit": 26},
+  "rowsReturned": 26,
+  "data": {
+    "results": [
+      {"area_id":"VIC215","period_end":"2026-06-30T00:00:00+00:00","property_type":"unit","clearance_rate":null,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2026-06-30T00:00:00+00:00","property_type":"house","clearance_rate":null,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2026-05-31T00:00:00+00:00","property_type":"house","clearance_rate":0.7857,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2026-05-31T00:00:00+00:00","property_type":"unit","clearance_rate":0.7857,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2026-04-30T00:00:00+00:00","property_type":"unit","clearance_rate":0.7,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2026-04-30T00:00:00+00:00","property_type":"house","clearance_rate":0.7,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2026-03-31T00:00:00+00:00","property_type":"house","clearance_rate":0.58,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2026-03-31T00:00:00+00:00","property_type":"unit","clearance_rate":0.58,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2026-02-28T00:00:00+00:00","property_type":"house","clearance_rate":0.6216,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2026-02-28T00:00:00+00:00","property_type":"unit","clearance_rate":0.6216,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2026-01-31T00:00:00+00:00","property_type":"unit","clearance_rate":0.7241,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2026-01-31T00:00:00+00:00","property_type":"house","clearance_rate":0.7241,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2025-12-31T00:00:00+00:00","property_type":"house","clearance_rate":0.25,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2025-12-31T00:00:00+00:00","property_type":"unit","clearance_rate":0.25,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2025-11-30T00:00:00+00:00","property_type":"house","clearance_rate":0.6909,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2025-11-30T00:00:00+00:00","property_type":"unit","clearance_rate":0.6909,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2025-10-31T00:00:00+00:00","property_type":"unit","clearance_rate":0.6667,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2025-10-31T00:00:00+00:00","property_type":"house","clearance_rate":0.6667,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2025-09-30T00:00:00+00:00","property_type":"unit","clearance_rate":0.7742,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2025-09-30T00:00:00+00:00","property_type":"house","clearance_rate":0.7742,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2025-08-31T00:00:00+00:00","property_type":"house","clearance_rate":0.5476,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2025-08-31T00:00:00+00:00","property_type":"unit","clearance_rate":0.5476,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2025-07-31T00:00:00+00:00","property_type":"unit","clearance_rate":0.0,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2025-07-31T00:00:00+00:00","property_type":"house","clearance_rate":0.0,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2025-06-30T00:00:00+00:00","property_type":"house","clearance_rate":0.5789,"scheduled":null},
+      {"area_id":"VIC215","period_end":"2025-06-30T00:00:00+00:00","property_type":"unit","clearance_rate":0.5789,"scheduled":null}
+    ],
+    "total": 26
+  }
+}
