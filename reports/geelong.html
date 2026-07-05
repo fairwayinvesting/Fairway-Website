@@ -128,6 +128,17 @@
       .r-4col{grid-template-columns:1fr!important;}
       .hero-stats-strip{grid-template-columns:1fr 1fr;}
     }
+
+    /* Info tooltips */
+    .tip{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:rgba(34,32,29,0.1);color:rgba(34,32,29,0.38);font-size:9px;font-weight:700;font-style:normal;text-transform:none;letter-spacing:0;cursor:default;position:relative;margin-left:5px;vertical-align:middle;flex-shrink:0;transition:background .15s;}
+    .tip:hover{background:rgba(34,32,29,0.18);}
+    .tip::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#22201d;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:12px;font-weight:300;line-height:1.55;padding:10px 14px;border-radius:10px;width:240px;text-align:left;opacity:0;pointer-events:none;transition:opacity .18s;z-index:300;white-space:normal;text-transform:none;letter-spacing:normal;font-weight:300;}
+    .tip:hover::after{opacity:1;}
+    .tip-r::after{left:auto;right:0;transform:none;}
+    .tip-lt{background:rgba(247,243,237,0.12);color:rgba(247,243,237,0.4);}
+    .tip-lt:hover{background:rgba(247,243,237,0.2);}
+    .tip-lt::after{background:#f7f3ed;color:#22201d;}
+    .tip-lt.tip-r::after{left:auto;right:0;transform:none;}
   </style>
 </head>
 <body>
@@ -165,11 +176,11 @@
     <div style="max-width:1060px;margin:0 auto;display:contents;">
       <div class="hero-stat reveal">
         <div class="hero-stat-val">~$925k</div>
-        <div class="hero-stat-label">Approx. house median</div>
+        <div class="hero-stat-label">Approx. house median <i class="tip tip-lt" data-tip="The estimated price of a typical house across the LGA, based on recent sales data. Individual properties vary by location, size and condition.">i</i></div>
       </div>
       <div class="hero-stat reveal">
         <div class="hero-stat-val">2.9–3.1%</div>
-        <div class="hero-stat-label">Indicative gross yield</div>
+        <div class="hero-stat-label">Indicative gross yield <i class="tip tip-lt" data-tip="Annual rent as a percentage of property value, before expenses. Net yield — what you keep after rates, insurance and management — is typically 1–2% lower.">i</i></div>
       </div>
       <div class="hero-stat reveal">
         <div class="hero-stat-val">270k</div>
@@ -177,7 +188,7 @@
       </div>
       <div class="hero-stat reveal">
         <div class="hero-stat-val">1.5%</div>
-        <div class="hero-stat-label">Vacancy rate</div>
+        <div class="hero-stat-label">Vacancy rate <i class="tip tip-lt tip-r" data-tip="The percentage of rental properties currently sitting empty. Under 2% means strong tenant demand — landlords have pricing power on rent.">i</i></div>
       </div>
     </div>
   </div>
@@ -424,19 +435,19 @@
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:52px;" class="r-4col reveal">
       <div style="padding:26px 22px;background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);box-shadow:0 2px 16px rgba(34,32,29,0.04);">
         <div class="stat-val" data-target="924894" data-prefix="$" data-suffix="" data-format="price">0</div>
-        <div class="stat-label">Approx. house median</div>
+        <div class="stat-label">Approx. house median <i class="tip" data-tip="The estimated price of a typical house across the LGA, based on recent sales data. Individual properties vary by location, size and condition.">i</i></div>
       </div>
       <div style="padding:26px 22px;background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);box-shadow:0 2px 16px rgba(34,32,29,0.04);">
         <div class="stat-val" data-target="730851" data-prefix="$" data-suffix="" data-format="price">0</div>
-        <div class="stat-label">Approx. unit median</div>
+        <div class="stat-label">Approx. unit median <i class="tip" data-tip="The estimated price of a typical unit across the LGA, based on recent sales data. Individual properties vary by location, size and condition.">i</i></div>
       </div>
       <div style="padding:26px 22px;background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);box-shadow:0 2px 16px rgba(34,32,29,0.04);">
         <div style="font-family:'Fraunces',serif;font-size:38px;font-weight:400;line-height:1;letter-spacing:-1px;">$520–$525</div>
-        <div class="stat-label">House rent range /wk</div>
+        <div class="stat-label">House rent range /wk <i class="tip" data-tip="The middle range of weekly rents currently being achieved across the LGA. Your property's actual rent depends on its size, condition and exact location.">i</i></div>
       </div>
       <div style="padding:26px 22px;background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);box-shadow:0 2px 16px rgba(34,32,29,0.04);">
         <div style="font-family:'Fraunces',serif;font-size:38px;font-weight:400;line-height:1;letter-spacing:-1px;">$430–$435</div>
-        <div class="stat-label">Unit rent range /wk</div>
+        <div class="stat-label">Unit rent range /wk <i class="tip tip-r" data-tip="The middle range of weekly rents currently being achieved for units across the LGA. Your property's actual rent depends on its size, condition and exact location.">i</i></div>
       </div>
     </div>
 
@@ -446,16 +457,29 @@
       <div style="background:#fff;border:1px solid rgba(34,32,29,0.07);border-radius:16px;padding:28px;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
         <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#bd7a70;margin-bottom:10px;">Houses</p>
         <p style="font-family:'Fraunces',serif;font-size:36px;font-weight:400;color:#22201d;line-height:1;">2.9–3.1%</p>
-        <p style="font-size:13px;font-weight:300;color:rgba(34,32,29,0.5);margin-top:6px;">Indicative gross yield range</p>
+        <p style="font-size:13px;font-weight:300;color:rgba(34,32,29,0.5);margin-top:6px;">Indicative gross yield range <i class="tip" data-tip="Annual rent as a percentage of purchase price. This is BEFORE expenses — net yield (what you actually keep after rates, insurance and management) is typically 1–2% lower.">i</i></p>
         <p style="font-size:12px;font-weight:300;color:rgba(34,32,29,0.35);margin-top:8px;line-height:1.6;">Gross yield before ownership expenses (rates, insurance, management, maintenance). Actual returns vary by property.</p>
       </div>
       <div style="background:#fff;border:1px solid rgba(34,32,29,0.07);border-radius:16px;padding:28px;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
         <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#bd7a70;margin-bottom:10px;">Units</p>
         <p style="font-family:'Fraunces',serif;font-size:36px;font-weight:400;color:#22201d;line-height:1;">3.0–3.1%</p>
-        <p style="font-size:13px;font-weight:300;color:rgba(34,32,29,0.5);margin-top:6px;">Indicative gross yield range</p>
+        <p style="font-size:13px;font-weight:300;color:rgba(34,32,29,0.5);margin-top:6px;">Indicative gross yield range <i class="tip tip-r" data-tip="Annual rent as a percentage of purchase price. This is BEFORE expenses — net yield (what you actually keep after rates, insurance and management) is typically 1–2% lower.">i</i></p>
         <p style="font-size:12px;font-weight:300;color:rgba(34,32,29,0.35);margin-top:8px;line-height:1.6;">Gross yield before ownership expenses (rates, insurance, management, maintenance). Actual returns vary by property.</p>
       </div>
     </div>
+
+    <!-- Live price & rent trend charts -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:40px;" class="r-2col reveal">
+      <div style="background:#fff;border:1px solid rgba(34,32,29,0.07);border-radius:16px;padding:28px;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+        <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#bd7a70;margin-bottom:16px;">Price trend — 12 months</p>
+        <div class="chart-wrap"><canvas id="priceChart"></canvas></div>
+      </div>
+      <div style="background:#fff;border:1px solid rgba(34,32,29,0.07);border-radius:16px;padding:28px;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+        <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#bd7a70;margin-bottom:16px;">Rent trend — 12 months</p>
+        <div class="chart-wrap"><canvas id="rentChart"></canvas></div>
+      </div>
+    </div>
+    <p class="data-note">Source: HtAG Analytics. Monthly typical price and median rent, Greater Geelong LGA, Jul 2025–Jun 2026.</p>
   </div>
 </section>
 
@@ -469,21 +493,38 @@
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:52px;" class="r-4col reveal">
       <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:16px;padding:24px 20px;">
         <div class="stat-val" style="font-size:40px;color:#f7f3ed;" data-target="1.5" data-prefix="" data-suffix="%" data-decimal="1">0</div>
-        <div class="stat-label" style="color:rgba(247,243,237,0.4);">Vacancy rate</div>
+        <div class="stat-label" style="color:rgba(247,243,237,0.4);">Vacancy rate <i class="tip tip-lt" data-tip="The percentage of rental properties sitting empty. Under 2% signals strong tenant demand — landlords have pricing power on rent.">i</i></div>
       </div>
       <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:16px;padding:24px 20px;">
         <div class="stat-val" style="font-size:40px;color:#f7f3ed;" data-target="31" data-prefix="" data-suffix=" days">0</div>
-        <div class="stat-label" style="color:rgba(247,243,237,0.4);">Avg. days on market (houses)</div>
+        <div class="stat-label" style="color:rgba(247,243,237,0.4);">Avg. days on market (houses) <i class="tip tip-lt" data-tip="How long a typical house takes to sell after listing. Under 30 days is a fast-moving market — sellers are in control. Over 60 days gives buyers more leverage.">i</i></div>
       </div>
       <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:16px;padding:24px 20px;">
         <div class="stat-val" style="font-size:40px;color:#f7f3ed;" data-target="79" data-prefix="" data-suffix="%">0</div>
-        <div class="stat-label" style="color:rgba(247,243,237,0.4);">Auction clearance rate</div>
+        <div class="stat-label" style="color:rgba(247,243,237,0.4);">Auction clearance rate <i class="tip tip-lt" data-tip="The share of properties sold at or before auction. Above 70% indicates strong buyer competition — markets above 75% tend to see sustained price growth.">i</i></div>
       </div>
       <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:16px;padding:24px 20px;">
         <div class="stat-val" style="font-size:40px;color:#f7f3ed;" data-target="2.1" data-prefix="" data-suffix=" mths" data-decimal="1">0</div>
-        <div class="stat-label" style="color:rgba(247,243,237,0.4);">Months of supply</div>
+        <div class="stat-label" style="color:rgba(247,243,237,0.4);">Months of supply <i class="tip tip-lt tip-r" data-tip="At the current sales pace, how long it would take to sell all properties currently on market. Under 3 months is seller-favoured; over 6 months shifts power to buyers.">i</i></div>
       </div>
     </div>
+
+    <!-- Market depth stats -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:8px;" class="r-3col reveal">
+      <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:16px;padding:24px 20px;">
+        <div class="stat-val" style="font-size:36px;color:#f7f3ed;" data-target="7995" data-prefix="" data-suffix="">0</div>
+        <div class="stat-label" style="color:rgba(247,243,237,0.4);">House sales per year <i class="tip tip-lt" data-tip="Total house transactions recorded across Greater Geelong in the past 12 months. Higher volume means more comparable sales data and greater market liquidity.">i</i></div>
+      </div>
+      <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:16px;padding:24px 20px;">
+        <div class="stat-val" style="font-size:36px;color:#f7f3ed;" data-target="1189" data-prefix="" data-suffix="">0</div>
+        <div class="stat-label" style="color:rgba(247,243,237,0.4);">Unit sales per year <i class="tip tip-lt" data-tip="Total unit transactions across Greater Geelong in the past 12 months. Lower volume than houses reflects a thinner market — can mean less liquidity when selling.">i</i></div>
+      </div>
+      <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:16px;padding:24px 20px;">
+        <div class="stat-val" style="font-size:36px;color:#f7f3ed;" data-target="5557" data-prefix="" data-suffix="">0</div>
+        <div class="stat-label" style="color:rgba(247,243,237,0.4);">House rentals per year <i class="tip tip-lt tip-r" data-tip="New rental agreements signed for houses over the past 12 months. Strong rental turnover alongside low vacancy confirms deep and active tenant demand.">i</i></div>
+      </div>
+    </div>
+    <p class="data-note" style="color:rgba(247,243,237,0.3);margin-bottom:0;">Annual transaction volumes, Greater Geelong LGA. Source: HtAG Analytics.</p>
 
   </div>
 </section>
@@ -501,7 +542,7 @@
       <div>
         <div style="background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);overflow:hidden;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
           <div style="padding:18px 22px;border-bottom:1px solid rgba(34,32,29,0.07);background:rgba(189,122,112,0.04);">
-            <p style="font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#bd7a70;">Houses — annualised growth</p>
+            <p style="font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#bd7a70;">Houses — annualised growth <i class="tip" data-tip="CAGR (Compound Annual Growth Rate) — the smoothed yearly return if you held from that date to today. It accounts for compounding, so a 10yr CAGR of 6.6% means $1 became $1.90.">i</i></p>
           </div>
           <div class="perf-row" style="padding:15px 22px;border-bottom:1px solid rgba(34,32,29,0.06);">
             <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">1 year</span>
@@ -530,7 +571,7 @@
       <div>
         <div style="background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);overflow:hidden;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
           <div style="padding:18px 22px;border-bottom:1px solid rgba(34,32,29,0.07);background:rgba(207,155,146,0.06);">
-            <p style="font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#cf9b92;">Units — annualised growth</p>
+            <p style="font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#cf9b92;">Units — annualised growth <i class="tip tip-r" data-tip="CAGR (Compound Annual Growth Rate) — the smoothed yearly return if you held from that date to today. Negative figures mean the median price fell over that period in real terms.">i</i></p>
           </div>
           <div class="perf-row" style="padding:15px 22px;border-bottom:1px solid rgba(34,32,29,0.06);">
             <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">1 year</span>
@@ -557,6 +598,70 @@
 
     </div>
     <p class="data-note" style="margin-bottom:40px;">Annualised compound growth rates, Greater Geelong LGA. Source: HtAG Analytics. Figures are approximate.</p>
+
+    <!-- Rent growth CAGR tables -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px;" class="r-2col reveal">
+
+      <!-- Houses rent -->
+      <div>
+        <div style="background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);overflow:hidden;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+          <div style="padding:18px 22px;border-bottom:1px solid rgba(34,32,29,0.07);background:rgba(189,122,112,0.04);">
+            <p style="font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#bd7a70;">Houses — rent growth <i class="tip" data-tip="How quickly weekly rents have grown on a compound annual basis. Sustained rent growth compounds your income over time and supports yield even as property values rise.">i</i></p>
+          </div>
+          <div class="perf-row" style="padding:15px 22px;border-bottom:1px solid rgba(34,32,29,0.06);">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">1 year</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%" data-width="38%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">3.8%</span>
+          </div>
+          <div class="perf-row" style="padding:15px 22px;border-bottom:1px solid rgba(34,32,29,0.06);">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">3 years</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%" data-width="40%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">4.0% p.a.</span>
+          </div>
+          <div class="perf-row" style="padding:15px 22px;border-bottom:1px solid rgba(34,32,29,0.06);">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">5 years</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%" data-width="52%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">5.2% p.a.</span>
+          </div>
+          <div class="perf-row" style="padding:15px 22px;">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">10 years</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%" data-width="45%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">4.5% p.a.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Units rent -->
+      <div>
+        <div style="background:#fff;border-radius:16px;border:1px solid rgba(34,32,29,0.07);overflow:hidden;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
+          <div style="padding:18px 22px;border-bottom:1px solid rgba(34,32,29,0.07);background:rgba(207,155,146,0.06);">
+            <p style="font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#cf9b92;">Units — rent growth <i class="tip tip-r" data-tip="How quickly weekly rents have grown on a compound annual basis. Strong unit rent growth can offset softer capital growth — the income return matters more for unit investors.">i</i></p>
+          </div>
+          <div class="perf-row" style="padding:15px 22px;border-bottom:1px solid rgba(34,32,29,0.06);">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">1 year</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%;background:#cf9b92;" data-width="36%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">3.6%</span>
+          </div>
+          <div class="perf-row" style="padding:15px 22px;border-bottom:1px solid rgba(34,32,29,0.06);">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">3 years</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%;background:#cf9b92;" data-width="42%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">4.2% p.a.</span>
+          </div>
+          <div class="perf-row" style="padding:15px 22px;border-bottom:1px solid rgba(34,32,29,0.06);">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">5 years</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%;background:#cf9b92;" data-width="53%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">5.3% p.a.</span>
+          </div>
+          <div class="perf-row" style="padding:15px 22px;">
+            <span style="font-size:13.5px;font-weight:500;color:rgba(34,32,29,0.55);">10 years</span>
+            <div style="background:rgba(34,32,29,0.06);border-radius:100px;height:5px;"><div class="perf-bar" style="width:0%;background:#cf9b92;" data-width="47%"></div></div>
+            <span style="font-size:14px;font-weight:600;color:#22201d;text-align:right;">4.7% p.a.</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <p class="data-note" style="margin-bottom:40px;">Annualised compound rent growth rates, Greater Geelong LGA. Source: HtAG Analytics. Figures are approximate.</p>
 
     <!-- Comparable markets (full width below tables) -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;" class="r-2col reveal">
@@ -699,6 +804,11 @@ const DATA = {
   stock:      [1820,1740,1650,1580,1310,1180,1250,1280,1240,1240],
   stockMonths:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
   stockVals:  [1380,1320,1290,1260,1240,1220,1240,1270,1260,1250,1240,1240],
+  htMonths:    ["Jul '25","Aug '25","Sep '25","Oct '25","Nov '25","Dec '25","Jan '26","Feb '26","Mar '26","Apr '26","May '26","Jun '26"],
+  htHousePrice:[845722,849204,853492,859681,866688,872518,883720,893307,903020,914018,919455,924894],
+  htUnitPrice: [708123,707857,709069,709277,708596,709427,712275,716288,721752,725617,728234,730851],
+  htHouseRent: [504,506,508,509,511,513,515,517,519,520,521,522],
+  htUnitRent:  [418,420,422,424,426,427,428,429,430,430,430,431],
 };
 
 // Brand colours
@@ -744,6 +854,60 @@ function barChart(id, labels, data, darkBg) {
       scales: {
         x: { grid: { color: grid }, ticks: { color: tick, font: { size: 11 } } },
         y: { grid: { color: grid }, ticks: { color: tick, font: { size: 11 } } }
+      }
+    }
+  });
+}
+
+function priceLineChart(id) {
+  return new Chart(document.getElementById(id), {
+    type: 'line',
+    data: {
+      labels: DATA.htMonths,
+      datasets: [
+        { label: 'Houses', data: DATA.htHousePrice, borderColor: COPPER, backgroundColor: 'transparent', tension: 0.4, pointRadius: 2, pointBackgroundColor: COPPER },
+        { label: 'Units', data: DATA.htUnitPrice, borderColor: COPPER_LIGHT, backgroundColor: 'transparent', tension: 0.4, pointRadius: 2, pointBackgroundColor: COPPER_LIGHT, borderDash: [4,3] }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 1200, easing: 'easeInOutQuart' },
+      plugins: {
+        legend: { display: true, labels: { color: LIGHT_TICK, font: { size: 12 }, boxWidth: 12, padding: 16 } },
+        tooltip: { backgroundColor: '#22201d', titleColor: '#f7f3ed', bodyColor: 'rgba(247,243,237,0.65)', padding: 12, cornerRadius: 8,
+          callbacks: { label: ctx => ctx.dataset.label + ': $' + Math.round(ctx.parsed.y / 1000) + 'k' }
+        }
+      },
+      scales: {
+        x: { grid: { color: LIGHT_GRID }, ticks: { color: LIGHT_TICK, font: { size: 11 } } },
+        y: { grid: { color: LIGHT_GRID }, ticks: { color: LIGHT_TICK, font: { size: 11 }, callback: v => '$' + Math.round(v/1000) + 'k' } }
+      }
+    }
+  });
+}
+
+function rentLineChart(id) {
+  return new Chart(document.getElementById(id), {
+    type: 'line',
+    data: {
+      labels: DATA.htMonths,
+      datasets: [
+        { label: 'Houses', data: DATA.htHouseRent, borderColor: COPPER, backgroundColor: 'transparent', tension: 0.4, pointRadius: 2, pointBackgroundColor: COPPER },
+        { label: 'Units', data: DATA.htUnitRent, borderColor: COPPER_LIGHT, backgroundColor: 'transparent', tension: 0.4, pointRadius: 2, pointBackgroundColor: COPPER_LIGHT, borderDash: [4,3] }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 1200, easing: 'easeInOutQuart' },
+      plugins: {
+        legend: { display: true, labels: { color: LIGHT_TICK, font: { size: 12 }, boxWidth: 12, padding: 16 } },
+        tooltip: { backgroundColor: '#22201d', titleColor: '#f7f3ed', bodyColor: 'rgba(247,243,237,0.65)', padding: 12, cornerRadius: 8,
+          callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y + '/wk' }
+        }
+      },
+      scales: {
+        x: { grid: { color: LIGHT_GRID }, ticks: { color: LIGHT_TICK, font: { size: 11 } } },
+        y: { grid: { color: LIGHT_GRID }, ticks: { color: LIGHT_TICK, font: { size: 11 }, callback: v => '$' + v + '/wk' } }
       }
     }
   });
@@ -826,6 +990,8 @@ const chartObserver = new IntersectionObserver((entries) => {
           tension: 0.4, fill: true, pointRadius: 3, pointBackgroundColor: COPPER
         }], false);
       }
+      if (id === 'priceChart') priceLineChart('priceChart');
+      if (id === 'rentChart') rentLineChart('rentChart');
     }
   });
 }, { threshold: 0.2 });
