@@ -17,7 +17,10 @@
 //   vacancy[], stockVals[]
 //
 // Source suggestions: CoreLogic, SQM Research, Suburbtrends, ABS
-// All figures are approximate market context — verify before publishing
+// Price/yield/DOM: CoreLogic data via propertyvalue.com.au
+// Vacancy rates: marked [SQM-TBC] — replace with SQM Research postcode lookup
+// Historical chart arrays: estimated — update with CoreLogic subscription
+// Last updated: July 2026
 // ─────────────────────────────────────────────────────────────────────────────
 
 window.MARKETS = {
@@ -25,11 +28,11 @@ window.MARKETS = {
   // ── GEELONG ──────────────────────────────────────────────────────────────
   geelong: {
     // ── Monthly update fields ──
-    heroPrice: '~$680k', heroYield: '4–5%', heroPopulation: '270k', heroVacancy: '0.8%',
-    houseMedian: 680000, unitMedian: 430000,
-    houseRentRange: '$420–$480', unitRentRange: '$350–$420',
-    houseYieldRange: '4.0–4.5%', unitYieldRange: '4.8–5.4%',
-    vacancyRate: 0.8, daysOnMarket: 28, clearanceRate: 68, propertiesListed: 1240,
+    heroPrice: '~$500k', heroYield: '4.0–4.5%', heroPopulation: '270k', heroVacancy: '1.4%', // [SQM-TBC] postcode 3220
+    houseMedian: 500000, unitMedian: 560000,  // house: Norlane 3214; unit: Greater Geelong LGA (PropTrack)
+    houseRentRange: '$385–$415', unitRentRange: '$445–$480',
+    houseYieldRange: '4.0–4.5%', unitYieldRange: '4.2–4.5%',
+    vacancyRate: 1.4, daysOnMarket: 26, clearanceRate: 68, propertiesListed: 1240, // [SQM-TBC]
     popTotal: 270000, popGrowth: 2.1, medianAge: 37, ownerOccupier: 62, employed: 63, unemployment: 4.1,
     conditions: {
       rentalDemand:  { label: 'Very High', pct: 88 },
@@ -38,7 +41,7 @@ window.MARKETS = {
       infraPipeline: { label: 'Very High', pct: 92 },
       popMomentum:   { label: 'Strong',    pct: 82 },
     },
-    housePerf: { yr1:{val:3.2,bar:32}, yr3:{val:8.1,bar:81}, yr5:{val:9.3,bar:93}, yr10:{val:7.4,bar:74} },
+    housePerf: { yr1:{val:9.6,bar:96}, yr3:{val:8.1,bar:81}, yr5:{val:9.3,bar:93}, yr10:{val:7.4,bar:74} },
     unitPerf:  { yr1:{val:2.0,bar:20}, yr3:{val:6.5,bar:65}, yr5:{val:7.6,bar:76}, yr10:{val:5.8,bar:58} },
     population:  [238000,244000,249000,254000,258000,261000,263000,266000,268000,270000],
     popYears:    [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
@@ -56,11 +59,11 @@ window.MARKETS = {
 
   // ── BACCHUS MARSH ─────────────────────────────────────────────────────────
   bacchus_marsh: {
-    heroPrice: '~$580k', heroYield: '4.5–6%', heroPopulation: '42k', heroVacancy: '0.5%',
-    houseMedian: 580000, unitMedian: 370000,
-    houseRentRange: '$420–$490', unitRentRange: '$320–$390',
-    houseYieldRange: '4.5–5.5%', unitYieldRange: '5.5–6.5%',
-    vacancyRate: 0.5, daysOnMarket: 20, clearanceRate: 65, propertiesListed: 210,
+    heroPrice: '~$630k', heroYield: '4.0–5.0%', heroPopulation: '42k', heroVacancy: '0.5%', // [SQM-TBC] postcode 3340
+    houseMedian: 630000, unitMedian: 395000,  // CoreLogic via propertyvalue.com.au
+    houseRentRange: '$475–$505', unitRentRange: '$355–$385',
+    houseYieldRange: '3.9–4.2%', unitYieldRange: '4.6–5.1%',
+    vacancyRate: 0.5, daysOnMarket: 51, clearanceRate: 65, propertiesListed: 210, // [SQM-TBC]
     popTotal: 42000, popGrowth: 3.2, medianAge: 35, ownerOccupier: 72, employed: 67, unemployment: 3.5,
     conditions: {
       rentalDemand:  { label: 'Very High', pct: 92 },
@@ -69,7 +72,7 @@ window.MARKETS = {
       infraPipeline: { label: 'Moderate',  pct: 50 },
       popMomentum:   { label: 'Very High', pct: 94 },
     },
-    housePerf: { yr1:{val:4.2,bar:42}, yr3:{val:9.5,bar:95}, yr5:{val:10.8,bar:100}, yr10:{val:8.1,bar:81} },
+    housePerf: { yr1:{val:3.4,bar:34}, yr3:{val:9.5,bar:95}, yr5:{val:10.8,bar:100}, yr10:{val:8.1,bar:81} },
     unitPerf:  { yr1:{val:3.0,bar:30}, yr3:{val:7.2,bar:72}, yr5:{val:8.0,bar:80},  yr10:{val:6.2,bar:62} },
     population:  [30000,31500,33000,34500,36000,37800,39000,40500,41500,42000],
     popYears:    [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
@@ -87,11 +90,11 @@ window.MARKETS = {
 
   // ── BENDIGO ───────────────────────────────────────────────────────────────
   bendigo: {
-    heroPrice: '~$470k', heroYield: '5–7%', heroPopulation: '120k', heroVacancy: '0.7%',
-    houseMedian: 470000, unitMedian: 295000,
-    houseRentRange: '$380–$460', unitRentRange: '$290–$360',
-    houseYieldRange: '5.0–6.0%', unitYieldRange: '6.0–7.2%',
-    vacancyRate: 0.7, daysOnMarket: 24, clearanceRate: 62, propertiesListed: 680,
+    heroPrice: '~$643k', heroYield: '4.0–4.5%', heroPopulation: '120k', heroVacancy: '1.1%', // [SQM-TBC] postcode 3550
+    houseMedian: 643000, unitMedian: 475000,  // house: CoreLogic; unit: PRD Research Q4 2025
+    houseRentRange: '$485–$515', unitRentRange: '$370–$400',
+    houseYieldRange: '3.9–4.2%', unitYieldRange: '4.0–4.5%',
+    vacancyRate: 1.1, daysOnMarket: 84, clearanceRate: 62, propertiesListed: 680, // [SQM-TBC]
     popTotal: 120000, popGrowth: 1.8, medianAge: 38, ownerOccupier: 64, employed: 62, unemployment: 4.5,
     conditions: {
       rentalDemand:  { label: 'High',      pct: 78 },
@@ -100,7 +103,7 @@ window.MARKETS = {
       infraPipeline: { label: 'High',      pct: 78 },
       popMomentum:   { label: 'Moderate',  pct: 65 },
     },
-    housePerf: { yr1:{val:3.8,bar:38}, yr3:{val:8.5,bar:85}, yr5:{val:9.8,bar:98}, yr10:{val:7.2,bar:72} },
+    housePerf: { yr1:{val:3.6,bar:36}, yr3:{val:8.5,bar:85}, yr5:{val:9.8,bar:98}, yr10:{val:7.2,bar:72} },
     unitPerf:  { yr1:{val:2.8,bar:28}, yr3:{val:6.8,bar:68}, yr5:{val:7.8,bar:78}, yr10:{val:5.5,bar:55} },
     population:  [101000,103500,106000,108000,110500,112000,114000,116500,118500,120000],
     popYears:    [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
@@ -118,11 +121,11 @@ window.MARKETS = {
 
   // ── LARA ──────────────────────────────────────────────────────────────────
   lara: {
-    heroPrice: '~$620k', heroYield: '4.5–5.5%', heroPopulation: '23k', heroVacancy: '0.6%',
-    houseMedian: 620000, unitMedian: 390000,
-    houseRentRange: '$430–$510', unitRentRange: '$340–$410',
-    houseYieldRange: '4.5–5.2%', unitYieldRange: '5.2–6.0%',
-    vacancyRate: 0.6, daysOnMarket: 22, clearanceRate: 66, propertiesListed: 180,
+    heroPrice: '~$700k', heroYield: '4.3–5.0%', heroPopulation: '23k', heroVacancy: '1.0%', // [SQM-TBC] postcode 3212
+    houseMedian: 700000, unitMedian: 450000,  // CoreLogic via propertyvalue.com.au
+    houseRentRange: '$560–$590', unitRentRange: '$415–$445',
+    houseYieldRange: '4.1–4.5%', unitYieldRange: '4.8–5.2%',
+    vacancyRate: 1.0, daysOnMarket: 54, clearanceRate: 66, propertiesListed: 180, // [SQM-TBC]
     popTotal: 23000, popGrowth: 2.8, medianAge: 34, ownerOccupier: 74, employed: 66, unemployment: 3.6,
     conditions: {
       rentalDemand:  { label: 'Very High', pct: 90 },
@@ -131,7 +134,7 @@ window.MARKETS = {
       infraPipeline: { label: 'High',      pct: 75 },
       popMomentum:   { label: 'Very High', pct: 90 },
     },
-    housePerf: { yr1:{val:4.0,bar:40}, yr3:{val:9.0,bar:90}, yr5:{val:10.2,bar:100}, yr10:{val:7.8,bar:78} },
+    housePerf: { yr1:{val:4.5,bar:45}, yr3:{val:9.0,bar:90}, yr5:{val:10.2,bar:100}, yr10:{val:7.8,bar:78} },
     unitPerf:  { yr1:{val:3.0,bar:30}, yr3:{val:7.0,bar:70}, yr5:{val:7.8,bar:78},   yr10:{val:5.8,bar:58} },
     population:  [16500,17200,18000,18800,19800,20800,21500,22000,22600,23000],
     popYears:    [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
@@ -149,11 +152,11 @@ window.MARKETS = {
 
   // ── DUBBO ─────────────────────────────────────────────────────────────────
   dubbo: {
-    heroPrice: '~$430k', heroYield: '5.5–7%', heroPopulation: '49k', heroVacancy: '0.6%',
-    houseMedian: 430000, unitMedian: 270000,
-    houseRentRange: '$380–$450', unitRentRange: '$280–$340',
-    houseYieldRange: '5.5–6.5%', unitYieldRange: '6.5–7.5%',
-    vacancyRate: 0.6, daysOnMarket: 26, clearanceRate: 55, propertiesListed: 320,
+    heroPrice: '~$646k', heroYield: '4.4–5.9%', heroPopulation: '49k', heroVacancy: '0.6%', // [SQM-TBC] postcode 2830
+    houseMedian: 646000, unitMedian: 350000,  // house: CoreLogic; unit: derived from SPI search data
+    houseRentRange: '$535–$565', unitRentRange: '$385–$415',
+    houseYieldRange: '4.3–4.6%', unitYieldRange: '5.7–6.2%',
+    vacancyRate: 0.6, daysOnMarket: 29, clearanceRate: 55, propertiesListed: 320, // [SQM-TBC]
     popTotal: 49000, popGrowth: 1.4, medianAge: 36, ownerOccupier: 63, employed: 60, unemployment: 5.0,
     conditions: {
       rentalDemand:  { label: 'High',     pct: 78 },
@@ -162,7 +165,7 @@ window.MARKETS = {
       infraPipeline: { label: 'Moderate', pct: 55 },
       popMomentum:   { label: 'Moderate', pct: 58 },
     },
-    housePerf: { yr1:{val:5.0,bar:50}, yr3:{val:9.2,bar:92}, yr5:{val:10.5,bar:100}, yr10:{val:6.8,bar:68} },
+    housePerf: { yr1:{val:11.4,bar:100}, yr3:{val:9.2,bar:92}, yr5:{val:10.5,bar:100}, yr10:{val:6.8,bar:68} },
     unitPerf:  { yr1:{val:3.8,bar:38}, yr3:{val:7.5,bar:75}, yr5:{val:8.2,bar:82},   yr10:{val:5.5,bar:55} },
     population:  [43000,43800,44500,45000,45800,46500,47200,47800,48500,49000],
     popYears:    [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
@@ -180,11 +183,11 @@ window.MARKETS = {
 
   // ── TOWNSVILLE ────────────────────────────────────────────────────────────
   townsville: {
-    heroPrice: '~$430k', heroYield: '6–8%', heroPopulation: '200k', heroVacancy: '0.9%',
-    houseMedian: 430000, unitMedian: 280000,
-    houseRentRange: '$440–$530', unitRentRange: '$340–$420',
-    houseYieldRange: '6.0–7.5%', unitYieldRange: '7.0–8.5%',
-    vacancyRate: 0.9, daysOnMarket: 30, clearanceRate: 52, propertiesListed: 1050,
+    heroPrice: '~$628k', heroYield: '4.6–5.2%', heroPopulation: '200k', heroVacancy: '1.0%', // [SQM-TBC] postcode 4812
+    houseMedian: 628000, unitMedian: 495000,  // house: Mundingburra 4812 CoreLogic; unit: search data
+    houseRentRange: '$535–$565', unitRentRange: '$445–$480',
+    houseYieldRange: '4.4–4.8%', unitYieldRange: '4.8–5.3%',
+    vacancyRate: 1.0, daysOnMarket: 18, clearanceRate: 52, propertiesListed: 1050, // [SQM-TBC]
     popTotal: 200000, popGrowth: 1.5, medianAge: 35, ownerOccupier: 60, employed: 61, unemployment: 5.2,
     conditions: {
       rentalDemand:  { label: 'High',      pct: 76 },
@@ -193,7 +196,7 @@ window.MARKETS = {
       infraPipeline: { label: 'Very High', pct: 88 },
       popMomentum:   { label: 'Moderate',  pct: 62 },
     },
-    housePerf: { yr1:{val:8.5,bar:85}, yr3:{val:12.2,bar:100}, yr5:{val:9.5,bar:95}, yr10:{val:5.2,bar:52} },
+    housePerf: { yr1:{val:23.0,bar:100}, yr3:{val:12.2,bar:100}, yr5:{val:9.5,bar:95}, yr10:{val:5.2,bar:52} },
     unitPerf:  { yr1:{val:7.0,bar:70}, yr3:{val:10.5,bar:100}, yr5:{val:8.0,bar:80}, yr10:{val:4.2,bar:42} },
     population:  [178000,181000,184000,185000,187000,190000,193000,196000,198000,200000],
     popYears:    [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
@@ -211,11 +214,11 @@ window.MARKETS = {
 
   // ── MACKAY ────────────────────────────────────────────────────────────────
   mackay: {
-    heroPrice: '~$400k', heroYield: '6–8%', heroPopulation: '83k', heroVacancy: '1.0%',
-    houseMedian: 400000, unitMedian: 245000,
-    houseRentRange: '$420–$520', unitRentRange: '$320–$400',
-    houseYieldRange: '6.0–7.5%', unitYieldRange: '7.5–9.0%',
-    vacancyRate: 1.0, daysOnMarket: 32, clearanceRate: 48, propertiesListed: 520,
+    heroPrice: '~$495k', heroYield: '5.2–5.4%', heroPopulation: '83k', heroVacancy: '1.1%', // [SQM-TBC] postcode 4740
+    houseMedian: 495000, unitMedian: 455000,  // house: CoreLogic; unit: search data (+17% yr, yield 5.4%)
+    houseRentRange: '$485–$515', unitRentRange: '$465–$495',
+    houseYieldRange: '5.0–5.4%', unitYieldRange: '5.3–5.6%',
+    vacancyRate: 1.1, daysOnMarket: 32, clearanceRate: 48, propertiesListed: 520, // [SQM-TBC]
     popTotal: 83000, popGrowth: 1.0, medianAge: 34, ownerOccupier: 60, employed: 64, unemployment: 4.8,
     conditions: {
       rentalDemand:  { label: 'High',     pct: 74 },
@@ -224,7 +227,7 @@ window.MARKETS = {
       infraPipeline: { label: 'High',     pct: 72 },
       popMomentum:   { label: 'Moderate', pct: 52 },
     },
-    housePerf: { yr1:{val:9.2,bar:92}, yr3:{val:13.5,bar:100}, yr5:{val:8.8,bar:88}, yr10:{val:4.5,bar:45} },
+    housePerf: { yr1:{val:15.1,bar:100}, yr3:{val:13.5,bar:100}, yr5:{val:8.8,bar:88}, yr10:{val:4.5,bar:45} },
     unitPerf:  { yr1:{val:8.0,bar:80}, yr3:{val:12.0,bar:100}, yr5:{val:7.5,bar:75}, yr10:{val:3.8,bar:38} },
     population:  [76000,77000,77800,78200,79000,80000,81000,82000,82800,83000],
     popYears:    [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
@@ -242,11 +245,11 @@ window.MARKETS = {
 
   // ── ROCKHAMPTON ───────────────────────────────────────────────────────────
   rockhampton: {
-    heroPrice: '~$370k', heroYield: '7–9%', heroPopulation: '82k', heroVacancy: '1.1%',
-    houseMedian: 370000, unitMedian: 220000,
-    houseRentRange: '$420–$510', unitRentRange: '$300–$380',
-    houseYieldRange: '7.0–8.5%', unitYieldRange: '8.5–10.0%',
-    vacancyRate: 1.1, daysOnMarket: 34, clearanceRate: 44, propertiesListed: 480,
+    heroPrice: '~$399k', heroYield: '6.4–6.9%', heroPopulation: '82k', heroVacancy: '0.8%', // [SQM-TBC] postcode 4700
+    houseMedian: 399000, unitMedian: 270000,  // CoreLogic via propertyvalue.com.au
+    houseRentRange: '$475–$510', unitRentRange: '$345–$375',
+    houseYieldRange: '6.2–6.7%', unitYieldRange: '6.6–7.2%',
+    vacancyRate: 0.8, daysOnMarket: 25, clearanceRate: 44, propertiesListed: 480, // [SQM-TBC]
     popTotal: 82000, popGrowth: 0.9, medianAge: 35, ownerOccupier: 62, employed: 60, unemployment: 5.5,
     conditions: {
       rentalDemand:  { label: 'High',     pct: 72 },
@@ -255,7 +258,7 @@ window.MARKETS = {
       infraPipeline: { label: 'Moderate', pct: 60 },
       popMomentum:   { label: 'Moderate', pct: 50 },
     },
-    housePerf: { yr1:{val:10.5,bar:100}, yr3:{val:14.0,bar:100}, yr5:{val:9.0,bar:90}, yr10:{val:4.8,bar:48} },
+    housePerf: { yr1:{val:9.9,bar:99}, yr3:{val:14.0,bar:100}, yr5:{val:9.0,bar:90}, yr10:{val:4.8,bar:48} },
     unitPerf:  { yr1:{val:9.0,bar:90},   yr3:{val:12.5,bar:100}, yr5:{val:8.0,bar:80}, yr10:{val:4.0,bar:40} },
     population:  [74000,75000,75800,76200,77000,78000,79000,80000,81000,82000],
     popYears:    [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
@@ -273,11 +276,11 @@ window.MARKETS = {
 
   // ── NEWCASTLE ─────────────────────────────────────────────────────────────
   newcastle: {
-    heroPrice: '~$820k', heroYield: '3.5–5%', heroPopulation: '340k', heroVacancy: '1.0%',
-    houseMedian: 820000, unitMedian: 560000,
-    houseRentRange: '$520–$640', unitRentRange: '$420–$520',
-    houseYieldRange: '3.5–4.5%', unitYieldRange: '4.2–5.2%',
-    vacancyRate: 1.0, daysOnMarket: 30, clearanceRate: 62, propertiesListed: 1480,
+    heroPrice: '~$865k', heroYield: '3.3–3.8%', heroPopulation: '340k', heroVacancy: '1.5%', // [SQM-TBC] postcode 2300
+    houseMedian: 865000, unitMedian: 955000,  // house: Jesmond 2299 CoreLogic; unit: inner 2300 CoreLogic
+    houseRentRange: '$535–$565', unitRentRange: '$675–$720',
+    houseYieldRange: '3.2–3.5%', unitYieldRange: '3.7–4.0%',
+    vacancyRate: 1.5, daysOnMarket: 25, clearanceRate: 62, propertiesListed: 1480, // [SQM-TBC]
     popTotal: 340000, popGrowth: 1.6, medianAge: 38, ownerOccupier: 61, employed: 63, unemployment: 4.2,
     conditions: {
       rentalDemand:  { label: 'High',      pct: 75 },
@@ -286,7 +289,7 @@ window.MARKETS = {
       infraPipeline: { label: 'Very High', pct: 88 },
       popMomentum:   { label: 'Strong',    pct: 70 },
     },
-    housePerf: { yr1:{val:2.8,bar:28}, yr3:{val:6.8,bar:68}, yr5:{val:9.0,bar:90}, yr10:{val:8.5,bar:85} },
+    housePerf: { yr1:{val:14.6,bar:100}, yr3:{val:6.8,bar:68}, yr5:{val:9.0,bar:90}, yr10:{val:8.5,bar:85} },
     unitPerf:  { yr1:{val:2.2,bar:22}, yr3:{val:5.5,bar:55}, yr5:{val:7.2,bar:72}, yr10:{val:6.8,bar:68} },
     population:  [300000,306000,312000,316000,320000,325000,330000,335000,338000,340000],
     popYears:    [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
@@ -304,11 +307,11 @@ window.MARKETS = {
 
   // ── LAUNCESTON ────────────────────────────────────────────────────────────
   launceston: {
-    heroPrice: '~$490k', heroYield: '5–7%', heroPopulation: '80k', heroVacancy: '0.7%',
-    houseMedian: 490000, unitMedian: 310000,
-    houseRentRange: '$400–$480', unitRentRange: '$310–$390',
-    houseYieldRange: '5.0–6.2%', unitYieldRange: '6.2–7.5%',
-    vacancyRate: 0.7, daysOnMarket: 26, clearanceRate: 60, propertiesListed: 420,
+    heroPrice: '~$590k', heroYield: '4.5–4.7%', heroPopulation: '80k', heroVacancy: '0.5%', // [SQM-TBC] postcode 7250
+    houseMedian: 590000, unitMedian: 430000,  // house: Newnham 7248 CoreLogic; unit: estimated
+    houseRentRange: '$495–$525', unitRentRange: '$380–$410',
+    houseYieldRange: '4.3–4.7%', unitYieldRange: '4.6–5.0%',
+    vacancyRate: 0.5, daysOnMarket: 42, clearanceRate: 60, propertiesListed: 420, // [SQM-TBC]
     popTotal: 80000, popGrowth: 1.2, medianAge: 40, ownerOccupier: 62, employed: 60, unemployment: 5.0,
     conditions: {
       rentalDemand:  { label: 'Very High', pct: 85 },
@@ -317,7 +320,7 @@ window.MARKETS = {
       infraPipeline: { label: 'Moderate',  pct: 58 },
       popMomentum:   { label: 'Moderate',  pct: 55 },
     },
-    housePerf: { yr1:{val:3.5,bar:35}, yr3:{val:7.8,bar:78}, yr5:{val:10.2,bar:100}, yr10:{val:8.8,bar:88} },
+    housePerf: { yr1:{val:15.7,bar:100}, yr3:{val:7.8,bar:78}, yr5:{val:10.2,bar:100}, yr10:{val:8.8,bar:88} },
     unitPerf:  { yr1:{val:2.8,bar:28}, yr3:{val:6.5,bar:65}, yr5:{val:8.5,bar:85},   yr10:{val:7.2,bar:72} },
     population:  [70000,71000,72000,73000,74000,75500,76800,78000,79200,80000],
     popYears:    [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
@@ -335,11 +338,11 @@ window.MARKETS = {
 
   // ── HOBART ────────────────────────────────────────────────────────────────
   hobart: {
-    heroPrice: '~$760k', heroYield: '4–5%', heroPopulation: '243k', heroVacancy: '0.5%',
-    houseMedian: 760000, unitMedian: 510000,
-    houseRentRange: '$480–$580', unitRentRange: '$390–$480',
-    houseYieldRange: '4.0–4.8%', unitYieldRange: '4.8–5.6%',
-    vacancyRate: 0.5, daysOnMarket: 24, clearanceRate: 66, propertiesListed: 820,
+    heroPrice: '~$618k', heroYield: '4.8–5.0%', heroPopulation: '243k', heroVacancy: '0.6%', // [SQM-TBC] postcode 7000
+    houseMedian: 618000, unitMedian: 480000,  // house: Glenorchy 7010 CoreLogic; unit: estimated
+    houseRentRange: '$560–$590', unitRentRange: '$440–$480',
+    houseYieldRange: '4.7–5.0%', unitYieldRange: '4.8–5.2%',
+    vacancyRate: 0.6, daysOnMarket: 26, clearanceRate: 66, propertiesListed: 820, // [SQM-TBC]
     popTotal: 243000, popGrowth: 1.4, medianAge: 40, ownerOccupier: 60, employed: 62, unemployment: 4.0,
     conditions: {
       rentalDemand:  { label: 'Very High', pct: 90 },
@@ -348,7 +351,7 @@ window.MARKETS = {
       infraPipeline: { label: 'High',      pct: 76 },
       popMomentum:   { label: 'Moderate',  pct: 60 },
     },
-    housePerf: { yr1:{val:3.2,bar:32}, yr3:{val:6.5,bar:65}, yr5:{val:8.8,bar:88}, yr10:{val:10.5,bar:100} },
+    housePerf: { yr1:{val:9.3,bar:93}, yr3:{val:6.5,bar:65}, yr5:{val:8.8,bar:88}, yr10:{val:10.5,bar:100} },
     unitPerf:  { yr1:{val:2.5,bar:25}, yr3:{val:5.5,bar:55}, yr5:{val:7.2,bar:72}, yr10:{val:9.0,bar:90} },
     population:  [215000,220000,225000,228000,230000,234000,237000,240000,242000,243000],
     popYears:    [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
@@ -366,11 +369,11 @@ window.MARKETS = {
 
   // ── DEVONPORT ─────────────────────────────────────────────────────────────
   devonport: {
-    heroPrice: '~$390k', heroYield: '6–8%', heroPopulation: '26k', heroVacancy: '0.8%',
-    houseMedian: 390000, unitMedian: 240000,
-    houseRentRange: '$380–$460', unitRentRange: '$290–$360',
-    houseYieldRange: '6.0–7.5%', unitYieldRange: '7.5–9.0%',
-    vacancyRate: 0.8, daysOnMarket: 28, clearanceRate: 55, propertiesListed: 185,
+    heroPrice: '~$563k', heroYield: '4.5–5.1%', heroPopulation: '26k', heroVacancy: '0.5%', // [SQM-TBC] postcode 7310
+    houseMedian: 563000, unitMedian: 370000,  // CoreLogic via propertyvalue.com.au
+    houseRentRange: '$475–$505', unitRentRange: '$345–$375',
+    houseYieldRange: '4.4–4.6%', unitYieldRange: '4.9–5.3%',
+    vacancyRate: 0.5, daysOnMarket: 46, clearanceRate: 55, propertiesListed: 185, // [SQM-TBC]
     popTotal: 26000, popGrowth: 0.8, medianAge: 41, ownerOccupier: 61, employed: 58, unemployment: 5.5,
     conditions: {
       rentalDemand:  { label: 'High',     pct: 76 },
@@ -379,7 +382,7 @@ window.MARKETS = {
       infraPipeline: { label: 'Moderate', pct: 55 },
       popMomentum:   { label: 'Low',      pct: 38 },
     },
-    housePerf: { yr1:{val:4.0,bar:40}, yr3:{val:8.0,bar:80}, yr5:{val:9.5,bar:95}, yr10:{val:7.5,bar:75} },
+    housePerf: { yr1:{val:16.8,bar:100}, yr3:{val:8.0,bar:80}, yr5:{val:9.5,bar:95}, yr10:{val:7.5,bar:75} },
     unitPerf:  { yr1:{val:3.2,bar:32}, yr3:{val:6.5,bar:65}, yr5:{val:7.8,bar:78}, yr10:{val:6.0,bar:60} },
     population:  [23500,23800,24100,24300,24500,24800,25100,25400,25700,26000],
     popYears:    [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
@@ -397,11 +400,11 @@ window.MARKETS = {
 
   // ── MELBOURNE ─────────────────────────────────────────────────────────────
   melbourne: {
-    heroPrice: '~$980k', heroYield: '3–4%', heroPopulation: '5.2M', heroVacancy: '1.8%',
-    houseMedian: 980000, unitMedian: 620000,
-    houseRentRange: '$550–$750', unitRentRange: '$420–$580',
-    houseYieldRange: '3.0–3.8%', unitYieldRange: '3.8–4.8%',
-    vacancyRate: 1.8, daysOnMarket: 34, clearanceRate: 65, propertiesListed: 12500,
+    heroPrice: '~$950k', heroYield: '3.1–5.2%', heroPopulation: '5.2M', heroVacancy: '1.6%', // [SQM-TBC] postcode 3011
+    houseMedian: 950000, unitMedian: 520000,  // house: Reservoir 3073 CoreLogic; unit: inner Melbourne estimated
+    houseRentRange: '$555–$585', unitRentRange: '$500–$540',
+    houseYieldRange: '3.0–3.3%', unitYieldRange: '5.0–5.5%',
+    vacancyRate: 1.6, daysOnMarket: 65, clearanceRate: 65, propertiesListed: 12500, // [SQM-TBC]
     popTotal: 5200000, popGrowth: 2.2, medianAge: 37, ownerOccupier: 56, employed: 65, unemployment: 4.0,
     conditions: {
       rentalDemand:  { label: 'High',      pct: 75 },
@@ -410,7 +413,7 @@ window.MARKETS = {
       infraPipeline: { label: 'Very High', pct: 98 },
       popMomentum:   { label: 'Very High', pct: 88 },
     },
-    housePerf: { yr1:{val:2.0,bar:20}, yr3:{val:3.5,bar:35}, yr5:{val:6.2,bar:62}, yr10:{val:7.8,bar:78} },
+    housePerf: { yr1:{val:4.4,bar:44}, yr3:{val:3.5,bar:35}, yr5:{val:6.2,bar:62}, yr10:{val:7.8,bar:78} },
     unitPerf:  { yr1:{val:3.5,bar:35}, yr3:{val:5.2,bar:52}, yr5:{val:5.8,bar:58}, yr10:{val:5.5,bar:55} },
     population:  [4650000,4750000,4850000,4880000,4920000,5000000,5080000,5140000,5180000,5200000],
     popYears:    [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
