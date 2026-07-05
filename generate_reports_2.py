@@ -451,10 +451,10 @@ MARKETS = [
       'Past performance is not a guide to future performance.'
     ),
     affordability_text=(
-      'At ~$400k median, Mackay offers high gross yield driven by a workforce with '
+      'At ~$595k median, Mackay offers strong gross yield driven by a workforce with '
       'above-average incomes from the Bowen Basin resources sector. For investors focused '
-      'on income, the combination of low entry price and strong rents creates a compelling '
-      'initial yield position that is difficult to replicate in most east-coast markets.'
+      'on income, the combination of resilient rents and a resources-driven tenant base '
+      'creates an income position that is difficult to replicate in most east-coast markets.'
     ),
     investment_intro=(
       'Mackay is a genuine high-yield market where the income case is supported by a workforce '
@@ -470,8 +470,8 @@ MARKETS = [
       'Airport connectivity for FIFO workforce demand',
       'Strong rental demand from professional tenant base',
     ],
-    entry_house='$330k–$480k+',
-    entry_unit='$210k–$310k+',
+    entry_house='$430k–$620k+',
+    entry_unit='$250k–$380k+',
     risks=[
       (
         'Commodity price sensitivity',
@@ -518,10 +518,10 @@ MARKETS = [
     ],
     map_line=None,
     lga_name='Mackay Regional LGA',
-    heroPrice='~$495k', heroYield='5.2–5.4%', heroPopulation='83k', heroVacancy='1.2%',
-    houseMedian=495000, unitMedian=455000,
-    houseRentRange='$485–$515', unitRentRange='$465–$495',
-    houseYieldRange='5.0–5.4%', unitYieldRange='5.3–5.6%',
+    heroPrice='~$595k', heroYield='5.3–6.5%', heroPopulation='83k', heroVacancy='1.2%',
+    houseMedian=595000, unitMedian=400000,
+    houseRentRange='$600–$640', unitRentRange='$465–$500',
+    houseYieldRange='5.3–5.6%', unitYieldRange='6.0–6.5%',
     vacancyRate=1.2, daysOnMarket=32, clearanceRate=48, propertiesListed=520,
     popTotal=83000, popGrowth=1.0, medianAge=34, ownerOccupier=60, employed=64, unemployment=4.8,
     conditions=[

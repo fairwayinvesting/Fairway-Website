@@ -214,10 +214,10 @@ window.MARKETS = {
 
   // ── MACKAY ────────────────────────────────────────────────────────────────
   mackay: {
-    heroPrice: '~$495k', heroYield: '5.2–5.4%', heroPopulation: '83k', heroVacancy: '1.2%', // SQM Research May 2026
-    houseMedian: 495000, unitMedian: 455000,  // house: CoreLogic; unit: search data (+17% yr, yield 5.4%)
-    houseRentRange: '$485–$515', unitRentRange: '$465–$495',
-    houseYieldRange: '5.0–5.4%', unitYieldRange: '5.3–5.6%',
+    heroPrice: '~$595k', heroYield: '5.3–6.5%', heroPopulation: '83k', heroVacancy: '1.2%', // SQM Research May 2026
+    houseMedian: 595000, unitMedian: 400000,  // Mackay Regional LGA; house: Gardian/REA early 2026; unit: Gardian early 2026
+    houseRentRange: '$600–$640', unitRentRange: '$465–$500',
+    houseYieldRange: '5.3–5.6%', unitYieldRange: '6.0–6.5%',
     vacancyRate: 1.2, daysOnMarket: 32, clearanceRate: 48, propertiesListed: 520,
     popTotal: 83000, popGrowth: 1.0, medianAge: 34, ownerOccupier: 60, employed: 64, unemployment: 4.8,
     conditions: {
