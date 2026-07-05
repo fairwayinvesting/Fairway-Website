@@ -129,19 +129,16 @@
       .hero-stats-strip{grid-template-columns:1fr 1fr;}
     }
 
-    /* Info tooltips */
-    .tip{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:rgba(34,32,29,0.1);color:rgba(34,32,29,0.38);font-size:9px;font-weight:700;font-style:normal;text-transform:none;letter-spacing:0;cursor:default;position:relative;margin-left:5px;vertical-align:middle;flex-shrink:0;transition:background .15s;}
+    /* Info tooltips — circle only; popup is JS-driven (fixed position, overflow-safe) */
+    .tip{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:rgba(34,32,29,0.1);color:rgba(34,32,29,0.38);font-size:9px;font-weight:700;font-style:normal;text-transform:none;letter-spacing:0;cursor:default;margin-left:5px;vertical-align:middle;flex-shrink:0;transition:background .15s;}
     .tip:hover{background:rgba(34,32,29,0.18);}
-    .tip::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#22201d;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:12px;font-weight:300;line-height:1.55;padding:10px 14px;border-radius:10px;width:240px;text-align:left;opacity:0;pointer-events:none;transition:opacity .18s;z-index:300;white-space:normal;text-transform:none;letter-spacing:normal;font-weight:300;}
-    .tip:hover::after{opacity:1;}
-    .tip-r::after{left:auto;right:0;transform:none;}
     .tip-lt{background:rgba(247,243,237,0.12);color:rgba(247,243,237,0.4);}
     .tip-lt:hover{background:rgba(247,243,237,0.2);}
-    .tip-lt::after{background:#f7f3ed;color:#22201d;}
-    .tip-lt.tip-r::after{left:auto;right:0;transform:none;}
+    #g-tip{position:fixed;pointer-events:none;z-index:9999;width:240px;background:#22201d;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:12px;font-weight:300;line-height:1.55;padding:10px 14px;border-radius:10px;text-align:left;white-space:normal;opacity:0;transition:opacity .15s;}
   </style>
 </head>
 <body>
+<div id="g-tip"></div>
 
 <!-- NAV -->
 <nav>
@@ -1049,6 +1046,44 @@ pts.forEach(p => {
 L.polyline([[-37.8136, 144.9631], [-38.1499, 144.3617]], {
   color: 'rgba(189,122,112,0.5)', weight: 2, dashArray: '6 5',
 }).addTo(map);
+
+// ─── GLOBAL TOOLTIP (fixed-position, overflow-safe) ────────────────────────
+(function() {
+  const tip = document.getElementById('g-tip');
+  let hideTimer;
+
+  document.querySelectorAll('.tip[data-tip]').forEach(el => {
+    el.addEventListener('mouseenter', function() {
+      clearTimeout(hideTimer);
+      tip.textContent = this.dataset.tip;
+      tip.style.opacity = '0';
+      tip.style.top = '-9999px';
+      tip.style.left = '0';
+
+      // Measure after paint so height is known
+      requestAnimationFrame(() => {
+        const r = this.getBoundingClientRect();
+        const tipH = tip.offsetHeight;
+        const tipW = 240;
+        const margin = 8;
+
+        let left = r.left + r.width / 2 - tipW / 2;
+        left = Math.max(margin, Math.min(left, window.innerWidth - tipW - margin));
+
+        let top = r.top - tipH - 8;
+        if (top < margin) top = r.bottom + 8; // flip below if no room above
+
+        tip.style.left = left + 'px';
+        tip.style.top = top + 'px';
+        tip.style.opacity = '1';
+      });
+    });
+
+    el.addEventListener('mouseleave', () => {
+      hideTimer = setTimeout(() => { tip.style.opacity = '0'; }, 80);
+    });
+  });
+})();
 
 </script>
 
