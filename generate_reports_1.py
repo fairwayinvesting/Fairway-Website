@@ -816,16 +816,6 @@ const chartObserver = new IntersectionObserver((entries) => {{
       e.target._chartDone = true;
       const id = e.target.id;
       if (id === 'popChart') lineChart('popChart', D.popYears, [{{ label: 'Population', data: D.population, borderColor: COPPER, backgroundColor: COPPER_ALPHA, tension: 0.4, fill: true, pointRadius: 3, pointBackgroundColor: COPPER }}], false);
-      if (id === 'priceChart') lineChart('priceChart', D.priceYears, [
-        {{ label: 'Houses', data: D.housePrice, borderColor: COPPER, backgroundColor: COPPER_ALPHA, tension: 0.4, fill: true, pointRadius: 3, pointBackgroundColor: COPPER }},
-        {{ label: 'Units', data: D.unitPrice, borderColor: COPPER_LIGHT, backgroundColor: 'rgba(207,155,146,0.08)', tension: 0.4, fill: true, borderDash: [5,3], pointRadius: 3, pointBackgroundColor: COPPER_LIGHT }}
-      ], false);
-      if (id === 'yieldChart') lineChart('yieldChart', D.yieldYears, [
-        {{ label: 'Houses', data: D.yieldHouse, borderColor: COPPER, backgroundColor: COPPER_ALPHA, tension: 0.4, fill: true, pointRadius: 3, pointBackgroundColor: COPPER }},
-        {{ label: 'Units', data: D.yieldUnit, borderColor: COPPER_LIGHT, backgroundColor: 'rgba(207,155,146,0.08)', tension: 0.4, fill: false, borderDash: [5,3], pointRadius: 3, pointBackgroundColor: COPPER_LIGHT }}
-      ], false);
-      if (id === 'vacancyChart') lineChart('vacancyChart', D.vacYears, [{{ label: 'Vacancy %', data: D.vacancy, borderColor: COPPER, backgroundColor: COPPER_ALPHA, tension: 0.4, fill: true, pointRadius: 3, pointBackgroundColor: COPPER }}], true);
-      if (id === 'stockChart') barChart('stockChart', D.stockMonths, D.stockVals, true);
     }}
   }});
 }}, {{ threshold: 0.2 }});
@@ -1078,18 +1068,6 @@ def generate_html(m):
         <div class="stat-label">Unit rent range /wk</div>
       </div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;" class="r-2col">
-      <div class="reveal">
-        <p style="font-size:13px;font-weight:500;color:rgba(34,32,29,0.45);margin-bottom:18px;letter-spacing:0.05em;text-transform:uppercase;">Median house price — 10 year trend</p>
-        <div class="chart-wrap"><canvas id="priceChart"></canvas></div>
-        <p class="data-note">Approx. figures. Source: Suburbtrends / CoreLogic</p>
-      </div>
-      <div class="reveal">
-        <p style="font-size:13px;font-weight:500;color:rgba(34,32,29,0.45);margin-bottom:18px;letter-spacing:0.05em;text-transform:uppercase;">Gross yield trend — houses &amp; units</p>
-        <div class="chart-wrap"><canvas id="yieldChart"></canvas></div>
-        <p class="data-note">Approx. figures. Source: Suburbtrends</p>
-      </div>
-    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:40px;" class="r-2col reveal">
       <div style="background:#fff;border:1px solid rgba(34,32,29,0.07);border-radius:16px;padding:28px;box-shadow:0 2px 16px rgba(34,32,29,0.04);">
         <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#bd7a70;margin-bottom:10px;">Houses</p>
@@ -1127,18 +1105,6 @@ def generate_html(m):
       <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:16px;padding:24px 20px;">
         <div class="stat-val" style="font-size:40px;color:#f7f3ed;" data-target="{m['propertiesListed']}" data-prefix="" data-suffix="">0</div>
         <div class="stat-label" style="color:rgba(247,243,237,0.4);">Properties listed</div>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;" class="r-2col">
-      <div class="reveal">
-        <p style="font-size:13px;font-weight:500;color:rgba(247,243,237,0.35);margin-bottom:18px;letter-spacing:0.05em;text-transform:uppercase;">Vacancy rate trend</p>
-        <div class="chart-wrap"><canvas id="vacancyChart"></canvas></div>
-        <p class="data-note-light">Source: SQM Research</p>
-      </div>
-      <div class="reveal">
-        <p style="font-size:13px;font-weight:500;color:rgba(247,243,237,0.35);margin-bottom:18px;letter-spacing:0.05em;text-transform:uppercase;">Stock on market (listings count)</p>
-        <div class="chart-wrap"><canvas id="stockChart"></canvas></div>
-        <p class="data-note-light">Source: SQM Research</p>
       </div>
     </div>
   </div>

@@ -440,19 +440,6 @@
       </div>
     </div>
 
-    <!-- Charts row -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;" class="r-2col">
-      <div class="reveal">
-        <p style="font-size:13px;font-weight:500;color:rgba(34,32,29,0.45);margin-bottom:18px;letter-spacing:0.05em;text-transform:uppercase;">Median house price — 10 year trend</p>
-        <div class="chart-wrap"><canvas id="priceChart"></canvas></div>
-        <p class="data-note">Approx. figures. Source: Suburbtrends / CoreLogic</p>
-      </div>
-      <div class="reveal">
-        <p style="font-size:13px;font-weight:500;color:rgba(34,32,29,0.45);margin-bottom:18px;letter-spacing:0.05em;text-transform:uppercase;">Gross yield trend — houses &amp; units</p>
-        <div class="chart-wrap"><canvas id="yieldChart"></canvas></div>
-        <p class="data-note">Approx. figures. Source: Suburbtrends</p>
-      </div>
-    </div>
 
     <!-- Yield breakdown -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:40px;" class="r-2col reveal">
@@ -498,18 +485,6 @@
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;" class="r-2col">
-      <div class="reveal">
-        <p style="font-size:13px;font-weight:500;color:rgba(247,243,237,0.35);margin-bottom:18px;letter-spacing:0.05em;text-transform:uppercase;">Vacancy rate trend</p>
-        <div class="chart-wrap"><canvas id="vacancyChart"></canvas></div>
-        <p class="data-note-light">Source: SQM Research</p>
-      </div>
-      <div class="reveal">
-        <p style="font-size:13px;font-weight:500;color:rgba(247,243,237,0.35);margin-bottom:18px;letter-spacing:0.05em;text-transform:uppercase;">Stock on market (listings count)</p>
-        <div class="chart-wrap"><canvas id="stockChart"></canvas></div>
-        <p class="data-note-light">Source: SQM Research</p>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -851,27 +826,9 @@ const chartObserver = new IntersectionObserver((entries) => {
           tension: 0.4, fill: true, pointRadius: 3, pointBackgroundColor: COPPER
         }], false);
       }
-      if (id === 'priceChart') {
-        lineChart('priceChart', DATA.priceYears, [
-          { label: 'Houses', data: DATA.housePrice, borderColor: COPPER, backgroundColor: COPPER_ALPHA, tension: 0.4, fill: true, pointRadius: 3, pointBackgroundColor: COPPER },
-          { label: 'Units', data: DATA.unitPrice, borderColor: COPPER_LIGHT, backgroundColor: 'rgba(207,155,146,0.08)', tension: 0.4, fill: true, borderDash: [5,3], pointRadius: 3, pointBackgroundColor: COPPER_LIGHT }
         ], false);
       }
-      if (id === 'yieldChart') {
-        lineChart('yieldChart', DATA.yieldYears, [
-          { label: 'Houses', data: DATA.yieldHouse, borderColor: COPPER, backgroundColor: COPPER_ALPHA, tension: 0.4, fill: true, pointRadius: 3, pointBackgroundColor: COPPER },
-          { label: 'Units', data: DATA.yieldUnit, borderColor: COPPER_LIGHT, backgroundColor: 'rgba(207,155,146,0.08)', tension: 0.4, fill: false, borderDash: [5,3], pointRadius: 3, pointBackgroundColor: COPPER_LIGHT }
         ], false);
-      }
-      if (id === 'vacancyChart') {
-        lineChart('vacancyChart', DATA.vacYears, [{
-          label: 'Vacancy %', data: DATA.vacancy,
-          borderColor: COPPER, backgroundColor: COPPER_ALPHA,
-          tension: 0.4, fill: true, pointRadius: 3, pointBackgroundColor: COPPER
-        }], true);
-      }
-      if (id === 'stockChart') {
-        barChart('stockChart', DATA.stockMonths, DATA.stockVals, true);
       }
     }
   });
