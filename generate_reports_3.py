@@ -279,7 +279,7 @@ MARKETS = [
       'Past performance is not a guide to future performance.'
     ),
     affordability_text=(
-      'At ~$820k median, Newcastle has repriced significantly from its industrial-era values '
+      'At ~$963k median, Newcastle has repriced significantly from its industrial-era values '
       'and now represents a premium over many regional markets. The premium reflects genuine '
       'liveability, Sydney proximity and employment diversification — factors that have '
       'underpinned sustained demand even through Sydney\'s market cycles.'
@@ -347,10 +347,10 @@ MARKETS = [
     ],
     map_line=([-33.869, 151.209], [-32.925, 151.770]),
     lga_name='Greater Newcastle LGA',
-    heroPrice='~$865k', heroYield='3.3–3.8%', heroPopulation='340k', heroVacancy='1.6%',
-    houseMedian=865000, unitMedian=955000,
-    houseRentRange='$535–$565', unitRentRange='$675–$720',
-    houseYieldRange='3.2–3.5%', unitYieldRange='3.7–4.0%',
+    heroPrice='~$963k', heroYield='3.2–4.1%', heroPopulation='340k', heroVacancy='1.6%',
+    houseMedian=963000, unitMedian=681000,
+    houseRentRange='$595–$635', unitRentRange='$500–$540',
+    houseYieldRange='3.2–3.4%', unitYieldRange='3.8–4.1%',
     vacancyRate=1.6, daysOnMarket=25, clearanceRate=62, propertiesListed=1480,
     popTotal=340000, popGrowth=1.6, medianAge=38, ownerOccupier=61, employed=63, unemployment=4.2,
     conditions=[
@@ -457,7 +457,7 @@ MARKETS = [
       'to future performance.'
     ),
     affordability_text=(
-      'At ~$490k median, Launceston offers meaningful affordability relative to Hobart (~$760k) '
+      'At ~$623k median, Launceston offers meaningful affordability relative to Hobart (~$720k) '
       'while sharing many of the same structural supply dynamics. For investors seeking Tasmanian '
       'exposure at a lower entry point, Launceston\'s income profile is stronger and the growth '
       'potential relative to price remains compelling.'
@@ -476,8 +476,8 @@ MARKETS = [
       'Direct flights to three mainland capitals',
       'Long-term capital growth compounding',
     ],
-    entry_house='$420k–$620k+',
-    entry_unit='$270k–$400k+',
+    entry_house='$480k–$690k+',
+    entry_unit='$340k–$500k+',
     risks=[
       (
         'Lifestyle migration dependency',
@@ -524,10 +524,10 @@ MARKETS = [
     ],
     map_line=None,
     lga_name='City of Launceston',
-    heroPrice='~$590k', heroYield='4.5–4.7%', heroPopulation='80k', heroVacancy='0.6%',
-    houseMedian=590000, unitMedian=430000,
-    houseRentRange='$495–$525', unitRentRange='$380–$410',
-    houseYieldRange='4.3–4.7%', unitYieldRange='4.6–5.0%',
+    heroPrice='~$623k', heroYield='4.0–4.4%', heroPopulation='80k', heroVacancy='0.6%',
+    houseMedian=623000, unitMedian=490000,
+    houseRentRange='$495–$525', unitRentRange='$380–$415',
+    houseYieldRange='4.1–4.4%', unitYieldRange='4.0–4.3%',
     vacancyRate=0.6, daysOnMarket=42, clearanceRate=60, propertiesListed=420,
     popTotal=80000, popGrowth=1.2, medianAge=40, ownerOccupier=62, employed=60, unemployment=5.0,
     conditions=[

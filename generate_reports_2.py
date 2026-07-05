@@ -272,7 +272,7 @@ MARKETS = [
       'markets is not a guide to future performance in Townsville.'
     ),
     affordability_text=(
-      'At ~$430k median, Townsville offers exceptional gross yield relative to its city size, '
+      'At ~$695k median, Townsville offers strong gross yield relative to its city size, '
       'university and hospital employment base. The defence workforce creates consistent, '
       'high-quality rental demand that is largely independent of economic cycles — a '
       'risk-reduction characteristic that is rare in any regional property market.'
@@ -291,8 +291,8 @@ MARKETS = [
       'Affordable entry relative to size and amenity',
       'Long-term hold for income-focused investors',
     ],
-    entry_house='$360k–$530k+',
-    entry_unit='$250k–$360k+',
+    entry_house='$450k–$660k+',
+    entry_unit='$240k–$370k+',
     risks=[
       (
         'Defence base reliance',
@@ -339,10 +339,10 @@ MARKETS = [
     ],
     map_line=None,
     lga_name='Townsville LGA',
-    heroPrice='~$628k', heroYield='4.6–5.2%', heroPopulation='200k', heroVacancy='0.6%',
-    houseMedian=628000, unitMedian=495000,
-    houseRentRange='$535–$565', unitRentRange='$445–$480',
-    houseYieldRange='4.4–4.8%', unitYieldRange='4.8–5.3%',
+    heroPrice='~$695k', heroYield='4.0–5.4%', heroPopulation='200k', heroVacancy='0.6%',
+    houseMedian=695000, unitMedian=395000,
+    houseRentRange='$540–$570', unitRentRange='$380–$415',
+    houseYieldRange='4.0–4.3%', unitYieldRange='5.0–5.4%',
     vacancyRate=0.6, daysOnMarket=18, clearanceRate=52, propertiesListed=1050,
     popTotal=200000, popGrowth=1.5, medianAge=35, ownerOccupier=60, employed=61, unemployment=5.2,
     conditions=[

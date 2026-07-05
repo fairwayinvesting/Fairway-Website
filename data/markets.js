@@ -28,10 +28,10 @@ window.MARKETS = {
   // ── GEELONG ──────────────────────────────────────────────────────────────
   geelong: {
     // ── Monthly update fields ──
-    heroPrice: '~$500k', heroYield: '4.0–4.5%', heroPopulation: '270k', heroVacancy: '1.7%', // SQM Research May 2026
-    houseMedian: 500000, unitMedian: 560000,  // house: Norlane 3214; unit: Greater Geelong LGA (PropTrack)
-    houseRentRange: '$385–$415', unitRentRange: '$445–$480',
-    houseYieldRange: '4.0–4.5%', unitYieldRange: '4.2–4.5%',
+    heroPrice: '~$760k', heroYield: '3.4–4.6%', heroPopulation: '270k', heroVacancy: '1.7%', // SQM Research May 2026
+    houseMedian: 760000, unitMedian: 555000,  // Greater Geelong City LGA; house & unit: CoreLogic/Area Specialist July 2025
+    houseRentRange: '$505–$535', unitRentRange: '$460–$490',
+    houseYieldRange: '3.4–3.7%', unitYieldRange: '4.3–4.6%',
     vacancyRate: 1.7, daysOnMarket: 26, clearanceRate: 68, propertiesListed: 1240,
     popTotal: 270000, popGrowth: 2.1, medianAge: 37, ownerOccupier: 62, employed: 63, unemployment: 4.1,
     conditions: {
@@ -41,8 +41,8 @@ window.MARKETS = {
       infraPipeline: { label: 'Very High', pct: 92 },
       popMomentum:   { label: 'Strong',    pct: 82 },
     },
-    housePerf: { yr1:{val:9.6,bar:96}, yr3:{val:8.1,bar:81}, yr5:{val:9.3,bar:93}, yr10:{val:7.4,bar:74} },
-    unitPerf:  { yr1:{val:2.0,bar:20}, yr3:{val:6.5,bar:65}, yr5:{val:7.6,bar:76}, yr10:{val:5.8,bar:58} },
+    housePerf: { yr1:{val:1.0,bar:10}, yr3:{val:2.5,bar:25}, yr5:{val:3.2,bar:32}, yr10:{val:6.5,bar:65} },
+    unitPerf:  { yr1:{val:0.0,bar:0},  yr3:{val:3.0,bar:30}, yr5:{val:3.0,bar:30}, yr10:{val:5.8,bar:58} },
     population:  [238000,244000,249000,254000,258000,261000,263000,266000,268000,270000],
     popYears:    [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
     housePrice:  [490000,530000,560000,575000,590000,670000,720000,695000,680000,710000],
@@ -183,10 +183,10 @@ window.MARKETS = {
 
   // ── TOWNSVILLE ────────────────────────────────────────────────────────────
   townsville: {
-    heroPrice: '~$628k', heroYield: '4.6–5.2%', heroPopulation: '200k', heroVacancy: '0.6%', // SQM Research May 2026
-    houseMedian: 628000, unitMedian: 495000,  // house: Mundingburra 4812 CoreLogic; unit: search data
-    houseRentRange: '$535–$565', unitRentRange: '$445–$480',
-    houseYieldRange: '4.4–4.8%', unitYieldRange: '4.8–5.3%',
+    heroPrice: '~$695k', heroYield: '4.0–5.4%', heroPopulation: '200k', heroVacancy: '0.6%', // SQM Research May 2026
+    houseMedian: 695000, unitMedian: 395000,  // City of Townsville LGA; house: REIQ Dec 2025; unit: REIQ June 2025
+    houseRentRange: '$540–$570', unitRentRange: '$380–$415',
+    houseYieldRange: '4.0–4.3%', unitYieldRange: '5.0–5.4%',
     vacancyRate: 0.6, daysOnMarket: 18, clearanceRate: 52, propertiesListed: 1050,
     popTotal: 200000, popGrowth: 1.5, medianAge: 35, ownerOccupier: 60, employed: 61, unemployment: 5.2,
     conditions: {
@@ -276,10 +276,10 @@ window.MARKETS = {
 
   // ── NEWCASTLE ─────────────────────────────────────────────────────────────
   newcastle: {
-    heroPrice: '~$865k', heroYield: '3.3–3.8%', heroPopulation: '340k', heroVacancy: '1.6%', // SQM Research May 2026
-    houseMedian: 865000, unitMedian: 955000,  // house: Jesmond 2299 CoreLogic; unit: inner 2300 CoreLogic
-    houseRentRange: '$535–$565', unitRentRange: '$675–$720',
-    houseYieldRange: '3.2–3.5%', unitYieldRange: '3.7–4.0%',
+    heroPrice: '~$963k', heroYield: '3.2–4.1%', heroPopulation: '340k', heroVacancy: '1.6%', // SQM Research May 2026
+    houseMedian: 963000, unitMedian: 681000,  // Newcastle City Council LGA; house & unit: CoreLogic July 2025
+    houseRentRange: '$595–$635', unitRentRange: '$500–$540',
+    houseYieldRange: '3.2–3.4%', unitYieldRange: '3.8–4.1%',
     vacancyRate: 1.6, daysOnMarket: 25, clearanceRate: 62, propertiesListed: 1480,
     popTotal: 340000, popGrowth: 1.6, medianAge: 38, ownerOccupier: 61, employed: 63, unemployment: 4.2,
     conditions: {
@@ -307,10 +307,10 @@ window.MARKETS = {
 
   // ── LAUNCESTON ────────────────────────────────────────────────────────────
   launceston: {
-    heroPrice: '~$590k', heroYield: '4.5–4.7%', heroPopulation: '80k', heroVacancy: '0.6%', // SQM Research May 2026
-    houseMedian: 590000, unitMedian: 430000,  // house: Newnham 7248 CoreLogic; unit: estimated
-    houseRentRange: '$495–$525', unitRentRange: '$380–$410',
-    houseYieldRange: '4.3–4.7%', unitYieldRange: '4.6–5.0%',
+    heroPrice: '~$623k', heroYield: '4.0–4.4%', heroPopulation: '80k', heroVacancy: '0.6%', // SQM Research May 2026
+    houseMedian: 623000, unitMedian: 490000,  // City of Launceston LGA; house: Picki 2026; unit: CoreLogic/YIP 2025
+    houseRentRange: '$495–$525', unitRentRange: '$380–$415',
+    houseYieldRange: '4.1–4.4%', unitYieldRange: '4.0–4.3%',
     vacancyRate: 0.6, daysOnMarket: 42, clearanceRate: 60, propertiesListed: 420,
     popTotal: 80000, popGrowth: 1.2, medianAge: 40, ownerOccupier: 62, employed: 60, unemployment: 5.0,
     conditions: {
@@ -338,10 +338,10 @@ window.MARKETS = {
 
   // ── HOBART ────────────────────────────────────────────────────────────────
   hobart: {
-    heroPrice: '~$618k', heroYield: '4.8–5.0%', heroPopulation: '243k', heroVacancy: '0.8%', // SQM Research May 2026
-    houseMedian: 618000, unitMedian: 480000,  // house: Glenorchy 7010 CoreLogic; unit: estimated
-    houseRentRange: '$560–$590', unitRentRange: '$440–$480',
-    houseYieldRange: '4.7–5.0%', unitYieldRange: '4.8–5.2%',
+    heroPrice: '~$720k', heroYield: '4.2–4.6%', heroPopulation: '243k', heroVacancy: '0.8%', // SQM Research May 2026
+    houseMedian: 720000, unitMedian: 610000,  // Greater Hobart LGA; house: PRD/Mixproperty early 2026; unit: REIT Q4 2025
+    houseRentRange: '$600–$640', unitRentRange: '$495–$535',
+    houseYieldRange: '4.3–4.6%', unitYieldRange: '4.2–4.6%',
     vacancyRate: 0.8, daysOnMarket: 26, clearanceRate: 66, propertiesListed: 820,
     popTotal: 243000, popGrowth: 1.4, medianAge: 40, ownerOccupier: 60, employed: 62, unemployment: 4.0,
     conditions: {
@@ -400,10 +400,10 @@ window.MARKETS = {
 
   // ── MELBOURNE ─────────────────────────────────────────────────────────────
   melbourne: {
-    heroPrice: '~$950k', heroYield: '3.1–5.2%', heroPopulation: '5.2M', heroVacancy: '1.9%', // SQM Research May 2026
-    houseMedian: 950000, unitMedian: 520000,  // house: Reservoir 3073 CoreLogic; unit: inner Melbourne estimated
+    heroPrice: '~$940k', heroYield: '3.0–4.5%', heroPopulation: '5.2M', heroVacancy: '1.9%', // SQM Research May 2026
+    houseMedian: 940000, unitMedian: 617000,  // Greater Melbourne metro; house & unit: CoreLogic June 2025
     houseRentRange: '$555–$585', unitRentRange: '$500–$540',
-    houseYieldRange: '3.0–3.3%', unitYieldRange: '5.0–5.5%',
+    houseYieldRange: '3.0–3.2%', unitYieldRange: '4.2–4.5%',
     vacancyRate: 1.9, daysOnMarket: 65, clearanceRate: 65, propertiesListed: 12500,
     popTotal: 5200000, popGrowth: 2.2, medianAge: 37, ownerOccupier: 56, employed: 65, unemployment: 4.0,
     conditions: {

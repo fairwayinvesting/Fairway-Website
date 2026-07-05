@@ -102,7 +102,7 @@ MARKETS = [
       'past performance remain largely intact. Past performance is not a guide to future performance.'
     ),
     affordability_text=(
-      'At ~$760k median, Hobart is no longer the affordable Tasmanian market it was in 2013. '
+      'At ~$720k median, Hobart is no longer the affordable Tasmanian market it was in 2013. '
       'However, relative to mainland capitals with comparable liveability credentials — '
       'Melbourne, Brisbane — it remains meaningfully discounted, particularly given the '
       'physical supply constraints that are permanent rather than cyclical.'
@@ -121,8 +121,8 @@ MARKETS = [
       'Major CBD precinct urban renewal underway',
       'Long-term capital growth in a supply-constrained market',
     ],
-    entry_house='$660k–$900k+',
-    entry_unit='$450k–$640k+',
+    entry_house='$680k–$950k+',
+    entry_unit='$530k–$720k+',
     risks=[
       (
         'Higher entry, lower yield',
@@ -169,10 +169,10 @@ MARKETS = [
     ],
     map_line=None,
     lga_name='Greater Hobart',
-    heroPrice='~$618k', heroYield='4.8–5.0%', heroPopulation='243k', heroVacancy='0.8%',
-    houseMedian=618000, unitMedian=480000,
-    houseRentRange='$560–$590', unitRentRange='$440–$480',
-    houseYieldRange='4.7–5.0%', unitYieldRange='4.8–5.2%',
+    heroPrice='~$720k', heroYield='4.2–4.6%', heroPopulation='243k', heroVacancy='0.8%',
+    houseMedian=720000, unitMedian=610000,
+    houseRentRange='$600–$640', unitRentRange='$495–$535',
+    houseYieldRange='4.3–4.6%', unitYieldRange='4.2–4.6%',
     vacancyRate=0.8, daysOnMarket=26, clearanceRate=66, propertiesListed=820,
     popTotal=243000, popGrowth=1.4, medianAge=40, ownerOccupier=60, employed=62, unemployment=4.0,
     conditions=[
@@ -461,7 +461,7 @@ MARKETS = [
       'cities rather than domestic regional comparisons. Past performance is not a guide to future performance.'
     ),
     affordability_text=(
-      'At ~$980k median for houses, Melbourne remains materially below Sydney\'s median (~$1.5M) '
+      'At ~$940k median for houses, Melbourne remains materially below Sydney\'s median (~$1.5M) '
       'for a city with comparable global liveability credentials. Interstate migration from '
       'Sydney has historically supported Melbourne\'s demand floor during Sydney market upturns, '
       'and the relative value proposition continues to drive tenant and buyer migration '
@@ -531,10 +531,10 @@ MARKETS = [
     ],
     map_line=None,
     lga_name='Greater Melbourne',
-    heroPrice='~$950k', heroYield='3.1–5.2%', heroPopulation='5.2M', heroVacancy='1.9%',
-    houseMedian=950000, unitMedian=520000,
+    heroPrice='~$940k', heroYield='3.0–4.5%', heroPopulation='5.2M', heroVacancy='1.9%',
+    houseMedian=940000, unitMedian=617000,
     houseRentRange='$555–$585', unitRentRange='$500–$540',
-    houseYieldRange='3.0–3.3%', unitYieldRange='5.0–5.5%',
+    houseYieldRange='3.0–3.2%', unitYieldRange='4.2–4.5%',
     vacancyRate=1.9, daysOnMarket=65, clearanceRate=65, propertiesListed=12500,
     popTotal=5200000, popGrowth=2.2, medianAge=37, ownerOccupier=56, employed=65, unemployment=4.0,
     conditions=[
