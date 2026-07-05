@@ -153,11 +153,11 @@ MARKETS = [
     ],
     map_line=([-37.814, 144.963], [-37.674, 144.434]),
     lga_name='Moorabool Shire',
-    heroPrice='~$580k', heroYield='4.5–6%', heroPopulation='42k', heroVacancy='0.5%',
-    houseMedian=580000, unitMedian=370000,
-    houseRentRange='$420–$490', unitRentRange='$320–$390',
-    houseYieldRange='4.5–5.5%', unitYieldRange='5.5–6.5%',
-    vacancyRate=0.5, daysOnMarket=20, clearanceRate=65, propertiesListed=210,
+    heroPrice='~$630k', heroYield='4.0–5.0%', heroPopulation='42k', heroVacancy='1.2%',
+    houseMedian=630000, unitMedian=395000,
+    houseRentRange='$475–$505', unitRentRange='$355–$385',
+    houseYieldRange='3.9��4.2%', unitYieldRange='4.6��5.1%',
+    vacancyRate=1.2, daysOnMarket=51, clearanceRate=65, propertiesListed=210,
     popTotal=42000, popGrowth=3.2, medianAge=35, ownerOccupier=72, employed=67, unemployment=3.5,
     conditions=[
       ('Rental demand',              'Very High', 92),
@@ -166,7 +166,7 @@ MARKETS = [
       ('Infrastructure pipeline',    'Moderate',  50),
       ('Population growth momentum', 'Very High', 94),
     ],
-    housePerf=[('1 year', 4.2, 42), ('3 years', 9.5, 95), ('5 years', 10.8, 100), ('10 years', 8.1, 81)],
+    housePerf=[('1 year', 3.4, 34), ('3 years', 9.5, 95), ('5 years', 10.8, 100), ('10 years', 8.1, 81)],
     unitPerf= [('1 year', 3.0, 30), ('3 years', 7.2, 72), ('5 years', 8.0,  80), ('10 years', 6.2, 62)],
     data_sources=(
       'ABS Regional Population &amp; Census &nbsp;&middot;&nbsp; Infrastructure Australia Pipeline '
@@ -325,11 +325,11 @@ MARKETS = [
     ],
     map_line=None,
     lga_name='Greater Bendigo LGA',
-    heroPrice='~$470k', heroYield='5–7%', heroPopulation='120k', heroVacancy='0.7%',
-    houseMedian=470000, unitMedian=295000,
-    houseRentRange='$380–$460', unitRentRange='$290–$360',
-    houseYieldRange='5.0–6.0%', unitYieldRange='6.0–7.2%',
-    vacancyRate=0.7, daysOnMarket=24, clearanceRate=62, propertiesListed=680,
+    heroPrice='~$643k', heroYield='4.0–4.5%', heroPopulation='120k', heroVacancy='1.9%',
+    houseMedian=643000, unitMedian=475000,
+    houseRentRange='$485–$515', unitRentRange='$370–$400',
+    houseYieldRange='3.9–4.2%', unitYieldRange='4.0–4.5%',
+    vacancyRate=1.9, daysOnMarket=84, clearanceRate=62, propertiesListed=680,
     popTotal=120000, popGrowth=1.8, medianAge=38, ownerOccupier=64, employed=62, unemployment=4.5,
     conditions=[
       ('Rental demand',              'High',     78),
@@ -338,7 +338,7 @@ MARKETS = [
       ('Infrastructure pipeline',    'High',     78),
       ('Population growth momentum', 'Moderate', 65),
     ],
-    housePerf=[('1 year', 3.8, 38), ('3 years', 8.5, 85), ('5 years', 9.8, 98), ('10 years', 7.2, 72)],
+    housePerf=[('1 year', 3.6, 36), ('3 years', 8.5, 85), ('5 years', 9.8, 98), ('10 years', 7.2, 72)],
     unitPerf= [('1 year', 2.8, 28), ('3 years', 6.8, 68), ('5 years', 7.8, 78), ('10 years', 5.5, 55)],
     data_sources=(
       'ABS Regional Population &amp; Census &nbsp;&middot;&nbsp; Infrastructure Australia Pipeline '
@@ -495,11 +495,11 @@ MARKETS = [
     ],
     map_line=([-37.814, 144.963], [-38.147, 144.360]),
     lga_name='City of Greater Geelong',
-    heroPrice='~$620k', heroYield='4.5–5.5%', heroPopulation='23k', heroVacancy='0.6%',
-    houseMedian=620000, unitMedian=390000,
-    houseRentRange='$430–$510', unitRentRange='$340–$410',
-    houseYieldRange='4.5–5.2%', unitYieldRange='5.2–6.0%',
-    vacancyRate=0.6, daysOnMarket=22, clearanceRate=66, propertiesListed=180,
+    heroPrice='~$700k', heroYield='4.3–5.0%', heroPopulation='23k', heroVacancy='1.8%',
+    houseMedian=700000, unitMedian=450000,
+    houseRentRange='$560–$590', unitRentRange='$415–$445',
+    houseYieldRange='4.1–4.5%', unitYieldRange='4.8–5.2%',
+    vacancyRate=1.8, daysOnMarket=54, clearanceRate=66, propertiesListed=180,
     popTotal=23000, popGrowth=2.8, medianAge=34, ownerOccupier=74, employed=66, unemployment=3.6,
     conditions=[
       ('Rental demand',              'Very High', 90),
@@ -508,7 +508,7 @@ MARKETS = [
       ('Infrastructure pipeline',    'High',      75),
       ('Population growth momentum', 'Very High', 90),
     ],
-    housePerf=[('1 year', 4.0, 40), ('3 years', 9.0, 90), ('5 years', 10.2, 100), ('10 years', 7.8, 78)],
+    housePerf=[('1 year', 4.5, 45), ('3 years', 9.0, 90), ('5 years', 10.2, 100), ('10 years', 7.8, 78)],
     unitPerf= [('1 year', 3.0, 30), ('3 years', 7.0, 70), ('5 years', 7.8,  78), ('10 years', 5.8, 58)],
     data_sources=(
       'ABS Regional Population &amp; Census &nbsp;&middot;&nbsp; Infrastructure Australia Pipeline '

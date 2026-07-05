@@ -161,11 +161,11 @@ MARKETS = [
     ],
     map_line=None,
     lga_name='Dubbo Regional LGA',
-    heroPrice='~$430k', heroYield='5.5–7%', heroPopulation='49k', heroVacancy='0.6%',
-    houseMedian=430000, unitMedian=270000,
-    houseRentRange='$380–$450', unitRentRange='$280–$340',
-    houseYieldRange='5.5–6.5%', unitYieldRange='6.5–7.5%',
-    vacancyRate=0.6, daysOnMarket=26, clearanceRate=55, propertiesListed=320,
+    heroPrice='~$646k', heroYield='4.4–5.9%', heroPopulation='49k', heroVacancy='1.0%',
+    houseMedian=646000, unitMedian=350000,
+    houseRentRange='$535–$565', unitRentRange='$385–$415',
+    houseYieldRange='4.3–4.6%', unitYieldRange='5.7–6.2%',
+    vacancyRate=1.0, daysOnMarket=29, clearanceRate=55, propertiesListed=320,
     popTotal=49000, popGrowth=1.4, medianAge=36, ownerOccupier=63, employed=60, unemployment=5.0,
     conditions=[
       ('Rental demand',              'High',     78),
@@ -174,7 +174,7 @@ MARKETS = [
       ('Infrastructure pipeline',    'Moderate', 55),
       ('Population growth momentum', 'Moderate', 58),
     ],
-    housePerf=[('1 year', 5.0, 50), ('3 years', 9.2, 92), ('5 years', 10.5, 100), ('10 years', 6.8, 68)],
+    housePerf=[('1 year', 11.4, 100), ('3 years', 9.2, 92), ('5 years', 10.5, 100), ('10 years', 6.8, 68)],
     unitPerf= [('1 year', 3.8, 38), ('3 years', 7.5, 75), ('5 years', 8.2,  82), ('10 years', 5.5, 55)],
     data_sources=(
       'ABS Regional Population &amp; Census &nbsp;&middot;&nbsp; Infrastructure Australia Pipeline '
@@ -339,11 +339,11 @@ MARKETS = [
     ],
     map_line=None,
     lga_name='Townsville LGA',
-    heroPrice='~$430k', heroYield='6–8%', heroPopulation='200k', heroVacancy='0.9%',
-    houseMedian=430000, unitMedian=280000,
-    houseRentRange='$440–$530', unitRentRange='$340–$420',
-    houseYieldRange='6.0–7.5%', unitYieldRange='7.0–8.5%',
-    vacancyRate=0.9, daysOnMarket=30, clearanceRate=52, propertiesListed=1050,
+    heroPrice='~$628k', heroYield='4.6–5.2%', heroPopulation='200k', heroVacancy='0.6%',
+    houseMedian=628000, unitMedian=495000,
+    houseRentRange='$535–$565', unitRentRange='$445–$480',
+    houseYieldRange='4.4–4.8%', unitYieldRange='4.8–5.3%',
+    vacancyRate=0.6, daysOnMarket=18, clearanceRate=52, propertiesListed=1050,
     popTotal=200000, popGrowth=1.5, medianAge=35, ownerOccupier=60, employed=61, unemployment=5.2,
     conditions=[
       ('Rental demand',              'High',      76),
@@ -352,7 +352,7 @@ MARKETS = [
       ('Infrastructure pipeline',    'Very High', 88),
       ('Population growth momentum', 'Moderate',  62),
     ],
-    housePerf=[('1 year', 8.5, 85), ('3 years', 12.2, 100), ('5 years', 9.5, 95), ('10 years', 5.2, 52)],
+    housePerf=[('1 year', 23.0, 100), ('3 years', 12.2, 100), ('5 years', 9.5, 95), ('10 years', 5.2, 52)],
     unitPerf= [('1 year', 7.0, 70), ('3 years', 10.5, 100), ('5 years', 8.0, 80), ('10 years', 4.2, 42)],
     data_sources=(
       'ABS Regional Population &amp; Census &nbsp;&middot;&nbsp; Infrastructure Australia Pipeline '
@@ -518,11 +518,11 @@ MARKETS = [
     ],
     map_line=None,
     lga_name='Mackay Regional LGA',
-    heroPrice='~$400k', heroYield='6–8%', heroPopulation='83k', heroVacancy='1.0%',
-    houseMedian=400000, unitMedian=245000,
-    houseRentRange='$420–$520', unitRentRange='$320–$400',
-    houseYieldRange='6.0–7.5%', unitYieldRange='7.5–9.0%',
-    vacancyRate=1.0, daysOnMarket=32, clearanceRate=48, propertiesListed=520,
+    heroPrice='~$495k', heroYield='5.2–5.4%', heroPopulation='83k', heroVacancy='1.2%',
+    houseMedian=495000, unitMedian=455000,
+    houseRentRange='$485–$515', unitRentRange='$465–$495',
+    houseYieldRange='5.0–5.4%', unitYieldRange='5.3–5.6%',
+    vacancyRate=1.2, daysOnMarket=32, clearanceRate=48, propertiesListed=520,
     popTotal=83000, popGrowth=1.0, medianAge=34, ownerOccupier=60, employed=64, unemployment=4.8,
     conditions=[
       ('Rental demand',              'High',     74),
@@ -531,7 +531,7 @@ MARKETS = [
       ('Infrastructure pipeline',    'High',     72),
       ('Population growth momentum', 'Moderate', 52),
     ],
-    housePerf=[('1 year', 9.2, 92), ('3 years', 13.5, 100), ('5 years', 8.8, 88), ('10 years', 4.5, 45)],
+    housePerf=[('1 year', 15.1, 100), ('3 years', 13.5, 100), ('5 years', 8.8, 88), ('10 years', 4.5, 45)],
     unitPerf= [('1 year', 8.0, 80), ('3 years', 12.0, 100), ('5 years', 7.5, 75), ('10 years', 3.8, 38)],
     data_sources=(
       'ABS Regional Population &amp; Census &nbsp;&middot;&nbsp; Infrastructure Australia Pipeline '
