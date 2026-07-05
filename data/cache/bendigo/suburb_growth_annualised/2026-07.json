@@ -1,0 +1,19 @@
+{
+  "fetchedAt": "2026-07-05T16:10:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "bendigo",
+  "tool": "get_market_growth_annualised",
+  "params": {"level": "suburb", "area_id": ["VIC1529","VIC444","VIC1959","VIC1243","VIC1288","VIC1049","VIC923","VIC2772"], "limit": 30},
+  "rowsReturned": 14,
+  "note": "VIC2772 (White Hills) returned house only — no unit growth data. VIC1243 (Jackass Flat) house only.",
+  "data": {
+    "VIC1529": {"name":"Long Gully",      "house":{"1y":0.0835,"3y":0.0615,"5y":0.0736,"10y":0.0816}, "unit":{"1y":0.0303,"3y":0.0349,"5y":0.0386,"10y":0.0498}},
+    "VIC444":  {"name":"California Gully","house":{"1y":0.0883,"3y":0.0433,"5y":0.0619,"10y":0.0789}, "unit":{"1y":0.0788,"3y":0.0553,"5y":0.0790,"10y":0.0756}},
+    "VIC1959": {"name":"North Bendigo",   "house":{"1y":0.0796,"3y":0.0400,"5y":0.0422,"10y":0.0688}, "unit":{"1y":0.0608,"3y":0.0454,"5y":0.0608,"10y":0.0570}},
+    "VIC1243": {"name":"Jackass Flat",    "house":{"1y":0.1076,"3y":0.0523,"5y":0.0772,"10y":0.0932}, "unit":null},
+    "VIC1288": {"name":"Kangaroo Flat",   "house":{"1y":0.0993,"3y":0.0529,"5y":0.0600,"10y":0.0714}, "unit":{"1y":0.0705,"3y":0.0474,"5y":0.0673,"10y":0.0606}},
+    "VIC1049": {"name":"Golden Square",   "house":{"1y":0.1011,"3y":0.0556,"5y":0.0683,"10y":0.0718}, "unit":{"1y":0.0533,"3y":0.0456,"5y":0.0535,"10y":0.0521}},
+    "VIC923":  {"name":"Flora Hill",      "house":{"1y":0.1184,"3y":0.0736,"5y":0.0740,"10y":0.0718}, "unit":{"1y":0.0645,"3y":0.0603,"5y":0.0681,"10y":0.0629}},
+    "VIC2772": {"name":"White Hills",     "house":{"1y":0.0794,"3y":0.0463,"5y":0.0630,"10y":0.0762}, "unit":null}
+  }
+}

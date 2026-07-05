@@ -1,0 +1,10 @@
+{
+  "fetchedAt": "2026-07-05T16:04:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "bendigo",
+  "tool": "get_market_trends_vacancy",
+  "params": {"level": "lga", "area_id": "VIC193", "limit": 13},
+  "rowsReturned": 13,
+  "note": "deduplicationKey: vacancy_series — one call only this refresh. Jun 2026: 1.24%.",
+  "jun2026_vacancy": 0.0124
+}

@@ -1,0 +1,11 @@
+{
+  "fetchedAt": "2026-07-05T16:02:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "bendigo",
+  "tool": "get_market_trends_rent",
+  "params": {"level": "lga", "area_id": "VIC193", "limit": 26},
+  "rowsReturned": 26,
+  "note": "Jul 2025 – Jun 2026 slice. Unit rent very flat — 1yr CAGR only +1.6%.",
+  "htHouseRent": [483,486,489,492,495,499,502,505,508,510,512,513],
+  "htUnitRent":  [385,388,390,391,392,392,391,390,389,388,389,389]
+}

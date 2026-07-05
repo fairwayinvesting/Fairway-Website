@@ -1,0 +1,12 @@
+{
+  "fetchedAt": "2026-07-05T16:03:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "bendigo",
+  "tool": "get_market_growth_annualised",
+  "params": {"level": "lga", "area_id": "VIC193"},
+  "rowsReturned": 2,
+  "data": {
+    "house": {"price_1y": 0.0796, "price_3y": 0.0433, "price_5y": 0.0572, "price_10y": 0.0675, "rent_1y": 0.0688, "rent_3y": 0.0639, "rent_5y": 0.0740, "rent_10y": 0.0580},
+    "unit":  {"price_1y": 0.0681, "price_3y": 0.0564, "price_5y": 0.0711, "price_10y": 0.0671, "rent_1y": 0.0157, "rent_3y": 0.0500, "rent_5y": 0.0710, "rent_10y": 0.0517}
+  }
+}

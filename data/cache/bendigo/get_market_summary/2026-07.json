@@ -1,0 +1,12 @@
+{
+  "fetchedAt": "2026-07-05T16:00:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "bendigo",
+  "tool": "get_market_summary",
+  "params": {"level": "lga", "area_id": "VIC193"},
+  "rowsReturned": 2,
+  "data": {
+    "house": {"price": 655210, "rent": 512, "yield": 0.0406, "annual_sales": 3489, "annual_rentals": 1753},
+    "unit":  {"price": 460319, "rent": 389, "yield": 0.0439, "annual_sales": 335}
+  }
+}

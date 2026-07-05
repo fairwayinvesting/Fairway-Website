@@ -1,0 +1,11 @@
+{
+  "fetchedAt": "2026-07-05T16:06:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "bendigo",
+  "tool": "get_market_trends_clearance_rate",
+  "params": {"level": "lga", "area_id": "VIC193", "limit": 26},
+  "rowsReturned": 26,
+  "note": "Mostly null — Bendigo is primarily a private sale market with very low auction volumes. Most recent non-null: Nov 2025 = 77.78%, Oct 2025 = 83.33%.",
+  "nov2025_clearance": 0.7778,
+  "oct2025_clearance": 0.8333
+}

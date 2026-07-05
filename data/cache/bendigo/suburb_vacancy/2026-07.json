@@ -1,0 +1,18 @@
+{
+  "fetchedAt": "2026-07-05T16:12:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "bendigo",
+  "tool": "get_market_trends_vacancy",
+  "params": {"level": "suburb", "area_id": ["VIC1529","VIC444","VIC1959","VIC1243","VIC1288","VIC1049","VIC923","VIC2772"], "period_end_min": "2026-06-01", "period_end_max": "2026-06-30", "limit": 20},
+  "rowsReturned": 15,
+  "data": {
+    "VIC1529": {"house": 0.0074, "unit": 0.0074},
+    "VIC444":  {"house": 0.0141, "unit": 0.0141},
+    "VIC1959": {"house": 0.0098, "unit": 0.0098},
+    "VIC1243": {"house": 0.0167, "unit": null},
+    "VIC1288": {"house": 0.0115, "unit": 0.0115},
+    "VIC1049": {"house": 0.0116, "unit": 0.0116},
+    "VIC923":  {"house": 0.0096, "unit": 0.0096},
+    "VIC2772": {"house": 0.0162, "unit": 0.0162}
+  }
+}

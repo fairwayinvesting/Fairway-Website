@@ -1,0 +1,12 @@
+{
+  "fetchedAt": "2026-07-05T16:01:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "bendigo",
+  "tool": "get_market_trends_price",
+  "params": {"level": "lga", "area_id": "VIC193", "limit": 26},
+  "rowsReturned": 26,
+  "note": "Jul 2025 – Jun 2026 slice (12 months used for charts)",
+  "htMonths": ["Jul '25","Aug '25","Sep '25","Oct '25","Nov '25","Dec '25","Jan '26","Feb '26","Mar '26","Apr '26","May '26","Jun '26"],
+  "htHousePrice": [611615,616273,620553,624885,628906,632831,637853,641674,645378,650193,652701,655210],
+  "htUnitPrice":  [432558,434505,436328,438621,441066,443426,446812,449767,452982,456313,458316,460319]
+}

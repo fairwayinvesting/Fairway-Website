@@ -1,0 +1,9 @@
+{
+  "fetchedAt": "2026-07-05T16:07:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "bendigo",
+  "tool": "get_market_trends_inventory",
+  "params": {"level": "lga", "area_id": "VIC193", "limit": 13},
+  "rowsReturned": 13,
+  "jun2026_months_supply": 1.65
+}

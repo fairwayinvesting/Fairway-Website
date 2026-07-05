@@ -1,0 +1,9 @@
+{
+  "fetchedAt": "2026-07-05T16:05:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "bendigo",
+  "tool": "get_market_trends_days_on_market",
+  "params": {"level": "lga", "area_id": "VIC193", "limit": 26},
+  "rowsReturned": 26,
+  "jun2026_houses_days": 33
+}

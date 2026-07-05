@@ -1,0 +1,19 @@
+{
+  "fetchedAt": "2026-07-05T15:45:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "bendigo",
+  "tool": "get_market_summary",
+  "params": {"level": "suburb", "area_id": ["all 65 VIC193 localities"], "limit": 200},
+  "rowsReturned": 49,
+  "note": "49 rows returned. Top 8 affordable selected by house price, High confidence, min 100 sales/yr.",
+  "selected_suburbs": [
+    {"loc_pid":"VIC1529","name":"LONG GULLY",       "postcode":"3550","house_price":553712,"unit_price":397960,"house_annual_sales":101,"house_confidence":"High"},
+    {"loc_pid":"VIC444", "name":"CALIFORNIA GULLY", "postcode":"3556","house_price":563810,"unit_price":434050,"house_annual_sales":106,"house_confidence":"High"},
+    {"loc_pid":"VIC1959","name":"NORTH BENDIGO",    "postcode":"3550","house_price":573263,"unit_price":443944,"house_annual_sales":118,"house_confidence":"High"},
+    {"loc_pid":"VIC1243","name":"JACKASS FLAT",     "postcode":"3556","house_price":576451,"unit_price":null,  "house_annual_sales":116,"house_confidence":"High"},
+    {"loc_pid":"VIC1288","name":"KANGAROO FLAT",    "postcode":"3555","house_price":603390,"unit_price":387388,"house_annual_sales":301,"house_confidence":"High"},
+    {"loc_pid":"VIC1049","name":"GOLDEN SQUARE",    "postcode":"3555","house_price":632110,"unit_price":439966,"house_annual_sales":328,"house_confidence":"High"},
+    {"loc_pid":"VIC923", "name":"FLORA HILL",       "postcode":"3550","house_price":659619,"unit_price":461061,"house_annual_sales":125,"house_confidence":"High"},
+    {"loc_pid":"VIC2772","name":"WHITE HILLS",      "postcode":"3550","house_price":662189,"unit_price":null,  "house_annual_sales":111,"house_confidence":"High"}
+  ]
+}

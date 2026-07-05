@@ -1,0 +1,23 @@
+{
+  "fetchedAt": "2026-07-05T11:37:12.282029Z",
+  "calendarMonth": "2026-07",
+  "region": "bendigo",
+  "tool": "lookup_lgas",
+  "params": {
+    "name": "Greater Bendigo",
+    "state_name": "VIC",
+    "limit": 5
+  },
+  "rowsReturned": 1,
+  "data": {
+    "results": [
+      {
+        "lga_pid": "VIC193",
+        "lga_name": "GREATER BENDIGO CITY",
+        "state_name": "VIC",
+        "lga_key": "greater-bendigo-city"
+      }
+    ],
+    "total": 1
+  }
+}
