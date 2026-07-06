@@ -1,0 +1,10 @@
+{
+  "fetchedAt": "2026-07-06T08:00:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "dubbo",
+  "tool": "get_market_trends_rent",
+  "params": {"level": "lga", "area_id": ["NSW333"], "period_end_min": "2025-07-01", "period_end_max": "2026-06-30", "limit": 26},
+  "rowsReturned": 24,
+  "house_rents": [458, 462, 466, 469, 472, 475, 477, 479, 481, 483, 484, 486],
+  "unit_rents":  [368, 370, 372, 374, 377, 380, 383, 386, 389, 391, 392, 392]
+}

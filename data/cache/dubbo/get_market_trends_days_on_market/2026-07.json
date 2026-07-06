@@ -1,0 +1,10 @@
+{
+  "fetchedAt": "2026-07-06T08:00:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "dubbo",
+  "tool": "get_market_trends_days_on_market",
+  "params": {"level": "lga", "area_id": ["NSW333"], "period_end_min": "2025-07-01", "limit": 26},
+  "rowsReturned": 24,
+  "latest_house_dom": 20,
+  "latest_unit_dom": 36
+}

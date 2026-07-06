@@ -1,0 +1,12 @@
+{
+  "fetchedAt": "2026-07-06T08:00:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "dubbo",
+  "tool": "get_market_summary",
+  "params": {"level": "lga", "area_id": ["NSW333"]},
+  "rowsReturned": 2,
+  "data": [
+    {"area_id":"NSW333","period_end":"2026-06-30","property_type":"house","typical_price":708283,"rent":484,"gross_yield":0.0355,"sales":61,"annual_sales_volume":1366,"rentals":82,"annual_rental_volume":1069,"estimated_dwellings":29408,"adult_population":54922,"confidence":"High"},
+    {"area_id":"NSW333","period_end":"2026-06-30","property_type":"unit","typical_price":472010,"rent":392,"gross_yield":0.0432,"sales":0,"annual_sales_volume":67,"rentals":20,"annual_rental_volume":277,"estimated_dwellings":29408,"adult_population":54922,"confidence":"Medium"}
+  ]
+}

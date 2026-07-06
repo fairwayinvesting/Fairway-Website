@@ -1,0 +1,13 @@
+{
+  "fetchedAt": "2026-07-06T08:00:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "dubbo",
+  "tool": "get_market_growth_annualised",
+  "params": {"level": "suburb", "area_id": ["NSW1310","NSW4257"]},
+  "rowsReturned": 3,
+  "data": {
+    "NSW1310_house": {"price_1y":0.1992,"price_3y":0.0945,"price_5y":0.1158,"price_10y":0.0813,"rent_1y":0.0723,"rent_3y":0.0611,"rent_5y":0.0779,"rent_10y":0.0522},
+    "NSW1310_unit":  {"price_1y":0.0755,"price_3y":0.0802,"price_5y":0.0848,"price_10y":0.0872,"rent_1y":0.0623,"rent_3y":0.0623,"rent_5y":0.0711,"rent_10y":0.0507},
+    "NSW4257_house": {"price_1y":0.2271,"price_3y":0.1059,"price_5y":0.1490,"price_10y":0.0986,"rent_1y":0.0583,"rent_3y":0.0699,"rent_5y":0.0741,"rent_10y":0.0679}
+  }
+}

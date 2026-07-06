@@ -1,0 +1,9 @@
+{
+  "fetchedAt": "2026-07-06T08:00:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "dubbo",
+  "tool": "get_market_trends_clearance_rate",
+  "params": {"level": "lga", "area_id": ["NSW333"], "period_end_min": "2025-07-01", "limit": 26},
+  "rowsReturned": 24,
+  "note": "All clearance rate values are null — Dubbo Regional Council is a private sale market. No meaningful auction data available."
+}

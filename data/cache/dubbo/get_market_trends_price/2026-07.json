@@ -1,0 +1,11 @@
+{
+  "fetchedAt": "2026-07-06T08:00:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "dubbo",
+  "tool": "get_market_trends_price",
+  "params": {"level": "lga", "area_id": ["NSW333"], "period_end_min": "2025-07-01", "period_end_max": "2026-06-30", "limit": 26},
+  "rowsReturned": 24,
+  "house_months": ["Jul '25","Aug '25","Sep '25","Oct '25","Nov '25","Dec '25","Jan '26","Feb '26","Mar '26","Apr '26","May '26","Jun '26"],
+  "house_prices":  [593609, 601559, 609546, 618401, 624629, 635067, 654018, 667114, 681237, 694627, 701454, 708283],
+  "unit_prices":   [447643, 449289, 451346, 455017, 457598, 458616, 464036, 467299, 468939, 468973, 470491, 472010]
+}

@@ -1,0 +1,13 @@
+{
+  "fetchedAt": "2026-07-06T08:00:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "dubbo",
+  "tool": "get_market_summary",
+  "params": {"level": "suburb", "area_id": ["NSW1310","NSW4257","NSW590","NSW1626","NSW3714","NSW1421","NSW4405","NSW158","NSW2662"]},
+  "rowsReturned": 5,
+  "note": "Dubbo's urban area is recorded as a single suburb (NSW1310). Wellington (NSW4257) is a separate satellite township ~80km southeast. All other localities are low-confidence rural areas.",
+  "selected_localities": [
+    {"loc_pid":"NSW1310","name":"DUBBO","postcode":"2830","house_price":800911,"house_rent":532,"house_yield":0.0345,"house_annual_sales":1120,"unit_price":528258,"unit_rent":392,"unit_yield":0.0386,"unit_annual_sales":65,"house_confidence":"High","unit_confidence":"Medium"},
+    {"loc_pid":"NSW4257","name":"WELLINGTON","postcode":"2820","house_price":449990,"house_rent":436,"house_yield":0.0504,"house_annual_sales":153,"unit_price":null,"unit_confidence":"Low","house_confidence":"High"}
+  ]
+}

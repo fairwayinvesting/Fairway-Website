@@ -1,0 +1,12 @@
+{
+  "fetchedAt": "2026-07-06T08:00:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "dubbo",
+  "tool": "get_market_growth_annualised",
+  "params": {"level": "lga", "area_id": ["NSW333"]},
+  "rowsReturned": 2,
+  "data": [
+    {"area_id":"NSW333","period_end":"2026-06-30","property_type":"house","price_1y":0.2061,"price_3y":0.0963,"price_5y":0.1253,"price_10y":0.0849,"rent_1y":0.0681,"rent_3y":0.0734,"rent_5y":0.0766,"rent_10y":0.0605},
+    {"area_id":"NSW333","period_end":"2026-06-30","property_type":"unit","price_1y":0.0584,"price_3y":0.0618,"price_5y":0.0634,"price_10y":0.0641,"rent_1y":0.0681,"rent_3y":0.0825,"rent_5y":0.0766,"rent_10y":0.0580}
+  ]
+}

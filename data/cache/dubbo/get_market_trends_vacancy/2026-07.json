@@ -1,0 +1,10 @@
+{
+  "fetchedAt": "2026-07-06T08:00:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "dubbo",
+  "tool": "get_market_trends_vacancy",
+  "params": {"level": "lga", "area_id": ["NSW333"], "limit": 13},
+  "rowsReturned": 13,
+  "latest": {"period_end":"2026-06-30","house":0.0138,"unit":0.0138},
+  "series_house": [0.0147,0.0146,0.0145,0.0144,0.0144,0.0143,0.0142,0.0141,0.0140,0.0140,0.0139,0.0138]
+}

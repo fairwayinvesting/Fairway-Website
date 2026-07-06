@@ -1,0 +1,10 @@
+{
+  "fetchedAt": "2026-07-06T08:00:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "dubbo",
+  "tool": "get_market_trends_inventory",
+  "params": {"level": "lga", "area_id": ["NSW333"], "limit": 13},
+  "rowsReturned": 13,
+  "latest_house_inventory": 1.53,
+  "latest_unit_inventory": 1.25
+}

@@ -1,0 +1,12 @@
+{
+  "fetchedAt": "2026-07-06T08:00:00.000000Z",
+  "calendarMonth": "2026-07",
+  "region": "dubbo",
+  "tool": "get_market_trends_vacancy",
+  "params": {"level": "suburb", "area_id": ["NSW1310","NSW4257"], "period_end_min": "2026-06-01", "period_end_max": "2026-06-30", "limit": 10},
+  "rowsReturned": 4,
+  "data": {
+    "NSW1310": {"house": 0.0146, "unit": 0.0146},
+    "NSW4257": {"house": 0.0116, "unit": 0.0116}
+  }
+}
