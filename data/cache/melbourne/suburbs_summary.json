@@ -1,0 +1,17 @@
+{"fetched":"2026-07-06","outer_ring_houses":[
+  {"suburb":"Wyndham Vale","pid":"VIC2884","price":710670,"rent":430,"yield":0.0315,"annual_sales":1012,"confidence":"High"},
+  {"suburb":"Tarneit","pid":"VIC2453","price":740296,"rent":495,"yield":0.0348,"annual_sales":2693,"confidence":"High"},
+  {"suburb":"Werribee","pid":"VIC2753","price":783308,"rent":456,"yield":0.0303,"annual_sales":1612,"confidence":"High"},
+  {"suburb":"Manor Lakes","pid":"VIC3007","price":723026,"rent":460,"yield":0.0331,"annual_sales":518,"confidence":"High"},
+  {"suburb":"Hoppers Crossing","pid":"VIC1195","price":767986,"rent":474,"yield":0.0321,"annual_sales":912,"confidence":"High"},
+  {"suburb":"Truganina","pid":"VIC2585","price":769595,"rent":496,"yield":0.0335,"annual_sales":1360,"confidence":"High"},
+  {"suburb":"Point Cook","pid":"VIC2082","price":905184,"rent":533,"yield":0.0306,"annual_sales":1467,"confidence":"High"},
+  {"suburb":"Williams Landing","pid":"VIC2948","price":961674,"rent":575,"yield":0.0311,"annual_sales":187,"confidence":"High"}
+],"inner_west_units":[
+  {"suburb":"Sunshine","pid":"VIC2398","unit_price":545206,"unit_rent":465,"unit_yield":0.0444,"unit_annual_sales":87,"confidence":"High"},
+  {"suburb":"Coburg","pid":"VIC593","unit_price":526625,"unit_rent":576,"unit_yield":0.0569,"unit_annual_sales":264,"confidence":"High"},
+  {"suburb":"Preston","pid":"VIC2117","unit_price":621618,"unit_rent":569,"unit_yield":0.0476,"unit_annual_sales":551,"confidence":"High"},
+  {"suburb":"Yarraville","pid":"VIC2918","unit_price":594896,"unit_rent":585,"unit_yield":0.0511,"unit_annual_sales":110,"confidence":"High"},
+  {"suburb":"Footscray","pid":"VIC927","unit_price":521355,"unit_rent":573,"unit_yield":0.0572,"unit_annual_sales":556,"confidence":"High"},
+  {"suburb":"Reservoir","pid":"VIC2158","unit_price":569069,"unit_rent":526,"unit_yield":0.0481,"unit_annual_sales":513,"confidence":"High"}
+]}

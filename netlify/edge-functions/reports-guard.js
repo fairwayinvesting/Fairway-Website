@@ -4,9 +4,17 @@ export default async function (request, context) {
 
   const url = new URL(request.url);
   const cookie = request.headers.get('cookie') || '';
-  const match = cookie.match(/fw_session=([^;]+)/);
   const loginUrl = `${url.origin}/clients/?redirect=${encodeURIComponent(url.pathname)}`;
 
+  // Admin cookie — bypass all market checks
+  const adminMatch = cookie.match(/fw_admin=([^;]+)/);
+  if (adminMatch) {
+    const adminPayload = await verifyJWT(adminMatch[1], secret);
+    if (adminPayload && adminPayload.role === 'admin') return context.next();
+  }
+
+  // Client session
+  const match = cookie.match(/fw_session=([^;]+)/);
   if (!match) return Response.redirect(loginUrl, 302);
 
   const payload = await verifyJWT(match[1], secret);

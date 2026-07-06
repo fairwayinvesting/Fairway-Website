@@ -153,6 +153,14 @@
       </tbody>
     </table>
   </div>
+
+  <div style="margin-top:52px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+      <h2 style="font-family:'Fraunces',serif;font-size:24px;font-weight:400;">Area reports</h2>
+      <span style="font-size:12px;font-weight:300;color:rgba(247,243,237,0.3);">Opens in new tab &mdash; admin session bypasses client login</span>
+    </div>
+    <div id="reports-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;"></div>
+  </div>
 </main>
 
 <!-- Add / Edit modal -->
@@ -230,6 +238,7 @@ document.getElementById('gate-btn').addEventListener('click', async function() {
   if (await tryAuth(pw)) {
     adminPassword = pw;
     sessionStorage.setItem('fw_admin_pw', pw);
+    fetch('/api/admin-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw }) });
     document.getElementById('gate').classList.add('hidden');
     loadClients();
   } else {
@@ -247,6 +256,7 @@ document.getElementById('gate-pw').addEventListener('keydown', e => {
   const stored = sessionStorage.getItem('fw_admin_pw');
   if (stored && await tryAuth(stored)) {
     adminPassword = stored;
+    fetch('/api/admin-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: stored }) });
     document.getElementById('gate').classList.add('hidden');
     loadClients();
   }
@@ -266,6 +276,7 @@ async function loadClients() {
   const res = await api('GET', '/api/admin/clients');
   clients = await res.json();
   renderTable();
+  renderReports();
 }
 
 function renderTable() {
@@ -394,6 +405,19 @@ async function deleteClient(id, name) {
   if (!confirm(`Delete ${name}? This cannot be undone.`)) return;
   await api('DELETE', `/api/admin/clients?id=${encodeURIComponent(id)}`);
   await loadClients();
+}
+
+function renderReports() {
+  const grid = document.getElementById('reports-grid');
+  if (!grid) return;
+  grid.innerHTML = MARKETS.map(m => {
+    const path = `/reports/${m.key}.html`;
+    return `<a href="${path}" target="_blank" rel="noopener" style="display:flex;flex-direction:column;gap:6px;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.08);border-radius:12px;padding:16px 18px;transition:background .15s;text-decoration:none;" onmouseover="this.style.background='rgba(247,243,237,0.1)'" onmouseout="this.style.background='rgba(247,243,237,0.05)'">
+      <span style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(189,122,112,0.6);">${m.state}</span>
+      <span style="font-size:15px;font-weight:400;color:#f7f3ed;">${m.name}</span>
+      <span style="font-size:11px;font-weight:300;color:rgba(247,243,237,0.25);">↗ open report</span>
+    </a>`;
+  }).join('');
 }
 </script>
 </body>

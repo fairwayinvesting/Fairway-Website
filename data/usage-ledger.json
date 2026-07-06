@@ -12,7 +12,7 @@
     "estimatedCostAUD": 0.222,
     "fromCache": false,
     "cacheKey": "data/cache/geelong/lookup_lgas/2026-07.json",
-    "tierNote": "Budgeted at Restricted — confirm tier on developer.htagai.com"
+    "tierNote": "Budgeted at Restricted \u2014 confirm tier on developer.htagai.com"
   },
   {
     "ts": "2026-07-05T11:37:12.282281Z",
@@ -27,7 +27,7 @@
     "estimatedCostAUD": 0.222,
     "fromCache": false,
     "cacheKey": "data/cache/bendigo/lookup_lgas/2026-07.json",
-    "tierNote": "Budgeted at Restricted — confirm tier on developer.htagai.com"
+    "tierNote": "Budgeted at Restricted \u2014 confirm tier on developer.htagai.com"
   },
   {
     "ts": "2026-07-05T12:00:00.000000Z",
@@ -126,7 +126,7 @@
     "estimatedCostAUD": 2.886,
     "fromCache": false,
     "cacheKey": "data/cache/geelong/get_market_trends_vacancy/2026-07.json",
-    "note": "deduplicationKey: vacancy_series — one call only this refresh"
+    "note": "deduplicationKey: vacancy_series \u2014 one call only this refresh"
   },
   {
     "ts": "2026-07-05T12:35:00.000000Z",
@@ -183,7 +183,7 @@
     "estimatedCostAUD": 11.77,
     "fromCache": false,
     "cacheKey": "data/cache/geelong/concordance_lga_to_localities/2026-07.json",
-    "tierNote": "Budgeted at Restricted — confirm tier on developer.htagai.com"
+    "tierNote": "Budgeted at Restricted \u2014 confirm tier on developer.htagai.com"
   },
   {
     "ts": "2026-07-05T14:05:00.000000Z",
@@ -226,7 +226,7 @@
     "estimatedCostAUD": 3.552,
     "fromCache": false,
     "cacheKey": "data/cache/geelong/suburb_vacancy/2026-07.json",
-    "note": "deduplicationKey: suburb_vacancy_jun26 — limited to Jun 2026 period only"
+    "note": "deduplicationKey: suburb_vacancy_jun26 \u2014 limited to Jun 2026 period only"
   },
   {
     "ts": "2026-07-05T16:00:00.000000Z",
@@ -280,7 +280,7 @@
     "budgetTier": "Enhanced",
     "budgetCostPerRow": 0.075,
     "rowsReturned": 2,
-    "estimatedCostAUD": 0.150,
+    "estimatedCostAUD": 0.15,
     "fromCache": false,
     "cacheKey": "data/cache/bendigo/get_market_growth_annualised/2026-07.json"
   },
@@ -297,7 +297,7 @@
     "estimatedCostAUD": 2.886,
     "fromCache": false,
     "cacheKey": "data/cache/bendigo/get_market_trends_vacancy/2026-07.json",
-    "note": "deduplicationKey: vacancy_series — one call only this refresh"
+    "note": "deduplicationKey: vacancy_series \u2014 one call only this refresh"
   },
   {
     "ts": "2026-07-05T16:05:00.000000Z",
@@ -326,7 +326,7 @@
     "estimatedCostAUD": 5.772,
     "fromCache": false,
     "cacheKey": "data/cache/bendigo/get_market_trends_clearance_rate/2026-07.json",
-    "note": "Mostly null — private sale market. Nov 2025 = 77.78%"
+    "note": "Mostly null \u2014 private sale market. Nov 2025 = 77.78%"
   },
   {
     "ts": "2026-07-05T16:07:00.000000Z",
@@ -355,7 +355,7 @@
     "estimatedCostAUD": 14.43,
     "fromCache": false,
     "cacheKey": "data/cache/bendigo/concordance_lga_to_localities/2026-07.json",
-    "tierNote": "Budgeted at Restricted — confirm tier on developer.htagai.com"
+    "tierNote": "Budgeted at Restricted \u2014 confirm tier on developer.htagai.com"
   },
   {
     "ts": "2026-07-05T16:09:00.000000Z",
@@ -381,7 +381,7 @@
     "budgetTier": "Enhanced",
     "budgetCostPerRow": 0.075,
     "rowsReturned": 14,
-    "estimatedCostAUD": 1.050,
+    "estimatedCostAUD": 1.05,
     "fromCache": false,
     "cacheKey": "data/cache/bendigo/suburb_growth_annualised/2026-07.json"
   },
@@ -395,12 +395,11 @@
     "budgetTier": "Restricted",
     "budgetCostPerRow": 0.222,
     "rowsReturned": 15,
-    "estimatedCostAUD": 3.330,
+    "estimatedCostAUD": 3.33,
     "fromCache": false,
     "cacheKey": "data/cache/bendigo/suburb_vacancy/2026-07.json",
-    "note": "deduplicationKey: suburb_vacancy_jun26 — limited to Jun 2026 period only"
-  }
-,
+    "note": "deduplicationKey: suburb_vacancy_jun26 \u2014 limited to Jun 2026 period only"
+  },
   {
     "ts": "2026-07-06T07:00:00.000000Z",
     "refreshId": "dubbo-2026-07-v1",
@@ -453,7 +452,7 @@
     "budgetTier": "Enhanced",
     "budgetCostPerRow": 0.075,
     "rowsReturned": 2,
-    "estimatedCostAUD": 0.150,
+    "estimatedCostAUD": 0.15,
     "fromCache": false,
     "cacheKey": "data/cache/dubbo/get_market_growth_annualised/2026-07.json"
   },
@@ -470,7 +469,7 @@
     "estimatedCostAUD": 2.886,
     "fromCache": false,
     "cacheKey": "data/cache/dubbo/get_market_trends_vacancy/2026-07.json",
-    "note": "deduplicationKey: vacancy_series — one call only this refresh"
+    "note": "deduplicationKey: vacancy_series \u2014 one call only this refresh"
   },
   {
     "ts": "2026-07-06T07:05:00.000000Z",
@@ -499,7 +498,7 @@
     "estimatedCostAUD": 2.886,
     "fromCache": false,
     "cacheKey": "data/cache/dubbo/get_market_trends_clearance_rate/2026-07.json",
-    "note": "All null — private sale market. Displayed as N/A on report."
+    "note": "All null \u2014 private sale market. Displayed as N/A on report."
   },
   {
     "ts": "2026-07-06T07:07:00.000000Z",
@@ -528,7 +527,7 @@
     "estimatedCostAUD": 1.998,
     "fromCache": false,
     "cacheKey": "data/cache/dubbo/concordance_lga_to_localities/2026-07.json",
-    "tierNote": "Budgeted at Restricted — confirm tier on developer.htagai.com"
+    "tierNote": "Budgeted at Restricted \u2014 confirm tier on developer.htagai.com"
   },
   {
     "ts": "2026-07-06T07:09:00.000000Z",
@@ -572,6 +571,150 @@
     "estimatedCostAUD": 0.888,
     "fromCache": false,
     "cacheKey": "data/cache/dubbo/suburb_vacancy/2026-07.json",
-    "note": "deduplicationKey: suburb_vacancy_jun26 — limited to Jun 2026 period only"
+    "note": "deduplicationKey: suburb_vacancy_jun26 \u2014 limited to Jun 2026 period only"
+  },
+  {
+    "ts": "2026-07-06T09:00:00.000000Z",
+    "refreshId": "melbourne-2026-07-v1",
+    "region": "melbourne",
+    "tool": "get_market_summary",
+    "tier": "Standard",
+    "tierConfirmed": false,
+    "budgetTier": "Standard",
+    "budgetCostPerRow": 0.031,
+    "rowsReturned": 2,
+    "estimatedCostAUD": 0.062,
+    "fromCache": false,
+    "cacheKey": "data/cache/melbourne/lga_summary.json"
+  },
+  {
+    "ts": "2026-07-06T09:01:00.000000Z",
+    "refreshId": "melbourne-2026-07-v1",
+    "region": "melbourne",
+    "tool": "get_market_trends_price",
+    "tier": "Standard",
+    "tierConfirmed": false,
+    "budgetTier": "Standard",
+    "budgetCostPerRow": 0.031,
+    "rowsReturned": 13,
+    "estimatedCostAUD": 0.403,
+    "fromCache": false,
+    "cacheKey": "data/cache/melbourne/lga_price_trends.json",
+    "note": "limit=13 returns 7 house + 6 unit months interleaved"
+  },
+  {
+    "ts": "2026-07-06T09:02:00.000000Z",
+    "refreshId": "melbourne-2026-07-v1",
+    "region": "melbourne",
+    "tool": "get_market_trends_rent",
+    "tier": "Standard",
+    "tierConfirmed": false,
+    "budgetTier": "Standard",
+    "budgetCostPerRow": 0.031,
+    "rowsReturned": 13,
+    "estimatedCostAUD": 0.403,
+    "fromCache": false,
+    "cacheKey": "data/cache/melbourne/lga_rent_trends.json"
+  },
+  {
+    "ts": "2026-07-06T09:03:00.000000Z",
+    "refreshId": "melbourne-2026-07-v1",
+    "region": "melbourne",
+    "tool": "get_market_growth_annualised",
+    "tier": "Enhanced",
+    "tierConfirmed": false,
+    "budgetTier": "Enhanced",
+    "budgetCostPerRow": 0.075,
+    "rowsReturned": 2,
+    "estimatedCostAUD": 0.15,
+    "fromCache": false,
+    "cacheKey": "data/cache/melbourne/lga_growth.json"
+  },
+  {
+    "ts": "2026-07-06T09:04:00.000000Z",
+    "refreshId": "melbourne-2026-07-v1",
+    "region": "melbourne",
+    "tool": "get_market_trends_vacancy",
+    "tier": "Restricted",
+    "tierConfirmed": false,
+    "budgetTier": "Restricted",
+    "budgetCostPerRow": 0.222,
+    "rowsReturned": 13,
+    "estimatedCostAUD": 2.886,
+    "fromCache": false,
+    "cacheKey": "data/cache/melbourne/lga_vacancy.json",
+    "note": "deduplicationKey: vacancy_series \u2014 one call only this refresh"
+  },
+  {
+    "ts": "2026-07-06T09:05:00.000000Z",
+    "refreshId": "melbourne-2026-07-v1",
+    "region": "melbourne",
+    "tool": "get_market_trends_days_on_market",
+    "tier": "Restricted",
+    "tierConfirmed": false,
+    "budgetTier": "Restricted",
+    "budgetCostPerRow": 0.222,
+    "rowsReturned": 13,
+    "estimatedCostAUD": 2.886,
+    "fromCache": false,
+    "cacheKey": "data/cache/melbourne/lga_dom.json"
+  },
+  {
+    "ts": "2026-07-06T09:06:00.000000Z",
+    "refreshId": "melbourne-2026-07-v1",
+    "region": "melbourne",
+    "tool": "get_market_trends_clearance_rate",
+    "tier": "Restricted",
+    "tierConfirmed": false,
+    "budgetTier": "Restricted",
+    "budgetCostPerRow": 0.222,
+    "rowsReturned": 13,
+    "estimatedCostAUD": 2.886,
+    "fromCache": false,
+    "cacheKey": "data/cache/melbourne/lga_clearance.json"
+  },
+  {
+    "ts": "2026-07-06T09:07:00.000000Z",
+    "refreshId": "melbourne-2026-07-v1",
+    "region": "melbourne",
+    "tool": "get_market_trends_inventory",
+    "tier": "Restricted",
+    "tierConfirmed": false,
+    "budgetTier": "Restricted",
+    "budgetCostPerRow": 0.222,
+    "rowsReturned": 13,
+    "estimatedCostAUD": 2.886,
+    "fromCache": false,
+    "cacheKey": "data/cache/melbourne/lga_inventory.json"
+  },
+  {
+    "ts": "2026-07-06T09:08:00.000000Z",
+    "refreshId": "melbourne-2026-07-v2",
+    "region": "melbourne",
+    "tool": "get_market_summary (14 suburbs)",
+    "tier": "Standard",
+    "tierConfirmed": false,
+    "budgetTier": "Standard",
+    "budgetCostPerRow": 0.031,
+    "rowsReturned": 26,
+    "estimatedCostAUD": 0.806,
+    "fromCache": false,
+    "cacheKey": "data/cache/melbourne/suburbs_summary.json",
+    "note": "8 Wyndham outer ring suburbs + 6 inner west suburbs"
+  },
+  {
+    "ts": "2026-07-06T09:09:00.000000Z",
+    "refreshId": "melbourne-2026-07-v2",
+    "region": "melbourne",
+    "tool": "get_market_growth_annualised (14 suburbs)",
+    "tier": "Enhanced",
+    "tierConfirmed": false,
+    "budgetTier": "Enhanced",
+    "budgetCostPerRow": 0.075,
+    "rowsReturned": 26,
+    "estimatedCostAUD": 1.95,
+    "fromCache": false,
+    "cacheKey": "data/cache/melbourne/suburbs_growth.json",
+    "note": "8 Wyndham outer ring + 6 inner west suburbs"
   }
 ]
