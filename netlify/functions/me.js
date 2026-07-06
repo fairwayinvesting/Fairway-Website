@@ -1,4 +1,4 @@
-const crypto = require('crypto');
+import crypto from 'crypto';
 
 function verifyJWT(token, secret) {
   try {
@@ -11,17 +11,18 @@ function verifyJWT(token, secret) {
   } catch { return null; }
 }
 
-exports.handler = async function (event) {
-  const cookie = event.headers['cookie'] || '';
+export default async (req) => {
+  const cookie = req.headers.get('cookie') || '';
   const match = cookie.match(/fw_session=([^;]+)/);
-  if (!match) return { statusCode: 401, body: JSON.stringify({ error: 'Not authenticated' }) };
+  if (!match) return new Response(JSON.stringify({ error: 'Not authenticated' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
 
   const payload = verifyJWT(match[1], process.env.JWT_SECRET);
-  if (!payload) return { statusCode: 401, body: JSON.stringify({ error: 'Session expired' }) };
+  if (!payload) return new Response(JSON.stringify({ error: 'Session expired' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
 
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: payload.name, email: payload.email, markets: payload.markets }),
-  };
+  return new Response(
+    JSON.stringify({ name: payload.name, email: payload.email, markets: payload.markets }),
+    { status: 200, headers: { 'Content-Type': 'application/json' } }
+  );
 };
+
+export const config = { path: '/api/me' };

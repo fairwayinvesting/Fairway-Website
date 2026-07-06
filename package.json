@@ -2,6 +2,6 @@
   "name": "fairway-site",
   "private": true,
   "dependencies": {
-    "@netlify/blobs": "^7.3.0"
+    "@netlify/blobs": "^10.0.0"
   }
 }
