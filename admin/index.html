@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Fairway Investing</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="theme-color" content="#22201d">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Outfit',sans-serif;font-weight:300;background:#1a1916;color:#f7f3ed;-webkit-font-smoothing:antialiased;min-height:100vh;}
+    a{color:inherit;text-decoration:none;}
+
+    /* Gate overlay */
+    #gate{position:fixed;inset:0;background:#1a1916;z-index:999;display:flex;align-items:center;justify-content:center;padding:24px;}
+    #gate.hidden{display:none;}
+    .gate-card{background:#22201d;border:1px solid rgba(247,243,237,0.09);border-radius:20px;padding:44px 40px;width:100%;max-width:380px;}
+    .gate-card h2{font-family:'Fraunces',serif;font-size:26px;font-weight:400;margin-bottom:6px;}
+    .gate-card p{font-size:14px;font-weight:300;color:rgba(247,243,237,0.4);margin-bottom:28px;}
+
+    nav{background:#22201d;border-bottom:1px solid rgba(247,243,237,0.08);padding:0 44px;}
+    .nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px;}
+    .nav-logo{display:flex;align-items:center;gap:10px;}
+    .badge{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;background:rgba(189,122,112,0.2);color:#bd7a70;border:1px solid rgba(189,122,112,0.3);border-radius:100px;padding:3px 10px;}
+
+    main{max-width:1200px;margin:0 auto;padding:44px;}
+    .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px;flex-wrap:wrap;gap:16px;}
+    .page-header h1{font-family:'Fraunces',serif;font-size:32px;font-weight:400;}
+
+    /* Buttons */
+    .btn-primary{display:inline-flex;align-items:center;gap:8px;background:#bd7a70;border:none;border-radius:10px;padding:12px 22px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;color:#f7f3ed;cursor:pointer;transition:background .2s;}
+    .btn-primary:hover{background:#cf9b92;}
+    .btn-sm{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:7px;font-family:'Outfit',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .2s;border:none;}
+    .btn-edit{background:rgba(247,243,237,0.07);color:rgba(247,243,237,0.7);}
+    .btn-edit:hover{background:rgba(247,243,237,0.12);}
+    .btn-delete{background:rgba(189,122,112,0.1);color:#cf9b92;}
+    .btn-delete:hover{background:rgba(189,122,112,0.2);}
+    .btn-secondary{background:rgba(247,243,237,0.07);color:rgba(247,243,237,0.7);border:1px solid rgba(247,243,237,0.1);border-radius:10px;padding:11px 20px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:400;cursor:pointer;transition:all .2s;}
+    .btn-secondary:hover{background:rgba(247,243,237,0.12);}
+
+    /* Table */
+    .table-wrap{background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:14px;overflow:hidden;}
+    table{width:100%;border-collapse:collapse;}
+    th{font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);padding:14px 20px;text-align:left;border-bottom:1px solid rgba(247,243,237,0.07);background:rgba(247,243,237,0.02);}
+    td{padding:16px 20px;border-bottom:1px solid rgba(247,243,237,0.05);font-size:14px;font-weight:300;color:rgba(247,243,237,0.75);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:rgba(247,243,237,0.02);}
+    .td-name{font-weight:400;color:#f7f3ed;}
+    .td-email{color:rgba(247,243,237,0.45);font-size:13px;}
+    .pill{display:inline-flex;align-items:center;background:rgba(189,122,112,0.12);border:1px solid rgba(189,122,112,0.2);border-radius:100px;padding:3px 10px;font-size:11.5px;font-weight:400;color:#bd7a70;margin:2px 3px 2px 0;}
+    .pill-inactive{background:rgba(247,243,237,0.05);border-color:rgba(247,243,237,0.1);color:rgba(247,243,237,0.3);}
+    .status-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px;}
+    .status-active{background:#6dbf7b;}
+    .status-inactive{background:rgba(247,243,237,0.2);}
+    .actions{display:flex;gap:6px;}
+    .empty-row td{text-align:center;color:rgba(247,243,237,0.25);padding:48px;}
+
+    /* Modal */
+    #modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:500;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .2s;}
+    #modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal{background:#22201d;border:1px solid rgba(247,243,237,0.1);border-radius:20px;padding:36px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;}
+    .modal h2{font-family:'Fraunces',serif;font-size:24px;font-weight:400;margin-bottom:24px;}
+    .field{margin-bottom:18px;}
+    .field label{display:block;font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.4);margin-bottom:7px;}
+    .field input{width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:300;color:#f7f3ed;outline:none;transition:border-color .2s;}
+    .field input::placeholder{color:rgba(247,243,237,0.2);}
+    .field input:focus{border-color:rgba(189,122,112,0.6);}
+    .field-note{font-size:12px;font-weight:300;color:rgba(247,243,237,0.3);margin-top:6px;}
+    .markets-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .market-check{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.07);border-radius:8px;cursor:pointer;transition:background .15s;}
+    .market-check:hover{background:rgba(247,243,237,0.07);}
+    .market-check input[type=checkbox]{width:15px;height:15px;accent-color:#bd7a70;cursor:pointer;flex-shrink:0;}
+    .market-check span{font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.7);}
+    .market-state{font-size:10.5px;color:rgba(247,243,237,0.3);margin-left:auto;font-weight:400;}
+    .toggle-wrap{display:flex;align-items:center;gap:12px;}
+    .toggle{position:relative;width:44px;height:24px;flex-shrink:0;}
+    .toggle input{opacity:0;width:0;height:0;position:absolute;}
+    .toggle-slider{position:absolute;inset:0;background:rgba(247,243,237,0.12);border-radius:100px;cursor:pointer;transition:.2s;}
+    .toggle-slider::before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:rgba(247,243,237,0.4);border-radius:50%;transition:.2s;}
+    .toggle input:checked + .toggle-slider{background:#bd7a70;}
+    .toggle input:checked + .toggle-slider::before{transform:translateX(20px);background:#f7f3ed;}
+    .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:28px;padding-top:20px;border-top:1px solid rgba(247,243,237,0.07);}
+    .error-msg{font-size:13px;font-weight:300;color:#cf9b92;margin-top:14px;display:none;}
+    .error-msg.visible{display:block;}
+
+    /* Input field in gate */
+    .gate-field input{width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:13px 16px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:300;color:#f7f3ed;outline:none;margin-bottom:14px;transition:border-color .2s;}
+    .gate-field input:focus{border-color:rgba(189,122,112,0.6);}
+
+    .spinner{width:24px;height:24px;border:2px solid rgba(247,243,237,0.1);border-top-color:#bd7a70;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    @media(max-width:760px){
+      nav,main{padding-left:20px;padding-right:20px;}
+      .markets-grid{grid-template-columns:1fr;}
+      td,th{padding:12px 14px;}
+      .td-email{display:none;}
+    }
+    @media(max-width:520px){
+      main{padding:24px 16px;}
+      .modal{padding:24px 20px;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- Password gate -->
+<div id="gate">
+  <div class="gate-card">
+    <h2>Admin access</h2>
+    <p>Enter your admin password to continue.</p>
+    <div class="gate-field">
+      <input type="password" id="gate-pw" placeholder="Admin password" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" style="width:100%;" id="gate-btn">Continue</button>
+    <div class="error-msg" id="gate-error">Incorrect password.</div>
+  </div>
+</div>
+
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <img src="/logo-icon.png" alt="" style="height:26px;width:auto;">
+      <img src="/logo-word.png" alt="Fairway Investing" style="height:16px;width:auto;">
+      <span class="badge">Admin</span>
+    </div>
+    <a href="/" style="font-size:13px;color:rgba(247,243,237,0.3);transition:color .2s;" onmouseover="this.style.color='rgba(247,243,237,0.6)'" onmouseout="this.style.color='rgba(247,243,237,0.3)'">&larr; Main site</a>
+  </div>
+</nav>
+
+<main>
+  <div class="page-header">
+    <h1>Client management</h1>
+    <button class="btn-primary" id="add-btn">+ Add client</button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Client</th>
+          <th class="td-email" style="display:table-cell;">Email</th>
+          <th>Markets</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr class="empty-row"><td colspan="5">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<!-- Add / Edit modal -->
+<div id="modal-overlay">
+  <div class="modal">
+    <h2 id="modal-title">Add client</h2>
+    <input type="hidden" id="edit-id">
+
+    <div class="field">
+      <label>Full name</label>
+      <input type="text" id="f-name" placeholder="Jane Smith">
+    </div>
+    <div class="field">
+      <label>Email address</label>
+      <input type="email" id="f-email" placeholder="jane@example.com">
+    </div>
+    <div class="field">
+      <label id="pw-label">Password</label>
+      <input type="password" id="f-password" placeholder="Set a password">
+      <p class="field-note" id="pw-note"></p>
+    </div>
+    <div class="field">
+      <label>Markets (select which reports this client can view)</label>
+      <div class="markets-grid" id="markets-grid"></div>
+    </div>
+    <div class="field">
+      <label>Account status</label>
+      <div class="toggle-wrap">
+        <label class="toggle">
+          <input type="checkbox" id="f-active" checked>
+          <span class="toggle-slider"></span>
+        </label>
+        <span style="font-size:14px;font-weight:300;color:rgba(247,243,237,0.6);" id="active-label">Active</span>
+      </div>
+    </div>
+    <div class="error-msg" id="modal-error"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" id="modal-cancel">Cancel</button>
+      <button class="btn-primary" id="modal-save">Save client</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MARKETS = [
+  { key: 'geelong',       name: 'Geelong',      state: 'VIC' },
+  { key: 'bendigo',       name: 'Bendigo',       state: 'VIC' },
+  { key: 'dubbo',         name: 'Dubbo',         state: 'NSW' },
+  { key: 'bacchus-marsh', name: 'Bacchus Marsh', state: 'VIC' },
+  { key: 'devonport',     name: 'Devonport',     state: 'TAS' },
+  { key: 'hobart',        name: 'Hobart',        state: 'TAS' },
+  { key: 'lara',          name: 'Lara',          state: 'VIC' },
+  { key: 'launceston',    name: 'Launceston',    state: 'TAS' },
+  { key: 'mackay',        name: 'Mackay',        state: 'QLD' },
+  { key: 'melbourne',     name: 'Melbourne',     state: 'VIC' },
+  { key: 'newcastle',     name: 'Newcastle',     state: 'NSW' },
+  { key: 'rockhampton',   name: 'Rockhampton',   state: 'QLD' },
+  { key: 'townsville',    name: 'Townsville',    state: 'QLD' },
+];
+
+let adminPassword = '';
+let clients = [];
+
+// ── Gate ──────────────────────────────────────────────────────────────────────
+async function tryAuth(pw) {
+  const res = await fetch('/api/admin/clients', { headers: { Authorization: `Bearer ${pw}` } });
+  return res.ok;
+}
+
+document.getElementById('gate-btn').addEventListener('click', async function() {
+  const pw = document.getElementById('gate-pw').value;
+  if (!pw) return;
+  this.textContent = 'Checking…';
+  this.disabled = true;
+  if (await tryAuth(pw)) {
+    adminPassword = pw;
+    sessionStorage.setItem('fw_admin_pw', pw);
+    document.getElementById('gate').classList.add('hidden');
+    loadClients();
+  } else {
+    document.getElementById('gate-error').classList.add('visible');
+    this.textContent = 'Continue';
+    this.disabled = false;
+  }
+});
+document.getElementById('gate-pw').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('gate-btn').click();
+});
+
+// Auto-restore from session
+(async function() {
+  const stored = sessionStorage.getItem('fw_admin_pw');
+  if (stored && await tryAuth(stored)) {
+    adminPassword = stored;
+    document.getElementById('gate').classList.add('hidden');
+    loadClients();
+  }
+})();
+
+// ── API helpers ───────────────────────────────────────────────────────────────
+function api(method, path, body) {
+  return fetch(path, {
+    method,
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${adminPassword}` },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+}
+
+// ── Load clients ──────────────────────────────────────────────────────────────
+async function loadClients() {
+  const res = await api('GET', '/api/admin/clients');
+  clients = await res.json();
+  renderTable();
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tbody');
+  if (!clients.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No clients yet. Add your first client above.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = clients.map(c => `
+    <tr>
+      <td class="td-name">${esc(c.name)}</td>
+      <td class="td-email">${esc(c.email)}</td>
+      <td>${c.markets.length ? c.markets.map(m => `<span class="pill">${marketName(m)}</span>`).join('') : '<span style="color:rgba(247,243,237,0.25);font-size:13px;">None</span>'}</td>
+      <td><span class="status-dot ${c.active ? 'status-active' : 'status-inactive'}"></span>${c.active ? 'Active' : 'Inactive'}</td>
+      <td><div class="actions">
+        <button class="btn-sm btn-edit" onclick="openEdit('${c.id}')">Edit</button>
+        <button class="btn-sm btn-delete" onclick="deleteClient('${c.id}','${esc(c.name)}')">Delete</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function marketName(key) {
+  return (MARKETS.find(m => m.key === key) || { name: key }).name;
+}
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function buildMarketsGrid(selected = []) {
+  document.getElementById('markets-grid').innerHTML = MARKETS.map(m => `
+    <label class="market-check">
+      <input type="checkbox" name="market" value="${m.key}" ${selected.includes(m.key) ? 'checked' : ''}>
+      <span>${m.name}</span>
+      <span class="market-state">${m.state}</span>
+    </label>`).join('');
+}
+
+function selectedMarkets() {
+  return [...document.querySelectorAll('#markets-grid input[type=checkbox]:checked')].map(el => el.value);
+}
+
+document.getElementById('f-active').addEventListener('change', function() {
+  document.getElementById('active-label').textContent = this.checked ? 'Active' : 'Inactive';
+});
+
+function openAdd() {
+  document.getElementById('edit-id').value = '';
+  document.getElementById('modal-title').textContent = 'Add client';
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-email').value = '';
+  document.getElementById('f-email').disabled = false;
+  document.getElementById('f-password').value = '';
+  document.getElementById('pw-label').textContent = 'Password';
+  document.getElementById('pw-note').textContent = '';
+  document.getElementById('f-active').checked = true;
+  document.getElementById('active-label').textContent = 'Active';
+  document.getElementById('modal-error').classList.remove('visible');
+  buildMarketsGrid([]);
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function openEdit(id) {
+  const c = clients.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('edit-id').value = id;
+  document.getElementById('modal-title').textContent = 'Edit client';
+  document.getElementById('f-name').value = c.name;
+  document.getElementById('f-email').value = c.email;
+  document.getElementById('f-email').disabled = true;
+  document.getElementById('f-password').value = '';
+  document.getElementById('pw-label').textContent = 'Reset password';
+  document.getElementById('pw-note').textContent = 'Leave blank to keep existing password.';
+  document.getElementById('f-active').checked = c.active;
+  document.getElementById('active-label').textContent = c.active ? 'Active' : 'Inactive';
+  document.getElementById('modal-error').classList.remove('visible');
+  buildMarketsGrid(c.markets || []);
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+document.getElementById('add-btn').addEventListener('click', openAdd);
+document.getElementById('modal-cancel').addEventListener('click', closeModal);
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+document.getElementById('modal-save').addEventListener('click', async function() {
+  const errEl = document.getElementById('modal-error');
+  errEl.classList.remove('visible');
+  const id = document.getElementById('edit-id').value;
+  const name = document.getElementById('f-name').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const password = document.getElementById('f-password').value;
+  const markets = selectedMarkets();
+  const active = document.getElementById('f-active').checked;
+
+  if (!name) { errEl.textContent = 'Name is required.'; errEl.classList.add('visible'); return; }
+  if (!id && !email) { errEl.textContent = 'Email is required.'; errEl.classList.add('visible'); return; }
+  if (!id && !password) { errEl.textContent = 'Password is required for new clients.'; errEl.classList.add('visible'); return; }
+
+  this.disabled = true;
+  this.innerHTML = '<span class="spinner"></span>Saving…';
+
+  const body = id
+    ? { id, name, markets, active, ...(password ? { password } : {}) }
+    : { name, email, password, markets };
+
+  const res = await api(id ? 'PUT' : 'POST', '/api/admin/clients', body);
+  const data = await res.json();
+
+  if (res.ok) {
+    closeModal();
+    await loadClients();
+  } else {
+    errEl.textContent = data.error || 'Save failed.';
+    errEl.classList.add('visible');
+  }
+  this.disabled = false;
+  this.textContent = 'Save client';
+});
+
+async function deleteClient(id, name) {
+  if (!confirm(`Delete ${name}? This cannot be undone.`)) return;
+  await api('DELETE', `/api/admin/clients?id=${encodeURIComponent(id)}`);
+  await loadClients();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+export default async function (request, context) {
+  const secret = Deno.env.get('JWT_SECRET');
+  if (!secret) return context.next();
+
+  const url = new URL(request.url);
+  const cookie = request.headers.get('cookie') || '';
+  const match = cookie.match(/fw_session=([^;]+)/);
+  const loginUrl = `${url.origin}/clients/?redirect=${encodeURIComponent(url.pathname)}`;
+
+  if (!match) return Response.redirect(loginUrl, 302);
+
+  const payload = await verifyJWT(match[1], secret);
+  if (!payload) return Response.redirect(loginUrl, 302);
+
+  const market = url.pathname.split('/').pop().replace('.html', '');
+  if (!Array.isArray(payload.markets) || !payload.markets.includes(market)) {
+    return Response.redirect(`${url.origin}/clients/portal.html`, 302);
+  }
+
+  return context.next();
+}
+
+async function verifyJWT(token, secret) {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const [h, b, sig] = parts;
+    const key = await crypto.subtle.importKey(
+      'raw', new TextEncoder().encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']
+    );
+    const sigBytes = Uint8Array.from(atob(sig.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+    const valid = await crypto.subtle.verify('HMAC', key, sigBytes, new TextEncoder().encode(`${h}.${b}`));
+    if (!valid) return null;
+    const payload = JSON.parse(atob(b.replace(/-/g, '+').replace(/_/g, '/')));
+    if (payload.exp && payload.exp < Date.now() / 1000) return null;
+    return payload;
+  } catch { return null; }
+}

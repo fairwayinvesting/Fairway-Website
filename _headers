@@ -2,6 +2,15 @@
 /p/*
   X-Robots-Tag: noindex, nofollow
 
+/clients/*
+  X-Robots-Tag: noindex, nofollow
+
+/admin/*
+  X-Robots-Tag: noindex, nofollow
+
+/reports/*
+  X-Robots-Tag: noindex, nofollow
+
 /discovery-call.html
   X-Robots-Tag: noindex, nofollow
 
