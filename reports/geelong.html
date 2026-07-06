@@ -1249,42 +1249,45 @@ L.polyline([[-37.8136, 144.9631], [-38.1499, 144.3617]], {
   color: 'rgba(189,122,112,0.5)', weight: 2, dashArray: '6 5',
 }).addTo(map);
 
-// ─── GLOBAL TOOLTIP (fixed-position, overflow-safe) ────────────────────────
 (function() {
   const tip = document.getElementById('g-tip');
-  let hideTimer;
+  let activeEl = null;
+
+  function showTip(el) {
+    activeEl = el;
+    tip.textContent = el.dataset.tip;
+    tip.style.opacity = '0';
+    tip.style.top = '-9999px';
+    tip.style.left = '0';
+    requestAnimationFrame(() => {
+      const r = el.getBoundingClientRect();
+      const tipW = 240, margin = 8;
+      let left = r.left + r.width / 2 - tipW / 2;
+      left = Math.max(margin, Math.min(left, window.innerWidth - tipW - margin));
+      let top = r.top - tip.offsetHeight - 8;
+      if (top < margin) top = r.bottom + 8;
+      tip.style.left = left + 'px';
+      tip.style.top = top + 'px';
+      tip.style.opacity = '1';
+    });
+  }
+
+  function hideTip() { tip.style.opacity = '0'; activeEl = null; }
 
   document.querySelectorAll('.tip[data-tip]').forEach(el => {
-    el.addEventListener('mouseenter', function() {
-      clearTimeout(hideTimer);
-      tip.textContent = this.dataset.tip;
-      tip.style.opacity = '0';
-      tip.style.top = '-9999px';
-      tip.style.left = '0';
-
-      // Measure after paint so height is known
-      requestAnimationFrame(() => {
-        const r = this.getBoundingClientRect();
-        const tipH = tip.offsetHeight;
-        const tipW = 240;
-        const margin = 8;
-
-        let left = r.left + r.width / 2 - tipW / 2;
-        left = Math.max(margin, Math.min(left, window.innerWidth - tipW - margin));
-
-        let top = r.top - tipH - 8;
-        if (top < margin) top = r.bottom + 8; // flip below if no room above
-
-        tip.style.left = left + 'px';
-        tip.style.top = top + 'px';
-        tip.style.opacity = '1';
-      });
-    });
-
-    el.addEventListener('mouseleave', () => {
-      hideTimer = setTimeout(() => { tip.style.opacity = '0'; }, 80);
+    el.addEventListener('mouseenter', function() { showTip(this); });
+    el.addEventListener('mouseleave', hideTip);
+    el.addEventListener('click', function(e) {
+      e.stopPropagation();
+      activeEl === this ? hideTip() : showTip(this);
     });
   });
+
+  window.addEventListener('scroll', hideTip, { passive: true });
+  document.addEventListener('click', hideTip);
+  document.addEventListener('touchstart', function(e) {
+    if (activeEl && !activeEl.contains(e.target)) hideTip();
+  }, { passive: true });
 })();
 
 </script>
