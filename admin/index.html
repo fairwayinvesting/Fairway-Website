@@ -417,7 +417,7 @@ function renderTable() {
       <td><span class="status-dot ${c.active ? 'status-active' : 'status-inactive'}"></span>${c.active ? 'Active' : 'Inactive'}</td>
       <td><div class="actions">
         <button class="btn-sm btn-edit" onclick="openEdit('${c.id}')">Edit</button>
-        <button class="btn-dates" id="dates-btn-${c.id}" onclick="toggleMilestones('${c.id}','${esc(c.name)}')">${msLabel}</button>
+        <button class="btn-dates" id="dates-btn-${c.id}" onclick="toggleMilestones('${c.id}')">${msLabel}</button>
         <button class="btn-sm btn-delete" onclick="deleteClient('${c.id}','${esc(c.name)}')">Delete</button>
       </div></td>
     </tr>
@@ -566,7 +566,16 @@ async function loadMilestones() {
   const res = await api('GET', '/api/admin/milestones');
   milestones = await res.json();
   renderMilestonesDashboard();
-  renderTable(); // refresh Dates button counts
+  updateMilestoneBadges();
+}
+
+function updateMilestoneBadges() {
+  clients.forEach(c => {
+    const btn = document.getElementById('dates-btn-' + c.id);
+    if (!btn) return;
+    const count = milestones.filter(m => m.clientId === c.id && !m.completed).length;
+    btn.textContent = count ? `Dates (${count})` : 'Dates';
+  });
 }
 
 function daysFromToday(dateStr) {
@@ -622,21 +631,28 @@ function renderMilestonesDashboard() {
   }).join('');
 }
 
-function toggleMilestones(clientId, clientName) {
+function clientName(clientId) {
+  const c = clients.find(x => x.id === clientId);
+  return c ? c.name : '';
+}
+
+function toggleMilestones(clientId) {
   const row = document.getElementById('ms-row-' + clientId);
   const btn = document.getElementById('dates-btn-' + clientId);
   if (row.style.display === 'none') {
     row.style.display = 'table-row';
     btn.classList.add('active');
-    renderClientMilestones(clientId, clientName);
+    renderClientMilestones(clientId);
   } else {
     row.style.display = 'none';
     btn.classList.remove('active');
   }
 }
 
-function renderClientMilestones(clientId, clientName) {
+function renderClientMilestones(clientId) {
   const panel = document.getElementById('ms-panel-' + clientId);
+  if (!panel) return;
+  const name = clientName(clientId);
   const cMs = milestones.filter(m => m.clientId === clientId);
   const active = cMs.filter(m => !m.completed).sort((a, b) => new Date(a.date) - new Date(b.date));
   const done = cMs.filter(m => m.completed);
@@ -648,48 +664,50 @@ function renderClientMilestones(clientId, clientName) {
       <span class="ms-item-date">${formatDate(m.date)}</span>
       <span class="ms-item-days ${urg}">${urgencyLabel(days)}</span>
       <div class="actions">
-        <button class="btn-sm btn-done" onclick="completeMilestone('${m.id}','${clientId}','${esc(clientName)}')">✓ Done</button>
-        <button class="btn-sm btn-delete" onclick="deleteMilestoneConfirm('${m.id}','${clientId}','${esc(clientName)}')">×</button>
+        <button class="btn-sm btn-done" onclick="completeMilestone('${m.id}','${clientId}')">✓ Done</button>
+        <button class="btn-sm btn-delete" onclick="deleteMilestoneConfirm('${m.id}','${clientId}')">×</button>
       </div>
     </div>`;
   }).join('') : '<p style="font-size:13px;color:rgba(247,243,237,0.25);padding:8px 0;">No upcoming dates.</p>';
 
   panel.innerHTML = `<div class="ms-panel-inner">
     ${msHtml}
-    ${done.length ? `<p style="font-size:12px;color:rgba(247,243,237,0.2);margin-top:12px;">${done.length} completed milestone${done.length > 1 ? 's' : ''}</p>` : ''}
+    ${done.length ? `<p style="font-size:12px;color:rgba(247,243,237,0.2);margin-top:12px;">${done.length} completed date${done.length > 1 ? 's' : ''}</p>` : ''}
     <div class="ms-add-form">
       <select id="ms-type-${clientId}">
         ${Object.entries(MS_TYPES).map(([k,v]) => `<option value="${k}">${v}</option>`).join('')}
       </select>
       <input type="date" id="ms-date-${clientId}" style="color-scheme:dark;">
       <input type="text" id="ms-notes-${clientId}" placeholder="Notes (optional)" style="flex:1;min-width:140px;">
-      <button class="btn-add-ms" onclick="addMilestone('${clientId}','${esc(clientName)}')">+ Add date</button>
+      <button class="btn-add-ms" onclick="addMilestone('${clientId}')">+ Add date</button>
     </div>
   </div>`;
 }
 
-async function addMilestone(clientId, clientName) {
+async function addMilestone(clientId) {
   const type = document.getElementById('ms-type-' + clientId).value;
   const date = document.getElementById('ms-date-' + clientId).value;
   const notes = document.getElementById('ms-notes-' + clientId).value;
   if (!date) { alert('Please select a date.'); return; }
+  const name = clientName(clientId);
   const label = type === 'custom' ? (notes || 'Custom') : MS_TYPES[type];
-  await api('POST', '/api/admin/milestones', { clientId, clientName, type, label, date, notes });
+  const res = await api('POST', '/api/admin/milestones', { clientId, clientName: name, type, label, date, notes });
+  if (!res.ok) { alert('Failed to save. Please try again.'); return; }
   await loadMilestones();
-  renderClientMilestones(clientId, clientName);
+  renderClientMilestones(clientId);
 }
 
-async function completeMilestone(id, clientId, clientName) {
+async function completeMilestone(id, clientId) {
   await api('PUT', '/api/admin/milestones', { id, completed: true });
   await loadMilestones();
-  if (clientId) renderClientMilestones(clientId, clientName);
+  if (clientId) renderClientMilestones(clientId);
 }
 
-async function deleteMilestoneConfirm(id, clientId, clientName) {
+async function deleteMilestoneConfirm(id, clientId) {
   if (!confirm('Delete this date?')) return;
   await api('DELETE', `/api/admin/milestones?id=${encodeURIComponent(id)}`);
   await loadMilestones();
-  if (clientId) renderClientMilestones(clientId, clientName);
+  if (clientId) renderClientMilestones(clientId);
 }
 
 // ── TOTP Setup ────────────────────────────────────────────────────────────────
