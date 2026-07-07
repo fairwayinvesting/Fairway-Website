@@ -43,7 +43,7 @@
     .btn-secondary:hover{background:rgba(247,243,237,0.12);}
 
     /* Table */
-    .table-wrap{background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:14px;overflow:hidden;}
+    .table-wrap{background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:14px;overflow:clip;}
     table{width:100%;border-collapse:collapse;}
     th{font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);padding:14px 20px;text-align:left;border-bottom:1px solid rgba(247,243,237,0.07);background:rgba(247,243,237,0.02);}
     td{padding:16px 20px;border-bottom:1px solid rgba(247,243,237,0.05);font-size:14px;font-weight:300;color:rgba(247,243,237,0.75);vertical-align:middle;}
@@ -124,7 +124,7 @@
     .ms-add-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;margin-bottom:20px;}
     .ms-add-field{display:flex;flex-direction:column;}
     .ms-add-label{font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.4);margin-bottom:7px;display:block;}
-    .ms-add-input{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:300;color:#f7f3ed;outline:none;transition:border-color .2s;width:100%;}
+    .ms-add-input{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:0 14px;height:46px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:300;color:#f7f3ed;outline:none;transition:border-color .2s;width:100%;box-sizing:border-box;}
     .ms-add-input:focus{border-color:rgba(189,122,112,0.6);}
     .ms-add-input option{background:#22201d;}
 
