@@ -697,7 +697,7 @@ document.getElementById('totp-setup-btn').addEventListener('click', async functi
   this.textContent = 'Loading…'; this.disabled = true;
   const res = await api('GET', '/api/admin/totp-setup');
   const { secret, uri, configured } = await res.json();
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(uri)}&color=f7f3ed&bgcolor=22201d`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(uri)}`;
   const panel = document.getElementById('totp-panel');
   panel.innerHTML = `
     <div style="display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start;">
