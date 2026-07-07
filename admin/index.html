@@ -594,8 +594,14 @@ document.getElementById('modal-save').addEventListener('click', async function()
   const data = await res.json();
 
   if (res.ok) {
+    if (id) {
+      const idx = clients.findIndex(c => c.id === id);
+      if (idx !== -1) { clients[idx].name = name; clients[idx].markets = markets; clients[idx].active = active; }
+    } else {
+      clients.push({ id: data.id, name, email: email.toLowerCase().trim(), markets, active: true, createdAt: new Date().toISOString() });
+    }
+    renderTable();
     closeModal();
-    await loadClients();
   } else {
     errEl.textContent = data.error || 'Save failed.';
     errEl.classList.add('visible');
@@ -606,8 +612,10 @@ document.getElementById('modal-save').addEventListener('click', async function()
 
 async function deleteClient(id, name) {
   if (!confirm(`Delete ${name}? This cannot be undone.`)) return;
-  await api('DELETE', `/api/admin/clients?id=${encodeURIComponent(id)}`);
-  await loadClients();
+  const res = await api('DELETE', `/api/admin/clients?id=${encodeURIComponent(id)}`);
+  if (!res.ok) return;
+  clients = clients.filter(c => c.id !== id);
+  renderTable();
 }
 
 function renderReports() {
@@ -702,8 +710,8 @@ function renderMilestonesDashboard() {
       <td class="ms-label">${esc(m.label)}</td>
       <td class="ms-date">${formatDate(m.date)}</td>
       <td><div class="actions">
-        <button class="btn-sm btn-done" onclick="completeMilestone('${m.id}')">✓ Done</button>
-        <button class="btn-sm btn-delete" onclick="deleteMilestoneConfirm('${m.id}')">Delete</button>
+        <button class="btn-sm btn-done" onclick="completeMilestone('${m.id}')" title="Mark done">✓</button>
+        <button class="btn-sm btn-delete" onclick="deleteMilestoneConfirm('${m.id}')" title="Delete">✕</button>
       </div></td>
     </tr>`;
   }).join('');
@@ -790,20 +798,30 @@ async function addMilestoneFromDashboard() {
   const res = await api('POST', '/api/admin/milestones', { clientId, clientName: name, type, label, date, notes });
   btn.textContent = 'Add date'; btn.disabled = false;
   if (!res.ok) { alert('Failed to save. Please try again.'); return; }
+  const data = await res.json();
+  milestones.push({ id: data.id, clientId, clientName: name, type, label, date, notes, completed: false, completedAt: null, createdAt: new Date().toISOString() });
   toggleAddDateForm();
-  await loadMilestones();
+  renderMilestonesDashboard();
+  updateMilestoneBadges();
 }
 
 async function completeMilestone(id, clientId) {
-  await api('PUT', '/api/admin/milestones', { id, completed: true });
-  await loadMilestones();
+  const res = await api('PUT', '/api/admin/milestones', { id, completed: true });
+  if (!res.ok) return;
+  const m = milestones.find(x => x.id === id);
+  if (m) { m.completed = true; m.completedAt = new Date().toISOString(); }
+  renderMilestonesDashboard();
+  updateMilestoneBadges();
   if (clientId) renderClientMilestones(clientId);
 }
 
 async function deleteMilestoneConfirm(id, clientId) {
   if (!confirm('Delete this date?')) return;
-  await api('DELETE', `/api/admin/milestones?id=${encodeURIComponent(id)}`);
-  await loadMilestones();
+  const res = await api('DELETE', `/api/admin/milestones?id=${encodeURIComponent(id)}`);
+  if (!res.ok) return;
+  milestones = milestones.filter(x => x.id !== id);
+  renderMilestonesDashboard();
+  updateMilestoneBadges();
   if (clientId) renderClientMilestones(clientId);
 }
 
