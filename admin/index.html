@@ -87,6 +87,48 @@
     .error-msg{font-size:13px;font-weight:300;color:#cf9b92;margin-top:14px;display:none;}
     .error-msg.visible{display:block;}
 
+    /* Milestones */
+    .ms-table{width:100%;border-collapse:collapse;}
+    .ms-table th{font-size:10.5px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);padding:11px 16px;text-align:left;border-bottom:1px solid rgba(247,243,237,0.07);}
+    .ms-table td{padding:12px 16px;font-size:13.5px;font-weight:300;border-bottom:1px solid rgba(247,243,237,0.05);vertical-align:middle;}
+    .ms-table tr:last-child td{border-bottom:none;}
+    .urg-overdue{color:#f08080;}
+    .urg-overdue .urg-badge{background:rgba(240,128,128,0.12);border:1px solid rgba(240,128,128,0.3);color:#f08080;}
+    .urg-critical{color:#e8a87c;}
+    .urg-critical .urg-badge{background:rgba(232,168,124,0.12);border:1px solid rgba(232,168,124,0.3);color:#e8a87c;}
+    .urg-soon{color:rgba(247,243,237,0.75);}
+    .urg-soon .urg-badge{background:rgba(247,243,237,0.07);border:1px solid rgba(247,243,237,0.12);color:rgba(247,243,237,0.5);}
+    .urg-ok{color:rgba(247,243,237,0.45);}
+    .urg-ok .urg-badge{background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.2);color:#6dbf7b;}
+    .urg-badge{display:inline-block;font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;border-radius:100px;padding:2px 9px;white-space:nowrap;}
+    .ms-client{font-weight:400;color:#f7f3ed;}
+    .ms-label{color:rgba(247,243,237,0.6);}
+    .ms-date{font-variant-numeric:tabular-nums;color:rgba(247,243,237,0.45);font-size:12.5px;}
+    .btn-done{background:rgba(109,191,123,0.1);color:#6dbf7b;border:1px solid rgba(109,191,123,0.2);}
+    .btn-done:hover{background:rgba(109,191,123,0.2);}
+
+    /* Client milestone panel */
+    .ms-panel{background:#1a1916;border-top:1px solid rgba(247,243,237,0.05);padding:20px 20px 24px;}
+    .ms-panel-inner{max-width:700px;}
+    .ms-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(247,243,237,0.05);}
+    .ms-item:last-of-type{border-bottom:none;}
+    .ms-item-label{flex:1;font-size:13.5px;color:rgba(247,243,237,0.75);}
+    .ms-item-date{font-size:12.5px;color:rgba(247,243,237,0.4);min-width:90px;font-variant-numeric:tabular-nums;}
+    .ms-item-days{font-size:12px;min-width:100px;}
+    .ms-add-form{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-top:16px;padding-top:16px;border-top:1px solid rgba(247,243,237,0.07);}
+    .ms-add-form select,.ms-add-form input{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:8px 12px;font-family:'Outfit',sans-serif;font-size:13px;color:#f7f3ed;outline:none;}
+    .ms-add-form select:focus,.ms-add-form input:focus{border-color:rgba(189,122,112,0.5);}
+    .ms-add-form select option{background:#22201d;}
+    .btn-add-ms{background:rgba(189,122,112,0.15);color:#bd7a70;border:1px solid rgba(189,122,112,0.25);border-radius:8px;padding:8px 16px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:background .2s;}
+    .btn-add-ms:hover{background:rgba(189,122,112,0.25);}
+    .btn-dates{background:rgba(247,243,237,0.07);color:rgba(247,243,237,0.6);border:none;border-radius:7px;padding:7px 12px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:background .2s;}
+    .btn-dates:hover{background:rgba(247,243,237,0.12);}
+    .btn-dates.active{background:rgba(189,122,112,0.15);color:#bd7a70;}
+
+    /* TOTP setup */
+    .totp-setup{background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:28px 32px;}
+    .totp-secret-box{background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.09);border-radius:10px;padding:14px 18px;font-family:Courier,monospace;font-size:16px;letter-spacing:0.12em;color:#f7f3ed;word-break:break-all;margin:12px 0;}
+
     /* Input field in gate */
     .gate-field input{width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:13px 16px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:300;color:#f7f3ed;outline:none;margin-bottom:14px;transition:border-color .2s;}
     .gate-field input:focus{border-color:rgba(189,122,112,0.6);}
@@ -111,12 +153,23 @@
 <!-- Password gate -->
 <div id="gate">
   <div class="gate-card">
-    <h2>Admin access</h2>
-    <p>Enter your admin password to continue.</p>
-    <div class="gate-field">
-      <input type="password" id="gate-pw" placeholder="Admin password" autocomplete="current-password">
+    <div id="gate-step-1">
+      <h2>Admin access</h2>
+      <p>Enter your admin password to continue.</p>
+      <div class="gate-field">
+        <input type="password" id="gate-pw" placeholder="Admin password" autocomplete="current-password">
+      </div>
+      <button class="btn-primary" style="width:100%;" id="gate-btn">Continue</button>
     </div>
-    <button class="btn-primary" style="width:100%;" id="gate-btn">Continue</button>
+    <div id="gate-step-2" style="display:none;">
+      <h2>Two-factor auth</h2>
+      <p>Enter the 6-digit code from your authenticator app.</p>
+      <div class="gate-field">
+        <input type="text" id="gate-code" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" style="letter-spacing:0.2em;font-size:22px;text-align:center;">
+      </div>
+      <button class="btn-primary" style="width:100%;" id="gate-code-btn">Verify</button>
+      <button class="btn-secondary" style="width:100%;margin-top:10px;" id="gate-back-btn">← Back</button>
+    </div>
     <div class="error-msg" id="gate-error">Incorrect password.</div>
   </div>
 </div>
@@ -133,6 +186,26 @@
 </nav>
 
 <main>
+  <!-- Milestones dashboard -->
+  <div id="milestones-section" style="margin-bottom:48px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+      <h2 style="font-family:'Fraunces',serif;font-size:24px;font-weight:400;">Upcoming dates</h2>
+      <span id="ms-summary" style="font-size:12px;font-weight:300;color:rgba(247,243,237,0.3);"></span>
+    </div>
+    <div class="table-wrap">
+      <table class="ms-table">
+        <thead><tr>
+          <th style="width:110px;">Urgency</th>
+          <th>Client</th>
+          <th>Milestone</th>
+          <th>Date</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="ms-tbody"><tr><td colspan="5" style="text-align:center;color:rgba(247,243,237,0.25);padding:32px;">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
   <div class="page-header">
     <h1>Client management</h1>
     <button class="btn-primary" id="add-btn">+ Add client</button>
@@ -160,6 +233,20 @@
       <span style="font-size:12px;font-weight:300;color:rgba(247,243,237,0.3);">Opens in new tab &mdash; admin session bypasses client login</span>
     </div>
     <div id="reports-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;"></div>
+  </div>
+
+  <!-- Security / 2FA -->
+  <div style="margin-top:52px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+      <h2 style="font-family:'Fraunces',serif;font-size:24px;font-weight:400;">Security</h2>
+    </div>
+    <div class="totp-setup">
+      <div id="totp-section">
+        <p style="font-size:13.5px;color:rgba(247,243,237,0.4);margin-bottom:18px;">Two-factor authentication (2FA) adds an extra layer of security to your admin login.</p>
+        <button class="btn-secondary" id="totp-setup-btn">Set up / view 2FA</button>
+      </div>
+      <div id="totp-panel" style="display:none;"></div>
+    </div>
   </div>
 </main>
 
@@ -223,42 +310,76 @@ const MARKETS = [
 
 let adminPassword = '';
 let clients = [];
+let milestones = [];
 
 // ── Gate ──────────────────────────────────────────────────────────────────────
+let _gatePw = '';
+
 async function tryAuth(pw) {
   const res = await fetch('/api/admin/clients', { headers: { Authorization: `Bearer ${pw}` } });
   return res.ok;
 }
 
+async function completeLogin(pw) {
+  adminPassword = pw;
+  sessionStorage.setItem('fw_admin_pw', pw);
+  document.getElementById('gate').classList.add('hidden');
+  loadClients();
+  loadMilestones();
+}
+
 document.getElementById('gate-btn').addEventListener('click', async function() {
   const pw = document.getElementById('gate-pw').value;
   if (!pw) return;
-  this.textContent = 'Checking…';
-  this.disabled = true;
-  if (await tryAuth(pw)) {
-    adminPassword = pw;
-    sessionStorage.setItem('fw_admin_pw', pw);
-    fetch('/api/admin-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw }) });
-    document.getElementById('gate').classList.add('hidden');
-    loadClients();
+  this.textContent = 'Checking…'; this.disabled = true;
+  const errEl = document.getElementById('gate-error');
+  errEl.classList.remove('visible');
+  const res = await fetch('/api/admin-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw }) });
+  if (res.status === 200) {
+    _gatePw = pw; await completeLogin(pw);
+  } else if (res.status === 202) {
+    _gatePw = pw;
+    document.getElementById('gate-step-1').style.display = 'none';
+    document.getElementById('gate-step-2').style.display = 'block';
+    document.getElementById('gate-code').focus();
+    this.textContent = 'Continue'; this.disabled = false;
   } else {
-    document.getElementById('gate-error').classList.add('visible');
-    this.textContent = 'Continue';
-    this.disabled = false;
+    errEl.textContent = 'Incorrect password.'; errEl.classList.add('visible');
+    this.textContent = 'Continue'; this.disabled = false;
   }
 });
-document.getElementById('gate-pw').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('gate-btn').click();
+document.getElementById('gate-pw').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('gate-btn').click(); });
+
+document.getElementById('gate-code-btn').addEventListener('click', async function() {
+  const code = document.getElementById('gate-code').value.trim();
+  if (!code) return;
+  this.textContent = 'Verifying…'; this.disabled = true;
+  const errEl = document.getElementById('gate-error');
+  errEl.classList.remove('visible');
+  const res = await fetch('/api/admin-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: _gatePw, code }) });
+  if (res.status === 200) {
+    await completeLogin(_gatePw);
+  } else {
+    errEl.textContent = 'Invalid code. Try again.'; errEl.classList.add('visible');
+    this.textContent = 'Verify'; this.disabled = false;
+    document.getElementById('gate-code').value = ''; document.getElementById('gate-code').focus();
+  }
+});
+document.getElementById('gate-code').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('gate-code-btn').click(); });
+document.getElementById('gate-back-btn').addEventListener('click', function() {
+  document.getElementById('gate-step-2').style.display = 'none';
+  document.getElementById('gate-step-1').style.display = 'block';
+  document.getElementById('gate-code').value = '';
+  document.getElementById('gate-error').classList.remove('visible');
 });
 
 // Auto-restore from session
 (async function() {
   const stored = sessionStorage.getItem('fw_admin_pw');
   if (stored && await tryAuth(stored)) {
-    adminPassword = stored;
+    _gatePw = stored;
     fetch('/api/admin-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: stored }) });
-    document.getElementById('gate').classList.add('hidden');
-    loadClients();
+    await completeLogin(stored);
   }
 })();
 
@@ -285,7 +406,10 @@ function renderTable() {
     tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No clients yet. Add your first client above.</td></tr>';
     return;
   }
-  tbody.innerHTML = clients.map(c => `
+  tbody.innerHTML = clients.map(c => {
+    const cMs = milestones.filter(m => m.clientId === c.id && !m.completed);
+    const msLabel = cMs.length ? `Dates (${cMs.length})` : 'Dates';
+    return `
     <tr>
       <td class="td-name">${esc(c.name)}</td>
       <td class="td-email">${esc(c.email)}</td>
@@ -293,9 +417,16 @@ function renderTable() {
       <td><span class="status-dot ${c.active ? 'status-active' : 'status-inactive'}"></span>${c.active ? 'Active' : 'Inactive'}</td>
       <td><div class="actions">
         <button class="btn-sm btn-edit" onclick="openEdit('${c.id}')">Edit</button>
+        <button class="btn-dates" id="dates-btn-${c.id}" onclick="toggleMilestones('${c.id}','${esc(c.name)}')">${msLabel}</button>
         <button class="btn-sm btn-delete" onclick="deleteClient('${c.id}','${esc(c.name)}')">Delete</button>
       </div></td>
-    </tr>`).join('');
+    </tr>
+    <tr id="ms-row-${c.id}" style="display:none;">
+      <td colspan="5" style="padding:0;">
+        <div class="ms-panel" id="ms-panel-${c.id}"></div>
+      </td>
+    </tr>`;
+  }).join('');
 }
 
 function marketName(key) {
@@ -418,6 +549,186 @@ function renderReports() {
       <span style="font-size:11px;font-weight:300;color:rgba(247,243,237,0.25);">↗ open report</span>
     </a>`;
   }).join('');
+}
+
+// ── Milestones ────────────────────────────────────────────────────────────────
+const MS_TYPES = {
+  finance:       'Subject to Finance',
+  building_pest: 'Building & Pest',
+  contracts:     'Contracts Exchanged',
+  cooling_off:   'Cooling Off End',
+  settlement:    'Settlement',
+  preapproval:   'Pre-Approval Expiry',
+  custom:        'Custom',
+};
+
+async function loadMilestones() {
+  const res = await api('GET', '/api/admin/milestones');
+  milestones = await res.json();
+  renderMilestonesDashboard();
+  renderTable(); // refresh Dates button counts
+}
+
+function daysFromToday(dateStr) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(dateStr + 'T00:00:00');
+  return Math.round((d - today) / 86400000);
+}
+
+function urgencyClass(days) {
+  if (days < 0) return 'urg-overdue';
+  if (days <= 3) return 'urg-critical';
+  if (days <= 14) return 'urg-soon';
+  return 'urg-ok';
+}
+
+function urgencyLabel(days) {
+  if (days < 0) return `${Math.abs(days)}d overdue`;
+  if (days === 0) return 'Today';
+  if (days === 1) return 'Tomorrow';
+  return `${days} days`;
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function renderMilestonesDashboard() {
+  const tbody = document.getElementById('ms-tbody');
+  const summaryEl = document.getElementById('ms-summary');
+  const active = milestones.filter(m => !m.completed).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const overdue = active.filter(m => daysFromToday(m.date) < 0).length;
+  summaryEl.textContent = active.length
+    ? `${active.length} active${overdue ? ' · ' + overdue + ' overdue' : ''}`
+    : '';
+  if (!active.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:rgba(247,243,237,0.25);padding:32px;">No upcoming dates. Add dates from the client rows below.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = active.map(m => {
+    const days = daysFromToday(m.date);
+    const urg = urgencyClass(days);
+    return `<tr class="${urg}">
+      <td><span class="urg-badge">${urgencyLabel(days)}</span></td>
+      <td class="ms-client">${esc(m.clientName)}</td>
+      <td class="ms-label">${esc(m.label)}</td>
+      <td class="ms-date">${formatDate(m.date)}</td>
+      <td><div class="actions">
+        <button class="btn-sm btn-done" onclick="completeMilestone('${m.id}')">✓ Done</button>
+        <button class="btn-sm btn-delete" onclick="deleteMilestoneConfirm('${m.id}')">Delete</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function toggleMilestones(clientId, clientName) {
+  const row = document.getElementById('ms-row-' + clientId);
+  const btn = document.getElementById('dates-btn-' + clientId);
+  if (row.style.display === 'none') {
+    row.style.display = 'table-row';
+    btn.classList.add('active');
+    renderClientMilestones(clientId, clientName);
+  } else {
+    row.style.display = 'none';
+    btn.classList.remove('active');
+  }
+}
+
+function renderClientMilestones(clientId, clientName) {
+  const panel = document.getElementById('ms-panel-' + clientId);
+  const cMs = milestones.filter(m => m.clientId === clientId);
+  const active = cMs.filter(m => !m.completed).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const done = cMs.filter(m => m.completed);
+  const msHtml = active.length ? active.map(m => {
+    const days = daysFromToday(m.date);
+    const urg = urgencyClass(days);
+    return `<div class="ms-item">
+      <span class="ms-item-label ${urg}">${esc(m.label)}${m.notes ? `<span style="font-size:12px;color:rgba(247,243,237,0.3);display:block;">${esc(m.notes)}</span>` : ''}</span>
+      <span class="ms-item-date">${formatDate(m.date)}</span>
+      <span class="ms-item-days ${urg}">${urgencyLabel(days)}</span>
+      <div class="actions">
+        <button class="btn-sm btn-done" onclick="completeMilestone('${m.id}','${clientId}','${esc(clientName)}')">✓ Done</button>
+        <button class="btn-sm btn-delete" onclick="deleteMilestoneConfirm('${m.id}','${clientId}','${esc(clientName)}')">×</button>
+      </div>
+    </div>`;
+  }).join('') : '<p style="font-size:13px;color:rgba(247,243,237,0.25);padding:8px 0;">No upcoming dates.</p>';
+
+  panel.innerHTML = `<div class="ms-panel-inner">
+    ${msHtml}
+    ${done.length ? `<p style="font-size:12px;color:rgba(247,243,237,0.2);margin-top:12px;">${done.length} completed milestone${done.length > 1 ? 's' : ''}</p>` : ''}
+    <div class="ms-add-form">
+      <select id="ms-type-${clientId}">
+        ${Object.entries(MS_TYPES).map(([k,v]) => `<option value="${k}">${v}</option>`).join('')}
+      </select>
+      <input type="date" id="ms-date-${clientId}" style="color-scheme:dark;">
+      <input type="text" id="ms-notes-${clientId}" placeholder="Notes (optional)" style="flex:1;min-width:140px;">
+      <button class="btn-add-ms" onclick="addMilestone('${clientId}','${esc(clientName)}')">+ Add date</button>
+    </div>
+  </div>`;
+}
+
+async function addMilestone(clientId, clientName) {
+  const type = document.getElementById('ms-type-' + clientId).value;
+  const date = document.getElementById('ms-date-' + clientId).value;
+  const notes = document.getElementById('ms-notes-' + clientId).value;
+  if (!date) { alert('Please select a date.'); return; }
+  const label = type === 'custom' ? (notes || 'Custom') : MS_TYPES[type];
+  await api('POST', '/api/admin/milestones', { clientId, clientName, type, label, date, notes });
+  await loadMilestones();
+  renderClientMilestones(clientId, clientName);
+}
+
+async function completeMilestone(id, clientId, clientName) {
+  await api('PUT', '/api/admin/milestones', { id, completed: true });
+  await loadMilestones();
+  if (clientId) renderClientMilestones(clientId, clientName);
+}
+
+async function deleteMilestoneConfirm(id, clientId, clientName) {
+  if (!confirm('Delete this date?')) return;
+  await api('DELETE', `/api/admin/milestones?id=${encodeURIComponent(id)}`);
+  await loadMilestones();
+  if (clientId) renderClientMilestones(clientId, clientName);
+}
+
+// ── TOTP Setup ────────────────────────────────────────────────────────────────
+document.getElementById('totp-setup-btn').addEventListener('click', async function() {
+  this.textContent = 'Loading…'; this.disabled = true;
+  const res = await api('GET', '/api/admin/totp-setup');
+  const { secret, uri, configured } = await res.json();
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(uri)}&color=f7f3ed&bgcolor=22201d`;
+  const panel = document.getElementById('totp-panel');
+  panel.innerHTML = `
+    <div style="display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start;">
+      <img src="${qrUrl}" width="180" height="180" alt="QR Code" style="border-radius:12px;flex-shrink:0;">
+      <div style="flex:1;min-width:220px;">
+        <p style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(189,122,112,0.7);margin-bottom:10px;">${configured ? '2FA is active' : '2FA not yet active'}</p>
+        <p style="font-size:14px;color:rgba(247,243,237,0.55);margin-bottom:14px;line-height:1.6;">Scan this QR code with Google Authenticator or Authy. Or enter the key manually.</p>
+        <p style="font-size:11px;color:rgba(247,243,237,0.3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.1em;">Setup key</p>
+        <div class="totp-secret-box">${secret}</div>
+        ${!configured ? `<div style="background:rgba(232,168,124,0.1);border:1px solid rgba(232,168,124,0.2);border-radius:10px;padding:14px 16px;margin-top:14px;">
+          <p style="font-size:13px;color:#e8a87c;line-height:1.6;"><strong>Next step:</strong> Scan the QR code first, then add <code style="background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:4px;">TOTP_SECRET=${secret}</code> to your Netlify environment variables and redeploy.</p>
+        </div>` : ''}
+        <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <input type="text" id="totp-test-input" placeholder="Test code" maxlength="6" inputmode="numeric" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:8px;padding:9px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#f7f3ed;outline:none;width:120px;letter-spacing:0.15em;">
+          <button class="btn-secondary" onclick="testTotpCode('${secret}')">Test code</button>
+          <span id="totp-test-result" style="font-size:13px;"></span>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('totp-panel').style.display = 'block';
+  document.getElementById('totp-section').style.display = 'none';
+});
+
+async function testTotpCode(secret) {
+  const code = document.getElementById('totp-test-input').value.trim();
+  const resultEl = document.getElementById('totp-test-result');
+  if (!code) return;
+  const res = await api('POST', '/api/admin/totp-setup', { code, secret });
+  const { valid } = await res.json();
+  resultEl.textContent = valid ? '✓ Code is valid' : '✗ Invalid code';
+  resultEl.style.color = valid ? '#6dbf7b' : '#f08080';
 }
 </script>
 </body>
