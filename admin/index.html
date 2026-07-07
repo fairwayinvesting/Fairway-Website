@@ -121,7 +121,7 @@
     .btn-dates.active{background:rgba(189,122,112,0.15);color:#bd7a70;}
 
     /* Add date form — grid layout matching modal fields */
-    .ms-add-grid{display:grid;grid-template-columns:1fr 1fr 168px 1fr;gap:14px;margin-bottom:20px;}
+    .ms-add-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;margin-bottom:20px;}
     .ms-add-field{display:flex;flex-direction:column;}
     .ms-add-label{font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.4);margin-bottom:7px;display:block;}
     .ms-add-input{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:300;color:#f7f3ed;outline:none;transition:border-color .2s;width:100%;}
@@ -231,7 +231,8 @@
         <button class="btn-secondary" onclick="toggleAddDateForm()">Cancel</button>
       </div>
     </div>
-    <div class="table-wrap">
+    <p id="ms-empty" style="display:none;font-size:14px;color:rgba(247,243,237,0.25);padding:32px 0;text-align:center;">No upcoming dates — use the + Add date button above to get started.</p>
+    <div class="table-wrap" id="ms-table-wrap">
       <div class="ms-scroll">
         <table class="ms-table">
           <thead><tr>
@@ -241,7 +242,7 @@
             <th>Date</th>
             <th></th>
           </tr></thead>
-          <tbody id="ms-tbody"><tr><td colspan="5" style="text-align:center;color:rgba(247,243,237,0.25);padding:32px;">Loading…</td></tr></tbody>
+          <tbody id="ms-tbody"></tbody>
         </table>
       </div>
     </div>
@@ -682,10 +683,16 @@ function renderMilestonesDashboard() {
   summaryEl.textContent = active.length
     ? `${active.length} active${overdue ? ' · ' + overdue + ' overdue' : ''}`
     : '';
+  const emptyEl = document.getElementById('ms-empty');
+  const tableWrap = document.getElementById('ms-table-wrap');
   if (!active.length) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:rgba(247,243,237,0.25);padding:32px;">No upcoming dates. Add dates from the client rows below.</td></tr>';
+    emptyEl.style.display = 'block';
+    tableWrap.style.display = 'none';
+    tbody.innerHTML = '';
     return;
   }
+  emptyEl.style.display = 'none';
+  tableWrap.style.display = 'block';
   tbody.innerHTML = active.map(m => {
     const days = daysFromToday(m.date);
     const urg = urgencyClass(days);
