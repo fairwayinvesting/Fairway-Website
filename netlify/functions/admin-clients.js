@@ -6,11 +6,11 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 function buildWelcomeEmail(name, email, password) {
   const firstName = name.split(' ')[0];
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><style>:root{color-scheme:light;}[data-ogsc] body,[data-ogsc] .email-outer{background-color:#FAF6F1!important;}[data-ogsc] .dark-card{background-color:#1C1815!important;}</style><title>Welcome to Fairway</title></head>
-<body style="margin:0;padding:0;background:#FAF6F1;font-family:Helvetica,Arial,sans-serif;" class="email-outer">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#FAF6F1" class="email-outer"><tr><td align="center" style="padding:48px 24px 40px;">
+  return `<!DOCTYPE html><html lang="en" style="background:#181614;"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Welcome to Fairway</title></head>
+<body style="margin:0;padding:0;background:#181614;font-family:Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#181614"><tr><td align="center" style="padding:40px 16px;background:#181614;">
 <table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;">
-  <tr><td style="background:#1C1815;border-radius:18px;padding:44px 48px 44px;" class="dark-card">
+  <tr><td style="background:#1C1815;border-radius:20px;border:1px solid rgba(181,113,90,0.2);padding:44px 48px;">
     <p style="margin:0 0 36px;padding-bottom:32px;border-bottom:1px solid rgba(250,246,241,0.08);text-align:center;">
       <img src="https://fairwayinvesting.com.au/logo-word.png" width="200" height="30" alt="Fairway Investing" style="display:inline-block;border:0;max-width:200px;">
     </p>
@@ -43,8 +43,8 @@ function buildWelcomeEmail(name, email, password) {
     </tr></table>
     <p style="font-size:13px;color:rgba(250,246,241,0.3);margin:28px 0 0;line-height:1.6;">Any questions, reply to this email or call 0416 184 333.</p>
   </td></tr>
-  <tr><td style="padding:28px 0 0;text-align:center;">
-    <p style="font-size:12px;color:rgba(28,24,21,0.4);margin:0;line-height:1.7;">Fairway Investing &middot; Suite 211, Level 2/5 Alexander Street, Crows Nest NSW 2065<br>
+  <tr><td style="padding:24px 0 0;text-align:center;">
+    <p style="font-size:12px;color:rgba(250,246,241,0.25);margin:0;line-height:1.7;">Fairway Investing &middot; Suite 211, Level 2/5 Alexander Street, Crows Nest NSW 2065<br>
     <a href="mailto:info@fairwayinvesting.com.au" style="color:#B5715A;text-decoration:none;">info@fairwayinvesting.com.au</a> &middot; 0416 184 333</p>
   </td></tr>
 </table>
