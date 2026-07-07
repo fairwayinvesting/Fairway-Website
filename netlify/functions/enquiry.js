@@ -85,14 +85,14 @@ export default async (req) => {
       resend.emails.send({
         from: 'Fairway Investing <info@fairwayinvesting.com.au>',
         to: ['luke@fairwayinvesting.com.au'],
-        replyTo: d.email,
+        reply_to: d.email,
         subject: `New enquiry — ${d.firstName} ${d.lastName}`,
         html: buildNotificationEmail(d),
       }),
       resend.emails.send({
         from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
         to: [d.email],
-        replyTo: 'luke@fairwayinvesting.com.au',
+        reply_to: 'luke@fairwayinvesting.com.au',
         subject: `Thanks for reaching out — Fairway Investing`,
         html: buildAcknowledgementEmail(d.firstName),
       }),

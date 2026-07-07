@@ -98,13 +98,17 @@ export default async (req) => {
     clients.push(client);
     await store.setJSON('all', clients);
 
-    resend.emails.send({
-      from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
-      to: [client.email],
-      replyTo: 'luke@fairwayinvesting.com.au',
-      subject: 'Welcome to Fairway — your portal is ready',
-      html: buildWelcomeEmail(client.name, client.email, password),
-    }).catch(err => console.error('Welcome email failed:', err));
+    try {
+      await resend.emails.send({
+        from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
+        to: [client.email],
+        reply_to: 'luke@fairwayinvesting.com.au',
+        subject: 'Welcome to Fairway — your portal is ready',
+        html: buildWelcomeEmail(client.name, client.email, password),
+      });
+    } catch (err) {
+      console.error('Welcome email failed:', err?.message || err);
+    }
 
     return json({ ok: true, id: client.id }, 201);
   }
