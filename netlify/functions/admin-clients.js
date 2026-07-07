@@ -10,11 +10,10 @@ function buildWelcomeEmail(name, email, password) {
 <body style="margin:0;padding:0;background:#FAF6F1;font-family:Helvetica,Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#FAF6F1"><tr><td align="center" style="padding:48px 24px 40px;">
 <table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;">
-  <tr><td style="padding:0 0 36px;text-align:center;">
-    <span style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:400;color:#1C1815;letter-spacing:0.25em;text-transform:uppercase;">FAIRWAY</span>
-    <span style="display:block;font-size:10px;color:rgba(28,24,21,0.4);letter-spacing:0.14em;text-transform:uppercase;margin-top:4px;">Investing</span>
-  </td></tr>
-  <tr><td style="background:#1C1815;border-radius:18px;padding:52px 48px 44px;">
+  <tr><td style="background:#1C1815;border-radius:18px;padding:44px 48px 44px;">
+    <p style="margin:0 0 36px;padding-bottom:32px;border-bottom:1px solid rgba(250,246,241,0.08);text-align:center;">
+      <img src="https://fairwayinvesting.com.au/logo-word.png" width="200" height="30" alt="Fairway Investing" style="display:inline-block;border:0;max-width:200px;">
+    </p>
     <p style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#B5715A;margin:0 0 16px;">Client portal</p>
     <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:36px;font-weight:400;color:#FAF6F1;margin:0 0 12px;line-height:1.15;">Welcome, ${firstName}.</h1>
     <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 36px;line-height:1.65;">Your Fairway client portal is live. Use the details below to sign in and access your market research reports.</p>
@@ -42,7 +41,7 @@ function buildWelcomeEmail(name, email, password) {
         <a href="https://fairwayinvesting.com.au/clients/" style="display:inline-block;font-size:15px;font-weight:500;color:#FAF6F1;text-decoration:none;padding:15px 34px;">Access your portal &rarr;</a>
       </td>
     </tr></table>
-    <p style="font-size:13px;color:rgba(250,246,241,0.3);margin:28px 0 0;line-height:1.6;">We recommend changing your password after your first login. Any questions, reply to this email or call 0416 184 333.</p>
+    <p style="font-size:13px;color:rgba(250,246,241,0.3);margin:28px 0 0;line-height:1.6;">Any questions, reply to this email or call 0416 184 333.</p>
   </td></tr>
   <tr><td style="padding:28px 0 0;text-align:center;">
     <p style="font-size:12px;color:rgba(28,24,21,0.4);margin:0;line-height:1.7;">Fairway Investing &middot; Suite 211, Level 2/5 Alexander Street, Crows Nest NSW 2065<br>
