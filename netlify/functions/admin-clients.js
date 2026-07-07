@@ -12,7 +12,7 @@ function buildWelcomeEmail(name, email, password) {
 <table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;">
   <tr><td style="background:#1C1815;border-radius:18px;padding:44px 48px 44px;">
     <p style="margin:0 0 36px;padding-bottom:32px;border-bottom:1px solid rgba(250,246,241,0.08);text-align:center;">
-      <img src="https://fairwayinvesting.com.au/logo-word.png" width="200" height="30" alt="Fairway Investing" style="display:inline-block;border:0;max-width:200px;">
+      <span style="font-family:Georgia,'Times New Roman',serif;font-size:20px;font-weight:400;letter-spacing:0.22em;color:rgba(250,246,241,0.3);text-transform:uppercase;">FAIRWAY</span><span style="font-family:Georgia,'Times New Roman',serif;font-size:20px;font-weight:400;letter-spacing:0.22em;color:#B5715A;text-transform:uppercase;"> INVESTING</span>
     </p>
     <p style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#B5715A;margin:0 0 16px;">Client portal</p>
     <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:36px;font-weight:400;color:#FAF6F1;margin:0 0 12px;line-height:1.15;">Welcome, ${firstName}.</h1>

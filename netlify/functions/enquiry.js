@@ -13,8 +13,8 @@ function buildNotificationEmail(d) {
 <body style="margin:0;padding:0;background:#FAF6F1;font-family:Helvetica,Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#FAF6F1"><tr><td align="center" style="padding:48px 24px 40px;">
 <table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;">
-  <tr><td style="background:#1C1815;border-radius:16px 16px 0 0;padding:28px 48px;text-align:center;border-bottom:1px solid rgba(250,246,241,0.08);">
-    <img src="https://fairwayinvesting.com.au/logo-word.png" width="180" height="27" alt="Fairway Investing" style="display:inline-block;border:0;max-width:180px;">
+  <tr><td style="background:#1C1815;border-radius:16px 16px 0 0;padding:24px 48px;text-align:center;border-bottom:1px solid rgba(250,246,241,0.08);">
+    <span style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:400;letter-spacing:0.22em;color:rgba(250,246,241,0.3);text-transform:uppercase;">FAIRWAY</span><span style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:400;letter-spacing:0.22em;color:#B5715A;text-transform:uppercase;"> INVESTING</span>
   </td></tr>
   <tr><td style="background:#ffffff;border:1px solid rgba(28,24,21,0.1);border-radius:0 0 16px 16px;padding:44px 48px;border-top:0;">
     <p style="font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#B5715A;margin:0 0 10px;">New enquiry</p>
@@ -51,7 +51,7 @@ function buildAcknowledgementEmail(firstName) {
   </td></tr>
   <tr><td style="background:#1C1815;border-radius:18px;padding:44px 48px 44px;">
     <p style="margin:0 0 32px;padding-bottom:28px;border-bottom:1px solid rgba(250,246,241,0.08);text-align:center;">
-      <img src="https://fairwayinvesting.com.au/logo-word.png" width="180" height="27" alt="Fairway Investing" style="display:inline-block;border:0;max-width:180px;">
+      <span style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:400;letter-spacing:0.22em;color:rgba(250,246,241,0.3);text-transform:uppercase;">FAIRWAY</span><span style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:400;letter-spacing:0.22em;color:#B5715A;text-transform:uppercase;"> INVESTING</span>
     </p>
     <p style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#B5715A;margin:0 0 16px;">Got it</p>
     <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:34px;font-weight:400;color:#FAF6F1;margin:0 0 16px;line-height:1.15;">Thanks, ${firstName}.</h1>
