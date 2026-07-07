@@ -1,5 +1,57 @@
 import { getStore } from '@netlify/blobs';
 import crypto from 'crypto';
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+function buildWelcomeEmail(name, email, password) {
+  const firstName = name.split(' ')[0];
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Welcome to Fairway</title></head>
+<body style="margin:0;padding:0;background:#FAF6F1;font-family:Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#FAF6F1"><tr><td align="center" style="padding:48px 24px 40px;">
+<table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;">
+  <tr><td style="padding:0 0 36px;text-align:center;">
+    <span style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:400;color:#1C1815;letter-spacing:0.25em;text-transform:uppercase;">FAIRWAY</span>
+    <span style="display:block;font-size:10px;color:rgba(28,24,21,0.4);letter-spacing:0.14em;text-transform:uppercase;margin-top:4px;">Investing</span>
+  </td></tr>
+  <tr><td style="background:#1C1815;border-radius:18px;padding:52px 48px 44px;">
+    <p style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#B5715A;margin:0 0 16px;">Client portal</p>
+    <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:36px;font-weight:400;color:#FAF6F1;margin:0 0 12px;line-height:1.15;">Welcome, ${firstName}.</h1>
+    <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 36px;line-height:1.65;">Your Fairway client portal is live. Use the details below to sign in and access your market research reports.</p>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:rgba(250,246,241,0.06);border:1px solid rgba(250,246,241,0.1);border-radius:12px;margin:0 0 36px;">
+      <tr><td style="padding:28px 32px;">
+        <p style="font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#B5715A;margin:0 0 20px;">Your login details</p>
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td style="padding:0 0 14px;">
+            <span style="font-size:11px;color:rgba(250,246,241,0.4);display:block;margin-bottom:4px;">LOGIN URL</span>
+            <a href="https://fairwayinvesting.com.au/clients/" style="font-size:14px;color:#B5715A;text-decoration:none;">fairwayinvesting.com.au/clients</a>
+          </td></tr>
+          <tr><td style="padding:14px 0;border-top:1px solid rgba(250,246,241,0.07);">
+            <span style="font-size:11px;color:rgba(250,246,241,0.4);display:block;margin-bottom:4px;">EMAIL</span>
+            <span style="font-size:14px;color:#FAF6F1;font-family:Courier,monospace;">${email}</span>
+          </td></tr>
+          <tr><td style="padding:14px 0 0;border-top:1px solid rgba(250,246,241,0.07);">
+            <span style="font-size:11px;color:rgba(250,246,241,0.4);display:block;margin-bottom:4px;">PASSWORD</span>
+            <span style="font-size:14px;color:#FAF6F1;font-family:Courier,monospace;">${password}</span>
+          </td></tr>
+        </table>
+      </td></tr>
+    </table>
+    <table cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="border-radius:100px;background:#B5715A;">
+        <a href="https://fairwayinvesting.com.au/clients/" style="display:inline-block;font-size:15px;font-weight:500;color:#FAF6F1;text-decoration:none;padding:15px 34px;">Access your portal &rarr;</a>
+      </td>
+    </tr></table>
+    <p style="font-size:13px;color:rgba(250,246,241,0.3);margin:28px 0 0;line-height:1.6;">We recommend changing your password after your first login. Any questions, reply to this email or call 0416 184 333.</p>
+  </td></tr>
+  <tr><td style="padding:28px 0 0;text-align:center;">
+    <p style="font-size:12px;color:rgba(28,24,21,0.4);margin:0;line-height:1.7;">Fairway Investing &middot; Suite 211, Level 2/5 Alexander Street, Crows Nest NSW 2065<br>
+    <a href="mailto:info@fairwayinvesting.com.au" style="color:#B5715A;text-decoration:none;">info@fairwayinvesting.com.au</a> &middot; 0416 184 333</p>
+  </td></tr>
+</table>
+</td></tr></table>
+</body></html>`;
+}
 
 async function pbkdf2Hash(password, salt) {
   return new Promise((resolve, reject) => {
@@ -46,6 +98,15 @@ export default async (req) => {
     };
     clients.push(client);
     await store.setJSON('all', clients);
+
+    resend.emails.send({
+      from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
+      to: [client.email],
+      replyTo: 'luke@fairwayinvesting.com.au',
+      subject: 'Welcome to Fairway — your portal is ready',
+      html: buildWelcomeEmail(client.name, client.email, password),
+    }).catch(err => console.error('Welcome email failed:', err));
+
     return json({ ok: true, id: client.id }, 201);
   }
 
