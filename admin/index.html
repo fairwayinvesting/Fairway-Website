@@ -124,6 +124,10 @@
     .btn-dates{background:rgba(247,243,237,0.07);color:rgba(247,243,237,0.6);border:none;border-radius:7px;padding:7px 12px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:background .2s;}
     .btn-dates:hover{background:rgba(247,243,237,0.12);}
     .btn-dates.active{background:rgba(189,122,112,0.15);color:#bd7a70;}
+    .ms-dash-select{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:8px 12px;font-family:'Outfit',sans-serif;font-size:13px;color:#f7f3ed;outline:none;width:100%;}
+    .ms-dash-select:focus{border-color:rgba(189,122,112,0.5);}
+    .ms-dash-select option{background:#22201d;}
+    #ms-dash-form{align-items:flex-end;}
 
     /* TOTP setup */
     .totp-setup{background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:28px 32px;}
@@ -206,7 +210,38 @@
   <div id="milestones-section" style="margin-bottom:48px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
       <h2 style="font-family:'Fraunces',serif;font-size:24px;font-weight:400;">Upcoming dates</h2>
-      <span id="ms-summary" style="font-size:12px;font-weight:300;color:rgba(247,243,237,0.3);"></span>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <span id="ms-summary" style="font-size:12px;font-weight:300;color:rgba(247,243,237,0.3);"></span>
+        <button class="btn-primary" id="ms-add-btn" onclick="toggleAddDateForm()" style="padding:9px 18px;font-size:13px;">+ Add date</button>
+      </div>
+    </div>
+    <!-- Inline add-date form -->
+    <div id="ms-add-panel" style="display:none;background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:22px 24px;margin-bottom:16px;">
+      <p style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:16px;">New date</p>
+      <div class="ms-add-form" id="ms-dash-form">
+        <div style="flex:1;min-width:160px;">
+          <label style="display:block;font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:6px;">Client</label>
+          <select id="ms-add-client" class="ms-dash-select">
+            <option value="">Select client…</option>
+          </select>
+        </div>
+        <div style="flex:1;min-width:160px;">
+          <label style="display:block;font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:6px;">Type</label>
+          <select id="ms-add-type" class="ms-dash-select"></select>
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:6px;">Date</label>
+          <input type="date" id="ms-add-date" style="color-scheme:dark;">
+        </div>
+        <div style="flex:2;min-width:140px;">
+          <label style="display:block;font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:6px;">Notes (optional)</label>
+          <input type="text" id="ms-add-notes" placeholder="e.g. 21 days from exchange">
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-end;padding-bottom:1px;">
+          <button class="btn-add-ms" id="ms-add-submit" onclick="addMilestoneFromDashboard()">Add date</button>
+          <button class="btn-secondary" onclick="toggleAddDateForm()" style="padding:8px 14px;font-size:13px;">Cancel</button>
+        </div>
+      </div>
     </div>
     <div class="table-wrap">
       <table class="ms-table">
@@ -231,7 +266,7 @@
       <thead>
         <tr>
           <th>Client</th>
-          <th class="td-email" style="display:table-cell;">Email</th>
+          <th class="td-email">Email</th>
           <th class="td-markets">Markets</th>
           <th>Status</th>
           <th>Actions</th>
@@ -689,28 +724,47 @@ function renderClientMilestones(clientId) {
   panel.innerHTML = `<div class="ms-panel-inner">
     ${msHtml}
     ${done.length ? `<p style="font-size:12px;color:rgba(247,243,237,0.2);margin-top:12px;">${done.length} completed date${done.length > 1 ? 's' : ''}</p>` : ''}
-    <div class="ms-add-form">
-      <select id="ms-type-${clientId}">
-        ${Object.entries(MS_TYPES).map(([k,v]) => `<option value="${k}">${v}</option>`).join('')}
-      </select>
-      <input type="date" id="ms-date-${clientId}" style="color-scheme:dark;">
-      <input type="text" id="ms-notes-${clientId}" placeholder="Notes (optional)" style="flex:1;min-width:140px;">
-      <button class="btn-add-ms" onclick="addMilestone('${clientId}')">+ Add date</button>
-    </div>
   </div>`;
 }
 
-async function addMilestone(clientId) {
-  const type = document.getElementById('ms-type-' + clientId).value;
-  const date = document.getElementById('ms-date-' + clientId).value;
-  const notes = document.getElementById('ms-notes-' + clientId).value;
+function toggleAddDateForm() {
+  const panel = document.getElementById('ms-add-panel');
+  const isOpen = panel.style.display !== 'none';
+  if (isOpen) {
+    panel.style.display = 'none';
+    document.getElementById('ms-add-btn').textContent = '+ Add date';
+  } else {
+    // Populate client dropdown fresh
+    const sel = document.getElementById('ms-add-client');
+    sel.innerHTML = '<option value="">Select client…</option>' +
+      clients.filter(c => c.active).map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+    // Populate type dropdown
+    document.getElementById('ms-add-type').innerHTML =
+      Object.entries(MS_TYPES).map(([k,v]) => `<option value="${k}">${v}</option>`).join('');
+    document.getElementById('ms-add-date').value = '';
+    document.getElementById('ms-add-notes').value = '';
+    panel.style.display = 'block';
+    document.getElementById('ms-add-btn').textContent = '✕ Cancel';
+    sel.focus();
+  }
+}
+
+async function addMilestoneFromDashboard() {
+  const clientId = document.getElementById('ms-add-client').value;
+  const type = document.getElementById('ms-add-type').value;
+  const date = document.getElementById('ms-add-date').value;
+  const notes = document.getElementById('ms-add-notes').value.trim();
+  if (!clientId) { alert('Please select a client.'); return; }
   if (!date) { alert('Please select a date.'); return; }
   const name = clientName(clientId);
   const label = type === 'custom' ? (notes || 'Custom') : MS_TYPES[type];
+  const btn = document.getElementById('ms-add-submit');
+  btn.textContent = 'Saving…'; btn.disabled = true;
   const res = await api('POST', '/api/admin/milestones', { clientId, clientName: name, type, label, date, notes });
+  btn.textContent = 'Add date'; btn.disabled = false;
   if (!res.ok) { alert('Failed to save. Please try again.'); return; }
+  toggleAddDateForm();
   await loadMilestones();
-  renderClientMilestones(clientId);
 }
 
 async function completeMilestone(id, clientId) {
