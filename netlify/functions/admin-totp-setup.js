@@ -37,7 +37,7 @@ export default async (req) => {
 
   if (req.method === 'GET') {
     const secret = process.env.TOTP_SECRET ||
-      Array.from(crypto.randomBytes(20), b => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'[b % 32]).join('');
+      Array.from(crypto.randomBytes(32), b => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'[b % 32]).join('');
     const uri = `otpauth://totp/Fairway%20Admin?secret=${secret}&issuer=Fairway&algorithm=SHA1&digits=6&period=30`;
     return json({ secret, uri, configured });
   }
