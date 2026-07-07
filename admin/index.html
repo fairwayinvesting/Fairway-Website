@@ -87,18 +87,19 @@
     .error-msg{font-size:13px;font-weight:300;color:#cf9b92;margin-top:14px;display:none;}
     .error-msg.visible{display:block;}
 
-    /* Milestones */
-    .ms-table{width:100%;border-collapse:collapse;}
+    /* Milestones dashboard table */
+    .ms-table{width:100%;border-collapse:collapse;min-width:480px;}
     .ms-table th{font-size:10.5px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);padding:11px 16px;text-align:left;border-bottom:1px solid rgba(247,243,237,0.07);}
     .ms-table td{padding:12px 16px;font-size:13.5px;font-weight:300;border-bottom:1px solid rgba(247,243,237,0.05);vertical-align:middle;}
     .ms-table tr:last-child td{border-bottom:none;}
-    .urg-overdue{color:#f08080;}
+    .ms-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    .urg-overdue td{color:#f08080;}
     .urg-overdue .urg-badge{background:rgba(240,128,128,0.12);border:1px solid rgba(240,128,128,0.3);color:#f08080;}
-    .urg-critical{color:#e8a87c;}
+    .urg-critical td{color:#e8a87c;}
     .urg-critical .urg-badge{background:rgba(232,168,124,0.12);border:1px solid rgba(232,168,124,0.3);color:#e8a87c;}
-    .urg-soon{color:rgba(247,243,237,0.75);}
+    .urg-soon td{color:rgba(247,243,237,0.75);}
     .urg-soon .urg-badge{background:rgba(247,243,237,0.07);border:1px solid rgba(247,243,237,0.12);color:rgba(247,243,237,0.5);}
-    .urg-ok{color:rgba(247,243,237,0.45);}
+    .urg-ok td{color:rgba(247,243,237,0.45);}
     .urg-ok .urg-badge{background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.2);color:#6dbf7b;}
     .urg-badge{display:inline-block;font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;border-radius:100px;padding:2px 9px;white-space:nowrap;}
     .ms-client{font-weight:400;color:#f7f3ed;}
@@ -110,24 +111,22 @@
     /* Client milestone panel */
     .ms-panel{background:#1a1916;border-top:1px solid rgba(247,243,237,0.05);padding:20px 20px 24px;}
     .ms-panel-inner{max-width:700px;}
-    .ms-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(247,243,237,0.05);}
+    .ms-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(247,243,237,0.05);flex-wrap:wrap;}
     .ms-item:last-of-type{border-bottom:none;}
-    .ms-item-label{flex:1;font-size:13.5px;color:rgba(247,243,237,0.75);}
-    .ms-item-date{font-size:12.5px;color:rgba(247,243,237,0.4);min-width:90px;font-variant-numeric:tabular-nums;}
-    .ms-item-days{font-size:12px;min-width:100px;}
-    .ms-add-form{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-top:16px;padding-top:16px;border-top:1px solid rgba(247,243,237,0.07);}
-    .ms-add-form select,.ms-add-form input{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:8px 12px;font-family:'Outfit',sans-serif;font-size:13px;color:#f7f3ed;outline:none;}
-    .ms-add-form select:focus,.ms-add-form input:focus{border-color:rgba(189,122,112,0.5);}
-    .ms-add-form select option{background:#22201d;}
-    .btn-add-ms{background:rgba(189,122,112,0.15);color:#bd7a70;border:1px solid rgba(189,122,112,0.25);border-radius:8px;padding:8px 16px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:background .2s;}
-    .btn-add-ms:hover{background:rgba(189,122,112,0.25);}
-    .btn-dates{background:rgba(247,243,237,0.07);color:rgba(247,243,237,0.6);border:none;border-radius:7px;padding:7px 12px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:background .2s;}
+    .ms-item-label{flex:1;min-width:120px;font-size:13.5px;color:rgba(247,243,237,0.75);}
+    .ms-item-date{font-size:12.5px;color:rgba(247,243,237,0.4);font-variant-numeric:tabular-nums;white-space:nowrap;}
+    .ms-item-days{font-size:12px;white-space:nowrap;}
+    .btn-dates{background:rgba(247,243,237,0.07);color:rgba(247,243,237,0.6);border:none;border-radius:7px;padding:7px 12px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:background .2s;white-space:nowrap;}
     .btn-dates:hover{background:rgba(247,243,237,0.12);}
     .btn-dates.active{background:rgba(189,122,112,0.15);color:#bd7a70;}
-    .ms-dash-select{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:8px 12px;font-family:'Outfit',sans-serif;font-size:13px;color:#f7f3ed;outline:none;width:100%;}
-    .ms-dash-select:focus{border-color:rgba(189,122,112,0.5);}
-    .ms-dash-select option{background:#22201d;}
-    #ms-dash-form{align-items:flex-end;}
+
+    /* Add date form — grid layout matching modal fields */
+    .ms-add-grid{display:grid;grid-template-columns:1fr 1fr 168px 1fr;gap:14px;margin-bottom:20px;}
+    .ms-add-field{display:flex;flex-direction:column;}
+    .ms-add-label{font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.4);margin-bottom:7px;display:block;}
+    .ms-add-input{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:300;color:#f7f3ed;outline:none;transition:border-color .2s;width:100%;}
+    .ms-add-input:focus{border-color:rgba(189,122,112,0.6);}
+    .ms-add-input option{background:#22201d;}
 
     /* TOTP setup */
     .totp-setup{background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:28px 32px;}
@@ -143,19 +142,10 @@
     @media(max-width:760px){
       nav,main{padding-left:20px;padding-right:20px;}
       .markets-grid{grid-template-columns:1fr;}
-      td,th{padding:11px 14px;}
+      /* Hide email + markets columns — client table uses card layout on mobile via JS */
       .td-email,.td-markets{display:none;}
-      /* Client table actions: wrap buttons so nothing overflows */
-      .actions{flex-wrap:wrap;gap:5px;}
-      /* Milestone dashboard: scroll horizontally on small screens */
-      .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-      .ms-table{min-width:500px;}
-      /* ms add form: stack vertically */
-      .ms-add-form{flex-direction:column;align-items:stretch;}
-      .ms-add-form select,.ms-add-form input,.btn-add-ms{width:100%;}
-      /* ms item: allow wrap */
-      .ms-item{flex-wrap:wrap;gap:8px;}
-      .ms-item-date,.ms-item-days{min-width:auto;}
+      /* Add date form stacks to single column */
+      .ms-add-grid{grid-template-columns:1fr;}
       /* Page header */
       .page-header h1{font-size:26px;}
     }
@@ -163,8 +153,6 @@
       main{padding:24px 16px;}
       .modal{padding:24px 20px;}
       .gate-card{padding:32px 24px;}
-      /* On very small screens, show client name + status + actions only */
-      .td-status-label{display:none;}
     }
   </style>
 </head>
@@ -216,44 +204,46 @@
       </div>
     </div>
     <!-- Inline add-date form -->
-    <div id="ms-add-panel" style="display:none;background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:22px 24px;margin-bottom:16px;">
-      <p style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:16px;">New date</p>
-      <div class="ms-add-form" id="ms-dash-form">
-        <div style="flex:1;min-width:160px;">
-          <label style="display:block;font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:6px;">Client</label>
-          <select id="ms-add-client" class="ms-dash-select">
+    <div id="ms-add-panel" style="display:none;background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:28px;margin-bottom:16px;">
+      <p style="font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:20px;">Add a date</p>
+      <div class="ms-add-grid">
+        <div class="ms-add-field">
+          <label class="ms-add-label">Client</label>
+          <select id="ms-add-client" class="ms-add-input">
             <option value="">Select client…</option>
           </select>
         </div>
-        <div style="flex:1;min-width:160px;">
-          <label style="display:block;font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:6px;">Type</label>
-          <select id="ms-add-type" class="ms-dash-select"></select>
+        <div class="ms-add-field">
+          <label class="ms-add-label">Date type</label>
+          <select id="ms-add-type" class="ms-add-input"></select>
         </div>
-        <div>
-          <label style="display:block;font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:6px;">Date</label>
-          <input type="date" id="ms-add-date" style="color-scheme:dark;">
+        <div class="ms-add-field">
+          <label class="ms-add-label">Date</label>
+          <input type="date" id="ms-add-date" class="ms-add-input" style="color-scheme:dark;">
         </div>
-        <div style="flex:2;min-width:140px;">
-          <label style="display:block;font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:6px;">Notes (optional)</label>
-          <input type="text" id="ms-add-notes" placeholder="e.g. 21 days from exchange">
+        <div class="ms-add-field">
+          <label class="ms-add-label">Notes <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">(optional)</span></label>
+          <input type="text" id="ms-add-notes" class="ms-add-input" placeholder="e.g. 21 days from exchange">
         </div>
-        <div style="display:flex;gap:8px;align-items:flex-end;padding-bottom:1px;">
-          <button class="btn-add-ms" id="ms-add-submit" onclick="addMilestoneFromDashboard()">Add date</button>
-          <button class="btn-secondary" onclick="toggleAddDateForm()" style="padding:8px 14px;font-size:13px;">Cancel</button>
-        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn-primary" id="ms-add-submit" onclick="addMilestoneFromDashboard()">Add date</button>
+        <button class="btn-secondary" onclick="toggleAddDateForm()">Cancel</button>
       </div>
     </div>
     <div class="table-wrap">
-      <table class="ms-table">
-        <thead><tr>
-          <th style="width:110px;">Urgency</th>
-          <th>Client</th>
-          <th>Milestone</th>
-          <th>Date</th>
-          <th></th>
-        </tr></thead>
-        <tbody id="ms-tbody"><tr><td colspan="5" style="text-align:center;color:rgba(247,243,237,0.25);padding:32px;">Loading…</td></tr></tbody>
-      </table>
+      <div class="ms-scroll">
+        <table class="ms-table">
+          <thead><tr>
+            <th style="width:110px;">Urgency</th>
+            <th>Client</th>
+            <th>Milestone</th>
+            <th>Date</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="ms-tbody"><tr><td colspan="5" style="text-align:center;color:rgba(247,243,237,0.25);padding:32px;">Loading…</td></tr></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -333,6 +323,17 @@
         </label>
         <span style="font-size:14px;font-weight:300;color:rgba(247,243,237,0.6);" id="active-label">Active</span>
       </div>
+    </div>
+    <div class="field" id="send-email-field">
+      <label>Welcome email</label>
+      <div class="toggle-wrap">
+        <label class="toggle">
+          <input type="checkbox" id="f-send-email" checked>
+          <span class="toggle-slider"></span>
+        </label>
+        <span style="font-size:14px;font-weight:300;color:rgba(247,243,237,0.6);" id="send-email-label">Send portal access email to client</span>
+      </div>
+      <p class="field-note">Turn off if this client doesn't need portal access yet.</p>
     </div>
     <div class="error-msg" id="modal-error"></div>
     <div class="modal-footer">
@@ -457,26 +458,41 @@ function renderTable() {
     tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No clients yet. Add your first client above.</td></tr>';
     return;
   }
+  const mobile = window.innerWidth <= 760;
   tbody.innerHTML = clients.map(c => {
     const cMs = milestones.filter(m => m.clientId === c.id && !m.completed);
     const msLabel = cMs.length ? `Dates (${cMs.length})` : 'Dates';
-    return `
-    <tr>
+    const dot = `<span class="status-dot ${c.active ? 'status-active' : 'status-inactive'}"></span>`;
+    const msRow = `<tr id="ms-row-${c.id}" style="display:none;"><td colspan="5" style="padding:0;"><div class="ms-panel" id="ms-panel-${c.id}"></div></td></tr>`;
+    if (mobile) {
+      return `<tr style="border-bottom:1px solid rgba(247,243,237,0.05);">
+        <td colspan="5" style="padding:14px 16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+            <div style="min-width:0;flex:1;">
+              <div style="font-weight:400;color:#f7f3ed;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(c.name)}</div>
+              <div style="font-size:12px;color:rgba(247,243,237,0.3);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(c.email)}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+              ${dot}
+              <button class="btn-sm btn-edit" onclick="openEdit('${c.id}')">Edit</button>
+              <button class="btn-dates" id="dates-btn-${c.id}" onclick="toggleMilestones('${c.id}')">${msLabel}</button>
+              <button class="btn-sm btn-delete" onclick="deleteClient('${c.id}','${esc(c.name)}')">✕</button>
+            </div>
+          </div>
+        </td>
+      </tr>${msRow}`;
+    }
+    return `<tr>
       <td class="td-name">${esc(c.name)}</td>
       <td class="td-email">${esc(c.email)}</td>
       <td class="td-markets">${c.markets.length ? c.markets.map(m => `<span class="pill">${marketName(m)}</span>`).join('') : '<span style="color:rgba(247,243,237,0.25);font-size:13px;">None</span>'}</td>
-      <td><span class="status-dot ${c.active ? 'status-active' : 'status-inactive'}"></span>${c.active ? 'Active' : 'Inactive'}</td>
+      <td>${dot}${c.active ? 'Active' : 'Inactive'}</td>
       <td><div class="actions">
         <button class="btn-sm btn-edit" onclick="openEdit('${c.id}')">Edit</button>
         <button class="btn-dates" id="dates-btn-${c.id}" onclick="toggleMilestones('${c.id}')">${msLabel}</button>
         <button class="btn-sm btn-delete" onclick="deleteClient('${c.id}','${esc(c.name)}')">Delete</button>
       </div></td>
-    </tr>
-    <tr id="ms-row-${c.id}" style="display:none;">
-      <td colspan="5" style="padding:0;">
-        <div class="ms-panel" id="ms-panel-${c.id}"></div>
-      </td>
-    </tr>`;
+    </tr>${msRow}`;
   }).join('');
 }
 
@@ -515,6 +531,8 @@ function openAdd() {
   document.getElementById('pw-note').textContent = '';
   document.getElementById('f-active').checked = true;
   document.getElementById('active-label').textContent = 'Active';
+  document.getElementById('f-send-email').checked = true;
+  document.getElementById('send-email-field').style.display = 'block';
   document.getElementById('modal-error').classList.remove('visible');
   buildMarketsGrid([]);
   document.getElementById('modal-overlay').classList.add('open');
@@ -533,6 +551,7 @@ function openEdit(id) {
   document.getElementById('pw-note').textContent = 'Leave blank to keep existing password.';
   document.getElementById('f-active').checked = c.active;
   document.getElementById('active-label').textContent = c.active ? 'Active' : 'Inactive';
+  document.getElementById('send-email-field').style.display = 'none';
   document.getElementById('modal-error').classList.remove('visible');
   buildMarketsGrid(c.markets || []);
   document.getElementById('modal-overlay').classList.add('open');
@@ -565,9 +584,10 @@ document.getElementById('modal-save').addEventListener('click', async function()
   this.disabled = true;
   this.innerHTML = '<span class="spinner"></span>Saving…';
 
+  const sendEmail = !id && document.getElementById('f-send-email').checked;
   const body = id
     ? { id, name, markets, active, ...(password ? { password } : {}) }
-    : { name, email, password, markets };
+    : { name, email, password, markets, sendEmail };
 
   const res = await api(id ? 'PUT' : 'POST', '/api/admin/clients', body);
   const data = await res.json();

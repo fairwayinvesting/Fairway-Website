@@ -81,7 +81,7 @@ export default async (req) => {
   }
 
   if (req.method === 'POST') {
-    const { name, email, password, markets } = await req.json().catch(() => ({}));
+    const { name, email, password, markets, sendEmail = true } = await req.json().catch(() => ({}));
     if (!name || !email || !password) return json({ error: 'name, email and password required' }, 400);
     if (clients.some(c => c.email.toLowerCase() === email.toLowerCase())) return json({ error: 'Email already exists' }, 409);
     const salt = crypto.randomBytes(16).toString('hex');
@@ -98,16 +98,18 @@ export default async (req) => {
     clients.push(client);
     await store.setJSON('all', clients);
 
-    try {
-      await resend.emails.send({
-        from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
-        to: [client.email],
-        reply_to: 'luke@fairwayinvesting.com.au',
-        subject: 'Welcome to Fairway — your portal is ready',
-        html: buildWelcomeEmail(client.name, client.email, password),
-      });
-    } catch (err) {
-      console.error('Welcome email failed:', err?.message || err);
+    if (sendEmail) {
+      try {
+        await resend.emails.send({
+          from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
+          to: [client.email],
+          reply_to: 'luke@fairwayinvesting.com.au',
+          subject: 'Welcome to Fairway — your portal is ready',
+          html: buildWelcomeEmail(client.name, client.email, password),
+        });
+      } catch (err) {
+        console.error('Welcome email failed:', err?.message || err);
+      }
     }
 
     return json({ ok: true, id: client.id }, 201);
