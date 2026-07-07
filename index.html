@@ -813,10 +813,13 @@ body{ font-family:'Outfit',sans-serif; font-weight:300; color:#22201d; backgroun
         #enq-submit-btn{display:inline-flex;align-items:center;gap:8px;background:#bd7a70;color:#22201d;font-family:'Outfit',sans-serif;font-size:15px;font-weight:500;border:none;padding:15px 34px;border-radius:100px;cursor:pointer;transition:background .2s;letter-spacing:0.01em;}
         #enq-submit-btn:hover{background:#cf9b92;}
         #enq-submit-btn:disabled{opacity:.55;cursor:default;}
-        @media(max-width:640px){.enq-row{grid-template-columns:1fr!important;}}
+        @media(max-width:640px){
+          .enq-row{grid-template-columns:1fr!important;}
+          #enq-card{padding:32px 24px!important;}
+        }
       </style>
       <div data-reveal style="margin-bottom:40px;">
-        <div style="background:#22201d; border-radius:22px; padding:48px 52px;">
+        <div id="enq-card" style="background:#22201d; border-radius:22px; padding:48px 52px;">
           <p style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#bd7a70;margin:0 0 10px;">Enquiry</p>
           <h3 style="font-family:'Fraunces',serif;font-weight:400;font-size:30px;line-height:1.15;color:#f7f3ed;margin:0 0 8px;">Tell us what you're looking for</h3>
           <p style="font-size:15px;color:rgba(247,243,237,0.48);margin:0 0 36px;line-height:1.6;">We'll come back to you within one business day.</p>

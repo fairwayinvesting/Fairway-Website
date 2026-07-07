@@ -139,12 +139,28 @@
     @media(max-width:760px){
       nav,main{padding-left:20px;padding-right:20px;}
       .markets-grid{grid-template-columns:1fr;}
-      td,th{padding:12px 14px;}
-      .td-email{display:none;}
+      td,th{padding:11px 14px;}
+      .td-email,.td-markets{display:none;}
+      /* Client table actions: wrap buttons so nothing overflows */
+      .actions{flex-wrap:wrap;gap:5px;}
+      /* Milestone dashboard: scroll horizontally on small screens */
+      .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+      .ms-table{min-width:500px;}
+      /* ms add form: stack vertically */
+      .ms-add-form{flex-direction:column;align-items:stretch;}
+      .ms-add-form select,.ms-add-form input,.btn-add-ms{width:100%;}
+      /* ms item: allow wrap */
+      .ms-item{flex-wrap:wrap;gap:8px;}
+      .ms-item-date,.ms-item-days{min-width:auto;}
+      /* Page header */
+      .page-header h1{font-size:26px;}
     }
     @media(max-width:520px){
       main{padding:24px 16px;}
       .modal{padding:24px 20px;}
+      .gate-card{padding:32px 24px;}
+      /* On very small screens, show client name + status + actions only */
+      .td-status-label{display:none;}
     }
   </style>
 </head>
@@ -216,7 +232,7 @@
         <tr>
           <th>Client</th>
           <th class="td-email" style="display:table-cell;">Email</th>
-          <th>Markets</th>
+          <th class="td-markets">Markets</th>
           <th>Status</th>
           <th>Actions</th>
         </tr>
@@ -413,7 +429,7 @@ function renderTable() {
     <tr>
       <td class="td-name">${esc(c.name)}</td>
       <td class="td-email">${esc(c.email)}</td>
-      <td>${c.markets.length ? c.markets.map(m => `<span class="pill">${marketName(m)}</span>`).join('') : '<span style="color:rgba(247,243,237,0.25);font-size:13px;">None</span>'}</td>
+      <td class="td-markets">${c.markets.length ? c.markets.map(m => `<span class="pill">${marketName(m)}</span>`).join('') : '<span style="color:rgba(247,243,237,0.25);font-size:13px;">None</span>'}</td>
       <td><span class="status-dot ${c.active ? 'status-active' : 'status-inactive'}"></span>${c.active ? 'Active' : 'Inactive'}</td>
       <td><div class="actions">
         <button class="btn-sm btn-edit" onclick="openEdit('${c.id}')">Edit</button>
