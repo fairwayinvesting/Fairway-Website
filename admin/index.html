@@ -1226,13 +1226,15 @@ async function sendPresentation(id) {
 }
 
 async function previewPresentation(id) {
+  const win = window.open('', '_blank');
+  if (win) win.document.write('<p style="font-family:sans-serif;padding:40px;color:#999;">Opening preview…</p>');
   const btn = document.querySelector(`button[onclick="previewPresentation('${id}')"]`);
   if (btn) { btn.textContent = '…'; btn.disabled = true; }
   const res = await api('PUT', '/api/admin/presentations', { id, action: 'preview' });
   if (btn) { btn.textContent = 'Preview'; btn.disabled = false; }
-  if (!res.ok) { alert('Could not generate preview.'); return; }
+  if (!res.ok) { if (win) win.close(); alert('Could not generate preview.'); return; }
   const { token } = await res.json();
-  window.open(`/p/property.html?t=${token}`, '_blank');
+  if (win) win.location.href = `/p/property.html?t=${token}`;
 }
 
 async function sendPresentationFromModal() {
