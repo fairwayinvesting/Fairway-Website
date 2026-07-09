@@ -188,6 +188,11 @@
     .btn-add-block:hover{background:rgba(247,243,237,0.09);}
     .btn-remove{background:none;border:none;color:rgba(247,243,237,0.25);font-size:16px;cursor:pointer;padding:2px 4px;line-height:1;flex-shrink:0;transition:color .15s;}
     .btn-remove:hover{color:#f08080;}
+    /* Comparable items */
+    .pres-comp-item{background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.07);border-radius:10px;padding:14px;margin-bottom:10px;}
+    .pres-comp-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+    .pres-comp-num{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);}
+    .pres-comp-label{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.35);display:block;margin:8px 0 4px;}
     @media(max-width:760px){.pres-field-row{grid-template-columns:1fr 1fr;}.pres-field-row-2{grid-template-columns:1fr;}.pres-modal-head,.pres-modal-body,.pres-modal-foot{padding-left:20px;padding-right:20px;}}
     @media(max-width:480px){.pres-field-row{grid-template-columns:1fr 1fr;}.pres-tab{padding:8px 10px;font-size:12px;}}
 
@@ -485,6 +490,28 @@
               <div style="display:flex;gap:8px;"><button class="btn-upload" onclick="triggerSectionUpload('demo')">↑ Upload screenshot</button><input type="url" id="demo-image" class="pres-media-input" placeholder="or paste URL" style="flex:1;"></div>
               <img id="demo-image-preview" style="display:none;margin-top:10px;max-height:120px;border-radius:8px;">
             </div>
+          </div>
+        </div>
+        <!-- Comparable Sales -->
+        <div class="pres-analysis-block">
+          <div class="pres-analysis-head" onclick="toggleAnalysis('sales')">
+            <span class="pres-analysis-title">Comparable sales</span>
+            <div class="toggle-wrap" onclick="event.stopPropagation()"><label class="toggle"><input type="checkbox" id="sales-enabled" onchange="toggleAnalysis('sales',true)"><span class="toggle-slider"></span></label></div>
+          </div>
+          <div class="pres-analysis-body" id="analysis-sales">
+            <div id="pres-sales-list"></div>
+            <button class="btn-upload" onclick="addComparable('sales')" style="margin-top:4px;">+ Add comparable sale</button>
+          </div>
+        </div>
+        <!-- Comparable Rentals -->
+        <div class="pres-analysis-block">
+          <div class="pres-analysis-head" onclick="toggleAnalysis('rentals')">
+            <span class="pres-analysis-title">Comparable rentals</span>
+            <div class="toggle-wrap" onclick="event.stopPropagation()"><label class="toggle"><input type="checkbox" id="rentals-enabled" onchange="toggleAnalysis('rentals',true)"><span class="toggle-slider"></span></label></div>
+          </div>
+          <div class="pres-analysis-body" id="analysis-rentals">
+            <div id="pres-rentals-list"></div>
+            <button class="btn-upload" onclick="addComparable('rentals')" style="margin-top:4px;">+ Add comparable rental</button>
           </div>
         </div>
       </div>
@@ -1110,7 +1137,7 @@ async function testTotpCode(secret) {
 }
 
 // ── Presentations ─────────────────────────────────────────────────────────────
-let _presImages = [], _presVideos = [], _presSections = [], _uploadTarget = null;
+let _presImages = [], _presVideos = [], _presSections = [], _presSales = [], _presRentals = [], _uploadTarget = null;
 
 async function loadPresentations() {
   const res = await api('GET', '/api/admin/presentations');
@@ -1161,6 +1188,68 @@ function renderPresentations() {
       </div></td>
     </tr>`;
   }).join('');
+}
+
+// ── Comparable sales & rentals ────────────────────────────────────────────────
+function renderComparables(type) {
+  const items = type === 'sales' ? _presSales : _presRentals;
+  const isSales = type === 'sales';
+  const list = document.getElementById('pres-' + type + '-list');
+  if (!list) return;
+  list.innerHTML = items.map((item, i) => `
+    <div class="pres-comp-item" data-comp-id="${item.id}" data-comp-type="${type}">
+      <div class="pres-comp-hd">
+        <span class="pres-comp-num">${isSales ? 'Sale' : 'Rental'} #${i + 1}</span>
+        <button class="btn-remove" style="font-size:13px;color:rgba(247,243,237,0.3);" onclick="removeComparable('${type}','${item.id}')">✕ Remove</button>
+      </div>
+      <input class="pres-media-input pres-comp-address" style="width:100%;margin-bottom:8px;" placeholder="Property address" value="${esc(item.address || '')}">
+      <div class="pres-field-row-2" style="margin-bottom:6px;">
+        <div><label class="pres-comp-label">${isSales ? 'Sale price' : 'Weekly rent'}</label><input class="pres-media-input pres-comp-price" style="width:100%;" placeholder="${isSales ? 'e.g. $485,000' : 'e.g. $420/wk'}" value="${esc(isSales ? (item.price || '') : (item.weeklyRent || ''))}"></div>
+        <div><label class="pres-comp-label">${isSales ? 'Date sold' : 'Date leased'}</label><input class="pres-media-input pres-comp-date" style="width:100%;" placeholder="e.g. March 2025" value="${esc(item.date || '')}"></div>
+      </div>
+      <div class="pres-field-row" style="margin-bottom:6px;">
+        <div><label class="pres-comp-label">Beds</label><input class="pres-media-input pres-comp-beds" style="width:100%;" placeholder="3" value="${esc(item.beds || '')}"></div>
+        <div><label class="pres-comp-label">Baths</label><input class="pres-media-input pres-comp-baths" style="width:100%;" placeholder="1" value="${esc(item.baths || '')}"></div>
+        <div><label class="pres-comp-label">Cars</label><input class="pres-media-input pres-comp-cars" style="width:100%;" placeholder="1" value="${esc(item.cars || '')}"></div>
+        ${isSales ? `<div><label class="pres-comp-label">Land</label><input class="pres-media-input pres-comp-land" style="width:100%;" placeholder="612m²" value="${esc(item.landSize || '')}"></div>` : '<div></div>'}
+      </div>
+      <textarea class="pres-media-input pres-comp-notes" style="width:100%;min-height:56px;resize:vertical;" placeholder="Notes (optional)">${esc(item.notes || '')}</textarea>
+    </div>`).join('');
+}
+
+function syncComparables(type) {
+  const isSales = type === 'sales';
+  const items = [];
+  document.querySelectorAll(`[data-comp-type="${type}"]`).forEach(el => {
+    const item = {
+      id: el.dataset.compId,
+      address: el.querySelector('.pres-comp-address')?.value.trim() || '',
+      date: el.querySelector('.pres-comp-date')?.value.trim() || '',
+      beds: el.querySelector('.pres-comp-beds')?.value.trim() || '',
+      baths: el.querySelector('.pres-comp-baths')?.value.trim() || '',
+      cars: el.querySelector('.pres-comp-cars')?.value.trim() || '',
+      notes: el.querySelector('.pres-comp-notes')?.value.trim() || '',
+    };
+    if (isSales) { item.price = el.querySelector('.pres-comp-price')?.value.trim() || ''; item.landSize = el.querySelector('.pres-comp-land')?.value.trim() || ''; }
+    else { item.weeklyRent = el.querySelector('.pres-comp-price')?.value.trim() || ''; }
+    items.push(item);
+  });
+  if (type === 'sales') _presSales = items; else _presRentals = items;
+}
+
+function addComparable(type) {
+  syncComparables(type);
+  const item = { id: uid(), address: '', date: '', beds: '', baths: '', cars: '', notes: '' };
+  if (type === 'sales') { item.price = ''; item.landSize = ''; _presSales.push(item); }
+  else { item.weeklyRent = ''; _presRentals.push(item); }
+  renderComparables(type);
+}
+
+function removeComparable(type, id) {
+  syncComparables(type);
+  if (type === 'sales') _presSales = _presSales.filter(x => x.id !== id);
+  else _presRentals = _presRentals.filter(x => x.id !== id);
+  renderComparables(type);
 }
 
 // ── Tab switching ─────────────────────────────────────────────────────────────
@@ -1341,6 +1430,17 @@ function openPresModal(id) {
     // Custom sections
     _presSections = (p.customSections || []).map(s => ({ ...s, id: s.id || uid(), blocks: (s.blocks||[]).map(b => ({...b, id: b.id || uid()})) }));
     renderSecList();
+    // Comparables
+    const cs = p.comparableSales || {};
+    document.getElementById('sales-enabled').checked = !!cs.enabled;
+    document.getElementById('analysis-sales').classList.toggle('open', !!cs.enabled);
+    _presSales = (cs.items || []).map(i => ({ ...i, id: i.id || uid() }));
+    renderComparables('sales');
+    const cr = p.comparableRentals || {};
+    document.getElementById('rentals-enabled').checked = !!cr.enabled;
+    document.getElementById('analysis-rentals').classList.toggle('open', !!cr.enabled);
+    _presRentals = (cr.items || []).map(i => ({ ...i, id: i.id || uid() }));
+    renderComparables('rentals');
     // Clients
     document.getElementById('pres-status').value = p.status || '';
     document.getElementById('pres-expires').value = p.expiresAt ? p.expiresAt.slice(0, 10) : '';
@@ -1393,8 +1493,10 @@ function openPresModal(id) {
     document.getElementById('pres-expires').value = '';
     document.getElementById('cf-lvr').value = '80';
     document.getElementById('cf-mgmt').value = '8';
-    ['cf-enabled','risk-enabled','demo-enabled'].forEach(id => document.getElementById(id).checked = false);
-    ['analysis-cashflow','analysis-risk','analysis-demo'].forEach(id => document.getElementById(id).classList.remove('open'));
+    ['cf-enabled','risk-enabled','demo-enabled','sales-enabled','rentals-enabled'].forEach(id => document.getElementById(id).checked = false);
+    ['analysis-cashflow','analysis-risk','analysis-demo','analysis-sales','analysis-rentals'].forEach(id => document.getElementById(id).classList.remove('open'));
+    _presSales = []; _presRentals = [];
+    renderComparables('sales'); renderComparables('rentals');
     ['risk-bushfire-preview','risk-flood-preview','demo-image-preview'].forEach(id => { const el = document.getElementById(id); if (el) { el.src=''; el.style.display='none'; } });
     document.getElementById('pres-links-section').style.display = 'none';
     document.getElementById('pres-preview-btn').style.display = 'none';
@@ -1466,6 +1568,9 @@ async function savePresentation() {
     status: document.getElementById('pres-status').value,
     assignedClients: Array.from(document.querySelectorAll('.pres-client-check:checked')).map(el => el.value),
   };
+  syncComparables('sales'); syncComparables('rentals');
+  body.comparableSales = { enabled: document.getElementById('sales-enabled').checked, items: _presSales };
+  body.comparableRentals = { enabled: document.getElementById('rentals-enabled').checked, items: _presRentals };
   let expiresAt = null;
   if (expiresRaw) { const d = new Date(expiresRaw + 'T23:59:59'); if (!isNaN(d)) expiresAt = d.toISOString(); }
   body.expiresAt = expiresAt;

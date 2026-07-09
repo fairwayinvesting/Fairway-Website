@@ -61,6 +61,8 @@ function defaultPres(fields) {
     riskProfile: { enabled: false, bushfireImageUrl: '', floodImageUrl: '', notes: '' },
     demographics: { enabled: false, ownerOccupier: '', renter: '', publicHousing: '', notes: '', imageUrl: '' },
     customSections: [],
+    comparableSales: { enabled: false, items: [] },
+    comparableRentals: { enabled: false, items: [] },
     status: '',
     expiresAt: null,
     assignedClients: [],
@@ -141,8 +143,9 @@ export default async (req) => {
     const pres = presentations[idx];
     const fields = ['address','suburb','price','bedrooms','bathrooms','carspaces','landSize',
                     'propertyType','summary','highlights','images','videos','cashflow',
-                    'riskProfile','demographics','customSections','status','expiresAt',
-                    'revokedClients'];
+                    'riskProfile','demographics','customSections',
+                    'comparableSales','comparableRentals',
+                    'status','expiresAt','revokedClients'];
     fields.forEach(f => { if (body[f] !== undefined) pres[f] = body[f]; });
     if (body.assignedClients !== undefined) {
       body.assignedClients.forEach(cid => {

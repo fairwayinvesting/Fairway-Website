@@ -63,13 +63,15 @@ export default async (req) => {
     }
     const { id, address, suburb, price, bedrooms, bathrooms, carspaces, landSize,
             propertyType, summary, highlights, images, videos,
-            cashflow, riskProfile, demographics, customSections, status } = found;
+            cashflow, riskProfile, demographics, customSections,
+            comparableSales, comparableRentals, status } = found;
     return json({
       id, address, suburb, price, bedrooms, bathrooms, carspaces, landSize,
       propertyType, summary, highlights,
       images: images || [], videos: videos || [],
       cashflow: cashflow || {}, riskProfile: riskProfile || {},
       demographics: demographics || {}, customSections: customSections || [],
+      comparableSales: comparableSales || {}, comparableRentals: comparableRentals || {},
       status: status || '',
       firstName, isPreview: clientId === '_preview',
     });
