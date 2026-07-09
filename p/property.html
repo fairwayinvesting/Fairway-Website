@@ -131,12 +131,19 @@
 </div>
 
 <script>
-function getEmbedUrl(url) {
+function getVideoHtml(url) {
   if (!url) return null;
+  // YouTube
   let m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-  if (m) return `https://www.youtube.com/embed/${m[1]}?rel=0&modestbranding=1`;
+  if (m) return `<iframe src="https://www.youtube.com/embed/${m[1]}?rel=0&modestbranding=1" allowfullscreen></iframe>`;
+  // Vimeo
   m = url.match(/vimeo\.com\/(\d+)/);
-  if (m) return `https://player.vimeo.com/video/${m[1]}?dnt=1`;
+  if (m) return `<iframe src="https://player.vimeo.com/video/${m[1]}?dnt=1" allowfullscreen></iframe>`;
+  // Streamable
+  m = url.match(/streamable\.com\/([a-z0-9]+)/i);
+  if (m) return `<iframe src="https://streamable.com/e/${m[1]}" allowfullscreen></iframe>`;
+  // Direct MP4 or other video file
+  if (/\.(mp4|webm|mov)(\?|$)/i.test(url)) return `<video src="${url}" controls playsinline style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:14px;"></video>`;
   return null;
 }
 
@@ -207,11 +214,20 @@ function render(d) {
     el.style.display = 'block';
   }
 
+  // Preview banner
+  if (d.isPreview) {
+    const banner = document.createElement('div');
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#e8a87c;color:#22201d;text-align:center;padding:10px 16px;font-size:13px;font-weight:500;z-index:100;';
+    banner.textContent = 'Preview mode — clients cannot see this banner. Looks good? Go back to admin and hit Send.';
+    document.body.prepend(banner);
+    document.getElementById('page').style.marginTop = '42px';
+  }
+
   // Video
-  const embedUrl = getEmbedUrl(d.videoUrl);
-  if (embedUrl) {
+  const videoHtml = getVideoHtml(d.videoUrl);
+  if (videoHtml) {
     const el = document.getElementById('p-video');
-    el.innerHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
+    el.innerHTML = videoHtml;
     el.style.display = 'block';
   }
 

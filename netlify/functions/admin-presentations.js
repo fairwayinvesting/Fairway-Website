@@ -94,6 +94,16 @@ export default async (req) => {
     const idx = presentations.findIndex(p => p.id === id);
     if (idx === -1) return json({ error: 'Not found' }, 404);
 
+    if (action === 'preview') {
+      const pres = presentations[idx];
+      if (!pres.previewToken) {
+        pres.previewToken = genToken();
+        presentations[idx] = pres;
+        await store.setJSON('all', presentations);
+      }
+      return json({ ok: true, token: pres.previewToken });
+    }
+
     if (action === 'send') {
       const clientStore = getStore('fairway-clients');
       const allClients = (await clientStore.get('all', { type: 'json' })) || [];

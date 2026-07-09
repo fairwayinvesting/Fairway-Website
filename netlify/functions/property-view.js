@@ -10,28 +10,42 @@ export default async (req) => {
   const store = getStore('fairway-presentations');
   const presentations = (await store.get('all', { type: 'json' })) || [];
 
+  // Check preview token first (admin preview — no client association)
   let found = null, clientId = null;
-  for (const p of presentations) {
-    for (const [cid, tok] of Object.entries(p.tokens || {})) {
-      if (tok === token) { found = p; clientId = cid; break; }
+  const previewMatch = presentations.find(p => p.previewToken === token);
+  if (previewMatch) {
+    found = previewMatch;
+    clientId = '_preview';
+  } else {
+    for (const p of presentations) {
+      for (const [cid, tok] of Object.entries(p.tokens || {})) {
+        if (tok === token) { found = p; clientId = cid; break; }
+      }
+      if (found) break;
     }
-    if (found) break;
   }
 
   if (!found) return json({ error: 'Not found' }, 404);
 
   if (req.method === 'GET') {
-    const clientStore = getStore('fairway-clients');
-    const allClients = (await clientStore.get('all', { type: 'json' })) || [];
-    const client = allClients.find(c => c.id === clientId);
-    const firstName = client ? client.name.split(' ')[0] : '';
+    let firstName = '';
+    if (clientId !== '_preview') {
+      const clientStore = getStore('fairway-clients');
+      const allClients = (await clientStore.get('all', { type: 'json' })) || [];
+      const client = allClients.find(c => c.id === clientId);
+      firstName = client ? client.name.split(' ')[0] : '';
+    }
     const { id, address, suburb, price, bedrooms, bathrooms, carspaces,
             landSize, propertyType, videoUrl, imageUrl, summary, highlights } = found;
+    const isPreview = clientId === '_preview';
     return json({ id, address, suburb, price, bedrooms, bathrooms, carspaces,
-                  landSize, propertyType, videoUrl, imageUrl, summary, highlights, firstName });
+                  landSize, propertyType, videoUrl, imageUrl, summary, highlights,
+                  firstName, isPreview });
   }
 
   if (req.method === 'POST') {
+    // Don't track views for admin preview
+    if (clientId === '_preview') return json({ ok: true });
     const idx = presentations.findIndex(p => p.id === found.id);
     if (idx !== -1) {
       if (!presentations[idx].views[clientId]) {
