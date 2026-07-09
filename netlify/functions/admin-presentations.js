@@ -58,7 +58,7 @@ function defaultPres(fields) {
     images: [],
     videos: [],
     cashflow: { enabled: false, purchasePrice: '', weeklyRent: '', interestRate: '', lvr: '80', managementFee: '8', annualRates: '', annualInsurance: '', annualMaintenance: '' },
-    riskProfile: { enabled: false, bushfire: '', flood: '', notes: '', imageUrl: '' },
+    riskProfile: { enabled: false, bushfireImageUrl: '', floodImageUrl: '', notes: '' },
     demographics: { enabled: false, ownerOccupier: '', renter: '', publicHousing: '', notes: '', imageUrl: '' },
     customSections: [],
     status: '',

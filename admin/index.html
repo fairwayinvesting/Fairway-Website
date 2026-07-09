@@ -457,15 +457,15 @@
             <div class="toggle-wrap" onclick="event.stopPropagation()"><label class="toggle"><input type="checkbox" id="risk-enabled" onchange="toggleAnalysis('risk',true)"><span class="toggle-slider"></span></label></div>
           </div>
           <div class="pres-analysis-body" id="analysis-risk">
-            <div class="pres-field-row-2">
-              <div class="field"><label>Bushfire risk</label><input type="text" id="risk-bushfire" placeholder="e.g. Low — Veg Category 1"></div>
-              <div class="field"><label>Flood zone</label><input type="text" id="risk-flood" placeholder="e.g. Medium — 1% AEP"></div>
+            <div class="field"><label>Bushfire risk screenshot</label>
+              <div style="display:flex;gap:8px;margin-bottom:6px;"><button class="btn-upload" onclick="triggerSectionUpload('risk-bushfire')">↑ Upload</button><input type="url" id="risk-bushfire-image" class="pres-media-input" placeholder="or paste URL" style="flex:1;"></div>
+              <img id="risk-bushfire-preview" style="display:none;margin-top:4px;width:100%;max-height:160px;object-fit:cover;border-radius:8px;border:1px solid rgba(247,243,237,0.07);">
+            </div>
+            <div class="field"><label>Flood zone screenshot</label>
+              <div style="display:flex;gap:8px;margin-bottom:6px;"><button class="btn-upload" onclick="triggerSectionUpload('risk-flood')">↑ Upload</button><input type="url" id="risk-flood-image" class="pres-media-input" placeholder="or paste URL" style="flex:1;"></div>
+              <img id="risk-flood-preview" style="display:none;margin-top:4px;width:100%;max-height:160px;object-fit:cover;border-radius:8px;border:1px solid rgba(247,243,237,0.07);">
             </div>
             <div class="field"><label>Notes <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">(optional)</span></label><textarea id="risk-notes" style="min-height:70px;" placeholder="Any relevant context…"></textarea></div>
-            <div class="field"><label>Map screenshot</label>
-              <div style="display:flex;gap:8px;"><button class="btn-upload" onclick="triggerSectionUpload('risk')">↑ Upload screenshot</button><input type="url" id="risk-image" class="pres-media-input" placeholder="or paste URL" style="flex:1;"></div>
-              <img id="risk-image-preview" style="display:none;margin-top:10px;max-height:120px;border-radius:8px;">
-            </div>
           </div>
         </div>
         <!-- Demographics -->
@@ -528,6 +528,7 @@
     <div class="pres-modal-foot">
       <button class="btn-secondary" onclick="closePresModal()">Cancel</button>
       <span class="error-msg" id="pres-modal-error" style="display:none;flex:1;text-align:left;"></span>
+      <button class="btn-secondary" id="pres-preview-btn" style="display:none;" onclick="previewFromModal()">Preview</button>
       <button class="btn-send" id="pres-send-btn" style="display:none;" onclick="sendPresentationFromModal()">✉ Send to clients</button>
       <button class="btn-primary" id="pres-save-btn" onclick="savePresentation()">Save draft</button>
     </div>
@@ -1228,9 +1229,12 @@ document.getElementById('pres-file-input').addEventListener('change', async func
   const url = json.url;
   if (_uploadTarget === 'image') {
     _presImages.push({ id: uid(), url, caption: '' }); renderImgList();
-  } else if (_uploadTarget === 'risk') {
-    document.getElementById('risk-image').value = url;
-    const prev = document.getElementById('risk-image-preview'); prev.src = url; prev.style.display = 'block';
+  } else if (_uploadTarget === 'risk-bushfire') {
+    document.getElementById('risk-bushfire-image').value = url;
+    const prev = document.getElementById('risk-bushfire-preview'); prev.src = url; prev.style.display = 'block';
+  } else if (_uploadTarget === 'risk-flood') {
+    document.getElementById('risk-flood-image').value = url;
+    const prev = document.getElementById('risk-flood-preview'); prev.src = url; prev.style.display = 'block';
   } else if (_uploadTarget === 'demo') {
     document.getElementById('demo-image').value = url;
     const prev = document.getElementById('demo-image-preview'); prev.src = url; prev.style.display = 'block';
@@ -1320,11 +1324,11 @@ function openPresModal(id) {
     const rp = p.riskProfile || {};
     document.getElementById('risk-enabled').checked = !!rp.enabled;
     document.getElementById('analysis-risk').classList.toggle('open', !!rp.enabled);
-    document.getElementById('risk-bushfire').value = rp.bushfire || '';
-    document.getElementById('risk-flood').value = rp.flood || '';
+    document.getElementById('risk-bushfire-image').value = rp.bushfireImageUrl || '';
+    const rbp = document.getElementById('risk-bushfire-preview'); rbp.src = rp.bushfireImageUrl || ''; rbp.style.display = rp.bushfireImageUrl ? 'block' : 'none';
+    document.getElementById('risk-flood-image').value = rp.floodImageUrl || '';
+    const rfp = document.getElementById('risk-flood-preview'); rfp.src = rp.floodImageUrl || ''; rfp.style.display = rp.floodImageUrl ? 'block' : 'none';
     document.getElementById('risk-notes').value = rp.notes || '';
-    document.getElementById('risk-image').value = rp.imageUrl || '';
-    const rip = document.getElementById('risk-image-preview'); rip.src = rp.imageUrl || ''; rip.style.display = rp.imageUrl ? 'block' : 'none';
     const dm = p.demographics || {};
     document.getElementById('demo-enabled').checked = !!dm.enabled;
     document.getElementById('analysis-demo').classList.toggle('open', !!dm.enabled);
@@ -1377,12 +1381,13 @@ function openPresModal(id) {
     } else { linksSection.style.display = 'none'; }
     const unrevoked = (p.assignedClients || []).filter(cid => !revokedList.includes(cid));
     const canSend = unrevoked.some(cid => !sentList.includes(cid));
+    document.getElementById('pres-preview-btn').style.display = 'inline-flex';
     document.getElementById('pres-send-btn').style.display = canSend ? 'inline-flex' : 'none';
     document.getElementById('pres-save-btn').textContent = 'Save changes';
   } else {
     document.getElementById('pres-modal-title').textContent = 'New presentation';
     document.getElementById('pres-edit-id').value = '';
-    ['pres-address','pres-price','pres-beds','pres-baths','pres-cars','pres-land','pres-summary','pres-highlights','cf-price','cf-rent','cf-rate','cf-lvr','cf-mgmt','cf-rates','cf-insurance','cf-maint','risk-bushfire','risk-flood','risk-notes','risk-image','demo-owner','demo-renter','demo-public','demo-notes','demo-image'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    ['pres-address','pres-price','pres-beds','pres-baths','pres-cars','pres-land','pres-summary','pres-highlights','cf-price','cf-rent','cf-rate','cf-lvr','cf-mgmt','cf-rates','cf-insurance','cf-maint','risk-bushfire-image','risk-flood-image','risk-notes','demo-owner','demo-renter','demo-public','demo-notes','demo-image'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.getElementById('pres-type').value = 'house';
     document.getElementById('pres-status').value = '';
     document.getElementById('pres-expires').value = '';
@@ -1390,8 +1395,9 @@ function openPresModal(id) {
     document.getElementById('cf-mgmt').value = '8';
     ['cf-enabled','risk-enabled','demo-enabled'].forEach(id => document.getElementById(id).checked = false);
     ['analysis-cashflow','analysis-risk','analysis-demo'].forEach(id => document.getElementById(id).classList.remove('open'));
-    ['risk-image-preview','demo-image-preview'].forEach(id => { const el = document.getElementById(id); el.src=''; el.style.display='none'; });
+    ['risk-bushfire-preview','risk-flood-preview','demo-image-preview'].forEach(id => { const el = document.getElementById(id); if (el) { el.src=''; el.style.display='none'; } });
     document.getElementById('pres-links-section').style.display = 'none';
+    document.getElementById('pres-preview-btn').style.display = 'none';
     document.getElementById('pres-send-btn').style.display = 'none';
     document.getElementById('pres-save-btn').textContent = 'Save draft';
     renderImgList(); renderVidList(); renderSecList();
@@ -1454,7 +1460,7 @@ async function savePresentation() {
     images: _presImages.filter(i => i.url),
     videos: _presVideos.filter(v => v.url),
     cashflow: { enabled: document.getElementById('cf-enabled').checked, purchasePrice: document.getElementById('cf-price').value, weeklyRent: document.getElementById('cf-rent').value, interestRate: document.getElementById('cf-rate').value, lvr: document.getElementById('cf-lvr').value || '80', managementFee: document.getElementById('cf-mgmt').value || '8', annualRates: document.getElementById('cf-rates').value, annualInsurance: document.getElementById('cf-insurance').value, annualMaintenance: document.getElementById('cf-maint').value },
-    riskProfile: { enabled: document.getElementById('risk-enabled').checked, bushfire: document.getElementById('risk-bushfire').value.trim(), flood: document.getElementById('risk-flood').value.trim(), notes: document.getElementById('risk-notes').value.trim(), imageUrl: document.getElementById('risk-image').value.trim() },
+    riskProfile: { enabled: document.getElementById('risk-enabled').checked, bushfireImageUrl: document.getElementById('risk-bushfire-image').value.trim(), floodImageUrl: document.getElementById('risk-flood-image').value.trim(), notes: document.getElementById('risk-notes').value.trim() },
     demographics: { enabled: document.getElementById('demo-enabled').checked, ownerOccupier: document.getElementById('demo-owner').value.trim(), renter: document.getElementById('demo-renter').value.trim(), publicHousing: document.getElementById('demo-public').value.trim(), notes: document.getElementById('demo-notes').value.trim(), imageUrl: document.getElementById('demo-image').value.trim() },
     customSections: _presSections,
     status: document.getElementById('pres-status').value,
@@ -1508,7 +1514,15 @@ async function previewPresentation(id) {
   const res = await api('PUT', '/api/admin/presentations', { id, action: 'preview' });
   if (!res.ok) { if (win) win.close(); alert('Could not generate preview.'); return; }
   const { token } = await res.json();
-  if (win) win.location.href = `/p/property.html?t=${token}`;
+  const url = `/p/property.html?t=${token}`;
+  if (win) { win.location.href = url; }
+  else { const w2 = window.open(url, '_blank'); if (!w2) window.location.href = url; }
+}
+
+async function previewFromModal() {
+  const id = document.getElementById('pres-edit-id').value;
+  if (!id) return;
+  await previewPresentation(id);
 }
 
 async function deletePresentation(id) {
