@@ -155,7 +155,7 @@
     .pres-media-item{display:flex;align-items:center;gap:10px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.08);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
     .pres-media-thumb{width:48px;height:48px;border-radius:6px;object-fit:cover;flex-shrink:0;background:rgba(247,243,237,0.05);}
     .pres-media-fields{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;}
-    .pres-media-input{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:8px 10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:300;color:#f7f3ed;outline:none;width:100;transition:border-color .15s;}
+    .pres-media-input{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:8px 10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:300;color:#f7f3ed;outline:none;width:100%;transition:border-color .15s;}
     .pres-media-input:focus{border-color:rgba(189,122,112,0.5);}
     .pres-media-input::placeholder{color:rgba(247,243,237,0.2);}
     .btn-upload{background:rgba(247,243,237,0.07);color:rgba(247,243,237,0.6);border:1px solid rgba(247,243,237,0.12);border-radius:8px;padding:8px 14px;font-family:'Outfit',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap;}
@@ -431,7 +431,7 @@
         <div class="pres-analysis-block">
           <div class="pres-analysis-head" onclick="toggleAnalysis('cashflow')">
             <span class="pres-analysis-title">Cashflow analysis</span>
-            <div class="toggle-wrap"><label class="toggle"><input type="checkbox" id="cf-enabled" onchange="toggleAnalysis('cashflow',true)"><span class="toggle-slider"></span></label></div>
+            <div class="toggle-wrap" onclick="event.stopPropagation()"><label class="toggle"><input type="checkbox" id="cf-enabled" onchange="toggleAnalysis('cashflow',true)"><span class="toggle-slider"></span></label></div>
           </div>
           <div class="pres-analysis-body" id="analysis-cashflow">
             <div class="pres-field-row-2">
@@ -454,7 +454,7 @@
         <div class="pres-analysis-block">
           <div class="pres-analysis-head" onclick="toggleAnalysis('risk')">
             <span class="pres-analysis-title">Risk profile (bushfire &amp; flood)</span>
-            <div class="toggle-wrap"><label class="toggle"><input type="checkbox" id="risk-enabled" onchange="toggleAnalysis('risk',true)"><span class="toggle-slider"></span></label></div>
+            <div class="toggle-wrap" onclick="event.stopPropagation()"><label class="toggle"><input type="checkbox" id="risk-enabled" onchange="toggleAnalysis('risk',true)"><span class="toggle-slider"></span></label></div>
           </div>
           <div class="pres-analysis-body" id="analysis-risk">
             <div class="pres-field-row-2">
@@ -472,7 +472,7 @@
         <div class="pres-analysis-block">
           <div class="pres-analysis-head" onclick="toggleAnalysis('demo')">
             <span class="pres-analysis-title">Area demographics</span>
-            <div class="toggle-wrap"><label class="toggle"><input type="checkbox" id="demo-enabled" onchange="toggleAnalysis('demo',true)"><span class="toggle-slider"></span></label></div>
+            <div class="toggle-wrap" onclick="event.stopPropagation()"><label class="toggle"><input type="checkbox" id="demo-enabled" onchange="toggleAnalysis('demo',true)"><span class="toggle-slider"></span></label></div>
           </div>
           <div class="pres-analysis-body" id="analysis-demo">
             <div class="pres-field-row">
@@ -1125,25 +1125,29 @@ function renderPresentations() {
   }
   tbody.innerHTML = presentations.map(p => {
     const assigned = p.assignedClients?.length || 0;
-    const revoked = p.revokedClients?.length || 0;
+    const revokedList = p.revokedClients || [];
+    const revokedCount = revokedList.length;
+    const unrevoked = (p.assignedClients || []).filter(cid => !revokedList.includes(cid));
+    const sentList = p.sentClients || [];
+    const allSent = unrevoked.length > 0 && unrevoked.every(cid => sentList.includes(cid));
+    const canSend = unrevoked.some(cid => !sentList.includes(cid));
+    const anySent = sentList.length > 0;
     const viewed = Object.values(p.views || {}).filter(v => v.firstViewedAt).length;
-    const sent = p.sentClients?.length || 0;
-    const allSent = assigned > 0 && sent >= assigned;
     const sentHtml = allSent
       ? '<span class="pill" style="background:rgba(109,191,123,0.12);border-color:rgba(109,191,123,0.25);color:#6dbf7b;">Sent</span>'
-      : sent > 0 ? '<span class="pill pill-inactive">Partial</span>'
+      : anySent ? '<span class="pill pill-inactive">Partial</span>'
       : '<span class="pill pill-inactive">Draft</span>';
     const propStatus = p.status;
-    const propStatusHtml = propStatus === 'under_offer' ? '<span class="pill" style="background:rgba(234,179,8,0.12);border-color:rgba(234,179,8,0.3);color:#eab308;margin-left:6px;">Under Offer</span>'
+    const propStatusHtml = propStatus === 'offer' ? '<span class="pill" style="background:rgba(234,179,8,0.12);border-color:rgba(234,179,8,0.3);color:#eab308;margin-left:6px;">Under Offer</span>'
       : propStatus === 'sold' ? '<span class="pill" style="background:rgba(239,68,68,0.12);border-color:rgba(239,68,68,0.3);color:#ef4444;margin-left:6px;">Sold</span>'
       : '';
-    const clientsLabel = assigned ? `${assigned} assigned${revoked ? ` (${revoked} revoked)` : ''}` : '<span style="color:rgba(247,243,237,0.2);">None</span>';
+    const clientsLabel = assigned ? `${assigned} assigned${revokedCount ? ` (${revokedCount} revoked)` : ''}` : '<span style="color:rgba(247,243,237,0.2);">None</span>';
     const viewsLabel = viewed ? `<span style="color:#6dbf7b;">${viewed}/${assigned} viewed</span>` : '<span style="color:rgba(247,243,237,0.2);">—</span>';
-    const canSend = assigned > 0 && !allSent;
+    const expiry = p.expiresAt ? ` · expires ${new Date(p.expiresAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}` : '';
     return `<tr>
       <td>
         <div class="td-name">${esc(p.address)}${propStatusHtml}</div>
-        ${p.price ? `<div style="font-size:12px;color:rgba(247,243,237,0.3);margin-top:3px;">${esc(p.price)}</div>` : ''}
+        ${p.price ? `<div style="font-size:12px;color:rgba(247,243,237,0.3);margin-top:3px;">${esc(p.price)}${expiry}</div>` : expiry ? `<div style="font-size:12px;color:rgba(247,243,237,0.3);margin-top:3px;">${expiry.trim()}</div>` : ''}
       </td>
       <td>${clientsLabel}</td>
       <td>${viewsLabel}</td>
@@ -1185,7 +1189,7 @@ function renderImgList() {
       <img class="pres-media-thumb" src="${esc(img.url)}" onerror="this.style.display='none'">
       <div class="pres-media-fields">
         <input class="pres-media-input" placeholder="Image URL" value="${esc(img.url)}" oninput="_presImages.find(x=>x.id==='${img.id}').url=this.value;this.previousElementSibling.src=this.value">
-        <input class="pres-media-input" placeholder="Caption (optional)" value="${esc(img.caption||'')} " oninput="_presImages.find(x=>x.id==='${img.id}').caption=this.value">
+        <input class="pres-media-input" placeholder="Caption (optional)" value="${esc(img.caption||'')}" oninput="_presImages.find(x=>x.id==='${img.id}').caption=this.value">
       </div>
       <button class="btn-remove" onclick="removeImage('${img.id}')">×</button>
     </div>`).join('');
@@ -1339,27 +1343,41 @@ function openPresModal(id) {
     (p.assignedClients || []).forEach(cid => { const cb = grid.querySelector(`.pres-client-check[value="${cid}"]`); if (cb) cb.checked = true; });
     // Links with revoke
     const linksSection = document.getElementById('pres-links-section');
-    const revoked = p.revokedClients || [];
+    const revokedList = p.revokedClients || [];
+    const sentList = p.sentClients || [];
+    const viewsData = p.views || {};
     if (p.assignedClients?.length) {
       linksSection.style.display = 'block';
       document.getElementById('pres-links-list').innerHTML = p.assignedClients.map(cid => {
         const cl = clients.find(c => c.id === cid); const name = cl ? cl.name : cid;
-        const tok = (p.tokens || {})[cid] || ''; const link = `https://fairwayinvesting.com.au/p/property.html?t=${tok}`;
-        const viewed = (p.views || {})[cid]?.firstViewedAt;
-        const isRevoked = revoked.includes(cid);
+        const tok = (p.tokens || {})[cid] || '';
+        const link = tok ? `https://fairwayinvesting.com.au/p/property.html?t=${tok}` : '';
+        const vd = viewsData[cid];
+        const viewDate = vd?.firstViewedAt ? new Date(vd.firstViewedAt).toLocaleString('en-AU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+        const viewCount = vd?.viewCount || 0;
+        const isSent = sentList.includes(cid);
+        const isRevoked = revokedList.includes(cid);
+        const statusLine = viewDate
+          ? `Viewed ${viewDate}${viewCount > 1 ? ` · ${viewCount}×` : ''}`
+          : isSent ? 'Sent — not yet opened'
+          : 'Assigned — not yet sent';
         return `<div class="pres-link-row">
-          <span class="pres-link-name">${esc(name)}</span>
-          ${viewed ? '<span class="pres-view-badge">Viewed</span>' : ''}
-          ${isRevoked ? '<span class="pres-revoked-badge">Revoked</span>' : ''}
-          ${tok ? `<button class="btn-copy" onclick="copyLink('${link}',this)" ${isRevoked ? 'disabled style="opacity:0.3"' : ''}>Copy link</button>` : ''}
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:400;color:${isRevoked ? 'rgba(247,243,237,0.35)' : 'rgba(247,243,237,0.75)'};">${esc(name)}</div>
+            <div style="font-size:11px;color:rgba(247,243,237,0.3);margin-top:2px;">${statusLine}</div>
+          </div>
+          ${isRevoked ? '<span class="pres-revoked-badge">Revoked</span>' : viewDate ? '<span class="pres-view-badge">Viewed</span>' : ''}
+          ${link ? `<button class="btn-copy" onclick="copyLink('${link}',this)" ${isRevoked ? 'disabled style="opacity:0.3"' : ''}>Copy link</button>` : ''}
+          ${isSent && !isRevoked ? `<button class="btn-copy" style="color:rgba(247,243,237,0.4);" onclick="resendToClient('${id}','${cid}',this)">Resend</button>` : ''}
           ${isRevoked
             ? `<button class="btn-restore" onclick="toggleRevoke('${id}','${cid}',false,this)">Restore</button>`
             : `<button class="btn-revoke" onclick="toggleRevoke('${id}','${cid}',true,this)">Revoke</button>`}
         </div>`;
       }).join('');
     } else { linksSection.style.display = 'none'; }
-    const allSent = (p.sentClients?.length || 0) >= (p.assignedClients?.length || 0) && (p.assignedClients?.length || 0) > 0;
-    document.getElementById('pres-send-btn').style.display = (!allSent && p.assignedClients?.length) ? 'inline-flex' : 'none';
+    const unrevoked = (p.assignedClients || []).filter(cid => !revokedList.includes(cid));
+    const canSend = unrevoked.some(cid => !sentList.includes(cid));
+    document.getElementById('pres-send-btn').style.display = canSend ? 'inline-flex' : 'none';
     document.getElementById('pres-save-btn').textContent = 'Save changes';
   } else {
     document.getElementById('pres-modal-title').textContent = 'New presentation';
@@ -1400,7 +1418,18 @@ async function toggleRevoke(presId, clientId, revoke, btn) {
   btn.disabled = false;
   if (!res.ok) { btn.textContent = revoke ? 'Revoke' : 'Restore'; alert('Failed to update.'); return; }
   p.revokedClients = newRevoked;
-  openPresModal(presId); // refresh links panel
+  renderPresentations();
+  openPresModal(presId);
+  const clientsTab = [...document.querySelectorAll('.pres-tab')].find(t => t.textContent.trim() === 'Clients');
+  if (clientsTab) switchPresTab('clients', clientsTab);
+}
+
+async function resendToClient(presId, clientId, btn) {
+  btn.disabled = true; btn.textContent = 'Sending…';
+  const res = await api('PUT', '/api/admin/presentations', { id: presId, action: 'resend', clientId });
+  btn.disabled = false; btn.textContent = 'Resend';
+  if (res.ok) alert('Email resent successfully.');
+  else alert('Resend failed. Please try again.');
 }
 
 // ── Save presentation ─────────────────────────────────────────────────────────
@@ -1429,17 +1458,23 @@ async function savePresentation() {
     demographics: { enabled: document.getElementById('demo-enabled').checked, ownerOccupier: document.getElementById('demo-owner').value.trim(), renter: document.getElementById('demo-renter').value.trim(), publicHousing: document.getElementById('demo-public').value.trim(), notes: document.getElementById('demo-notes').value.trim(), imageUrl: document.getElementById('demo-image').value.trim() },
     customSections: _presSections,
     status: document.getElementById('pres-status').value,
-    expiresAt: expiresRaw ? new Date(expiresRaw).toISOString() : null,
     assignedClients: Array.from(document.querySelectorAll('.pres-client-check:checked')).map(el => el.value),
   };
+  let expiresAt = null;
+  if (expiresRaw) { const d = new Date(expiresRaw + 'T23:59:59'); if (!isNaN(d)) expiresAt = d.toISOString(); }
+  body.expiresAt = expiresAt;
   const btn = document.getElementById('pres-save-btn');
   btn.disabled = true; btn.textContent = 'Saving…';
   const res = await api(id ? 'PUT' : 'POST', '/api/admin/presentations', id ? { id, ...body } : body);
   const data = await res.json();
   btn.disabled = false; btn.textContent = id ? 'Save changes' : 'Save draft';
   if (!res.ok) { errEl.textContent = data.error || 'Save failed.'; errEl.style.display = 'inline'; return; }
-  if (id) { const idx = presentations.findIndex(p => p.id === id); if (idx !== -1) Object.assign(presentations[idx], body); }
-  else { presentations.push({ id: data.id, ...body, tokens: {}, views: {}, sentClients: [], revokedClients: [], createdAt: new Date().toISOString() }); }
+  if (id) {
+    const idx = presentations.findIndex(p => p.id === id);
+    if (idx !== -1) presentations[idx] = data.pres ? { ...presentations[idx], ...data.pres } : { ...presentations[idx], ...body };
+  } else {
+    presentations.push(data.pres || { id: data.id, ...body, tokens: {}, views: {}, sentClients: [], revokedClients: [], createdAt: new Date().toISOString() });
+  }
   renderPresentations();
   closePresModal();
 }
@@ -1448,14 +1483,21 @@ async function savePresentation() {
 async function sendPresentation(id) {
   const p = presentations.find(x => x.id === id);
   if (!p) return;
-  const unsent = p.assignedClients.filter(cid => !p.sentClients.includes(cid) && !(p.revokedClients||[]).includes(cid));
+  const revoked = p.revokedClients || [];
+  const unsent = (p.assignedClients || []).filter(cid => !p.sentClients.includes(cid) && !revoked.includes(cid));
   if (!unsent.length) { alert('All assigned clients have already been sent this presentation.'); return; }
   const names = unsent.map(cid => { const c = clients.find(x => x.id === cid); return c ? c.name : cid; });
   if (!confirm(`Send to ${names.join(', ')}?`)) return;
+  const btns = [...document.querySelectorAll(`button[onclick="sendPresentation('${id}')"]`)];
+  btns.forEach(b => { b.textContent = 'Sending…'; b.disabled = true; });
   const res = await api('PUT', '/api/admin/presentations', { id, action: 'send' });
   const data = await res.json();
-  if (res.ok) { unsent.forEach(cid => p.sentClients.push(cid)); renderPresentations(); alert(`Sent to ${data.sent} client${data.sent !== 1 ? 's' : ''}.`); }
-  else alert('Send failed. Please try again.');
+  btns.forEach(b => { b.textContent = 'Send'; b.disabled = false; });
+  if (res.ok) {
+    unsent.forEach(cid => { if (!p.sentClients.includes(cid)) p.sentClients.push(cid); });
+    renderPresentations();
+    alert(`Sent to ${data.sent} client${data.sent !== 1 ? 's' : ''}.`);
+  } else alert('Send failed. Please try again.');
 }
 
 async function sendPresentationFromModal() { const id = document.getElementById('pres-edit-id').value; if (!id) return; closePresModal(); await sendPresentation(id); }

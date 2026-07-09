@@ -31,9 +31,15 @@ export default async (req) => {
     return json({ expired: true }, 410);
   }
 
-  // Check revoked (not for preview)
-  if (clientId !== '_preview' && (found.revokedClients || []).includes(clientId)) {
-    return json({ revoked: true }, 403);
+  if (clientId !== '_preview') {
+    // Client must still be in assignedClients (catches unassigned clients who have old tokens)
+    if (!(found.assignedClients || []).includes(clientId)) {
+      return json({ error: 'Not found' }, 404);
+    }
+    // Check revoked
+    if ((found.revokedClients || []).includes(clientId)) {
+      return json({ revoked: true }, 403);
+    }
   }
 
   if (req.method === 'GET') {

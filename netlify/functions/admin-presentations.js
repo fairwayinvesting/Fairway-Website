@@ -88,7 +88,7 @@ export default async (req) => {
     const pres = defaultPres({ ...body, tokens, views, sentClients: [], revokedClients: [] });
     presentations.push(pres);
     await store.setJSON('all', presentations);
-    return json({ ok: true, id: pres.id }, 201);
+    return json({ ok: true, id: pres.id, pres }, 201);
   }
 
   if (req.method === 'PUT') {
@@ -103,15 +103,21 @@ export default async (req) => {
       return json({ ok: true, token: presentations[idx].previewToken });
     }
 
-    if (action === 'send') {
+    if (action === 'send' || action === 'resend') {
       const clientStore = getStore('fairway-clients');
       const allClients = (await clientStore.get('all', { type: 'json' })) || [];
       const pres = presentations[idx];
-      const toSend = pres.assignedClients.filter(cid => !pres.sentClients.includes(cid) && !pres.revokedClients.includes(cid));
+      let toSend;
+      if (action === 'resend') {
+        const { clientId } = body;
+        toSend = clientId ? [clientId] : [];
+      } else {
+        toSend = pres.assignedClients.filter(cid => !pres.sentClients.includes(cid) && !(pres.revokedClients||[]).includes(cid));
+      }
       let sent = 0;
       for (const cid of toSend) {
         const client = allClients.find(c => c.id === cid);
-        if (!client) continue;
+        if (!client || !pres.tokens[cid]) continue;
         const link = `https://fairwayinvesting.com.au/p/property.html?t=${pres.tokens[cid]}`;
         try {
           await resend.emails.send({
@@ -121,7 +127,7 @@ export default async (req) => {
             subject: `Property opportunity — ${pres.address}`,
             html: buildPropertyEmail(client.name, pres.address, pres.price, link),
           });
-          pres.sentClients.push(cid);
+          if (action === 'send' && !pres.sentClients.includes(cid)) pres.sentClients.push(cid);
           sent++;
         } catch (err) { console.error('Send failed:', err?.message || err); }
       }
@@ -145,7 +151,7 @@ export default async (req) => {
     }
     presentations[idx] = pres;
     await store.setJSON('all', presentations);
-    return json({ ok: true });
+    return json({ ok: true, pres });
   }
 
   if (req.method === 'DELETE') {
