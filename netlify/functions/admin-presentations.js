@@ -96,15 +96,17 @@ export default async (req) => {
   if (req.method === 'PUT') {
     const body = await req.json().catch(() => ({}));
     const { id, action } = body;
-    const idx = presentations.findIndex(p => p.id === id);
-    if (idx === -1) return json({ error: 'Not found' }, 404);
+    if (!id) return json({ error: 'id required' }, 400);
 
+    // Preview uses HMAC — no Blobs read needed, so no eventual-consistency race
     if (action === 'preview') {
-      // Deterministic HMAC token — no Blobs write, so no eventual-consistency race
       const sig = crypto.createHmac('sha256', process.env.ADMIN_PASSWORD || 'fp-preview')
                         .update(id).digest('hex').slice(0, 32);
       return json({ ok: true, token: `pv.${id}.${sig}` });
     }
+
+    const idx = presentations.findIndex(p => p.id === id);
+    if (idx === -1) return json({ error: 'Not found' }, 404);
 
     if (action === 'send' || action === 'resend') {
       const clientStore = getStore('fairway-clients');
