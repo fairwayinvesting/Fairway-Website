@@ -16,234 +16,341 @@
     body{font-family:'Outfit',sans-serif;font-weight:300;background:#1a1916;color:#f7f3ed;-webkit-font-smoothing:antialiased;min-height:100vh;}
     a{color:inherit;text-decoration:none;}
 
-    /* Loading */
     #loading{display:flex;align-items:center;justify-content:center;min-height:100vh;font-size:14px;color:rgba(247,243,237,0.3);}
-    #error-state{display:none;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:40px;}
+    #gate-state{display:none;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:40px;}
     #page{display:none;}
 
-    /* Nav */
-    .p-nav{background:#1a1916;border-bottom:1px solid rgba(247,243,237,0.07);padding:18px 40px;display:flex;align-items:center;justify-content:center;}
+    .p-nav{background:#1a1916;border-bottom:1px solid rgba(247,243,237,0.07);padding:18px 40px;display:flex;align-items:center;justify-content:center;position:sticky;top:0;z-index:10;}
     @media(max-width:600px){.p-nav{padding:16px 24px;}}
 
-    /* Content wrapper */
-    .p-wrap{max-width:760px;margin:0 auto;padding:0 40px 80px;}
+    .p-preview-bar{background:#e8a87c;color:#22201d;text-align:center;padding:10px 16px;font-size:13px;font-weight:500;display:none;}
+
+    .p-wrap{max-width:780px;margin:0 auto;padding:0 40px 80px;}
     @media(max-width:600px){.p-wrap{padding:0 20px 60px;}}
 
+    /* Status banner */
+    .p-status{display:inline-block;padding:6px 18px;border-radius:100px;font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:20px;}
+    .p-status-offer{background:rgba(232,168,124,0.15);border:1px solid rgba(232,168,124,0.35);color:#e8a87c;}
+    .p-status-sold{background:rgba(240,128,128,0.12);border:1px solid rgba(240,128,128,0.3);color:#f08080;}
+    .p-status-available{background:rgba(109,191,123,0.12);border:1px solid rgba(109,191,123,0.25);color:#6dbf7b;}
+
     /* Hero */
-    .p-hero{padding:52px 0 44px;}
+    .p-hero{padding:52px 0 36px;}
     .p-eyebrow{font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:#bd7a70;margin-bottom:16px;}
-    .p-address{font-family:'Fraunces',serif;font-size:38px;font-weight:400;line-height:1.15;color:#f7f3ed;margin-bottom:14px;}
-    @media(max-width:600px){.p-address{font-size:28px;}}
-    .p-price{font-size:22px;font-weight:400;color:rgba(247,243,237,0.6);margin-bottom:24px;}
-    @media(max-width:600px){.p-price{font-size:19px;}}
+    .p-address{font-family:'Fraunces',serif;font-size:36px;font-weight:400;line-height:1.15;color:#f7f3ed;margin-bottom:12px;}
+    @media(max-width:600px){.p-address{font-size:26px;}}
+    .p-price{font-size:20px;font-weight:400;color:rgba(247,243,237,0.55);margin-bottom:20px;}
     .p-type-badge{display:inline-block;background:rgba(189,122,112,0.12);border:1px solid rgba(189,122,112,0.25);border-radius:100px;padding:4px 14px;font-size:12px;font-weight:500;letter-spacing:0.06em;color:#bd7a70;text-transform:capitalize;}
 
     /* Stats */
-    .p-stats{display:flex;gap:0;border:1px solid rgba(247,243,237,0.09);border-radius:14px;overflow:hidden;margin-bottom:44px;background:#22201d;}
-    .p-stat{flex:1;padding:18px 16px;text-align:center;border-right:1px solid rgba(247,243,237,0.07);}
+    .p-stats{display:flex;border:1px solid rgba(247,243,237,0.09);border-radius:14px;overflow:hidden;margin:24px 0 0;background:#22201d;}
+    .p-stat{flex:1;padding:18px 12px;text-align:center;border-right:1px solid rgba(247,243,237,0.07);}
     .p-stat:last-child{border-right:none;}
-    .p-stat-val{font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#f7f3ed;display:block;line-height:1;}
-    .p-stat-label{font-size:11px;font-weight:400;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.3);display:block;margin-top:6px;}
-    @media(max-width:480px){
-      .p-stat-val{font-size:20px;}
-      .p-stat-label{font-size:10px;}
-      .p-stat{padding:14px 10px;}
-    }
+    .p-stat-val{font-family:'Fraunces',serif;font-size:24px;font-weight:400;color:#f7f3ed;display:block;line-height:1;}
+    .p-stat-label{font-size:10px;font-weight:400;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.3);display:block;margin-top:6px;}
+    @media(max-width:480px){.p-stat-val{font-size:19px;}.p-stat{padding:14px 8px;}}
 
-    /* Image */
-    .p-image{width:100%;border-radius:16px;overflow:hidden;margin-bottom:44px;}
-    .p-image img{width:100%;display:block;object-fit:cover;}
+    /* Section structure */
+    .p-section{margin-top:48px;}
+    @media(max-width:600px){.p-section{margin-top:36px;}}
+    .p-section-label{font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:18px;}
+    .p-section-title{font-family:'Fraunces',serif;font-size:22px;font-weight:400;color:#f7f3ed;margin-bottom:14px;}
+    .p-divider{border:none;border-top:1px solid rgba(247,243,237,0.07);margin:48px 0 0;}
+    @media(max-width:600px){.p-divider{margin:36px 0 0;}}
+
+    /* Images */
+    .p-img-single{border-radius:14px;overflow:hidden;width:100%;}
+    .p-img-single img{width:100%;display:block;object-fit:cover;max-height:480px;}
+    .p-img-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .p-img-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+    .p-img-grid-2 .p-img-item,.p-img-grid-3 .p-img-item{border-radius:10px;overflow:hidden;}
+    .p-img-item img{width:100%;display:block;object-fit:cover;height:200px;}
+    @media(max-width:600px){.p-img-grid-2,.p-img-grid-3{grid-template-columns:1fr 1fr;}.p-img-grid-3 .p-img-item:last-child:nth-child(3){grid-column:span 2;}}
+    .p-img-caption{font-size:12px;color:rgba(247,243,237,0.3);margin-top:8px;text-align:center;}
 
     /* Video */
-    .p-video{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:14px;margin-bottom:44px;background:#22201d;}
-    .p-video iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:14px;}
+    .p-video-wrap{border-radius:14px;overflow:hidden;position:relative;padding-bottom:56.25%;height:0;background:#22201d;}
+    .p-video-wrap iframe,.p-video-wrap video{position:absolute;top:0;left:0;width:100%;height:100%;border:0;}
+    .p-video-item{margin-bottom:20px;}
+    .p-video-title{font-size:14px;font-weight:400;color:rgba(247,243,237,0.5);margin-bottom:10px;}
 
-    /* Divider */
-    .p-divider{border:none;border-top:1px solid rgba(247,243,237,0.07);margin:44px 0;}
-
-    /* Section */
-    .p-section-label{font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:18px;}
-    .p-summary{font-size:16px;font-weight:300;line-height:1.75;color:rgba(247,243,237,0.75);white-space:pre-wrap;}
+    /* Assessment */
+    .p-summary{font-size:16px;font-weight:300;line-height:1.8;color:rgba(247,243,237,0.75);white-space:pre-wrap;}
     @media(max-width:600px){.p-summary{font-size:15px;}}
 
     /* Highlights */
-    .p-highlights{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .p-highlights{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
     @media(max-width:520px){.p-highlights{grid-template-columns:1fr;}}
     .p-highlight{display:flex;align-items:flex-start;gap:12px;background:#22201d;border:1px solid rgba(247,243,237,0.07);border-radius:12px;padding:16px 18px;}
     .p-highlight-dot{width:6px;height:6px;border-radius:50%;background:#bd7a70;flex-shrink:0;margin-top:6px;}
     .p-highlight-text{font-size:14px;font-weight:300;color:rgba(247,243,237,0.7);line-height:1.5;}
 
+    /* Cashflow */
+    .p-cf-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:rgba(247,243,237,0.07);border:1px solid rgba(247,243,237,0.07);border-radius:14px;overflow:hidden;}
+    @media(max-width:520px){.p-cf-grid{grid-template-columns:1fr 1fr;}}
+    .p-cf-item{background:#22201d;padding:18px 20px;}
+    .p-cf-label{font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.3);display:block;margin-bottom:6px;}
+    .p-cf-val{font-family:'Fraunces',serif;font-size:22px;font-weight:400;color:#f7f3ed;display:block;}
+    .p-cf-positive .p-cf-val{color:#6dbf7b;}
+    .p-cf-negative .p-cf-val{color:#f08080;}
+    .p-cf-note{font-size:12px;color:rgba(247,243,237,0.25);margin-top:16px;line-height:1.6;}
+
+    /* Risk */
+    .p-risk-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+    @media(max-width:480px){.p-risk-grid{grid-template-columns:1fr;}}
+    .p-risk-item{background:#22201d;border:1px solid rgba(247,243,237,0.07);border-radius:12px;padding:16px 18px;}
+    .p-risk-label{font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:6px;}
+    .p-risk-val{font-size:15px;font-weight:300;color:rgba(247,243,237,0.75);}
+    .p-section-img{width:100%;border-radius:12px;display:block;margin-top:16px;border:1px solid rgba(247,243,237,0.07);}
+
+    /* Demographics */
+    .p-demo-bars{display:flex;flex-direction:column;gap:12px;margin-bottom:16px;}
+    .p-demo-bar-row{display:flex;align-items:center;gap:12px;}
+    .p-demo-bar-label{font-size:13px;color:rgba(247,243,237,0.55);width:130px;flex-shrink:0;}
+    .p-demo-bar-track{flex:1;height:8px;background:rgba(247,243,237,0.07);border-radius:100px;overflow:hidden;}
+    .p-demo-bar-fill{height:100%;border-radius:100px;background:#bd7a70;}
+    .p-demo-bar-pct{font-size:13px;font-weight:500;color:#f7f3ed;width:36px;text-align:right;flex-shrink:0;}
+    @media(max-width:480px){.p-demo-bar-label{width:90px;font-size:12px;}}
+
+    /* Custom section blocks */
+    .p-block{margin-bottom:20px;}
+    .p-block-text{font-size:15px;font-weight:300;line-height:1.75;color:rgba(247,243,237,0.75);white-space:pre-wrap;}
+    .p-block-image{border-radius:12px;overflow:hidden;border:1px solid rgba(247,243,237,0.07);}
+    .p-block-image img{width:100%;display:block;object-fit:cover;}
+    .p-block-caption{font-size:12px;color:rgba(247,243,237,0.3);margin-top:8px;}
+
     /* Footer */
-    .p-footer{margin-top:60px;padding-top:36px;border-top:1px solid rgba(247,243,237,0.07);text-align:center;}
-    .p-footer-name{font-size:13px;font-weight:400;color:rgba(247,243,237,0.45);margin-top:14px;line-height:1.7;}
-    .p-cta{display:inline-block;background:#bd7a70;border-radius:100px;padding:14px 32px;font-size:15px;font-weight:500;color:#f7f3ed;margin-top:28px;transition:background .2s;}
+    .p-footer{margin-top:64px;padding-top:36px;border-top:1px solid rgba(247,243,237,0.07);text-align:center;}
+    .p-footer-name{font-size:13px;font-weight:400;color:rgba(247,243,237,0.4);margin-top:14px;line-height:1.7;}
+    .p-cta{display:inline-block;background:#bd7a70;border-radius:100px;padding:14px 32px;font-size:15px;font-weight:500;color:#f7f3ed;margin-top:24px;transition:background .2s;}
     .p-cta:hover{background:#cf9b92;}
   </style>
 </head>
 <body>
 
-<div id="loading">Loading presentation…</div>
+<div id="loading">Loading…</div>
 
-<div id="error-state" style="display:none;">
+<div id="gate-state">
   <div>
     <img src="/logo-icon.png" alt="" style="height:36px;margin-bottom:24px;opacity:0.4;">
-    <p style="font-size:15px;color:rgba(247,243,237,0.35);">This presentation link is invalid or has expired.</p>
+    <p id="gate-msg" style="font-size:15px;color:rgba(247,243,237,0.35);line-height:1.7;max-width:320px;margin:0 auto;"></p>
   </div>
 </div>
 
 <div id="page">
-  <nav class="p-nav">
-    <img src="/logo-word.png" alt="Fairway Investing" style="height:18px;">
-  </nav>
-
-  <div class="p-wrap">
-    <div class="p-hero">
-      <p class="p-eyebrow" id="p-eyebrow">Property presentation</p>
-      <h1 class="p-address" id="p-address"></h1>
-      <p class="p-price" id="p-price" style="display:none;"></p>
-      <span class="p-type-badge" id="p-type"></span>
-    </div>
-
-    <div class="p-stats" id="p-stats" style="display:none;"></div>
-
-    <div class="p-image" id="p-image" style="display:none;"></div>
-
-    <div class="p-video" id="p-video" style="display:none;"></div>
-
-    <div id="p-summary-section" style="display:none;">
-      <hr class="p-divider">
-      <p class="p-section-label">Luke's assessment</p>
-      <p class="p-summary" id="p-summary"></p>
-    </div>
-
-    <div id="p-highlights-section" style="display:none;">
-      <hr class="p-divider">
-      <p class="p-section-label">Key highlights</p>
-      <div class="p-highlights" id="p-highlights"></div>
-    </div>
-
-    <div class="p-footer">
-      <img src="/logo-icon.png" alt="Fairway Investing" style="height:32px;opacity:0.5;">
-      <p class="p-footer-name">Prepared exclusively for you by<br><strong style="color:rgba(247,243,237,0.6);">Luke at Fairway Investing</strong></p>
-      <a href="mailto:luke@fairwayinvesting.com.au" class="p-cta">Get in touch</a>
-    </div>
-  </div>
+  <div class="p-preview-bar" id="preview-bar">Preview mode — clients cannot see this banner. Happy with it? Go back to admin and hit Send.</div>
+  <nav class="p-nav"><img src="/logo-word.png" alt="Fairway Investing" style="height:18px;"></nav>
+  <div class="p-wrap" id="p-content"></div>
 </div>
 
 <script>
+function fmt(n) { return '$' + Math.round(Math.abs(n)).toLocaleString('en-AU'); }
+function fmtSigned(n) { return (n >= 0 ? '+' : '−') + '$' + Math.round(Math.abs(n)).toLocaleString('en-AU'); }
+
 function getVideoHtml(url) {
   if (!url) return null;
-  // YouTube
   let m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
   if (m) return `<iframe src="https://www.youtube.com/embed/${m[1]}?rel=0&modestbranding=1" allowfullscreen></iframe>`;
-  // Vimeo
   m = url.match(/vimeo\.com\/(\d+)/);
   if (m) return `<iframe src="https://player.vimeo.com/video/${m[1]}?dnt=1" allowfullscreen></iframe>`;
-  // Streamable
   m = url.match(/streamable\.com\/([a-z0-9]+)/i);
   if (m) return `<iframe src="https://streamable.com/e/${m[1]}" allowfullscreen></iframe>`;
-  // Direct MP4 or other video file
-  if (/\.(mp4|webm|mov)(\?|$)/i.test(url)) return `<video src="${url}" controls playsinline style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:14px;"></video>`;
+  if (/\.(mp4|webm|mov)(\?|$)/i.test(url)) return `<video src="${url}" controls playsinline></video>`;
   return null;
+}
+
+function calcCashflow(cf) {
+  const price = parseFloat(String(cf.purchasePrice).replace(/[^0-9.]/g,'')) || 0;
+  const wRent = parseFloat(String(cf.weeklyRent).replace(/[^0-9.]/g,'')) || 0;
+  if (!price || !wRent) return null;
+  const rate = parseFloat(cf.interestRate) || 0;
+  const lvr = parseFloat(cf.lvr) || 80;
+  const mgmtPct = parseFloat(cf.managementFee) || 0;
+  const rates = parseFloat(String(cf.annualRates).replace(/[^0-9.]/g,'')) || 0;
+  const insurance = parseFloat(String(cf.annualInsurance).replace(/[^0-9.]/g,'')) || 0;
+  const maint = parseFloat(String(cf.annualMaintenance).replace(/[^0-9.]/g,'')) || 0;
+  const annualRent = wRent * 52;
+  const grossYield = annualRent / price * 100;
+  const loan = price * lvr / 100;
+  const interest = loan * rate / 100;
+  const mgmt = annualRent * mgmtPct / 100;
+  const totalCosts = interest + rates + insurance + maint + mgmt;
+  const netAnnual = annualRent - totalCosts;
+  return { price, wRent, annualRent, grossYield, loan, lvr, interest, mgmt, rates, insurance, maint, totalCosts, netAnnual, netWeekly: netAnnual / 52 };
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function render(d) {
+  const content = document.getElementById('p-content');
+  const typeLabels = { house:'House', unit:'Unit', townhouse:'Townhouse', duplex:'Duplex', land:'Land' };
+  const statusMap = { offer: ['Under Offer','p-status-offer'], sold: ['Sold','p-status-sold'], available: ['Available','p-status-available'] };
+
+  let html = `<div class="p-hero">`;
+
+  if (d.status && statusMap[d.status]) {
+    const [label, cls] = statusMap[d.status];
+    html += `<span class="p-status ${cls}">${label}</span>`;
+  }
+
+  html += `<p class="p-eyebrow">${d.firstName ? `Prepared for ${esc(d.firstName)}` : 'Property presentation'}</p>
+  <h1 class="p-address">${esc(d.address)}</h1>`;
+  if (d.price) html += `<p class="p-price">${esc(d.price)}</p>`;
+  html += `<span class="p-type-badge">${esc(typeLabels[d.propertyType] || d.propertyType || 'Property')}</span>`;
+
+  const stats = [];
+  if (d.bedrooms) stats.push([d.bedrooms, d.bedrooms == 1 ? 'Bedroom' : 'Bedrooms']);
+  if (d.bathrooms) stats.push([d.bathrooms, d.bathrooms == 1 ? 'Bathroom' : 'Bathrooms']);
+  if (d.carspaces) stats.push([d.carspaces, d.carspaces == 1 ? 'Car space' : 'Car spaces']);
+  if (d.landSize) stats.push([d.landSize, 'Land']);
+  if (stats.length) {
+    html += `<div class="p-stats">${stats.map(([v,l]) => `<div class="p-stat"><span class="p-stat-val">${esc(String(v))}</span><span class="p-stat-label">${l}</span></div>`).join('')}</div>`;
+  }
+  html += `</div>`;
+
+  // Images
+  const imgs = (d.images || []).filter(i => i.url);
+  if (imgs.length) {
+    html += `<hr class="p-divider"><div class="p-section">`;
+    if (imgs.length === 1) {
+      html += `<div class="p-img-single"><img src="${esc(imgs[0].url)}" alt="${esc(d.address)}"></div>`;
+      if (imgs[0].caption) html += `<p class="p-img-caption">${esc(imgs[0].caption)}</p>`;
+    } else {
+      const gridClass = imgs.length === 2 ? 'p-img-grid-2' : 'p-img-grid-3';
+      html += `<div class="${gridClass}">${imgs.map(img => `<div class="p-img-item"><img src="${esc(img.url)}" alt="${img.caption ? esc(img.caption) : ''}">${img.caption ? `<p class="p-img-caption">${esc(img.caption)}</p>` : ''}</div>`).join('')}</div>`;
+    }
+    html += `</div>`;
+  }
+
+  // Videos
+  const vids = (d.videos || []).filter(v => v.url);
+  if (vids.length) {
+    html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Video</p>`;
+    vids.forEach(v => {
+      const vh = getVideoHtml(v.url);
+      if (!vh) return;
+      html += `<div class="p-video-item">`;
+      if (v.title) html += `<p class="p-video-title">${esc(v.title)}</p>`;
+      html += `<div class="p-video-wrap">${vh}</div></div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Assessment
+  if (d.summary) {
+    html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Luke's assessment</p><p class="p-summary">${esc(d.summary)}</p></div>`;
+  }
+
+  // Highlights
+  if (d.highlights?.length) {
+    html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Key highlights</p><div class="p-highlights">${
+      d.highlights.map(h => `<div class="p-highlight"><div class="p-highlight-dot"></div><div class="p-highlight-text">${esc(h)}</div></div>`).join('')
+    }</div></div>`;
+  }
+
+  // Cashflow
+  if (d.cashflow?.enabled) {
+    const c = calcCashflow(d.cashflow);
+    if (c) {
+      const pos = c.netWeekly >= 0;
+      html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Cashflow analysis</p>
+      <div class="p-cf-grid">
+        <div class="p-cf-item"><span class="p-cf-label">Purchase price</span><span class="p-cf-val">${fmt(c.price)}</span></div>
+        <div class="p-cf-item"><span class="p-cf-label">Weekly rent</span><span class="p-cf-val">${fmt(c.wRent)}<span style="font-size:14px;font-weight:300;color:rgba(247,243,237,0.4)">/wk</span></span></div>
+        <div class="p-cf-item"><span class="p-cf-label">Gross yield</span><span class="p-cf-val">${c.grossYield.toFixed(2)}<span style="font-size:14px;font-weight:300;color:rgba(247,243,237,0.4)">%</span></span></div>
+        <div class="p-cf-item"><span class="p-cf-label">Loan (${c.lvr}% LVR)</span><span class="p-cf-val">${fmt(c.loan)}</span></div>
+        <div class="p-cf-item"><span class="p-cf-label">Annual holding costs</span><span class="p-cf-val">${fmt(c.totalCosts)}</span></div>
+        <div class="p-cf-item ${pos ? 'p-cf-positive' : 'p-cf-negative'}"><span class="p-cf-label">Net cash flow</span><span class="p-cf-val">${fmtSigned(c.netWeekly)}<span style="font-size:14px;font-weight:300">/wk</span></span></div>
+      </div>
+      <p class="p-cf-note">Holding costs include interest at ${d.cashflow.interestRate || '—'}%${d.cashflow.managementFee ? `, ${d.cashflow.managementFee}% management` : ''}${d.cashflow.annualRates ? `, council rates, insurance` : ''}.</p>
+      </div>`;
+    }
+  }
+
+  // Risk profile
+  if (d.riskProfile?.enabled) {
+    const r = d.riskProfile;
+    html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Risk profile</p><div class="p-risk-grid">`;
+    if (r.bushfire) html += `<div class="p-risk-item"><p class="p-risk-label">Bushfire risk</p><p class="p-risk-val">${esc(r.bushfire)}</p></div>`;
+    if (r.flood) html += `<div class="p-risk-item"><p class="p-risk-label">Flood zone</p><p class="p-risk-val">${esc(r.flood)}</p></div>`;
+    html += `</div>`;
+    if (r.notes) html += `<p style="font-size:14px;color:rgba(247,243,237,0.5);line-height:1.7;margin-bottom:10px;">${esc(r.notes)}</p>`;
+    if (r.imageUrl) html += `<img src="${esc(r.imageUrl)}" class="p-section-img" alt="Risk map">`;
+    html += `</div>`;
+  }
+
+  // Demographics
+  if (d.demographics?.enabled) {
+    const dm = d.demographics;
+    html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Area demographics</p><div class="p-demo-bars">`;
+    const bars = [['Owner occupier', dm.ownerOccupier], ['Renter', dm.renter], ['Public housing', dm.publicHousing]].filter(([,v]) => v);
+    bars.forEach(([label, pct]) => {
+      const num = parseFloat(pct) || 0;
+      html += `<div class="p-demo-bar-row">
+        <span class="p-demo-bar-label">${esc(label)}</span>
+        <div class="p-demo-bar-track"><div class="p-demo-bar-fill" style="width:${Math.min(num,100)}%"></div></div>
+        <span class="p-demo-bar-pct">${num}%</span>
+      </div>`;
+    });
+    html += `</div>`;
+    if (dm.notes) html += `<p style="font-size:14px;color:rgba(247,243,237,0.5);line-height:1.7;margin-bottom:10px;">${esc(dm.notes)}</p>`;
+    if (dm.imageUrl) html += `<img src="${esc(dm.imageUrl)}" class="p-section-img" alt="Demographics">`;
+    html += `</div>`;
+  }
+
+  // Custom sections
+  (d.customSections || []).forEach(sec => {
+    html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">${esc(sec.title || 'Additional information')}</p>`;
+    (sec.blocks || []).forEach(block => {
+      if (block.type === 'text' && block.content) {
+        html += `<div class="p-block"><p class="p-block-text">${esc(block.content)}</p></div>`;
+      } else if (block.type === 'image' && block.url) {
+        html += `<div class="p-block"><div class="p-block-image"><img src="${esc(block.url)}" alt="${block.caption ? esc(block.caption) : ''}"></div>${block.caption ? `<p class="p-block-caption">${esc(block.caption)}</p>` : ''}</div>`;
+      } else if (block.type === 'video' && block.url) {
+        const vh = getVideoHtml(block.url);
+        if (vh) html += `<div class="p-block"><div class="p-video-wrap">${vh}</div></div>`;
+      }
+    });
+    html += `</div>`;
+  });
+
+  // Footer
+  html += `<div class="p-footer">
+    <img src="/logo-icon.png" alt="Fairway" style="height:30px;opacity:0.45;">
+    <p class="p-footer-name">Prepared exclusively for you by<br><strong style="color:rgba(247,243,237,0.55);">Luke at Fairway Investing</strong></p>
+    <a href="mailto:luke@fairwayinvesting.com.au" class="p-cta">Get in touch</a>
+  </div>`;
+
+  content.innerHTML = html;
+  document.title = `${d.address} — Fairway Investing`;
+}
+
+function showGate(msg) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('gate-msg').textContent = msg;
+  document.getElementById('gate-state').style.display = 'flex';
 }
 
 (async function() {
   const token = new URLSearchParams(window.location.search).get('t');
-  if (!token) { showError(); return; }
+  if (!token) { showGate('This presentation link is invalid.'); return; }
 
   let data;
   try {
     const res = await fetch(`/api/property-view?t=${encodeURIComponent(token)}`);
-    if (!res.ok) { showError(); return; }
+    if (res.status === 403) { showGate('Your access to this presentation has been removed. Please contact Luke if you think this is a mistake.'); return; }
+    if (res.status === 410) { showGate('This presentation has expired. Please contact Luke for the latest information.'); return; }
+    if (!res.ok) { showGate('This presentation link is invalid or has expired.'); return; }
     data = await res.json();
-  } catch { showError(); return; }
+  } catch { showGate('Unable to load presentation. Please try again.'); return; }
 
-  // Record view (fire and forget)
   fetch(`/api/property-view?t=${encodeURIComponent(token)}`, { method: 'POST' }).catch(() => {});
 
-  render(data);
-})();
-
-function showError() {
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('error-state').style.display = 'flex';
-}
-
-function render(d) {
   document.getElementById('loading').style.display = 'none';
   document.getElementById('page').style.display = 'block';
-
-  // Title
-  document.title = `${d.address} — Fairway Investing`;
-
-  // Eyebrow
-  if (d.firstName) {
-    document.getElementById('p-eyebrow').textContent = `Prepared for ${d.firstName}`;
-  }
-
-  // Address
-  document.getElementById('p-address').textContent = d.address;
-
-  // Price
-  if (d.price) {
-    const el = document.getElementById('p-price');
-    el.textContent = d.price;
-    el.style.display = 'block';
-  }
-
-  // Type
-  const typeLabels = { house: 'House', unit: 'Unit', townhouse: 'Townhouse', duplex: 'Duplex', land: 'Land' };
-  document.getElementById('p-type').textContent = typeLabels[d.propertyType] || d.propertyType;
-
-  // Stats
-  const stats = [];
-  if (d.bedrooms) stats.push({ val: d.bedrooms, label: d.bedrooms == 1 ? 'Bedroom' : 'Bedrooms' });
-  if (d.bathrooms) stats.push({ val: d.bathrooms, label: d.bathrooms == 1 ? 'Bathroom' : 'Bathrooms' });
-  if (d.carspaces) stats.push({ val: d.carspaces, label: d.carspaces == 1 ? 'Car space' : 'Car spaces' });
-  if (d.landSize) stats.push({ val: d.landSize, label: 'Land size' });
-  if (stats.length) {
-    const el = document.getElementById('p-stats');
-    el.innerHTML = stats.map(s => `<div class="p-stat"><span class="p-stat-val">${s.val}</span><span class="p-stat-label">${s.label}</span></div>`).join('');
-    el.style.display = 'flex';
-  }
-
-  // Image
-  if (d.imageUrl) {
-    const el = document.getElementById('p-image');
-    el.innerHTML = `<img src="${d.imageUrl}" alt="${d.address}">`;
-    el.style.display = 'block';
-  }
-
-  // Preview banner
-  if (d.isPreview) {
-    const banner = document.createElement('div');
-    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#e8a87c;color:#22201d;text-align:center;padding:10px 16px;font-size:13px;font-weight:500;z-index:100;';
-    banner.textContent = 'Preview mode — clients cannot see this banner. Looks good? Go back to admin and hit Send.';
-    document.body.prepend(banner);
-    document.getElementById('page').style.marginTop = '42px';
-  }
-
-  // Video
-  const videoHtml = getVideoHtml(d.videoUrl);
-  if (videoHtml) {
-    const el = document.getElementById('p-video');
-    el.innerHTML = videoHtml;
-    el.style.display = 'block';
-  }
-
-  // Summary
-  if (d.summary) {
-    document.getElementById('p-summary').textContent = d.summary;
-    document.getElementById('p-summary-section').style.display = 'block';
-  }
-
-  // Highlights
-  if (d.highlights && d.highlights.length) {
-    const el = document.getElementById('p-highlights');
-    el.innerHTML = d.highlights.map(h => `<div class="p-highlight"><div class="p-highlight-dot"></div><div class="p-highlight-text">${h}</div></div>`).join('');
-    document.getElementById('p-highlights-section').style.display = 'block';
-  }
-}
+  if (data.isPreview) document.getElementById('preview-bar').style.display = 'block';
+  render(data);
+})();
 </script>
 </body>
 </html>

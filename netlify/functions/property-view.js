@@ -10,7 +10,6 @@ export default async (req) => {
   const store = getStore('fairway-presentations');
   const presentations = (await store.get('all', { type: 'json' })) || [];
 
-  // Check preview token first (admin preview — no client association)
   let found = null, clientId = null;
   const previewMatch = presentations.find(p => p.previewToken === token);
   if (previewMatch) {
@@ -27,6 +26,16 @@ export default async (req) => {
 
   if (!found) return json({ error: 'Not found' }, 404);
 
+  // Check expiry
+  if (found.expiresAt && new Date(found.expiresAt) < new Date()) {
+    return json({ expired: true }, 410);
+  }
+
+  // Check revoked (not for preview)
+  if (clientId !== '_preview' && (found.revokedClients || []).includes(clientId)) {
+    return json({ revoked: true }, 403);
+  }
+
   if (req.method === 'GET') {
     let firstName = '';
     if (clientId !== '_preview') {
@@ -35,22 +44,25 @@ export default async (req) => {
       const client = allClients.find(c => c.id === clientId);
       firstName = client ? client.name.split(' ')[0] : '';
     }
-    const { id, address, suburb, price, bedrooms, bathrooms, carspaces,
-            landSize, propertyType, videoUrl, imageUrl, summary, highlights } = found;
-    const isPreview = clientId === '_preview';
-    return json({ id, address, suburb, price, bedrooms, bathrooms, carspaces,
-                  landSize, propertyType, videoUrl, imageUrl, summary, highlights,
-                  firstName, isPreview });
+    const { id, address, suburb, price, bedrooms, bathrooms, carspaces, landSize,
+            propertyType, summary, highlights, images, videos,
+            cashflow, riskProfile, demographics, customSections, status } = found;
+    return json({
+      id, address, suburb, price, bedrooms, bathrooms, carspaces, landSize,
+      propertyType, summary, highlights,
+      images: images || [], videos: videos || [],
+      cashflow: cashflow || {}, riskProfile: riskProfile || {},
+      demographics: demographics || {}, customSections: customSections || [],
+      status: status || '',
+      firstName, isPreview: clientId === '_preview',
+    });
   }
 
   if (req.method === 'POST') {
-    // Don't track views for admin preview
     if (clientId === '_preview') return json({ ok: true });
     const idx = presentations.findIndex(p => p.id === found.id);
     if (idx !== -1) {
-      if (!presentations[idx].views[clientId]) {
-        presentations[idx].views[clientId] = { firstViewedAt: null, viewCount: 0 };
-      }
+      if (!presentations[idx].views[clientId]) presentations[idx].views[clientId] = { firstViewedAt: null, viewCount: 0 };
       const v = presentations[idx].views[clientId];
       if (!v.firstViewedAt) v.firstViewedAt = new Date().toISOString();
       v.viewCount = (v.viewCount || 0) + 1;
