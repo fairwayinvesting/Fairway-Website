@@ -4,8 +4,9 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-function buildWelcomeEmail(name, email, password) {
+function buildWelcomeEmail(name, email, setupToken) {
   const firstName = name.split(' ')[0];
+  const setupLink = `https://fairwayinvesting.com.au/clients/setup.html?token=${setupToken}`;
   return `<!DOCTYPE html><html lang="en" style="background:#181614;"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Welcome to Fairway</title></head>
 <body style="margin:0;padding:0;background:#181614;font-family:Helvetica,Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#181614"><tr><td align="center" style="padding:40px 16px;background:#181614;">
@@ -16,32 +17,29 @@ function buildWelcomeEmail(name, email, password) {
     </p>
     <p style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#B5715A;margin:0 0 16px;">Client portal</p>
     <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:36px;font-weight:400;color:#FAF6F1;margin:0 0 12px;line-height:1.15;">Welcome, ${firstName}.</h1>
-    <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 36px;line-height:1.65;">Your Fairway client portal is live. Use the details below to sign in and access your market research reports.</p>
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:rgba(250,246,241,0.06);border:1px solid rgba(250,246,241,0.1);border-radius:12px;margin:0 0 36px;">
+    <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 32px;line-height:1.65;">Your Fairway client portal is live. Click the button below to set your password and access your market research reports.</p>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:rgba(250,246,241,0.06);border:1px solid rgba(250,246,241,0.1);border-radius:12px;margin:0 0 32px;">
       <tr><td style="padding:28px 32px;">
-        <p style="font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#B5715A;margin:0 0 20px;">Your login details</p>
+        <p style="font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#B5715A;margin:0 0 16px;">Your login</p>
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr><td style="padding:0 0 14px;">
-            <span style="font-size:11px;color:rgba(250,246,241,0.4);display:block;margin-bottom:4px;">LOGIN URL</span>
+            <span style="font-size:11px;color:rgba(250,246,241,0.4);display:block;margin-bottom:4px;">PORTAL URL</span>
             <a href="https://fairwayinvesting.com.au/clients/" style="font-size:14px;color:#B5715A;text-decoration:none;">fairwayinvesting.com.au/clients</a>
           </td></tr>
-          <tr><td style="padding:14px 0;border-top:1px solid rgba(250,246,241,0.07);">
+          <tr><td style="padding:14px 0 0;border-top:1px solid rgba(250,246,241,0.07);">
             <span style="font-size:11px;color:rgba(250,246,241,0.4);display:block;margin-bottom:4px;">EMAIL</span>
             <span style="font-size:14px;color:#FAF6F1;font-family:Courier,monospace;">${email}</span>
-          </td></tr>
-          <tr><td style="padding:14px 0 0;border-top:1px solid rgba(250,246,241,0.07);">
-            <span style="font-size:11px;color:rgba(250,246,241,0.4);display:block;margin-bottom:4px;">PASSWORD</span>
-            <span style="font-size:14px;color:#FAF6F1;font-family:Courier,monospace;">${password}</span>
           </td></tr>
         </table>
       </td></tr>
     </table>
     <table cellpadding="0" cellspacing="0" border="0"><tr>
       <td style="border-radius:100px;background:#B5715A;">
-        <a href="https://fairwayinvesting.com.au/clients/" style="display:inline-block;font-size:15px;font-weight:500;color:#FAF6F1;text-decoration:none;padding:15px 34px;">Access your portal &rarr;</a>
+        <a href="${setupLink}" style="display:inline-block;font-size:15px;font-weight:500;color:#FAF6F1;text-decoration:none;padding:15px 34px;">Set your password &rarr;</a>
       </td>
     </tr></table>
-    <p style="font-size:13px;color:rgba(250,246,241,0.3);margin:28px 0 0;line-height:1.6;">Any questions, reply to this email or call 0416 184 333.</p>
+    <p style="font-size:12px;color:rgba(250,246,241,0.25);margin:20px 0 0;line-height:1.6;">This link expires in 7 days. If it has expired, contact Luke and he can send a new one.</p>
+    <p style="font-size:13px;color:rgba(250,246,241,0.3);margin:20px 0 0;line-height:1.6;">Any questions, reply to this email or call 0416 184 333.</p>
   </td></tr>
   <tr><td style="padding:24px 0 0;text-align:center;">
     <p style="font-size:12px;color:rgba(250,246,241,0.25);margin:0;line-height:1.7;">Fairway Investing &middot; Suite 211, Level 2/5 Alexander Street, Crows Nest NSW 2065<br>
@@ -60,6 +58,16 @@ async function pbkdf2Hash(password, salt) {
   });
 }
 
+async function appendAudit(action, detail) {
+  try {
+    const store = getStore('fairway-audit-log');
+    const entries = (await store.get('entries', { type: 'json' }).catch(() => null)) || [];
+    entries.unshift({ ts: new Date().toISOString(), action, detail });
+    if (entries.length > 200) entries.length = 200;
+    await store.setJSON('entries', entries);
+  } catch { /* best-effort */ }
+}
+
 function checkAdmin(req) {
   const auth = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '');
   return auth === process.env.ADMIN_PASSWORD;
@@ -75,25 +83,34 @@ export default async (req) => {
   const clients = (await store.get('all', { type: 'json' })) || [];
 
   if (req.method === 'GET') {
-    return json(clients.map(({ id, name, email, markets, active, createdAt }) =>
-      ({ id, name, email, markets, active, createdAt })
+    return json(clients.map(({ id, name, email, markets, active, createdAt, setupToken }) =>
+      ({ id, name, email, markets, active, createdAt, hasSetupToken: !!setupToken })
     ));
   }
 
   if (req.method === 'POST') {
     const { name, email, password, markets, sendEmail = true } = await req.json().catch(() => ({}));
-    if (!name || !email || !password) return json({ error: 'name, email and password required' }, 400);
+    if (!name || !email) return json({ error: 'name and email required' }, 400);
     if (clients.some(c => c.email.toLowerCase() === email.toLowerCase())) return json({ error: 'Email already exists' }, 409);
+
     const salt = crypto.randomBytes(16).toString('hex');
+    const setupToken = crypto.randomBytes(24).toString('hex');
+    const setupTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    // If admin sets a password, hash it; otherwise use a random placeholder (client must use setup link)
+    const effectivePassword = password || crypto.randomBytes(32).toString('hex');
+
     const client = {
       id: crypto.randomUUID(),
       name: name.trim(),
       email: email.toLowerCase().trim(),
-      passwordHash: await pbkdf2Hash(password, salt),
+      passwordHash: await pbkdf2Hash(effectivePassword, salt),
       passwordSalt: salt,
       markets: Array.isArray(markets) ? markets : [],
       active: true,
       createdAt: new Date().toISOString(),
+      setupToken,
+      setupTokenExpiry,
     };
     clients.push(client);
     await store.setJSON('all', clients);
@@ -104,14 +121,15 @@ export default async (req) => {
           from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
           to: [client.email],
           reply_to: 'luke@fairwayinvesting.com.au',
-          subject: 'Welcome to Fairway — your portal is ready',
-          html: buildWelcomeEmail(client.name, client.email, password),
+          subject: 'Welcome to Fairway — set up your portal access',
+          html: buildWelcomeEmail(client.name, client.email, setupToken),
         });
       } catch (err) {
         console.error('Welcome email failed:', err?.message || err);
       }
     }
 
+    appendAudit('client_created', `Created client ${client.name} <${client.email}>`);
     return json({ ok: true, id: client.id }, 201);
   }
 
@@ -134,9 +152,11 @@ export default async (req) => {
   if (req.method === 'DELETE') {
     const id = new URL(req.url).searchParams.get('id');
     if (!id) return json({ error: 'id required' }, 400);
+    const toDelete = clients.find(c => c.id === id);
     const updated = clients.filter(c => c.id !== id);
     if (updated.length === clients.length) return json({ error: 'Not found' }, 404);
     await store.setJSON('all', updated);
+    if (toDelete) appendAudit('client_deleted', `Deleted client ${toDelete.name} <${toDelete.email}>`);
     return json({ ok: true });
   }
 

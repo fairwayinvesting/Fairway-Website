@@ -363,6 +363,15 @@
     <div id="reports-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;"></div>
   </div>
 
+  <!-- Audit log -->
+  <div style="margin-top:52px;" id="audit-section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+      <h2 style="font-family:'Fraunces',serif;font-size:24px;font-weight:400;">Activity log</h2>
+      <button class="btn-secondary" onclick="loadAuditLog()" style="padding:8px 18px;font-size:13px;">Refresh</button>
+    </div>
+    <div id="audit-list" style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);line-height:1.8;">Loading…</div>
+  </div>
+
   <!-- Security / 2FA -->
   <div style="margin-top:52px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
@@ -586,7 +595,7 @@
     </div>
     <div class="field">
       <label id="pw-label">Password</label>
-      <input type="password" id="f-password" placeholder="Set a password">
+      <input type="password" id="f-password" placeholder="Optional">
       <p class="field-note" id="pw-note"></p>
     </div>
     <div class="field">
@@ -659,6 +668,7 @@ async function completeLogin(pw) {
   loadClients();
   loadMilestones();
   loadPresentations();
+  loadAuditLog();
 }
 
 document.getElementById('gate-btn').addEventListener('click', async function() {
@@ -808,8 +818,8 @@ function openAdd() {
   document.getElementById('f-email').value = '';
   document.getElementById('f-email').disabled = false;
   document.getElementById('f-password').value = '';
-  document.getElementById('pw-label').textContent = 'Password';
-  document.getElementById('pw-note').textContent = '';
+  document.getElementById('pw-label').textContent = 'Password (optional)';
+  document.getElementById('pw-note').textContent = 'Leave blank — the welcome email will include a link for the client to set their own password.';
   document.getElementById('f-active').checked = true;
   document.getElementById('active-label').textContent = 'Active';
   document.getElementById('f-send-email').checked = true;
@@ -860,8 +870,6 @@ document.getElementById('modal-save').addEventListener('click', async function()
 
   if (!name) { errEl.textContent = 'Name is required.'; errEl.classList.add('visible'); return; }
   if (!id && !email) { errEl.textContent = 'Email is required.'; errEl.classList.add('visible'); return; }
-  if (!id && !password) { errEl.textContent = 'Password is required for new clients.'; errEl.classList.add('visible'); return; }
-
   this.disabled = true;
   this.innerHTML = '<span class="spinner"></span>Saving…';
 
@@ -1142,6 +1150,35 @@ async function testTotpCode(secret) {
   const { valid } = await res.json();
   resultEl.textContent = valid ? '✓ Code is valid' : '✗ Invalid code';
   resultEl.style.color = valid ? '#6dbf7b' : '#f08080';
+}
+
+// ── Audit log ─────────────────────────────────────────────────────────────────
+const actionLabels = {
+  client_created: 'Client added',
+  client_deleted: 'Client deleted',
+  presentation_created: 'Presentation created',
+  presentation_sent: 'Presentation sent',
+  presentation_deleted: 'Presentation deleted',
+  access_revoked: 'Access revoked',
+};
+
+async function loadAuditLog() {
+  const el = document.getElementById('audit-list');
+  const res = await api('GET', '/api/admin/audit-log');
+  if (!res.ok) { el.textContent = 'Could not load activity log.'; return; }
+  const entries = await res.json();
+  if (!entries.length) { el.textContent = 'No activity recorded yet.'; return; }
+  el.innerHTML = entries.slice(0, 50).map(e => {
+    const d = new Date(e.ts);
+    const dateStr = d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+    const timeStr = d.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
+    const label = actionLabels[e.action] || e.action;
+    return `<div style="display:flex;gap:16px;padding:10px 0;border-bottom:1px solid rgba(247,243,237,0.05);">
+      <span style="flex-shrink:0;color:rgba(247,243,237,0.25);font-size:12px;white-space:nowrap;padding-top:1px;">${dateStr} ${timeStr}</span>
+      <span style="color:rgba(189,122,112,0.85);flex-shrink:0;font-size:12px;font-weight:500;padding-top:1px;">${label}</span>
+      <span>${e.detail || ''}</span>
+    </div>`;
+  }).join('');
 }
 
 // ── Presentations ─────────────────────────────────────────────────────────────

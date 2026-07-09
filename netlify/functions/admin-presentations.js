@@ -85,6 +85,16 @@ function defaultPres(fields) {
   };
 }
 
+async function appendAudit(action, detail) {
+  try {
+    const store = getStore('fairway-audit-log');
+    const entries = (await store.get('entries', { type: 'json' }).catch(() => null)) || [];
+    entries.unshift({ ts: new Date().toISOString(), action, detail });
+    if (entries.length > 200) entries.length = 200;
+    await store.setJSON('entries', entries);
+  } catch { /* best-effort — never block the main request */ }
+}
+
 export default async (req) => {
   if (!checkAdmin(req)) return json({ error: 'Unauthorized' }, 401);
 
@@ -101,6 +111,7 @@ export default async (req) => {
     const pres = defaultPres({ ...body, tokens, views, sentClients: [], revokedClients: [] });
     presentations.push(pres);
     await store.setJSON('all', presentations);
+    appendAudit('presentation_created', `Created presentation "${pres.address}"`);
     return json({ ok: true, id: pres.id, pres }, 201);
   }
 
@@ -149,6 +160,7 @@ export default async (req) => {
       }
       presentations[idx] = pres;
       await store.setJSON('all', presentations);
+      if (sent > 0) appendAudit('presentation_sent', `Sent "${pres.address}" to ${sent} client${sent !== 1 ? 's' : ''}`);
       return json({ ok: true, sent });
     }
 
@@ -166,17 +178,24 @@ export default async (req) => {
       });
       pres.assignedClients = body.assignedClients;
     }
+    const prevRevoked = (presentations[idx].revokedClients || []).length;
     presentations[idx] = pres;
     await store.setJSON('all', presentations);
+    const nowRevoked = (pres.revokedClients || []).length;
+    if (nowRevoked > prevRevoked) {
+      appendAudit('access_revoked', `Revoked access on "${pres.address}" (${nowRevoked} client${nowRevoked !== 1 ? 's' : ''} total)`);
+    }
     return json({ ok: true, pres });
   }
 
   if (req.method === 'DELETE') {
     const id = new URL(req.url).searchParams.get('id');
     if (!id) return json({ error: 'id required' }, 400);
+    const toDelete = presentations.find(p => p.id === id);
     const updated = presentations.filter(p => p.id !== id);
     if (updated.length === presentations.length) return json({ error: 'Not found' }, 404);
     await store.setJSON('all', updated);
+    if (toDelete) appendAudit('presentation_deleted', `Deleted presentation "${toDelete.address}"`);
     return json({ ok: true });
   }
 
