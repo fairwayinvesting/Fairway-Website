@@ -14,10 +14,13 @@ const json = (data, status = 200) =>
 
 function genToken() { return crypto.randomBytes(20).toString('hex'); }
 
-function buildPropertyEmail(clientName, address, price, link) {
+function buildPropertyEmail(clientName, address, suburb, price, propertyType, bedrooms, bathrooms, carspaces, link) {
   const firstName = clientName.split(' ')[0];
-  const priceStr = price ? ` &mdash; ${price}` : '';
-  return `<!DOCTYPE html><html lang="en" style="background:#181614;"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+  const typeLabels = { house: 'House', unit: 'Unit', townhouse: 'Townhouse', duplex: 'Duplex', land: 'Land' };
+  const typeLabel = typeLabels[propertyType] || 'Property';
+  const specParts = [typeLabel, bedrooms && `${bedrooms} bed`, bathrooms && `${bathrooms} bath`, carspaces && `${carspaces} car`].filter(Boolean);
+  const specLine = specParts.join(' &nbsp;&middot;&nbsp; ');
+  return `<!DOCTYPE html><html lang="en" style="background:#181614;"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Property presentation — Fairway</title></head>
 <body style="margin:0;padding:0;background:#181614;font-family:Helvetica,Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#181614"><tr><td align="center" style="padding:40px 16px;">
 <table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;">
@@ -26,12 +29,19 @@ function buildPropertyEmail(clientName, address, price, link) {
       <img src="https://fairwayinvesting.com.au/logo-word.png" width="200" height="30" alt="Fairway Investing" style="display:inline-block;border:0;max-width:200px;">
     </p>
     <p style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#B5715A;margin:0 0 16px;">Property presentation</p>
-    <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:30px;font-weight:400;color:#FAF6F1;margin:0 0 12px;line-height:1.25;">${firstName}, I've found a property worth looking at.</h1>
-    <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 32px;line-height:1.65;">I've put together a full presentation for you. Have a read through when you get a chance &mdash; happy to chat through it.</p>
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:rgba(250,246,241,0.06);border:1px solid rgba(250,246,241,0.1);border-radius:12px;margin:0 0 32px;">
-      <tr><td style="padding:24px 28px;">
-        <p style="font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#B5715A;margin:0 0 8px;">Property</p>
-        <p style="font-size:18px;font-weight:400;color:#FAF6F1;margin:0;line-height:1.4;">${address}${priceStr}</p>
+    <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:30px;font-weight:400;color:#FAF6F1;margin:0 0 16px;line-height:1.25;">${firstName}, I've found one I want you to see.</h1>
+    <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 32px;line-height:1.65;">I've put together a full analysis on this property. Inside you'll find my assessment, the cashflow numbers, comparable sales, and a risk profile &mdash; everything you need to form a view before we talk.</p>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:rgba(250,246,241,0.05);border:1px solid rgba(250,246,241,0.1);border-radius:14px;margin:0 0 32px;">
+      <tr><td style="padding:24px 28px 20px;">
+        <p style="font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#B5715A;margin:0 0 12px;">The property</p>
+        <p style="font-size:20px;font-weight:400;color:#FAF6F1;margin:0 0 4px;line-height:1.3;">${address}</p>
+        ${suburb ? `<p style="font-size:14px;color:rgba(250,246,241,0.4);margin:0 0 14px;">${suburb}</p>` : '<p style="margin:0 0 14px;"></p>'}
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid rgba(250,246,241,0.07);"><tr>
+          <td style="padding:14px 0 0;">
+            <span style="font-size:13px;color:rgba(250,246,241,0.45);">${specLine}</span>
+          </td>
+          ${price ? `<td style="padding:14px 0 0;text-align:right;"><span style="font-size:16px;font-weight:500;color:#FAF6F1;">${price}</span></td>` : ''}
+        </tr></table>
       </td></tr>
     </table>
     <table cellpadding="0" cellspacing="0" border="0"><tr>
@@ -39,7 +49,7 @@ function buildPropertyEmail(clientName, address, price, link) {
         <a href="${link}" style="display:inline-block;font-size:15px;font-weight:500;color:#FAF6F1;text-decoration:none;padding:15px 34px;">View full presentation &rarr;</a>
       </td>
     </tr></table>
-    <p style="font-size:13px;color:rgba(250,246,241,0.3);margin:28px 0 0;line-height:1.6;">Any questions, reply to this email or call 0416 184 333.</p>
+    <p style="font-size:13px;color:rgba(250,246,241,0.3);margin:28px 0 0;line-height:1.6;">Happy to walk you through it &mdash; reply to this email or call <a href="tel:0416184333" style="color:rgba(250,246,241,0.45);text-decoration:none;">0416 184 333</a>.</p>
   </td></tr>
   <tr><td style="padding:24px 0 0;text-align:center;">
     <p style="font-size:12px;color:rgba(250,246,241,0.25);margin:0;line-height:1.7;">Fairway Investing &middot; Suite 211, Level 2/5 Alexander Street, Crows Nest NSW 2065<br>
@@ -130,7 +140,7 @@ export default async (req) => {
             to: [client.email],
             reply_to: 'luke@fairwayinvesting.com.au',
             subject: `Property opportunity — ${pres.address}`,
-            html: buildPropertyEmail(client.name, pres.address, pres.price, link),
+            html: buildPropertyEmail(client.name, pres.address, pres.suburb, pres.price, pres.propertyType, pres.bedrooms, pres.bathrooms, pres.carspaces, link),
           });
           if (action === 'send' && !pres.sentClients.includes(cid)) pres.sentClients.push(cid);
           sent++;

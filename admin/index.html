@@ -397,8 +397,9 @@
 
       <!-- Details tab -->
       <div class="pres-tab-pane active" id="pres-tab-details">
-        <div class="field"><label>Property address</label><input type="text" id="pres-address" placeholder="e.g. 14 Smith Street, Corio VIC 3214"></div>
-        <div class="pres-field-row-2">
+        <div class="field"><label>Property address</label><input type="text" id="pres-address" placeholder="e.g. 14 Smith Street"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+          <div class="field"><label>Suburb</label><input type="text" id="pres-suburb" placeholder="e.g. Geelong West VIC"></div>
           <div class="field"><label>Price</label><input type="text" id="pres-price" placeholder="e.g. $485,000"></div>
           <div class="field"><label>Property type</label>
             <select id="pres-type"><option value="house">House</option><option value="unit">Unit</option><option value="townhouse">Townhouse</option><option value="duplex">Duplex</option><option value="land">Land</option></select>
@@ -1409,6 +1410,7 @@ function openPresModal(id) {
     document.getElementById('pres-modal-title').textContent = 'Edit presentation';
     document.getElementById('pres-edit-id').value = id;
     document.getElementById('pres-address').value = p.address || '';
+    document.getElementById('pres-suburb').value = p.suburb || '';
     document.getElementById('pres-price').value = p.price || '';
     document.getElementById('pres-type').value = p.propertyType || 'house';
     document.getElementById('pres-beds').value = p.bedrooms || '';
@@ -1510,7 +1512,7 @@ function openPresModal(id) {
   } else {
     document.getElementById('pres-modal-title').textContent = 'New presentation';
     document.getElementById('pres-edit-id').value = '';
-    ['pres-address','pres-price','pres-beds','pres-baths','pres-cars','pres-land','pres-summary','pres-highlights','cf-price','cf-rent','cf-rate','cf-lvr','cf-mgmt','cf-rates','cf-insurance','cf-maint','risk-bushfire-image','risk-flood-image','risk-notes','demo-owner','demo-renter','demo-public','demo-notes','demo-image'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    ['pres-address','pres-suburb','pres-price','pres-beds','pres-baths','pres-cars','pres-land','pres-summary','pres-highlights','cf-price','cf-rent','cf-rate','cf-lvr','cf-mgmt','cf-rates','cf-insurance','cf-maint','risk-bushfire-image','risk-flood-image','risk-notes','demo-owner','demo-renter','demo-public','demo-notes','demo-image'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.getElementById('pres-type').value = 'house';
     document.getElementById('pres-status').value = '';
     document.getElementById('pres-expires').value = '';
@@ -1574,6 +1576,7 @@ async function savePresentation() {
   const expiresRaw = document.getElementById('pres-expires').value;
   const body = {
     address,
+    suburb: document.getElementById('pres-suburb').value.trim(),
     price: document.getElementById('pres-price').value.trim(),
     propertyType: document.getElementById('pres-type').value,
     bedrooms: document.getElementById('pres-beds').value.trim(),
