@@ -63,7 +63,9 @@
   <script>
     (function() {
       const params = new URLSearchParams(location.search);
-      const redirect = params.get('redirect') || '/clients/portal.html';
+      const raw = params.get('redirect') || '';
+      // Only allow same-site relative paths (must start with / but not //)
+      const redirect = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/clients/portal.html';
 
       // Already logged in?
       fetch('/api/me').then(r => {

@@ -48,7 +48,9 @@
     <div style="display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;">
       <a href="/" style="font-size:15px;font-weight:500;color:#22201d;background:#bd7a70;padding:14px 28px;border-radius:100px;transition:background .2s ease;" onmouseover="this.style.background='#cf9b92'" onmouseout="this.style.background='#bd7a70'">Back to home</a>
       <a href="/#contact" style="font-size:15px;font-weight:400;color:rgba(247,243,237,0.6);padding:14px 20px;border:1px solid rgba(247,243,237,0.15);border-radius:100px;transition:border-color .2s ease;" onmouseover="this.style.borderColor='rgba(247,243,237,0.4)'" onmouseout="this.style.borderColor='rgba(247,243,237,0.15)'">Book a call</a>
+      <a href="/clients/" id="portal-link" style="display:none;font-size:15px;font-weight:400;color:rgba(247,243,237,0.6);padding:14px 20px;border:1px solid rgba(247,243,237,0.15);border-radius:100px;transition:border-color .2s ease;" onmouseover="this.style.borderColor='rgba(247,243,237,0.4)'" onmouseout="this.style.borderColor='rgba(247,243,237,0.15)'">Go to your portal</a>
     </div>
+    <script>fetch('/api/me').then(r=>{if(r.ok)document.getElementById('portal-link').style.display='inline-block';}).catch(()=>{});</script>
   </div>
 </main>
 

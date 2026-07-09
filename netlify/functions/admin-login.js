@@ -1,3 +1,4 @@
+import { getStore } from '@netlify/blobs';
 import crypto from 'crypto';
 
 function verifyTOTP(secret, token) {
@@ -29,30 +30,62 @@ function signJWT(payload, secret) {
   return `${header}.${body}.${sig}`;
 }
 
+const json = (data, status = 200) =>
+  new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+
+// ── Rate limiting (5 failures → 15-min lockout, keyed by IP) ─────────────────
+async function checkRateLimit(store, ip) {
+  const now = Date.now();
+  const data = await store.get(`admin-rl:${ip}`, { type: 'json' }).catch(() => null) || { attempts: [], lockedUntil: 0 };
+  if (data.lockedUntil > now) {
+    const mins = Math.ceil((data.lockedUntil - now) / 60000);
+    return { blocked: true, message: `Too many failed attempts. Try again in ${mins} minute${mins !== 1 ? 's' : ''}.` };
+  }
+  data.attempts = (data.attempts || []).filter(t => now - t < 15 * 60 * 1000);
+  return { blocked: false, data, now };
+}
+
+async function recordFailure(store, ip, data, now) {
+  data.attempts.push(now);
+  if (data.attempts.length >= 5) { data.lockedUntil = now + 15 * 60 * 1000; data.attempts = []; }
+  await store.setJSON(`admin-rl:${ip}`, data).catch(() => {});
+}
+
+async function clearRateLimit(store, ip) {
+  await store.delete(`admin-rl:${ip}`).catch(() => {});
+}
+
 export default async (req) => {
+  const store = getStore('fairway-ratelimits');
+  const ip = req.headers.get('x-nf-client-connection-ip') || req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown';
+
+  const rl = await checkRateLimit(store, ip);
+  if (rl.blocked) return json({ error: rl.message }, 429);
+
   const { password, code } = await req.json().catch(() => ({}));
+
   if (!password || password !== process.env.ADMIN_PASSWORD) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    await recordFailure(store, ip, rl.data, rl.now);
+    return json({ error: 'Unauthorized' }, 401);
   }
 
+  // TOTP is mandatory — if TOTP_SECRET is not configured the admin login is disabled
   const totpSecret = process.env.TOTP_SECRET;
-  if (totpSecret) {
-    if (!code) {
-      return new Response(JSON.stringify({ step: 'totp' }), {
-        status: 202,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-    if (!verifyTOTP(totpSecret, code)) {
-      return new Response(JSON.stringify({ error: 'Invalid authenticator code' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+  if (!totpSecret) {
+    return json({ error: 'Admin 2FA is not configured. Set TOTP_SECRET in Netlify environment variables.' }, 503);
   }
+
+  if (!code) {
+    return json({ step: 'totp' }, 202);
+  }
+
+  if (!verifyTOTP(totpSecret, code)) {
+    await recordFailure(store, ip, rl.data, rl.now);
+    return json({ error: 'Invalid authenticator code' }, 401);
+  }
+
+  // Success — clear rate limit and issue session
+  await clearRateLimit(store, ip);
 
   const token = signJWT(
     { role: 'admin', exp: Math.floor(Date.now() / 1000) + 86400 * 30 },

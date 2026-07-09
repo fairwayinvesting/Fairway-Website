@@ -27,6 +27,29 @@ const json = (data, status = 200, extraHeaders = {}) =>
     headers: { 'Content-Type': 'application/json', ...extraHeaders },
   });
 
+// ── Rate limiting (5 failures → 15-min lockout, keyed by email) ──────────────
+async function checkRateLimit(store, email) {
+  const now = Date.now();
+  const key = `client-rl:${email.toLowerCase()}`;
+  const data = await store.get(key, { type: 'json' }).catch(() => null) || { attempts: [], lockedUntil: 0 };
+  if (data.lockedUntil > now) {
+    const mins = Math.ceil((data.lockedUntil - now) / 60000);
+    return { blocked: true, message: `Too many failed attempts. Try again in ${mins} minute${mins !== 1 ? 's' : ''}.` };
+  }
+  data.attempts = (data.attempts || []).filter(t => now - t < 15 * 60 * 1000);
+  return { blocked: false, data, now, key };
+}
+
+async function recordFailure(store, key, data, now) {
+  data.attempts.push(now);
+  if (data.attempts.length >= 5) { data.lockedUntil = now + 15 * 60 * 1000; data.attempts = []; }
+  await store.setJSON(key, data).catch(() => {});
+}
+
+async function clearRateLimit(store, key) {
+  await store.delete(key).catch(() => {});
+}
+
 export default async (req) => {
   if (req.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
 
@@ -38,8 +61,12 @@ export default async (req) => {
   const { email, password } = body;
   if (!email || !password) return json({ error: 'Email and password required' }, 400);
 
-  const store = getStore('fairway-clients');
-  const clients = (await store.get('all', { type: 'json' })) || [];
+  const rlStore = getStore('fairway-ratelimits');
+  const rl = await checkRateLimit(rlStore, email);
+  if (rl.blocked) return json({ error: rl.message }, 429);
+
+  const clientStore = getStore('fairway-clients');
+  const clients = (await clientStore.get('all', { type: 'json' })) || [];
   const client = clients.find(c => c.email.toLowerCase() === email.toLowerCase().trim() && c.active);
 
   // Always run hash to prevent timing-based user enumeration
@@ -47,7 +74,13 @@ export default async (req) => {
   const hash = client ? client.passwordHash : crypto.randomBytes(32).toString('hex');
   const valid = await verifyPassword(password, salt, hash);
 
-  if (!client || !valid) return json({ error: 'Invalid email or password' }, 401);
+  if (!client || !valid) {
+    await recordFailure(rlStore, rl.key, rl.data, rl.now);
+    return json({ error: 'Invalid email or password' }, 401);
+  }
+
+  // Success — clear rate limit and issue session
+  await clearRateLimit(rlStore, rl.key);
 
   const token = signJWT({
     sub: client.id,
