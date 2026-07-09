@@ -130,6 +130,11 @@
 
     /* TOTP setup */
     .totp-setup{background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:28px 32px;}
+    .page-link-card{display:flex;flex-direction:column;gap:5px;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.08);border-radius:12px;padding:16px 18px;transition:background .15s;text-decoration:none;}
+    .page-link-card:hover{background:rgba(247,243,237,0.1);}
+    .plc-label{font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(189,122,112,0.6);}
+    .plc-name{font-size:15px;font-weight:400;color:#f7f3ed;}
+    .plc-url{font-size:11px;font-weight:300;color:rgba(247,243,237,0.25);}
     .totp-secret-box{background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.09);border-radius:10px;padding:14px 18px;font-family:Courier,monospace;font-size:16px;letter-spacing:0.12em;color:#f7f3ed;word-break:break-all;margin:12px 0;}
 
     /* Presentations */
@@ -352,6 +357,73 @@
           <tr class="empty-row"><td colspan="5">Loading…</td></tr>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Site pages -->
+  <div style="margin-top:52px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+      <h2 style="font-family:'Fraunces',serif;font-size:24px;font-weight:400;">Site pages</h2>
+      <span style="font-size:12px;font-weight:300;color:rgba(247,243,237,0.3);">Opens in new tab</span>
+    </div>
+    <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Public</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:22px;">
+      <a href="/" target="_blank" rel="noopener" class="page-link-card">
+        <span class="plc-label">Main site</span>
+        <span class="plc-name">Homepage</span>
+        <span class="plc-url">fairwayinvesting.com.au</span>
+      </a>
+      <a href="/discovery-call.html" target="_blank" rel="noopener" class="page-link-card">
+        <span class="plc-label">Booking</span>
+        <span class="plc-name">Discovery call</span>
+        <span class="plc-url">/discovery-call.html</span>
+      </a>
+      <a href="/strategy-session.html" target="_blank" rel="noopener" class="page-link-card">
+        <span class="plc-label">Booking</span>
+        <span class="plc-name">Strategy session</span>
+        <span class="plc-url">/strategy-session.html</span>
+      </a>
+      <a href="/privacy.html" target="_blank" rel="noopener" class="page-link-card">
+        <span class="plc-label">Legal</span>
+        <span class="plc-name">Privacy Policy</span>
+        <span class="plc-url">/privacy.html</span>
+      </a>
+      <a href="/terms.html" target="_blank" rel="noopener" class="page-link-card">
+        <span class="plc-label">Legal</span>
+        <span class="plc-name">Terms of Service</span>
+        <span class="plc-url">/terms.html</span>
+      </a>
+      <a href="/404.html" target="_blank" rel="noopener" class="page-link-card">
+        <span class="plc-label">System</span>
+        <span class="plc-name">404 Not found</span>
+        <span class="plc-url">/404.html</span>
+      </a>
+    </div>
+    <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Client portal</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:22px;">
+      <a href="/clients/" target="_blank" rel="noopener" class="page-link-card">
+        <span class="plc-label">Portal</span>
+        <span class="plc-name">Client login</span>
+        <span class="plc-url">/clients/</span>
+      </a>
+      <a href="/clients/portal.html" target="_blank" rel="noopener" class="page-link-card">
+        <span class="plc-label">Portal</span>
+        <span class="plc-name">Client dashboard</span>
+        <span class="plc-url">/clients/portal.html</span>
+      </a>
+      <a href="/clients/setup.html" target="_blank" rel="noopener" class="page-link-card">
+        <span class="plc-label">Portal</span>
+        <span class="plc-name">Password setup</span>
+        <span class="plc-url">/clients/setup.html</span>
+      </a>
+    </div>
+    <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Property presentations</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
+      <a href="/p/property.html" target="_blank" rel="noopener" class="page-link-card">
+        <span class="plc-label">Presentation</span>
+        <span class="plc-name">Viewer template</span>
+        <span class="plc-url">/p/property.html</span>
+      </a>
     </div>
   </div>
 
