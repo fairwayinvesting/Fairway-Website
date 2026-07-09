@@ -73,6 +73,7 @@ function defaultPres(fields) {
     customSections: [],
     comparableSales: { enabled: false, items: [] },
     comparableRentals: { enabled: false, items: [] },
+    revocationReason: '',
     status: '',
     expiresAt: null,
     assignedClients: [],
@@ -157,7 +158,7 @@ export default async (req) => {
                     'propertyType','summary','highlights','images','videos','cashflow',
                     'riskProfile','demographics','customSections',
                     'comparableSales','comparableRentals',
-                    'status','expiresAt','revokedClients'];
+                    'revocationReason','status','expiresAt','revokedClients'];
     fields.forEach(f => { if (body[f] !== undefined) pres[f] = body[f]; });
     if (body.assignedClients !== undefined) {
       body.assignedClients.forEach(cid => {

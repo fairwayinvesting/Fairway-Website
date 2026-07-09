@@ -154,7 +154,7 @@
 <div id="gate-state">
   <div>
     <img src="/logo-icon.png" alt="" style="height:36px;margin-bottom:24px;opacity:0.4;">
-    <p id="gate-msg" style="font-size:15px;color:rgba(247,243,237,0.35);line-height:1.7;max-width:320px;margin:0 auto;"></p>
+    <p id="gate-msg" style="font-size:15px;color:rgba(247,243,237,0.35);line-height:1.7;max-width:340px;margin:0 auto;white-space:pre-line;"></p>
   </div>
 </div>
 
@@ -418,7 +418,12 @@ function showGate(msg) {
   let data;
   try {
     const res = await fetch(`/api/property-view?t=${encodeURIComponent(token)}`);
-    if (res.status === 403) { showGate('Your access to this presentation has been removed. Please contact Luke if you think this is a mistake.'); return; }
+    if (res.status === 403) {
+      const body403 = await res.json().catch(() => ({}));
+      const base = 'Your access to this presentation has been removed.';
+      showGate(body403.reason ? `${base}\n\n${body403.reason}\n\nContact Luke at 0416 184 333 if you have questions.` : `${base} Please contact Luke if you think this is a mistake.`);
+      return;
+    }
     if (res.status === 410) { showGate('This presentation has expired. Please contact Luke for the latest information.'); return; }
     if (!res.ok) { showGate('This presentation link is invalid or has expired.'); return; }
     data = await res.json();

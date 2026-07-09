@@ -49,7 +49,7 @@ export default async (req) => {
     }
     // Check revoked
     if ((found.revokedClients || []).includes(clientId)) {
-      return json({ revoked: true }, 403);
+      return json({ revoked: true, reason: found.revocationReason || '' }, 403);
     }
   }
 
