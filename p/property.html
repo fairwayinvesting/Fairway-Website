@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Property Presentation — Fairway Investing</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="theme-color" content="#1a1916">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth;}
+    body{font-family:'Outfit',sans-serif;font-weight:300;background:#1a1916;color:#f7f3ed;-webkit-font-smoothing:antialiased;min-height:100vh;}
+    a{color:inherit;text-decoration:none;}
+
+    /* Loading */
+    #loading{display:flex;align-items:center;justify-content:center;min-height:100vh;font-size:14px;color:rgba(247,243,237,0.3);}
+    #error-state{display:none;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:40px;}
+    #page{display:none;}
+
+    /* Nav */
+    .p-nav{background:#1a1916;border-bottom:1px solid rgba(247,243,237,0.07);padding:18px 40px;display:flex;align-items:center;justify-content:center;}
+    @media(max-width:600px){.p-nav{padding:16px 24px;}}
+
+    /* Content wrapper */
+    .p-wrap{max-width:760px;margin:0 auto;padding:0 40px 80px;}
+    @media(max-width:600px){.p-wrap{padding:0 20px 60px;}}
+
+    /* Hero */
+    .p-hero{padding:52px 0 44px;}
+    .p-eyebrow{font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:#bd7a70;margin-bottom:16px;}
+    .p-address{font-family:'Fraunces',serif;font-size:38px;font-weight:400;line-height:1.15;color:#f7f3ed;margin-bottom:14px;}
+    @media(max-width:600px){.p-address{font-size:28px;}}
+    .p-price{font-size:22px;font-weight:400;color:rgba(247,243,237,0.6);margin-bottom:24px;}
+    @media(max-width:600px){.p-price{font-size:19px;}}
+    .p-type-badge{display:inline-block;background:rgba(189,122,112,0.12);border:1px solid rgba(189,122,112,0.25);border-radius:100px;padding:4px 14px;font-size:12px;font-weight:500;letter-spacing:0.06em;color:#bd7a70;text-transform:capitalize;}
+
+    /* Stats */
+    .p-stats{display:flex;gap:0;border:1px solid rgba(247,243,237,0.09);border-radius:14px;overflow:hidden;margin-bottom:44px;background:#22201d;}
+    .p-stat{flex:1;padding:18px 16px;text-align:center;border-right:1px solid rgba(247,243,237,0.07);}
+    .p-stat:last-child{border-right:none;}
+    .p-stat-val{font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#f7f3ed;display:block;line-height:1;}
+    .p-stat-label{font-size:11px;font-weight:400;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.3);display:block;margin-top:6px;}
+    @media(max-width:480px){
+      .p-stat-val{font-size:20px;}
+      .p-stat-label{font-size:10px;}
+      .p-stat{padding:14px 10px;}
+    }
+
+    /* Image */
+    .p-image{width:100%;border-radius:16px;overflow:hidden;margin-bottom:44px;}
+    .p-image img{width:100%;display:block;object-fit:cover;}
+
+    /* Video */
+    .p-video{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:14px;margin-bottom:44px;background:#22201d;}
+    .p-video iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:14px;}
+
+    /* Divider */
+    .p-divider{border:none;border-top:1px solid rgba(247,243,237,0.07);margin:44px 0;}
+
+    /* Section */
+    .p-section-label{font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:18px;}
+    .p-summary{font-size:16px;font-weight:300;line-height:1.75;color:rgba(247,243,237,0.75);white-space:pre-wrap;}
+    @media(max-width:600px){.p-summary{font-size:15px;}}
+
+    /* Highlights */
+    .p-highlights{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    @media(max-width:520px){.p-highlights{grid-template-columns:1fr;}}
+    .p-highlight{display:flex;align-items:flex-start;gap:12px;background:#22201d;border:1px solid rgba(247,243,237,0.07);border-radius:12px;padding:16px 18px;}
+    .p-highlight-dot{width:6px;height:6px;border-radius:50%;background:#bd7a70;flex-shrink:0;margin-top:6px;}
+    .p-highlight-text{font-size:14px;font-weight:300;color:rgba(247,243,237,0.7);line-height:1.5;}
+
+    /* Footer */
+    .p-footer{margin-top:60px;padding-top:36px;border-top:1px solid rgba(247,243,237,0.07);text-align:center;}
+    .p-footer-name{font-size:13px;font-weight:400;color:rgba(247,243,237,0.45);margin-top:14px;line-height:1.7;}
+    .p-cta{display:inline-block;background:#bd7a70;border-radius:100px;padding:14px 32px;font-size:15px;font-weight:500;color:#f7f3ed;margin-top:28px;transition:background .2s;}
+    .p-cta:hover{background:#cf9b92;}
+  </style>
+</head>
+<body>
+
+<div id="loading">Loading presentation…</div>
+
+<div id="error-state" style="display:none;">
+  <div>
+    <img src="/logo-icon.png" alt="" style="height:36px;margin-bottom:24px;opacity:0.4;">
+    <p style="font-size:15px;color:rgba(247,243,237,0.35);">This presentation link is invalid or has expired.</p>
+  </div>
+</div>
+
+<div id="page">
+  <nav class="p-nav">
+    <img src="/logo-word.png" alt="Fairway Investing" style="height:18px;">
+  </nav>
+
+  <div class="p-wrap">
+    <div class="p-hero">
+      <p class="p-eyebrow" id="p-eyebrow">Property presentation</p>
+      <h1 class="p-address" id="p-address"></h1>
+      <p class="p-price" id="p-price" style="display:none;"></p>
+      <span class="p-type-badge" id="p-type"></span>
+    </div>
+
+    <div class="p-stats" id="p-stats" style="display:none;"></div>
+
+    <div class="p-image" id="p-image" style="display:none;"></div>
+
+    <div class="p-video" id="p-video" style="display:none;"></div>
+
+    <div id="p-summary-section" style="display:none;">
+      <hr class="p-divider">
+      <p class="p-section-label">Luke's assessment</p>
+      <p class="p-summary" id="p-summary"></p>
+    </div>
+
+    <div id="p-highlights-section" style="display:none;">
+      <hr class="p-divider">
+      <p class="p-section-label">Key highlights</p>
+      <div class="p-highlights" id="p-highlights"></div>
+    </div>
+
+    <div class="p-footer">
+      <img src="/logo-icon.png" alt="Fairway Investing" style="height:32px;opacity:0.5;">
+      <p class="p-footer-name">Prepared exclusively for you by<br><strong style="color:rgba(247,243,237,0.6);">Luke at Fairway Investing</strong></p>
+      <a href="mailto:luke@fairwayinvesting.com.au" class="p-cta">Get in touch</a>
+    </div>
+  </div>
+</div>
+
+<script>
+function getEmbedUrl(url) {
+  if (!url) return null;
+  let m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if (m) return `https://www.youtube.com/embed/${m[1]}?rel=0&modestbranding=1`;
+  m = url.match(/vimeo\.com\/(\d+)/);
+  if (m) return `https://player.vimeo.com/video/${m[1]}?dnt=1`;
+  return null;
+}
+
+(async function() {
+  const token = new URLSearchParams(window.location.search).get('t');
+  if (!token) { showError(); return; }
+
+  let data;
+  try {
+    const res = await fetch(`/api/property-view?t=${encodeURIComponent(token)}`);
+    if (!res.ok) { showError(); return; }
+    data = await res.json();
+  } catch { showError(); return; }
+
+  // Record view (fire and forget)
+  fetch(`/api/property-view?t=${encodeURIComponent(token)}`, { method: 'POST' }).catch(() => {});
+
+  render(data);
+})();
+
+function showError() {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('error-state').style.display = 'flex';
+}
+
+function render(d) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('page').style.display = 'block';
+
+  // Title
+  document.title = `${d.address} — Fairway Investing`;
+
+  // Eyebrow
+  if (d.firstName) {
+    document.getElementById('p-eyebrow').textContent = `Prepared for ${d.firstName}`;
+  }
+
+  // Address
+  document.getElementById('p-address').textContent = d.address;
+
+  // Price
+  if (d.price) {
+    const el = document.getElementById('p-price');
+    el.textContent = d.price;
+    el.style.display = 'block';
+  }
+
+  // Type
+  const typeLabels = { house: 'House', unit: 'Unit', townhouse: 'Townhouse', duplex: 'Duplex', land: 'Land' };
+  document.getElementById('p-type').textContent = typeLabels[d.propertyType] || d.propertyType;
+
+  // Stats
+  const stats = [];
+  if (d.bedrooms) stats.push({ val: d.bedrooms, label: d.bedrooms == 1 ? 'Bedroom' : 'Bedrooms' });
+  if (d.bathrooms) stats.push({ val: d.bathrooms, label: d.bathrooms == 1 ? 'Bathroom' : 'Bathrooms' });
+  if (d.carspaces) stats.push({ val: d.carspaces, label: d.carspaces == 1 ? 'Car space' : 'Car spaces' });
+  if (d.landSize) stats.push({ val: d.landSize, label: 'Land size' });
+  if (stats.length) {
+    const el = document.getElementById('p-stats');
+    el.innerHTML = stats.map(s => `<div class="p-stat"><span class="p-stat-val">${s.val}</span><span class="p-stat-label">${s.label}</span></div>`).join('');
+    el.style.display = 'flex';
+  }
+
+  // Image
+  if (d.imageUrl) {
+    const el = document.getElementById('p-image');
+    el.innerHTML = `<img src="${d.imageUrl}" alt="${d.address}">`;
+    el.style.display = 'block';
+  }
+
+  // Video
+  const embedUrl = getEmbedUrl(d.videoUrl);
+  if (embedUrl) {
+    const el = document.getElementById('p-video');
+    el.innerHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
+    el.style.display = 'block';
+  }
+
+  // Summary
+  if (d.summary) {
+    document.getElementById('p-summary').textContent = d.summary;
+    document.getElementById('p-summary-section').style.display = 'block';
+  }
+
+  // Highlights
+  if (d.highlights && d.highlights.length) {
+    const el = document.getElementById('p-highlights');
+    el.innerHTML = d.highlights.map(h => `<div class="p-highlight"><div class="p-highlight-dot"></div><div class="p-highlight-text">${h}</div></div>`).join('');
+    document.getElementById('p-highlights-section').style.display = 'block';
+  }
+}
+</script>
+</body>
+</html>

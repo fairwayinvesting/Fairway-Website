@@ -132,6 +132,32 @@
     .totp-setup{background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:28px 32px;}
     .totp-secret-box{background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.09);border-radius:10px;padding:14px 18px;font-family:Courier,monospace;font-size:16px;letter-spacing:0.12em;color:#f7f3ed;word-break:break-all;margin:12px 0;}
 
+    /* Presentations */
+    .pres-modal{background:#22201d;border:1px solid rgba(247,243,237,0.1);border-radius:20px;padding:36px;width:100%;max-width:640px;max-height:92vh;overflow-y:auto;}
+    .pres-modal h2{font-family:'Fraunces',serif;font-size:24px;font-weight:400;margin-bottom:24px;}
+    .pres-field-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;}
+    .pres-field-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .field textarea{width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:300;color:#f7f3ed;outline:none;resize:vertical;min-height:100px;transition:border-color .2s;}
+    .field textarea:focus{border-color:rgba(189,122,112,0.6);}
+    .field textarea::placeholder{color:rgba(247,243,237,0.2);}
+    .field select{width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:300;color:#f7f3ed;outline:none;transition:border-color .2s;appearance:none;}
+    .field select:focus{border-color:rgba(189,122,112,0.6);}
+    .field select option{background:#22201d;}
+    .pres-link-row{display:flex;align-items:center;gap:10px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.08);border-radius:10px;padding:12px 14px;margin-bottom:8px;}
+    .pres-link-name{font-size:13px;font-weight:400;color:rgba(247,243,237,0.7);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .pres-view-badge{font-size:11px;color:#6dbf7b;background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.2);border-radius:100px;padding:2px 9px;white-space:nowrap;}
+    .btn-copy{background:rgba(247,243,237,0.07);color:rgba(247,243,237,0.55);border:1px solid rgba(247,243,237,0.1);border-radius:7px;padding:5px 12px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap;}
+    .btn-copy:hover{background:rgba(247,243,237,0.12);}
+    .btn-send{background:rgba(109,191,123,0.12);color:#6dbf7b;border:1px solid rgba(109,191,123,0.25);border-radius:7px;padding:7px 14px;font-family:'Outfit',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .2s;}
+    .btn-send:hover{background:rgba(109,191,123,0.22);}
+    @media(max-width:760px){
+      .pres-field-row{grid-template-columns:1fr 1fr;}
+      .pres-field-row-2{grid-template-columns:1fr;}
+    }
+    @media(max-width:480px){
+      .pres-field-row{grid-template-columns:1fr 1fr;}
+    }
+
     /* Input field in gate */
     .gate-field input{width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:13px 16px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:300;color:#f7f3ed;outline:none;margin-bottom:14px;transition:border-color .2s;}
     .gate-field input:focus{border-color:rgba(189,122,112,0.6);}
@@ -269,6 +295,28 @@
     </table>
   </div>
 
+  <!-- Property Presentations -->
+  <div style="margin-top:52px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+      <h2 style="font-family:'Fraunces',serif;font-size:24px;font-weight:400;">Property presentations</h2>
+      <button class="btn-primary" onclick="openPresModal()">+ New presentation</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Property</th>
+          <th>Clients</th>
+          <th>Views</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr></thead>
+        <tbody id="pres-tbody">
+          <tr class="empty-row"><td colspan="5">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <div style="margin-top:52px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
       <h2 style="font-family:'Fraunces',serif;font-size:24px;font-weight:400;">Area reports</h2>
@@ -291,6 +339,90 @@
     </div>
   </div>
 </main>
+
+<!-- Presentations modal -->
+<div id="pres-modal-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:500;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .2s;">
+  <div class="pres-modal">
+    <h2 id="pres-modal-title">New presentation</h2>
+    <input type="hidden" id="pres-edit-id">
+
+    <div class="field">
+      <label>Property address</label>
+      <input type="text" id="pres-address" placeholder="e.g. 14 Smith Street, Corio VIC 3214">
+    </div>
+    <div class="pres-field-row-2">
+      <div class="field">
+        <label>Price <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">(optional)</span></label>
+        <input type="text" id="pres-price" placeholder="e.g. $485,000">
+      </div>
+      <div class="field">
+        <label>Property type</label>
+        <select id="pres-type">
+          <option value="house">House</option>
+          <option value="unit">Unit</option>
+          <option value="townhouse">Townhouse</option>
+          <option value="duplex">Duplex</option>
+          <option value="land">Land</option>
+        </select>
+      </div>
+    </div>
+    <div class="pres-field-row">
+      <div class="field">
+        <label>Bedrooms</label>
+        <input type="text" id="pres-beds" placeholder="3">
+      </div>
+      <div class="field">
+        <label>Bathrooms</label>
+        <input type="text" id="pres-baths" placeholder="1">
+      </div>
+      <div class="field">
+        <label>Car spaces</label>
+        <input type="text" id="pres-cars" placeholder="1">
+      </div>
+      <div class="field">
+        <label>Land size</label>
+        <input type="text" id="pres-land" placeholder="612m²">
+      </div>
+    </div>
+    <div class="field">
+      <label>Video URL <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">(YouTube or Vimeo)</span></label>
+      <input type="url" id="pres-video" placeholder="https://youtube.com/watch?v=...">
+    </div>
+    <div class="field">
+      <label>Hero image URL <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">(optional)</span></label>
+      <input type="url" id="pres-image" placeholder="https://...">
+    </div>
+    <div class="field">
+      <label>Luke's assessment</label>
+      <textarea id="pres-summary" placeholder="Your commentary on why this property stacks up — this appears on the presentation page…" style="min-height:130px;"></textarea>
+    </div>
+    <div class="field">
+      <label>Key highlights <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">(one per line, max 6)</span></label>
+      <textarea id="pres-highlights" placeholder="0.88% rental vacancy&#10;Houses selling in 21 days&#10;Strong cashflow profile"></textarea>
+    </div>
+    <div class="field">
+      <label>Assign to clients</label>
+      <div class="markets-grid" id="pres-clients-grid" style="grid-template-columns:1fr 1fr;"></div>
+      <p class="field-note" id="pres-clients-note">Load clients first to assign them.</p>
+    </div>
+
+    <!-- Shareable links (shown when editing) -->
+    <div id="pres-links-section" style="display:none;">
+      <div style="border-top:1px solid rgba(247,243,237,0.07);margin:20px 0;padding-top:20px;">
+        <p style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:14px;">Shareable links</p>
+        <div id="pres-links-list"></div>
+        <p class="field-note">Copy a link to share directly via text or WhatsApp instead of email.</p>
+      </div>
+    </div>
+
+    <div class="error-msg" id="pres-modal-error"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closePresModal()">Cancel</button>
+      <button class="btn-send" id="pres-send-btn" style="display:none;" onclick="sendPresentationFromModal()">✉ Send to clients</button>
+      <button class="btn-primary" id="pres-save-btn" onclick="savePresentation()">Create presentation</button>
+    </div>
+  </div>
+</div>
 
 <!-- Add / Edit modal -->
 <div id="modal-overlay">
@@ -364,6 +496,7 @@ const MARKETS = [
 let adminPassword = '';
 let clients = [];
 let milestones = [];
+let presentations = [];
 
 // ── Gate ──────────────────────────────────────────────────────────────────────
 let _gatePw = '';
@@ -379,6 +512,7 @@ async function completeLogin(pw) {
   document.getElementById('gate').classList.add('hidden');
   loadClients();
   loadMilestones();
+  loadPresentations();
 }
 
 document.getElementById('gate-btn').addEventListener('click', async function() {
@@ -862,6 +996,254 @@ async function testTotpCode(secret) {
   const { valid } = await res.json();
   resultEl.textContent = valid ? '✓ Code is valid' : '✗ Invalid code';
   resultEl.style.color = valid ? '#6dbf7b' : '#f08080';
+}
+
+// ── Presentations ─────────────────────────────────────────────────────────────
+async function loadPresentations() {
+  const res = await api('GET', '/api/admin/presentations');
+  presentations = await res.json();
+  renderPresentations();
+}
+
+function renderPresentations() {
+  const tbody = document.getElementById('pres-tbody');
+  if (!presentations.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No presentations yet — create your first one above.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = presentations.map(p => {
+    const assigned = p.assignedClients?.length || 0;
+    const viewed = Object.values(p.views || {}).filter(v => v.firstViewedAt).length;
+    const sent = p.sentClients?.length || 0;
+    const allSent = assigned > 0 && sent >= assigned;
+    const statusHtml = allSent
+      ? '<span class="pill" style="background:rgba(109,191,123,0.12);border-color:rgba(109,191,123,0.25);color:#6dbf7b;">Sent</span>'
+      : sent > 0
+        ? '<span class="pill pill-inactive">Partial</span>'
+        : '<span class="pill pill-inactive">Draft</span>';
+    const clientsLabel = assigned ? `${assigned} client${assigned !== 1 ? 's' : ''}` : '<span style="color:rgba(247,243,237,0.2);">None</span>';
+    const viewsLabel = viewed ? `<span style="color:#6dbf7b;">${viewed}/${assigned} viewed</span>` : '<span style="color:rgba(247,243,237,0.2);">—</span>';
+    const canSend = assigned > 0 && !allSent;
+    return `<tr>
+      <td>
+        <div class="td-name">${esc(p.address)}</div>
+        ${p.price ? `<div style="font-size:12px;color:rgba(247,243,237,0.3);margin-top:3px;">${esc(p.price)}</div>` : ''}
+      </td>
+      <td>${clientsLabel}</td>
+      <td>${viewsLabel}</td>
+      <td>${statusHtml}</td>
+      <td><div class="actions">
+        <button class="btn-sm btn-edit" onclick="openPresModal('${p.id}')">Edit</button>
+        ${canSend ? `<button class="btn-sm btn-send" onclick="sendPresentation('${p.id}')">Send</button>` : ''}
+        <button class="btn-sm btn-delete" onclick="deletePresentation('${p.id}')">Delete</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function openPresModal(id) {
+  const overlay = document.getElementById('pres-modal-overlay');
+  const errEl = document.getElementById('pres-modal-error');
+  errEl.classList.remove('visible');
+  document.getElementById('pres-modal-error').style.display = 'none';
+
+  // Build client checkboxes
+  const grid = document.getElementById('pres-clients-grid');
+  const note = document.getElementById('pres-clients-note');
+  if (clients.length) {
+    note.style.display = 'none';
+    grid.innerHTML = clients.filter(c => c.active).map(c =>
+      `<label class="market-check">
+        <input type="checkbox" class="pres-client-check" value="${c.id}">
+        <span>${esc(c.name)}</span>
+      </label>`
+    ).join('');
+  } else {
+    note.style.display = 'block';
+    grid.innerHTML = '';
+  }
+
+  if (id) {
+    const p = presentations.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('pres-modal-title').textContent = 'Edit presentation';
+    document.getElementById('pres-edit-id').value = id;
+    document.getElementById('pres-address').value = p.address || '';
+    document.getElementById('pres-price').value = p.price || '';
+    document.getElementById('pres-type').value = p.propertyType || 'house';
+    document.getElementById('pres-beds').value = p.bedrooms || '';
+    document.getElementById('pres-baths').value = p.bathrooms || '';
+    document.getElementById('pres-cars').value = p.carspaces || '';
+    document.getElementById('pres-land').value = p.landSize || '';
+    document.getElementById('pres-video').value = p.videoUrl || '';
+    document.getElementById('pres-image').value = p.imageUrl || '';
+    document.getElementById('pres-summary').value = p.summary || '';
+    document.getElementById('pres-highlights').value = (p.highlights || []).join('\n');
+
+    // Tick assigned clients
+    (p.assignedClients || []).forEach(cid => {
+      const cb = grid.querySelector(`.pres-client-check[value="${cid}"]`);
+      if (cb) cb.checked = true;
+    });
+
+    // Show shareable links
+    const linksSection = document.getElementById('pres-links-section');
+    const linksList = document.getElementById('pres-links-list');
+    if (p.assignedClients?.length) {
+      linksSection.style.display = 'block';
+      linksList.innerHTML = p.assignedClients.map(cid => {
+        const client = clients.find(c => c.id === cid);
+        const name = client ? client.name : cid;
+        const tok = (p.tokens || {})[cid] || '';
+        const link = `https://fairwayinvesting.com.au/p/property.html?t=${tok}`;
+        const viewed = (p.views || {})[cid]?.firstViewedAt;
+        return `<div class="pres-link-row">
+          <span class="pres-link-name">${esc(name)}</span>
+          ${viewed ? '<span class="pres-view-badge">Viewed</span>' : ''}
+          <button class="btn-copy" onclick="copyLink('${link}', this)">Copy link</button>
+        </div>`;
+      }).join('');
+    } else {
+      linksSection.style.display = 'none';
+    }
+
+    const allSent = p.sentClients?.length >= p.assignedClients?.length && p.assignedClients?.length > 0;
+    document.getElementById('pres-send-btn').style.display = (!allSent && p.assignedClients?.length) ? 'inline-flex' : 'none';
+    document.getElementById('pres-save-btn').textContent = 'Save changes';
+  } else {
+    document.getElementById('pres-modal-title').textContent = 'New presentation';
+    document.getElementById('pres-edit-id').value = '';
+    document.getElementById('pres-address').value = '';
+    document.getElementById('pres-price').value = '';
+    document.getElementById('pres-type').value = 'house';
+    document.getElementById('pres-beds').value = '';
+    document.getElementById('pres-baths').value = '';
+    document.getElementById('pres-cars').value = '';
+    document.getElementById('pres-land').value = '';
+    document.getElementById('pres-video').value = '';
+    document.getElementById('pres-image').value = '';
+    document.getElementById('pres-summary').value = '';
+    document.getElementById('pres-highlights').value = '';
+    document.getElementById('pres-links-section').style.display = 'none';
+    document.getElementById('pres-send-btn').style.display = 'none';
+    document.getElementById('pres-save-btn').textContent = 'Create presentation';
+  }
+
+  overlay.style.opacity = '1';
+  overlay.style.pointerEvents = 'all';
+  document.getElementById('pres-address').focus();
+}
+
+function closePresModal() {
+  const overlay = document.getElementById('pres-modal-overlay');
+  overlay.style.opacity = '0';
+  overlay.style.pointerEvents = 'none';
+}
+
+document.getElementById('pres-modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closePresModal();
+});
+
+function presSelectedClients() {
+  return Array.from(document.querySelectorAll('.pres-client-check:checked')).map(el => el.value);
+}
+
+async function savePresentation() {
+  const id = document.getElementById('pres-edit-id').value;
+  const address = document.getElementById('pres-address').value.trim();
+  const errEl = document.getElementById('pres-modal-error');
+  errEl.style.display = 'none';
+
+  if (!address) {
+    errEl.textContent = 'Address is required.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const highlights = document.getElementById('pres-highlights').value
+    .split('\n').map(l => l.trim()).filter(Boolean).slice(0, 6);
+
+  const body = {
+    address,
+    price: document.getElementById('pres-price').value.trim(),
+    propertyType: document.getElementById('pres-type').value,
+    bedrooms: document.getElementById('pres-beds').value.trim(),
+    bathrooms: document.getElementById('pres-baths').value.trim(),
+    carspaces: document.getElementById('pres-cars').value.trim(),
+    landSize: document.getElementById('pres-land').value.trim(),
+    videoUrl: document.getElementById('pres-video').value.trim(),
+    imageUrl: document.getElementById('pres-image').value.trim(),
+    summary: document.getElementById('pres-summary').value.trim(),
+    highlights,
+    assignedClients: presSelectedClients(),
+  };
+
+  const btn = document.getElementById('pres-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  const res = await api(id ? 'PUT' : 'POST', '/api/admin/presentations', id ? { id, ...body } : body);
+  const data = await res.json();
+  btn.disabled = false; btn.textContent = id ? 'Save changes' : 'Create presentation';
+
+  if (!res.ok) {
+    errEl.textContent = data.error || 'Save failed.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  if (id) {
+    const idx = presentations.findIndex(p => p.id === id);
+    if (idx !== -1) Object.assign(presentations[idx], body);
+  } else {
+    presentations.push({ id: data.id, ...body, tokens: {}, views: {}, sentClients: [], createdAt: new Date().toISOString() });
+  }
+  renderPresentations();
+  closePresModal();
+}
+
+async function sendPresentation(id) {
+  const p = presentations.find(x => x.id === id);
+  if (!p) return;
+  const unsent = p.assignedClients.filter(cid => !p.sentClients.includes(cid));
+  const names = unsent.map(cid => { const c = clients.find(x => x.id === cid); return c ? c.name : cid; });
+  if (!unsent.length) { alert('All assigned clients have already been sent this presentation.'); return; }
+  if (!confirm(`Send to ${names.join(', ')}?`)) return;
+  const btn = document.querySelector(`button[onclick="sendPresentation('${id}')"]`);
+  if (btn) { btn.textContent = 'Sending…'; btn.disabled = true; }
+  const res = await api('PUT', '/api/admin/presentations', { id, action: 'send' });
+  const data = await res.json();
+  if (btn) { btn.textContent = 'Send'; btn.disabled = false; }
+  if (res.ok) {
+    unsent.forEach(cid => { const pres = presentations.find(x => x.id === id); if (pres) pres.sentClients.push(cid); });
+    renderPresentations();
+    alert(`Sent to ${data.sent} client${data.sent !== 1 ? 's' : ''}.`);
+  } else {
+    alert('Send failed. Please try again.');
+  }
+}
+
+async function sendPresentationFromModal() {
+  const id = document.getElementById('pres-edit-id').value;
+  if (!id) return;
+  closePresModal();
+  await sendPresentation(id);
+}
+
+async function deletePresentation(id) {
+  const p = presentations.find(x => x.id === id);
+  if (!confirm(`Delete presentation for "${p?.address}"? This cannot be undone.`)) return;
+  const res = await api('DELETE', `/api/admin/presentations?id=${encodeURIComponent(id)}`);
+  if (!res.ok) return;
+  presentations = presentations.filter(x => x.id !== id);
+  renderPresentations();
+}
+
+function copyLink(link, btn) {
+  navigator.clipboard.writeText(link).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied';
+    setTimeout(() => { btn.textContent = orig; }, 2000);
+  });
 }
 </script>
 </body>
