@@ -1,4 +1,5 @@
 import { getStore } from '@netlify/blobs';
+import crypto from 'crypto';
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
@@ -11,10 +12,20 @@ export default async (req) => {
   const presentations = (await store.get('all', { type: 'json' })) || [];
 
   let found = null, clientId = null;
-  const previewMatch = presentations.find(p => p.previewToken === token);
-  if (previewMatch) {
-    found = previewMatch;
-    clientId = '_preview';
+
+  if (token.startsWith('pv.')) {
+    // HMAC-signed preview token — verify without any Blobs read race
+    const lastDot = token.lastIndexOf('.');
+    if (lastDot > 3) {
+      const presId = token.slice(3, lastDot);
+      const sig = token.slice(lastDot + 1);
+      const expected = crypto.createHmac('sha256', process.env.ADMIN_PASSWORD || 'fp-preview')
+                             .update(presId).digest('hex').slice(0, 32);
+      if (sig === expected) {
+        found = presentations.find(p => p.id === presId) || null;
+        if (found) clientId = '_preview';
+      }
+    }
   } else {
     for (const p of presentations) {
       for (const [cid, tok] of Object.entries(p.tokens || {})) {

@@ -98,9 +98,10 @@ export default async (req) => {
     if (idx === -1) return json({ error: 'Not found' }, 404);
 
     if (action === 'preview') {
-      if (!presentations[idx].previewToken) presentations[idx].previewToken = genToken();
-      await store.setJSON('all', presentations);
-      return json({ ok: true, token: presentations[idx].previewToken });
+      // Deterministic HMAC token — no Blobs write, so no eventual-consistency race
+      const sig = crypto.createHmac('sha256', process.env.ADMIN_PASSWORD || 'fp-preview')
+                        .update(id).digest('hex').slice(0, 32);
+      return json({ ok: true, token: `pv.${id}.${sig}` });
     }
 
     if (action === 'send' || action === 'resend') {
