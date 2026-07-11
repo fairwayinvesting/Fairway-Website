@@ -88,9 +88,8 @@
   </nav>
 
   <div class="hero">
-    <p class="eyebrow">Research portal</p>
-    <h1 id="welcome-heading">Your reports</h1>
-    <p class="sub">Select a market below to view your area report, including data on prices, rents, yields, growth history and infrastructure pipeline.</p>
+    <p class="eyebrow">Client portal</p>
+    <h1 id="welcome-heading">Welcome back</h1>
   </div>
 
   <!-- QUESTIONNAIRE CARD (populated by JS) -->
@@ -106,7 +105,7 @@
   </div>
 
   <footer>
-    <p>Reports are updated monthly. Data sourced from HtAG Analytics, ABS and public government sources. &copy; 2026 Fairway Investing Pty Ltd &nbsp;&middot;&nbsp; For client use only.</p>
+    <p>&copy; 2026 Fairway Investing Pty Ltd &nbsp;&middot;&nbsp; For client use only.</p>
   </footer>
 
   <script>
@@ -242,8 +241,7 @@
       } catch { location.href = '/clients/'; return; }
 
       document.getElementById('user-name').textContent = me.name;
-      document.getElementById('welcome-heading').textContent =
-        `Welcome back, ${me.name.split(' ')[0]}`;
+      document.getElementById('welcome-heading').textContent = `Welcome back, ${me.name.split(' ')[0]}.`;
 
       // Fetch questionnaire status + brief status in parallel
       let qCompleted = false;

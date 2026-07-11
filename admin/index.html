@@ -259,17 +259,26 @@
     @media(max-width:760px){
       nav,main{padding-left:20px;padding-right:20px;}
       .markets-grid{grid-template-columns:1fr;}
-      /* Hide email + markets columns — client table uses card layout on mobile via JS */
       .td-email,.td-markets{display:none;}
-      /* Add date form stacks to single column */
       .ms-add-grid{grid-template-columns:1fr;}
-      /* Page header */
       .page-header h1{font-size:26px;}
     }
     @media(max-width:520px){
       main{padding:24px 16px;}
       .modal{padding:24px 20px;}
       .gate-card{padding:32px 24px;}
+      /* Brief modal — mobile */
+      .brief-modal-head{padding:18px 18px 14px;}
+      .brief-modal-body{padding:18px;}
+      .brief-modal-foot{padding:12px 18px;flex-wrap:wrap;gap:8px;}
+      .brief-modal-foot .btn-secondary:first-child{order:5;width:100%;text-align:center;}
+      .brief-check-grid{grid-template-columns:1fr;}
+      .brief-check-item:nth-last-child(-n+2){border-bottom:1px solid rgba(247,243,237,0.04);}
+      .brief-check-item:last-child{border-bottom:none;}
+      .brief-budget-row{flex-direction:column;gap:8px;}
+      .brief-budget-row span{display:none;}
+      .brief-budget-row input{width:100%;}
+      .brief-q-summary{flex-wrap:nowrap;overflow-x:auto;padding-bottom:8px;}
     }
   </style>
 </head>
@@ -1055,19 +1064,22 @@ function renderTable() {
     const briefBtn = `<button class="btn-sm btn-brief" onclick="openBrief('${c.id}','${esc(c.name)}')">Brief</button>`;
     if (mobile) {
       return `<tr style="border-bottom:1px solid rgba(247,243,237,0.05);">
-        <td colspan="5" style="padding:14px 16px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-            <div style="min-width:0;flex:1;">
-              <div style="font-weight:400;color:#f7f3ed;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(c.name)}</div>
-              <div style="font-size:12px;color:rgba(247,243,237,0.3);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(c.email)}</div>
+        <td colspan="5" style="padding:13px 16px;">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+            <div style="min-width:0;flex:1;padding-top:3px;">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;">${dot}<span style="font-weight:400;color:#f7f3ed;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(c.name)}</span></div>
+              <div style="font-size:12px;color:rgba(247,243,237,0.3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(c.email)}</div>
             </div>
-            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-              ${dot}
-              <button class="btn-sm btn-edit" onclick="openEdit('${c.id}')">Edit</button>
-              ${briefBtn}
-              ${notifyBtn}
-              <button class="btn-dates" id="dates-btn-${c.id}" onclick="toggleMilestones('${c.id}')">${msLabel}</button>
-              <button class="btn-sm btn-delete" onclick="deleteClient('${c.id}','${esc(c.name)}')">✕</button>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
+              <div style="display:flex;gap:5px;">
+                ${briefBtn}
+                <button class="btn-sm btn-edit" onclick="openEdit('${c.id}')">Edit</button>
+              </div>
+              <div style="display:flex;gap:5px;align-items:center;">
+                <button class="btn-dates" id="dates-btn-${c.id}" onclick="toggleMilestones('${c.id}')">${msLabel}</button>
+                ${notifyBtn}
+                <button class="btn-sm btn-delete" onclick="deleteClient('${c.id}','${esc(c.name)}')" style="padding:6px 10px;">✕</button>
+              </div>
             </div>
           </div>
         </td>
