@@ -54,6 +54,10 @@ function buildSheetRow(timestamp, d) {
     d.accountantIntro || '',
     d.statesToAvoid || 'No', d.statesToAvoidList || '',
     d.maxPurchasePrice || '',
+    // PPOR columns (add matching headers to Google Sheet)
+    d.ownPpor || 'No',
+    d.pporState || '', d.pporType || '', d.pporValue || '',
+    d.pporLoan || '', d.pporRate || '', d.pporStructure || '',
   ];
 }
 

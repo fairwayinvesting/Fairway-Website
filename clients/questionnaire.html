@@ -535,16 +535,78 @@
       <div class="step-header">
         <p class="step-num">Step 6 of 8</p>
         <h2>Your portfolio</h2>
-        <p>Tell us about any investment properties you currently own.</p>
+        <p>Tell us about the properties you already own — your home and any investments.</p>
       </div>
+
+      <!-- Primary residence -->
+      <div class="q-card" style="margin-bottom:14px">
+        <div class="field">
+          <label style="font-size:14px;font-weight:500;color:rgba(247,243,237,0.65)">Primary place of residence</label>
+          <div class="radio-pills">
+            <input type="radio" name="ownPpor" id="ppor-no" value="No" checked>
+            <label for="ppor-no">I rent / live with family</label>
+            <input type="radio" name="ownPpor" id="ppor-yes" value="Yes">
+            <label for="ppor-yes">Yes, I own my home</label>
+          </div>
+        </div>
+        <div class="cond" id="cond-ppor">
+          <div class="divider"></div>
+          <div class="field-row col2">
+            <div class="field">
+              <label>State</label>
+              <select id="pporState">
+                <option value="">Select…</option>
+                <option>ACT</option><option>NSW</option><option>NT</option>
+                <option>QLD</option><option>SA</option><option>TAS</option>
+                <option>VIC</option><option>WA</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Property type</label>
+              <select id="pporType">
+                <option value="">Select…</option>
+                <option>House</option><option>Unit</option><option>Townhouse</option>
+                <option>Duplex</option><option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row col2" style="margin-top:12px">
+            <div class="field">
+              <label>Estimated current value</label>
+              <div class="pfx"><span>$</span><input type="text" id="pporValue" inputmode="numeric" placeholder="850,000"></div>
+            </div>
+            <div class="field">
+              <label>Remaining loan balance</label>
+              <div class="pfx"><span>$</span><input type="text" id="pporLoan" inputmode="numeric" placeholder="420,000"></div>
+              <p class="field-hint">Leave blank if owned outright</p>
+            </div>
+          </div>
+          <div class="field-row col2" style="margin-top:12px">
+            <div class="field">
+              <label>Interest rate (%)</label>
+              <input type="text" id="pporRate" inputmode="decimal" placeholder="6.25">
+            </div>
+            <div class="field">
+              <label>Loan structure</label>
+              <select id="pporStructure">
+                <option value="">Select…</option>
+                <option>Principal &amp; Interest</option>
+                <option>Interest Only</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Investment properties -->
       <div class="q-card">
         <div class="field">
-          <label>Do you currently own investment properties?</label>
+          <label style="font-size:14px;font-weight:500;color:rgba(247,243,237,0.65)">Investment properties</label>
           <div class="radio-pills">
             <input type="radio" name="ownProperties" id="op-no" value="No" checked>
-            <label for="op-no">No</label>
+            <label for="op-no">None yet</label>
             <input type="radio" name="ownProperties" id="op-yes" value="Yes">
-            <label for="op-yes">Yes</label>
+            <label for="op-yes">Yes, I own investment properties</label>
           </div>
         </div>
         <div class="cond" id="cond-portfolio">
@@ -877,6 +939,7 @@ function setupConditionals() {
   }
 
   bindRadio('coInvestor', 'cond-coinvestor', 'Yes');
+  bindRadio('ownPpor', 'cond-ppor', 'Yes');
   bindRadio('hasBroker', 'cond-broker', 'Yes');
   bindRadio('hasAccountant', 'cond-accountant', 'Yes');
   bindRadio('statesToAvoid', 'cond-avoid', 'Yes');
@@ -1028,6 +1091,10 @@ function collectData() {
     motivation: gv('motivation'), timeframe: gv('timeframe'), riskTolerance: rv('riskTolerance'),
     fundingMethod: rv('fundingMethod'), cashSavings: gv('cashSavings'), annualSalary: gv('annualSalary'),
     dependants: gv('dependants'), weeklyRentPaid: gv('weeklyRentPaid'), otherDebts: gv('otherDebts'),
+    ownPpor: rv('ownPpor') || 'No',
+    pporState: gv('pporState'), pporType: gv('pporType'),
+    pporValue: gv('pporValue'), pporLoan: gv('pporLoan'),
+    pporRate: gv('pporRate'), pporStructure: gv('pporStructure'),
     ownProperties: rv('ownProperties') || 'No', properties,
     hasBroker: rv('hasBroker') || 'No',
     brokerName: gv('brokerName'), brokerEmail: gv('brokerEmail'), brokerPhone: gv('brokerPhone'),
@@ -1068,19 +1135,22 @@ function loadProgress() {
      'smsfName','smsfMembers','smsfAddress','smsfAbn','smsfTfn',
      'motivation','cashSavings','annualSalary','dependants','weeklyRentPaid','otherDebts',
      'brokerName','brokerEmail','brokerPhone','brokerCapacity',
-     'accountantName','accountantEmail','accountantPhone','maxPurchasePrice'
+     'accountantName','accountantEmail','accountantPhone','maxPurchasePrice',
+     'pporValue','pporLoan','pporRate'
     ].forEach(id => { const e=document.getElementById(id); if(e&&s[id]) e.value=s[id]; });
 
     if (s.dob) { const e=document.getElementById('dob'); if(e) e.value=s.dob; }
     if (s.p2Dob) { const e=document.getElementById('p2Dob'); if(e) e.value=s.p2Dob; }
     if (s.email) { const e=document.getElementById('email'); if(e&&!e.value) e.value=s.email; }
-    ['resState','p2State','p2Relationship','timeframe'].forEach(id => {
-      const e=document.getElementById(id); if(e&&s[id==='resState'?'state':id]) e.value=s[id==='resState'?'state':id];
-    });
-    // resState fix
-    if (s.state) { const e=document.getElementById('resState'); if(e) e.value=s.state; }
+    // Selects: map element id → data key
+    ({resState:'state',p2State:'p2State',p2Relationship:'p2Relationship',
+      timeframe:'timeframe',pporState:'pporState',pporType:'pporType',pporStructure:'pporStructure'
+    }).entries && Object.entries({resState:'state',p2State:'p2State',p2Relationship:'p2Relationship',
+      timeframe:'timeframe',pporState:'pporState',pporType:'pporType',pporStructure:'pporStructure'
+    }).forEach(([id,key]) => { const e=document.getElementById(id); if(e&&s[key]) e.value=s[key]; });
 
     setRadio('coInvestor', s.coInvestor);
+    setRadio('ownPpor', s.ownPpor);
     setRadio('entityType', s.entityType);
     setRadio('riskTolerance', s.riskTolerance);
     setRadio('fundingMethod', s.fundingMethod);
