@@ -1212,9 +1212,11 @@ async function openBrief(clientId, clientName) {
       if (questionnaire.timeframe) pills.push(questionnaire.timeframe);
       if (questionnaire.fundingMethod) pills.push(questionnaire.fundingMethod);
       if (questionnaire.coInvestor === 'Yes' && questionnaire.p2FirstName) pills.push('Co-investor: ' + questionnaire.p2FirstName + ' ' + (questionnaire.p2LastName || ''));
-      if (questionnaire.budget) pills.push('Budget: ' + questionnaire.budget);
+      if (questionnaire.maxPurchasePrice) pills.push('Budget: $' + Number(questionnaire.maxPurchasePrice).toLocaleString('en-AU'));
       qEl.innerHTML = pills.map(p => `<span class="brief-q-pill">${p}</span>`).join('');
     }
+
+    const DEFAULT_STRATEGY = 'Acquire a residential asset in a supply-constrained growth market with value-add potential and a rental yield profile that supports a balanced growth and cash flow approach.';
 
     if (brief) {
       // Status badge
@@ -1223,8 +1225,8 @@ async function openBrief(clientId, clientName) {
       badge.className = 'brief-status-badge ' + (brief.status === 'published' ? 'brief-status-published' : 'brief-status-draft');
       badge.style.display = '';
 
-      document.getElementById('brief-strategy').value = brief.strategyNotes || '';
-      document.getElementById('brief-budget').value = brief.budgetMax || '';
+      document.getElementById('brief-strategy').value = brief.strategyNotes || DEFAULT_STRATEGY;
+      document.getElementById('brief-budget').value = brief.budgetMax || (questionnaire && questionnaire.budget ? String(questionnaire.maxPurchasePrice || '').replace(/[^0-9]/g, '') : '');
 
       (brief.targetMarkets || []).forEach(key => {
         const cb = document.getElementById('bm-' + key);
@@ -1240,9 +1242,10 @@ async function openBrief(clientId, clientName) {
         });
       });
     } else {
-      // New brief — pre-fill budget from questionnaire if available
+      // New brief — pre-fill defaults
+      document.getElementById('brief-strategy').value = DEFAULT_STRATEGY;
       if (questionnaire && questionnaire.budget) {
-        document.getElementById('brief-budget').value = questionnaire.budget.replace(/[^0-9]/g, '');
+        document.getElementById('brief-budget').value = String(questionnaire.maxPurchasePrice || '').replace(/[^0-9]/g, '');
       }
     }
   } catch { /* silent — user can still type */ }
