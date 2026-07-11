@@ -1,3 +1,5 @@
+import { getStore } from '@netlify/blobs';
+
 export default async function (request, context) {
   const secret = Deno.env.get('JWT_SECRET');
   if (!secret) return context.next();
@@ -13,7 +15,7 @@ export default async function (request, context) {
     if (adminPayload && adminPayload.role === 'admin') return context.next();
   }
 
-  // Client session
+  // Client session — verify identity from JWT
   const match = cookie.match(/fw_session=([^;]+)/);
   if (!match) return Response.redirect(loginUrl, 302);
 
@@ -21,11 +23,23 @@ export default async function (request, context) {
   if (!payload) return Response.redirect(loginUrl, 302);
 
   const market = url.pathname.split('/').pop().replace('.html', '');
-  if (!Array.isArray(payload.markets) || !payload.markets.includes(market)) {
-    return Response.redirect(`${url.origin}/clients/portal.html`, 302);
-  }
 
-  return context.next();
+  // Live market check — so newly assigned markets work without re-login
+  try {
+    const store = getStore('fairway-clients');
+    const clients = await store.get('all', { type: 'json' });
+    const client = clients?.find(c => c.id === payload.sub);
+    if (!client || !client.active || !Array.isArray(client.markets) || !client.markets.includes(market)) {
+      return Response.redirect(`${url.origin}/clients/portal.html`, 302);
+    }
+    return context.next();
+  } catch {
+    // Blobs unavailable — fall back to JWT markets so the guard still works
+    if (!Array.isArray(payload.markets) || !payload.markets.includes(market)) {
+      return Response.redirect(`${url.origin}/clients/portal.html`, 302);
+    }
+    return context.next();
+  }
 }
 
 async function verifyJWT(token, secret) {
