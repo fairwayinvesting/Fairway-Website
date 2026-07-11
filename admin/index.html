@@ -775,7 +775,7 @@
       <button class="btn-secondary" onclick="closePresModal()">Cancel</button>
       <span class="error-msg" id="pres-modal-error" style="display:none;flex:1;text-align:left;"></span>
       <button class="btn-secondary" id="pres-preview-btn" style="display:none;" onclick="previewFromModal()">Preview</button>
-      <button class="btn-send" id="pres-send-btn" style="display:none;" onclick="sendPresentationFromModal()">✉ Send to clients</button>
+      <button class="btn-send" id="pres-send-btn" style="display:none;" onclick="notifyPresentationFromModal()">✉ Notify client</button>
       <button class="btn-primary" id="pres-save-btn" onclick="savePresentation()">Save draft</button>
     </div>
   </div>
@@ -1059,6 +1059,7 @@ async function loadClients() {
   clients = await res.json();
   renderTable();
   renderReports();
+  if (presentations.length) renderPresentations();
 }
 
 function renderTable() {
@@ -1793,7 +1794,10 @@ function renderPresentations() {
     const propStatusHtml = propStatus === 'offer' ? '<span class="pill" style="background:rgba(234,179,8,0.12);border-color:rgba(234,179,8,0.3);color:#eab308;margin-left:6px;">Under Offer</span>'
       : propStatus === 'sold' ? '<span class="pill" style="background:rgba(239,68,68,0.12);border-color:rgba(239,68,68,0.3);color:#ef4444;margin-left:6px;">Sold</span>'
       : '';
-    const clientsLabel = assigned ? `${assigned} assigned${revokedCount ? ` (${revokedCount} revoked)` : ''}` : '<span style="color:rgba(247,243,237,0.2);">None</span>';
+    const activeNames = unrevoked.map(cid => { const c = clients.find(x => x.id === cid); return c ? esc(c.name) : null; }).filter(Boolean);
+    const clientsLabel = activeNames.length
+      ? activeNames.map(n => `<span class="pill">${n}</span>`).join('')
+      : (assigned > 0 ? `<span style="color:rgba(247,243,237,0.25);font-size:13px;">${revokedCount} revoked</span>` : '<span style="color:rgba(247,243,237,0.2);">None</span>');
     const viewsLabel = viewed ? `<span style="color:#6dbf7b;">${viewed}/${assigned} viewed</span>` : '<span style="color:rgba(247,243,237,0.2);">—</span>';
     const expiry = p.expiresAt ? ` · expires ${new Date(p.expiresAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}` : '';
     return `<tr>
@@ -1807,7 +1811,7 @@ function renderPresentations() {
       <td><div class="actions">
         <button class="btn-sm btn-edit" onclick="openPresModal('${p.id}')">Edit</button>
         <button class="btn-sm btn-edit" onclick="previewPresentation('${p.id}')">Preview</button>
-        ${canSend ? `<button class="btn-sm btn-send" onclick="sendPresentation('${p.id}')">Send</button>` : ''}
+        ${unrevoked.length ? `<button class="btn-sm btn-notify" onclick="notifyPresentation('${p.id}')">✉ Notify</button>` : ''}
         <button class="btn-sm btn-delete" onclick="deletePresentation('${p.id}')">Delete</button>
       </div></td>
     </tr>`;
@@ -2131,7 +2135,7 @@ function openPresModal(id) {
     const unrevoked = (p.assignedClients || []).filter(cid => !revokedList.includes(cid));
     const canSend = unrevoked.some(cid => !sentList.includes(cid));
     document.getElementById('pres-preview-btn').style.display = 'inline-flex';
-    document.getElementById('pres-send-btn').style.display = canSend ? 'inline-flex' : 'none';
+    document.getElementById('pres-send-btn').style.display = unrevoked.length ? 'inline-flex' : 'none';
     document.getElementById('pres-save-btn').textContent = 'Save changes';
   } else {
     document.getElementById('pres-modal-title').textContent = 'New presentation';
@@ -2266,27 +2270,27 @@ async function savePresentation() {
 }
 
 // ── Send ──────────────────────────────────────────────────────────────────────
-async function sendPresentation(id) {
+async function notifyPresentation(id) {
   const p = presentations.find(x => x.id === id);
   if (!p) return;
   const revoked = p.revokedClients || [];
-  const unsent = (p.assignedClients || []).filter(cid => !p.sentClients.includes(cid) && !revoked.includes(cid));
-  if (!unsent.length) { alert('All assigned clients have already been sent this presentation.'); return; }
-  const names = unsent.map(cid => { const c = clients.find(x => x.id === cid); return c ? c.name : cid; });
-  if (!confirm(`Send to ${names.join(', ')}?`)) return;
-  const btns = [...document.querySelectorAll(`button[onclick="sendPresentation('${id}')"]`)];
+  const targets = (p.assignedClients || []).filter(cid => !revoked.includes(cid));
+  if (!targets.length) return;
+  const names = targets.map(cid => { const c = clients.find(x => x.id === cid); return c ? c.name : cid; });
+  if (!confirm(`Notify ${names.join(', ')} about "${p.address}"?`)) return;
+  const btns = [...document.querySelectorAll(`button[onclick="notifyPresentation('${id}')"]`)];
   btns.forEach(b => { b.textContent = 'Sending…'; b.disabled = true; });
-  const res = await api('PUT', '/api/admin/presentations', { id, action: 'send' });
+  const res = await api('PUT', '/api/admin/presentations', { id, action: 'notify' });
   const data = await res.json();
-  btns.forEach(b => { b.textContent = 'Send'; b.disabled = false; });
+  btns.forEach(b => { b.textContent = '✉ Notify'; b.disabled = false; });
   if (res.ok) {
-    unsent.forEach(cid => { if (!p.sentClients.includes(cid)) p.sentClients.push(cid); });
+    targets.forEach(cid => { if (!p.sentClients.includes(cid)) p.sentClients.push(cid); });
     renderPresentations();
-    alert(`Sent to ${data.sent} client${data.sent !== 1 ? 's' : ''}.`);
-  } else alert('Send failed. Please try again.');
+    alert(`Notified ${data.sent} client${data.sent !== 1 ? 's' : ''}.`);
+  } else alert('Notification failed. Please try again.');
 }
 
-async function sendPresentationFromModal() { const id = document.getElementById('pres-edit-id').value; if (!id) return; closePresModal(); await sendPresentation(id); }
+async function notifyPresentationFromModal() { const id = document.getElementById('pres-edit-id').value; if (!id) return; closePresModal(); await notifyPresentation(id); }
 
 async function previewPresentation(id) {
   const win = window.open('', '_blank');

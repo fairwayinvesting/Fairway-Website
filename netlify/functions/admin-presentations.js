@@ -130,15 +130,19 @@ export default async (req) => {
     const idx = presentations.findIndex(p => p.id === id);
     if (idx === -1) return json({ error: 'Not found' }, 404);
 
-    if (action === 'send' || action === 'resend') {
+    if (action === 'send' || action === 'resend' || action === 'notify') {
       const clientStore = getStore('fairway-clients');
       const allClients = (await clientStore.get('all', { type: 'json' })) || [];
       const pres = presentations[idx];
       let toSend;
-      if (action === 'resend') {
+      if (action === 'notify') {
+        // Send (or resend) to all unrevoked assigned clients
+        toSend = pres.assignedClients.filter(cid => !(pres.revokedClients||[]).includes(cid));
+      } else if (action === 'resend') {
         const { clientId } = body;
         toSend = clientId ? [clientId] : [];
       } else {
+        // First send — only clients who haven't received it yet
         toSend = pres.assignedClients.filter(cid => !pres.sentClients.includes(cid) && !(pres.revokedClients||[]).includes(cid));
       }
       let sent = 0;
@@ -154,7 +158,7 @@ export default async (req) => {
             subject: `Property opportunity — ${pres.address}`,
             html: buildPropertyEmail(client.name, pres.address, pres.suburb, pres.price, pres.propertyType, pres.bedrooms, pres.bathrooms, pres.carspaces, link),
           });
-          if (action === 'send' && !pres.sentClients.includes(cid)) pres.sentClients.push(cid);
+          if (!pres.sentClients.includes(cid)) pres.sentClients.push(cid);
           sent++;
         } catch (err) { console.error('Send failed:', err?.message || err); }
       }

@@ -98,6 +98,12 @@
   <!-- BUYING BRIEF (populated by JS) -->
   <div class="actions-wrap" id="brief-section" style="display:none"></div>
 
+  <!-- PROPERTY PRESENTATIONS (populated by JS) -->
+  <div class="grid-wrap" id="presentations-section" style="display:none">
+    <p class="section-label">Property presentations</p>
+    <div id="presentations-content"></div>
+  </div>
+
   <!-- AREA RESEARCH (populated by JS) -->
   <div class="grid-wrap" id="reports-section" style="display:none">
     <p class="section-label">Area research</p>
@@ -232,6 +238,36 @@
       content.innerHTML = `<div class="grid">${cards}</div>`;
     }
 
+    function renderPresentations(items) {
+      const section = document.getElementById('presentations-section');
+      const content = document.getElementById('presentations-content');
+      if (!items || items.length === 0) return;
+      section.style.display = 'block';
+
+      const typeLabels = { house:'House', unit:'Unit', townhouse:'Townhouse', duplex:'Duplex', land:'Land' };
+      const statusText = { offer:'Under Offer', sold:'Sold', available:'Available' };
+      const statusCol  = { offer:'#e8a87c', sold:'#f08080', available:'#6dbf7b' };
+
+      const cards = items.map(p => {
+        const type = typeLabels[p.propertyType] || 'Property';
+        const statusSuffix = p.status && statusText[p.status]
+          ? ` <span style="color:${statusCol[p.status]}">&middot;&nbsp;${statusText[p.status]}</span>`
+          : '';
+        const metaParts = [p.suburb && esc(p.suburb), p.price && esc(p.price)].filter(Boolean);
+        const meta = metaParts.join(' &nbsp;&middot;&nbsp; ');
+        return `<a href="/p/property.html?t=${encodeURIComponent(p.token)}" class="card">
+          <p class="card-state">${esc(type)}${statusSuffix}</p>
+          <div style="flex:1;">
+            <p style="font-family:'Fraunces',serif;font-size:22px;font-weight:400;color:#f7f3ed;line-height:1.2;margin-bottom:${meta ? '8px' : '0'};">${esc(p.address)}</p>
+            ${meta ? `<p style="font-size:13px;color:rgba(247,243,237,0.35);margin:0;">${meta}</p>` : ''}
+          </div>
+          <span class="card-btn" style="margin-top:20px;">View presentation &rarr;</span>
+        </a>`;
+      }).join('');
+
+      content.innerHTML = `<div class="grid">${cards}</div>`;
+    }
+
     async function init() {
       let me;
       try {
@@ -243,20 +279,24 @@
       document.getElementById('user-name').textContent = me.name;
       document.getElementById('welcome-heading').textContent = `Welcome back, ${me.name.split(' ')[0]}.`;
 
-      // Fetch questionnaire status + brief status in parallel
+      // Fetch questionnaire, brief and presentations in parallel
       let qCompleted = false;
       let briefPublished = false;
+      let presentations = [];
       try {
-        const [qr, br] = await Promise.all([
+        const [qr, br, pr] = await Promise.all([
           fetch('/api/submit-questionnaire'),
           fetch('/api/brief'),
+          fetch('/api/presentations'),
         ]);
         if (qr.ok) { const qd = await qr.json(); qCompleted = qd.completed === true; }
         if (br.ok) { const bd = await br.json(); briefPublished = bd.published === true; }
+        if (pr.ok) { const pd = await pr.json(); presentations = pd.presentations || []; }
       } catch {}
 
       renderQSection(qCompleted);
       renderBriefSection(qCompleted, briefPublished);
+      renderPresentations(presentations);
       renderReports(me.markets);
     }
 
