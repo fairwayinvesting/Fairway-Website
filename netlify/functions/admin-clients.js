@@ -188,15 +188,37 @@ export default async (req) => {
       return json({ ok: true });
     }
 
-    if (name !== undefined) clients[idx].name = name.trim();
-    if (markets !== undefined) clients[idx].markets = markets;
-    if (active !== undefined) clients[idx].active = active;
+    const client = clients[idx];
+    const prevName = client.name;
+    const prevMarkets = (client.markets || []).slice().sort().join(',');
+    const prevActive = client.active;
+
+    if (name !== undefined) client.name = name.trim();
+    if (markets !== undefined) client.markets = markets;
+    if (active !== undefined) client.active = active;
     if (password) {
       const salt = crypto.randomBytes(16).toString('hex');
-      clients[idx].passwordHash = await pbkdf2Hash(password, salt);
-      clients[idx].passwordSalt = salt;
+      client.passwordHash = await pbkdf2Hash(password, salt);
+      client.passwordSalt = salt;
     }
     await store.setJSON('all', clients);
+
+    // Audit after save so name is consistent in log entries
+    if (name !== undefined && name.trim() !== prevName) {
+      appendAudit('client_updated', `Renamed client "${prevName}" to "${client.name}" <${client.email}>`);
+    }
+    if (markets !== undefined && markets.slice().sort().join(',') !== prevMarkets) {
+      const label = markets.length
+        ? markets.map(m => m.charAt(0).toUpperCase() + m.slice(1).replace(/-/g, ' ')).join(', ')
+        : 'none';
+      appendAudit('markets_assigned', `Assigned markets to ${client.name} <${client.email}>: ${label}`);
+    }
+    if (active !== undefined && active !== prevActive) {
+      appendAudit('client_status_changed', `${active ? 'Activated' : 'Deactivated'} ${client.name} <${client.email}>`);
+    }
+    if (password) {
+      appendAudit('client_password_reset', `Reset password for ${client.name} <${client.email}>`);
+    }
     return json({ ok: true });
   }
 
