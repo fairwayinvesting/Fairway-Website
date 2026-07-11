@@ -420,13 +420,11 @@
       <table>
         <thead><tr>
           <th>Property</th>
-          <th>Clients</th>
-          <th>Views</th>
-          <th>Status</th>
+          <th>Client</th>
           <th>Actions</th>
         </tr></thead>
         <tbody id="pres-tbody">
-          <tr class="empty-row"><td colspan="5">Loading…</td></tr>
+          <tr class="empty-row"><td colspan="3">Loading…</td></tr>
         </tbody>
       </table>
     </div>
@@ -775,7 +773,7 @@
       <button class="btn-secondary" onclick="closePresModal()">Cancel</button>
       <span class="error-msg" id="pres-modal-error" style="display:none;flex:1;text-align:left;"></span>
       <button class="btn-secondary" id="pres-preview-btn" style="display:none;" onclick="previewFromModal()">Preview</button>
-      <button class="btn-send" id="pres-send-btn" style="display:none;" onclick="notifyPresentationFromModal()">✉ Notify client</button>
+      <button class="btn-send" id="pres-send-btn" style="display:none;" onclick="notifyPresentationFromModal()">✉ Save &amp; Notify</button>
       <button class="btn-primary" id="pres-save-btn" onclick="savePresentation()">Save draft</button>
     </div>
   </div>
@@ -1773,45 +1771,65 @@ async function loadPresentations() {
 function renderPresentations() {
   const tbody = document.getElementById('pres-tbody');
   if (!presentations.length) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No presentations yet — click "New presentation" to start.</td></tr>';
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="3">No presentations yet — click "New presentation" to start.</td></tr>';
     return;
   }
   tbody.innerHTML = presentations.map(p => {
-    const assigned = p.assignedClients?.length || 0;
     const revokedList = p.revokedClients || [];
-    const revokedCount = revokedList.length;
     const unrevoked = (p.assignedClients || []).filter(cid => !revokedList.includes(cid));
     const sentList = p.sentClients || [];
-    const allSent = unrevoked.length > 0 && unrevoked.every(cid => sentList.includes(cid));
-    const canSend = unrevoked.some(cid => !sentList.includes(cid));
-    const anySent = sentList.length > 0;
-    const viewed = Object.values(p.views || {}).filter(v => v.firstViewedAt).length;
-    const sentHtml = allSent
-      ? '<span class="pill" style="background:rgba(109,191,123,0.12);border-color:rgba(109,191,123,0.25);color:#6dbf7b;">Sent</span>'
-      : anySent ? '<span class="pill pill-inactive">Partial</span>'
-      : '<span class="pill pill-inactive">Draft</span>';
+    const viewsData = p.views || {};
     const propStatus = p.status;
-    const propStatusHtml = propStatus === 'offer' ? '<span class="pill" style="background:rgba(234,179,8,0.12);border-color:rgba(234,179,8,0.3);color:#eab308;margin-left:6px;">Under Offer</span>'
-      : propStatus === 'sold' ? '<span class="pill" style="background:rgba(239,68,68,0.12);border-color:rgba(239,68,68,0.3);color:#ef4444;margin-left:6px;">Sold</span>'
+    const propStatusHtml = propStatus === 'offer'
+      ? '<span class="pill" style="background:rgba(234,179,8,0.12);border-color:rgba(234,179,8,0.3);color:#eab308;margin-left:6px;">Under Offer</span>'
+      : propStatus === 'sold'
+      ? '<span class="pill" style="background:rgba(239,68,68,0.12);border-color:rgba(239,68,68,0.3);color:#ef4444;margin-left:6px;">Sold</span>'
       : '';
-    const activeNames = unrevoked.map(cid => { const c = clients.find(x => x.id === cid); return c ? esc(c.name) : null; }).filter(Boolean);
-    const clientsLabel = activeNames.length
-      ? activeNames.map(n => `<span class="pill">${n}</span>`).join('')
-      : (assigned > 0 ? `<span style="color:rgba(247,243,237,0.25);font-size:13px;">${revokedCount} revoked</span>` : '<span style="color:rgba(247,243,237,0.2);">None</span>');
-    const viewsLabel = viewed ? `<span style="color:#6dbf7b;">${viewed}/${assigned} viewed</span>` : '<span style="color:rgba(247,243,237,0.2);">—</span>';
-    const expiry = p.expiresAt ? ` · expires ${new Date(p.expiresAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}` : '';
+    const expiry = p.expiresAt ? `<span style="color:rgba(247,243,237,0.25);"> · expires ${new Date(p.expiresAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}</span>` : '';
+
+    // Per-client status rows
+    let clientCell;
+    if (!unrevoked.length) {
+      clientCell = '<span style="color:rgba(247,243,237,0.2);font-size:13px;">No client assigned</span>';
+    } else {
+      clientCell = unrevoked.map(cid => {
+        const c = clients.find(x => x.id === cid);
+        const name = c ? esc(c.name) : 'Unknown';
+        const vd = viewsData[cid];
+        const viewed = vd?.firstViewedAt;
+        const isSent = sentList.includes(cid);
+        let dot, statusText;
+        if (viewed) {
+          const d = new Date(viewed).toLocaleDateString('en-AU',{day:'numeric',month:'short'});
+          const times = vd.viewCount > 1 ? ` · ${vd.viewCount}×` : '';
+          dot = '#6dbf7b';
+          statusText = `<span style="font-size:11px;color:rgba(247,243,237,0.35);">Viewed ${d}${times}</span>`;
+        } else if (isSent) {
+          dot = '#e8a87c';
+          statusText = `<span style="font-size:11px;color:rgba(247,243,237,0.35);">Notified — not yet opened</span>`;
+        } else {
+          dot = 'rgba(247,243,237,0.2)';
+          statusText = `<span style="font-size:11px;color:rgba(247,243,237,0.25);">Not yet notified</span>`;
+        }
+        return `<div style="display:flex;align-items:center;gap:7px;padding:3px 0;">
+          <span style="width:7px;height:7px;border-radius:50%;background:${dot};flex-shrink:0;"></span>
+          <span style="font-size:13.5px;font-weight:400;color:#f7f3ed;">${name}</span>
+          ${statusText}
+        </div>`;
+      }).join('');
+    }
+
+    const notifyLabel = unrevoked.some(cid => !sentList.includes(cid)) ? '✉ Notify' : '✉ Re-notify';
     return `<tr>
       <td>
         <div class="td-name">${esc(p.address)}${propStatusHtml}</div>
-        ${p.price ? `<div style="font-size:12px;color:rgba(247,243,237,0.3);margin-top:3px;">${esc(p.price)}${expiry}</div>` : expiry ? `<div style="font-size:12px;color:rgba(247,243,237,0.3);margin-top:3px;">${expiry.trim()}</div>` : ''}
+        <div style="font-size:12px;color:rgba(247,243,237,0.3);margin-top:3px;">${p.price ? esc(p.price) : ''}${expiry}</div>
       </td>
-      <td>${clientsLabel}</td>
-      <td>${viewsLabel}</td>
-      <td>${sentHtml}</td>
+      <td>${clientCell}</td>
       <td><div class="actions">
         <button class="btn-sm btn-edit" onclick="openPresModal('${p.id}')">Edit</button>
         <button class="btn-sm btn-edit" onclick="previewPresentation('${p.id}')">Preview</button>
-        ${unrevoked.length ? `<button class="btn-sm btn-notify" onclick="notifyPresentation('${p.id}')">✉ Notify</button>` : ''}
+        ${unrevoked.length ? `<button class="btn-sm btn-notify" onclick="notifyPresentation('${p.id}')">${notifyLabel}</button>` : ''}
         <button class="btn-sm btn-delete" onclick="deletePresentation('${p.id}')">Delete</button>
       </div></td>
     </tr>`;
@@ -2290,7 +2308,28 @@ async function notifyPresentation(id) {
   } else alert('Notification failed. Please try again.');
 }
 
-async function notifyPresentationFromModal() { const id = document.getElementById('pres-edit-id').value; if (!id) return; closePresModal(); await notifyPresentation(id); }
+async function notifyPresentationFromModal() {
+  const id = document.getElementById('pres-edit-id').value;
+  if (!id) return;
+  const btn = document.getElementById('pres-send-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  // Save the current client assignment first — this generates tokens if new clients were added
+  const assignedClients = Array.from(document.querySelectorAll('.pres-client-check:checked')).map(el => el.value);
+  const saveRes = await api('PUT', '/api/admin/presentations', { id, assignedClients });
+  btn.disabled = false; btn.textContent = '✉ Save & Notify';
+  if (!saveRes.ok) {
+    const errEl = document.getElementById('pres-modal-error');
+    errEl.textContent = 'Could not save client assignment. Please try again.';
+    errEl.style.display = 'block';
+    return;
+  }
+  const saveData = await saveRes.json();
+  // Update local state so notifyPresentation sees the saved data
+  const idx = presentations.findIndex(x => x.id === id);
+  if (idx !== -1 && saveData.pres) presentations[idx] = saveData.pres;
+  closePresModal();
+  await notifyPresentation(id);
+}
 
 async function previewPresentation(id) {
   const win = window.open('', '_blank');
