@@ -25,17 +25,24 @@ export default async (req) => {
 
   const clientId = payload.sub;
 
-  const store = getStore('fairway-presentations');
-  const all = (await store.get('all', { type: 'json' })) || [];
+  let all = [];
+  try {
+    const store = getStore('fairway-presentations');
+    all = (await store.get('all', { type: 'json' })) || [];
+  } catch (err) {
+    console.error('presentations: Blobs error', err?.message || err);
+    return json({ presentations: [] });
+  }
 
   const mine = all
     .filter(p =>
-      (p.assignedClients || []).includes(clientId) &&
+      Array.isArray(p.assignedClients) &&
+      p.assignedClients.includes(clientId) &&
       !(p.revokedClients || []).includes(clientId)
     )
     .map(p => ({
       id: p.id,
-      address: p.address,
+      address: p.address || '',
       suburb: p.suburb || '',
       price: p.price || '',
       propertyType: p.propertyType || 'house',

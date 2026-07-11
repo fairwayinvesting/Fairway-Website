@@ -291,8 +291,14 @@
         ]);
         if (qr.ok) { const qd = await qr.json(); qCompleted = qd.completed === true; }
         if (br.ok) { const bd = await br.json(); briefPublished = bd.published === true; }
-        if (pr.ok) { const pd = await pr.json(); presentations = pd.presentations || []; }
-      } catch {}
+        if (pr.ok) {
+          const pd = await pr.json();
+          presentations = pd.presentations || [];
+          console.log('[portal] presentations response:', pd);
+        } else {
+          console.error('[portal] /api/presentations returned', pr.status);
+        }
+      } catch (e) { console.error('[portal] fetch error', e); }
 
       renderQSection(qCompleted);
       renderBriefSection(qCompleted, briefPublished);
