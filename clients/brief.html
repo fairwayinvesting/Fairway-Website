@@ -133,10 +133,14 @@
   function renderBrief(brief) {
     const wrap = document.getElementById('main-wrap');
 
-    const markets = (brief.targetMarkets || []).map(key => {
+    const knownChips = (brief.targetMarkets || []).map(key => {
       const m = MARKET_META[key] || { name: key, state: '' };
-      return `<span class="market-chip"><span class="chip-state">${m.state}</span>${m.name}</span>`;
-    }).join('') || '<span style="color:rgba(247,243,237,0.3);font-size:14px;">To be confirmed</span>';
+      return `<span class="market-chip">${m.state ? `<span class="chip-state">${m.state}</span>` : ''}${m.name}</span>`;
+    });
+    const customChips = (brief.customMarkets || []).map(name =>
+      `<span class="market-chip">${name}</span>`
+    );
+    const markets = [...knownChips, ...customChips].join('') || '<span style="color:rgba(247,243,237,0.3);font-size:14px;">To be confirmed</span>';
 
     const propTypes = (brief.propertyTypes || []).length
       ? brief.propertyTypes.map(t => `<span class="prop-chip">${t}</span>`).join('')

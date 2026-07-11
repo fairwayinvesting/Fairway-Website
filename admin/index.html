@@ -818,6 +818,11 @@
       <div class="brief-field">
         <label>Target markets</label>
         <div class="brief-market-grid" id="brief-market-grid"></div>
+        <div id="brief-custom-markets" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <input type="text" id="brief-custom-market-input" placeholder="Add unlisted market (e.g. Darwin NT)" style="flex:1;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.11);border-radius:10px;padding:9px 12px;font-size:13px;font-family:'Outfit',sans-serif;font-weight:300;color:#f7f3ed;outline:none">
+          <button type="button" onclick="addCustomMarket()" style="padding:9px 16px;background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.12);border-radius:10px;color:rgba(247,243,237,0.6);font-size:13px;cursor:pointer;white-space:nowrap;font-family:'Outfit',sans-serif">+ Add</button>
+        </div>
       </div>
 
       <!-- Property types -->
@@ -1139,9 +1144,38 @@ async function notifyMarkets(id, name) {
 
 // ── Brief builder ─────────────────────────────────────────────────────────────
 let _briefClientId = null;
+let _customMarkets = [];
+
+function renderCustomMarkets() {
+  const el = document.getElementById('brief-custom-markets');
+  el.innerHTML = _customMarkets.map((m, i) =>
+    `<span style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1.5px solid rgba(189,122,112,0.5);border-radius:100px;background:rgba(189,122,112,0.1);font-size:13px;color:#f7f3ed;">
+      ${esc(m)}
+      <button type="button" onclick="removeCustomMarket(${i})" style="background:none;border:none;color:rgba(247,243,237,0.4);cursor:pointer;font-size:15px;line-height:1;padding:0;margin-left:2px">&times;</button>
+    </span>`
+  ).join('');
+}
+
+function addCustomMarket() {
+  const input = document.getElementById('brief-custom-market-input');
+  const val = input.value.trim();
+  if (!val) return;
+  if (!_customMarkets.includes(val)) {
+    _customMarkets.push(val);
+    renderCustomMarkets();
+  }
+  input.value = '';
+  input.focus();
+}
+
+function removeCustomMarket(i) {
+  _customMarkets.splice(i, 1);
+  renderCustomMarkets();
+}
 
 async function openBrief(clientId, clientName) {
   _briefClientId = clientId;
+  _customMarkets = [];
 
   // Reset UI
   document.getElementById('brief-modal-title').textContent = clientName + ' — Buying Brief';
@@ -1149,6 +1183,9 @@ async function openBrief(clientId, clientName) {
   document.getElementById('brief-budget').value = '';
   document.getElementById('brief-q-summary').innerHTML = '';
   document.getElementById('brief-error').style.display = 'none';
+  document.getElementById('brief-custom-market-input').value = '';
+  document.getElementById('brief-custom-markets').innerHTML = '';
+  document.getElementById('brief-status-badge').style.display = 'none';
   document.querySelectorAll('.brief-type-check').forEach(c => c.checked = false);
 
   // Build market checkboxes from MARKETS array
@@ -1175,7 +1212,7 @@ async function openBrief(clientId, clientName) {
       if (questionnaire.timeframe) pills.push(questionnaire.timeframe);
       if (questionnaire.fundingMethod) pills.push(questionnaire.fundingMethod);
       if (questionnaire.coInvestor === 'Yes' && questionnaire.p2FirstName) pills.push('Co-investor: ' + questionnaire.p2FirstName + ' ' + (questionnaire.p2LastName || ''));
-      if (questionnaire.budget) pills.push('Budget from Q: ' + questionnaire.budget);
+      if (questionnaire.budget) pills.push('Budget: ' + questionnaire.budget);
       qEl.innerHTML = pills.map(p => `<span class="brief-q-pill">${p}</span>`).join('');
     }
 
@@ -1194,13 +1231,19 @@ async function openBrief(clientId, clientName) {
         if (cb) cb.checked = true;
       });
 
+      _customMarkets = (brief.customMarkets || []).slice();
+      renderCustomMarkets();
+
       (brief.propertyTypes || []).forEach(type => {
         document.querySelectorAll('.brief-type-check').forEach(cb => {
           if (cb.value === type) cb.checked = true;
         });
       });
     } else {
-      document.getElementById('brief-status-badge').style.display = 'none';
+      // New brief — pre-fill budget from questionnaire if available
+      if (questionnaire && questionnaire.budget) {
+        document.getElementById('brief-budget').value = questionnaire.budget.replace(/[^0-9]/g, '');
+      }
     }
   } catch { /* silent — user can still type */ }
 }
@@ -1228,6 +1271,7 @@ async function saveBrief(status) {
     clientId: _briefClientId,
     strategyNotes: document.getElementById('brief-strategy').value.trim(),
     targetMarkets,
+    customMarkets: _customMarkets.slice(),
     propertyTypes,
     budgetMax: budget,
     status,
@@ -1257,6 +1301,10 @@ async function saveBrief(status) {
 
 document.getElementById('brief-overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('brief-overlay')) closeBrief();
+});
+
+document.getElementById('brief-custom-market-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); addCustomMarket(); }
 });
 
 async function deleteClient(id, name) {
