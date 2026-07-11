@@ -41,6 +41,17 @@
     .empty h2{font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:rgba(247,243,237,0.4);margin-bottom:12px;}
     .empty p{font-size:15px;font-weight:300;color:rgba(247,243,237,0.25);}
 
+    .actions-wrap{padding:0 44px;max-width:1060px;margin:0 auto 32px;}
+    .action-card{background:#22201d;border:1px solid rgba(189,122,112,0.2);border-radius:18px;padding:24px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px;}
+    .action-card-left{display:flex;align-items:center;gap:16px;}
+    .action-icon{width:44px;height:44px;border-radius:12px;background:rgba(189,122,112,0.1);border:1px solid rgba(189,122,112,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .action-card-text p.ac-label{font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:#bd7a70;margin-bottom:4px;}
+    .action-card-text p.ac-title{font-family:'Fraunces',serif;font-size:18px;font-weight:400;color:#f7f3ed;margin-bottom:2px;}
+    .action-card-text p.ac-sub{font-size:13px;color:rgba(247,243,237,0.35);line-height:1.5;}
+    .action-btn{display:inline-flex;align-items:center;gap:8px;background:#bd7a70;border-radius:100px;padding:11px 24px;font-size:13.5px;font-weight:500;color:#f7f3ed;white-space:nowrap;transition:background .2s;flex-shrink:0;}
+    .action-btn:hover{background:#c9867d;}
+    @media(max-width:640px){.action-card{flex-direction:column;align-items:flex-start;}.action-btn{width:100%;justify-content:center;}}
+
     .loading{padding:80px 44px;text-align:center;}
     .spinner{width:32px;height:32px;border:2px solid rgba(247,243,237,0.1);border-top-color:#bd7a70;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px;}
     @keyframes spin{to{transform:rotate(360deg)}}
@@ -51,7 +62,7 @@
 
     @media(max-width:800px){
       nav,footer{padding-left:20px;padding-right:20px;}
-      .hero,.grid-wrap,.empty,.loading{padding-left:20px;padding-right:20px;}
+      .hero,.grid-wrap,.empty,.loading,.actions-wrap{padding-left:20px;padding-right:20px;}
       .grid{grid-template-columns:1fr 1fr;}
       h1{font-size:30px;}
     }
@@ -79,6 +90,22 @@
     <p class="eyebrow">Research portal</p>
     <h1 id="welcome-heading">Your reports</h1>
     <p class="sub">Select a market below to view your area report, including data on prices, rents, yields, growth history and infrastructure pipeline.</p>
+  </div>
+
+  <div class="actions-wrap">
+    <a href="/clients/questionnaire.html" class="action-card">
+      <div class="action-card-left">
+        <div class="action-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 5h12M4 10h8M4 15h10" stroke="#bd7a70" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <div class="action-card-text">
+          <p class="ac-label">Getting started</p>
+          <p class="ac-title">Onboarding questionnaire</p>
+          <p class="ac-sub">Complete your profile so we can build your client brief and find the right property.</p>
+        </div>
+      </div>
+      <span class="action-btn">Start questionnaire &rarr;</span>
+    </a>
   </div>
 
   <div class="grid-wrap">
