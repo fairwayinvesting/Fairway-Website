@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { getStore } from '@netlify/blobs';
 
 function verifyJWT(token, secret) {
   try {
@@ -19,10 +20,25 @@ export default async (req) => {
   const payload = verifyJWT(match[1], process.env.JWT_SECRET);
   if (!payload) return new Response(JSON.stringify({ error: 'Session expired' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
 
-  return new Response(
-    JSON.stringify({ name: payload.name, email: payload.email, markets: payload.markets }),
-    { status: 200, headers: { 'Content-Type': 'application/json' } }
-  );
+  // Live lookup so markets (and name) are always current, not stale from JWT
+  try {
+    const store = getStore('fairway-clients');
+    const clients = (await store.get('all', { type: 'json' })) || [];
+    const client = clients.find(c => c.id === payload.sub);
+    if (!client || !client.active) {
+      return new Response(JSON.stringify({ error: 'Account not found' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
+    return new Response(
+      JSON.stringify({ name: client.name, email: client.email, markets: client.markets || [] }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+  } catch {
+    // Blobs unavailable — fall back to JWT payload so login still works
+    return new Response(
+      JSON.stringify({ name: payload.name, email: payload.email, markets: payload.markets || [] }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
 };
 
 export const config = { path: '/api/me' };
