@@ -121,6 +121,37 @@
     .btn-dates.active{background:rgba(189,122,112,0.15);color:#bd7a70;}
     .btn-notify{background:rgba(100,160,120,0.1);color:rgba(140,200,155,0.85);}
     .btn-notify:hover{background:rgba(100,160,120,0.2);}
+    .btn-brief{background:rgba(100,130,200,0.1);color:rgba(140,165,230,0.85);}
+    .btn-brief:hover{background:rgba(100,130,200,0.2);}
+
+    /* Brief modal */
+    #brief-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:600;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+    #brief-overlay.open{opacity:1;pointer-events:all}
+    .brief-modal{background:#22201d;border:1px solid rgba(247,243,237,0.1);border-radius:20px;width:100%;max-width:620px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
+    .brief-modal-head{padding:28px 32px 20px;border-bottom:1px solid rgba(247,243,237,0.07);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .brief-modal-head h2{font-family:'Fraunces',serif;font-size:22px;font-weight:400;color:#f7f3ed}
+    .brief-modal-head button{background:none;border:none;color:rgba(247,243,237,0.35);font-size:22px;cursor:pointer;line-height:1;padding:0}
+    .brief-modal-body{padding:24px 32px;overflow-y:auto;flex:1}
+    .brief-modal-foot{padding:18px 32px;border-top:1px solid rgba(247,243,237,0.07);display:flex;align-items:center;gap:10px;justify-content:flex-end;flex-shrink:0}
+    .brief-q-summary{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid rgba(247,243,237,0.07)}
+    .brief-q-pill{padding:5px 12px;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:100px;font-size:12px;color:rgba(247,243,237,0.45);white-space:nowrap}
+    .brief-q-pill strong{color:rgba(247,243,237,0.7);font-weight:500}
+    .brief-field{margin-bottom:20px}
+    .brief-field label{display:block;font-size:12px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:8px}
+    .brief-field textarea,.brief-field input{width:100%;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.11);border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Outfit',sans-serif;font-weight:300;color:#f7f3ed;outline:none;transition:border-color .2s;resize:vertical}
+    .brief-field textarea:focus,.brief-field input:focus{border-color:rgba(189,122,112,0.5)}
+    .brief-field textarea{min-height:110px;line-height:1.65}
+    .brief-market-grid{display:flex;flex-wrap:wrap;gap:8px}
+    .brief-market-check{display:none}
+    .brief-market-label{padding:7px 14px;border:1.5px solid rgba(247,243,237,0.1);border-radius:100px;font-size:13px;color:rgba(247,243,237,0.45);cursor:pointer;transition:all .2s;user-select:none}
+    .brief-market-check:checked+.brief-market-label{border-color:#bd7a70;color:#f7f3ed;background:rgba(189,122,112,0.12)}
+    .brief-type-grid{display:flex;flex-wrap:wrap;gap:8px}
+    .brief-type-check{display:none}
+    .brief-type-label{padding:7px 14px;border:1.5px solid rgba(247,243,237,0.1);border-radius:100px;font-size:13px;color:rgba(247,243,237,0.45);cursor:pointer;transition:all .2s;user-select:none}
+    .brief-type-check:checked+.brief-type-label{border-color:rgba(189,122,112,0.6);color:#f7f3ed;background:rgba(189,122,112,0.1)}
+    .brief-status-badge{font-size:12px;font-weight:500;padding:4px 10px;border-radius:100px;margin-left:10px}
+    .brief-status-draft{background:rgba(247,243,237,0.08);color:rgba(247,243,237,0.4)}
+    .brief-status-published{background:rgba(100,180,100,0.15);color:rgba(140,210,140,0.9)}
 
     /* Add date form — grid layout matching modal fields */
     .ms-add-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;margin-bottom:20px;}
@@ -763,6 +794,60 @@
   </div>
 </div>
 
+<!-- Brief modal -->
+<div id="brief-overlay">
+  <div class="brief-modal">
+    <div class="brief-modal-head">
+      <div style="display:flex;align-items:center;gap:0">
+        <h2 id="brief-modal-title">Buying Brief</h2>
+        <span class="brief-status-badge brief-status-draft" id="brief-status-badge" style="display:none"></span>
+      </div>
+      <button onclick="closeBrief()">&times;</button>
+    </div>
+    <div class="brief-modal-body">
+      <!-- Questionnaire summary pills -->
+      <div class="brief-q-summary" id="brief-q-summary"></div>
+
+      <!-- Strategy -->
+      <div class="brief-field">
+        <label>Strategy notes</label>
+        <textarea id="brief-strategy" rows="5" placeholder="Summarise the client's investment strategy and what you're looking for on their behalf…"></textarea>
+      </div>
+
+      <!-- Target markets -->
+      <div class="brief-field">
+        <label>Target markets</label>
+        <div class="brief-market-grid" id="brief-market-grid"></div>
+      </div>
+
+      <!-- Property types -->
+      <div class="brief-field">
+        <label>Property types</label>
+        <div class="brief-type-grid">
+          <input type="checkbox" class="brief-type-check" id="bt-house" value="House"><label class="brief-type-label" for="bt-house">House</label>
+          <input type="checkbox" class="brief-type-check" id="bt-unit" value="Unit"><label class="brief-type-label" for="bt-unit">Unit</label>
+          <input type="checkbox" class="brief-type-check" id="bt-townhouse" value="Townhouse"><label class="brief-type-label" for="bt-townhouse">Townhouse</label>
+          <input type="checkbox" class="brief-type-check" id="bt-duplex" value="Duplex"><label class="brief-type-label" for="bt-duplex">Duplex</label>
+          <input type="checkbox" class="brief-type-check" id="bt-land" value="Land"><label class="brief-type-label" for="bt-land">Land</label>
+        </div>
+      </div>
+
+      <!-- Budget -->
+      <div class="brief-field">
+        <label>Maximum budget</label>
+        <input type="text" id="brief-budget" inputmode="numeric" placeholder="e.g. 750,000">
+      </div>
+
+      <p class="error-msg" id="brief-error" style="display:none;margin-top:4px"></p>
+    </div>
+    <div class="brief-modal-foot">
+      <button class="btn-secondary" onclick="closeBrief()">Cancel</button>
+      <button class="btn-secondary" id="brief-save-draft" onclick="saveBrief('draft')">Save draft</button>
+      <button class="btn-primary" id="brief-publish" onclick="saveBrief('published')">Publish to client</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const MARKETS = [
   { key: 'geelong',       name: 'Geelong',      state: 'VIC' },
@@ -890,6 +975,7 @@ function renderTable() {
     const notifyBtn = c.markets && c.markets.length
       ? `<button class="btn-sm btn-notify" onclick="notifyMarkets('${c.id}','${esc(c.name)}')" title="Send markets ready email">✉ Notify</button>`
       : '';
+    const briefBtn = `<button class="btn-sm btn-brief" onclick="openBrief('${c.id}','${esc(c.name)}')">Brief</button>`;
     if (mobile) {
       return `<tr style="border-bottom:1px solid rgba(247,243,237,0.05);">
         <td colspan="5" style="padding:14px 16px;">
@@ -901,6 +987,7 @@ function renderTable() {
             <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
               ${dot}
               <button class="btn-sm btn-edit" onclick="openEdit('${c.id}')">Edit</button>
+              ${briefBtn}
               ${notifyBtn}
               <button class="btn-dates" id="dates-btn-${c.id}" onclick="toggleMilestones('${c.id}')">${msLabel}</button>
               <button class="btn-sm btn-delete" onclick="deleteClient('${c.id}','${esc(c.name)}')">✕</button>
@@ -916,6 +1003,7 @@ function renderTable() {
       <td>${dot}${c.active ? 'Active' : 'Inactive'}</td>
       <td><div class="actions">
         <button class="btn-sm btn-edit" onclick="openEdit('${c.id}')">Edit</button>
+        ${briefBtn}
         ${notifyBtn}
         <button class="btn-dates" id="dates-btn-${c.id}" onclick="toggleMilestones('${c.id}')">${msLabel}</button>
         <button class="btn-sm btn-delete" onclick="deleteClient('${c.id}','${esc(c.name)}')">Delete</button>
@@ -1048,6 +1136,128 @@ async function notifyMarkets(id, name) {
     if (btn) { btn.disabled = false; btn.textContent = '✉ Notify'; }
   }
 }
+
+// ── Brief builder ─────────────────────────────────────────────────────────────
+let _briefClientId = null;
+
+async function openBrief(clientId, clientName) {
+  _briefClientId = clientId;
+
+  // Reset UI
+  document.getElementById('brief-modal-title').textContent = clientName + ' — Buying Brief';
+  document.getElementById('brief-strategy').value = '';
+  document.getElementById('brief-budget').value = '';
+  document.getElementById('brief-q-summary').innerHTML = '';
+  document.getElementById('brief-error').style.display = 'none';
+  document.querySelectorAll('.brief-type-check').forEach(c => c.checked = false);
+
+  // Build market checkboxes from MARKETS array
+  const grid = document.getElementById('brief-market-grid');
+  grid.innerHTML = MARKETS.map(m =>
+    `<input type="checkbox" class="brief-market-check" id="bm-${m.key}" value="${m.key}">` +
+    `<label class="brief-market-label" for="bm-${m.key}"><span style="font-size:10px;opacity:0.45;display:block;text-transform:uppercase;letter-spacing:0.1em">${m.state}</span>${m.name}</label>`
+  ).join('');
+
+  const overlay = document.getElementById('brief-overlay');
+  overlay.classList.add('open');
+
+  // Load existing brief + questionnaire
+  try {
+    const res = await api('GET', `/api/admin/brief?clientId=${encodeURIComponent(clientId)}`);
+    if (!res.ok) return;
+    const { brief, questionnaire } = await res.json();
+
+    // Populate Q pills
+    if (questionnaire) {
+      const qEl = document.getElementById('brief-q-summary');
+      const pills = [];
+      if (questionnaire.entityType) pills.push(questionnaire.entityType);
+      if (questionnaire.timeframe) pills.push(questionnaire.timeframe);
+      if (questionnaire.fundingMethod) pills.push(questionnaire.fundingMethod);
+      if (questionnaire.coInvestor === 'Yes' && questionnaire.p2FirstName) pills.push('Co-investor: ' + questionnaire.p2FirstName + ' ' + (questionnaire.p2LastName || ''));
+      if (questionnaire.budget) pills.push('Budget from Q: ' + questionnaire.budget);
+      qEl.innerHTML = pills.map(p => `<span class="brief-q-pill">${p}</span>`).join('');
+    }
+
+    if (brief) {
+      // Status badge
+      const badge = document.getElementById('brief-status-badge');
+      badge.textContent = brief.status === 'published' ? 'Published' : 'Draft';
+      badge.className = 'brief-status-badge ' + (brief.status === 'published' ? 'brief-status-published' : 'brief-status-draft');
+      badge.style.display = '';
+
+      document.getElementById('brief-strategy').value = brief.strategyNotes || '';
+      document.getElementById('brief-budget').value = brief.budgetMax || '';
+
+      (brief.targetMarkets || []).forEach(key => {
+        const cb = document.getElementById('bm-' + key);
+        if (cb) cb.checked = true;
+      });
+
+      (brief.propertyTypes || []).forEach(type => {
+        document.querySelectorAll('.brief-type-check').forEach(cb => {
+          if (cb.value === type) cb.checked = true;
+        });
+      });
+    } else {
+      document.getElementById('brief-status-badge').style.display = 'none';
+    }
+  } catch { /* silent — user can still type */ }
+}
+
+function closeBrief() {
+  document.getElementById('brief-overlay').classList.remove('open');
+  _briefClientId = null;
+}
+
+async function saveBrief(status) {
+  if (!_briefClientId) return;
+
+  const btn = document.getElementById(status === 'published' ? 'brief-publish' : 'brief-save-draft');
+  const errEl = document.getElementById('brief-error');
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = status === 'published' ? 'Publishing…' : 'Saving…';
+
+  const targetMarkets = [...document.querySelectorAll('.brief-market-check:checked')].map(c => c.value);
+  const propertyTypes = [...document.querySelectorAll('.brief-type-check:checked')].map(c => c.value);
+  const budgetRaw = document.getElementById('brief-budget').value.trim();
+  const budget = budgetRaw.replace(/[,$]/g, '');
+
+  const payload = {
+    clientId: _briefClientId,
+    strategyNotes: document.getElementById('brief-strategy').value.trim(),
+    targetMarkets,
+    propertyTypes,
+    budgetMax: budget,
+    status,
+  };
+
+  const res = await api('POST', '/api/admin/brief', payload);
+  if (res.ok) {
+    const { brief } = await res.json();
+    const badge = document.getElementById('brief-status-badge');
+    badge.textContent = brief.status === 'published' ? 'Published' : 'Draft';
+    badge.className = 'brief-status-badge ' + (brief.status === 'published' ? 'brief-status-published' : 'brief-status-draft');
+    badge.style.display = '';
+    btn.textContent = status === 'published' ? '✓ Published' : '✓ Saved';
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = status === 'published' ? 'Publish to client' : 'Save draft';
+      if (status === 'published') closeBrief();
+    }, 1400);
+  } else {
+    const err = await res.json().catch(() => ({}));
+    errEl.textContent = err.error || 'Save failed. Please try again.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = status === 'published' ? 'Publish to client' : 'Save draft';
+  }
+}
+
+document.getElementById('brief-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('brief-overlay')) closeBrief();
+});
 
 async function deleteClient(id, name) {
   if (!confirm(`Delete ${name}? This cannot be undone.`)) return;

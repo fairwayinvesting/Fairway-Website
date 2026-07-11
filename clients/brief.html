@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Buying Brief — Fairway Investing</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="theme-color" content="#22201d">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Outfit',sans-serif;font-weight:300;background:#1a1916;color:#f7f3ed;-webkit-font-smoothing:antialiased;min-height:100vh}
+    a{color:inherit;text-decoration:none}
+
+    nav{background:#22201d;border-bottom:1px solid rgba(247,243,237,0.08);padding:0 44px}
+    .nav-inner{max-width:1060px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;gap:20px}
+    .nav-logo{display:flex;align-items:center;gap:10px}
+    .nav-user{display:flex;align-items:center;gap:16px}
+    .user-name{font-size:13.5px;font-weight:400;color:rgba(247,243,237,0.5)}
+    .logout-btn{font-size:13px;color:rgba(247,243,237,0.35);padding:8px 16px;border:1px solid rgba(247,243,237,0.1);border-radius:100px;cursor:pointer;background:none;transition:all .2s}
+    .logout-btn:hover{color:rgba(247,243,237,0.7);border-color:rgba(247,243,237,0.2)}
+
+    .wrap{max-width:760px;margin:0 auto;padding:56px 24px 100px}
+
+    .eyebrow{font-size:11px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:#bd7a70;margin-bottom:12px}
+    h1{font-family:'Fraunces',serif;font-size:40px;font-weight:400;line-height:1.15;margin-bottom:8px}
+    .updated{font-size:13px;color:rgba(247,243,237,0.28);margin-bottom:48px}
+
+    .section{margin-bottom:12px}
+    .card{background:#22201d;border:1px solid rgba(247,243,237,0.09);border-radius:18px;padding:32px}
+    .card-label{font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:16px}
+    .strategy-text{font-size:16px;line-height:1.8;color:rgba(247,243,237,0.75)}
+
+    .meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+    .meta-item{padding:18px 0;border-bottom:1px solid rgba(247,243,237,0.07)}
+    .meta-item:nth-last-child(-n+2){border-bottom:none}
+    .meta-item:nth-child(odd){padding-right:24px;border-right:1px solid rgba(247,243,237,0.07)}
+    .meta-item:nth-child(even){padding-left:24px}
+    .meta-label{font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.28);margin-bottom:6px}
+    .meta-value{font-size:15px;font-weight:400;color:#f7f3ed}
+
+    .market-chips{display:flex;flex-wrap:wrap;gap:8px}
+    .market-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(189,122,112,0.1);border:1px solid rgba(189,122,112,0.22);border-radius:100px;font-size:13.5px;font-weight:400;color:#f7f3ed}
+    .chip-state{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#bd7a70}
+
+    .prop-chips{display:flex;flex-wrap:wrap;gap:8px}
+    .prop-chip{padding:8px 16px;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:100px;font-size:13.5px;color:rgba(247,243,237,0.65)}
+
+    .back-link{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;color:rgba(247,243,237,0.35);margin-bottom:36px;transition:color .2s}
+    .back-link:hover{color:rgba(247,243,237,0.6)}
+    .back-link svg{opacity:0.5}
+
+    .loading{text-align:center;padding:100px 24px}
+    .spinner{width:32px;height:32px;border:2px solid rgba(247,243,237,0.08);border-top-color:#bd7a70;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading p{font-size:14px;color:rgba(247,243,237,0.28)}
+
+    footer{border-top:1px solid rgba(247,243,237,0.06);padding:24px;text-align:center}
+    footer p{font-size:12px;color:rgba(247,243,237,0.18)}
+
+    @media(max-width:640px){
+      nav{padding:0 20px}
+      .wrap{padding:40px 20px 80px}
+      h1{font-size:30px}
+      .meta-grid{grid-template-columns:1fr}
+      .meta-item:nth-child(odd){padding-right:0;border-right:none}
+      .meta-item:nth-child(even){padding-left:0}
+      .meta-item:nth-last-child(-n+2){border-bottom:1px solid rgba(247,243,237,0.07)}
+      .meta-item:last-child{border-bottom:none}
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/clients/portal.html" class="nav-logo">
+      <img src="/logo-icon.png" alt="" style="height:28px;width:auto">
+      <img src="/logo-word.png" alt="Fairway Investing" style="height:18px;width:auto">
+    </a>
+    <div class="nav-user">
+      <span class="user-name" id="user-name"></span>
+      <button class="logout-btn" id="logout-btn">Sign out</button>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="wrap" id="main-wrap">
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Loading your brief…</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>Fairway Investing &middot; Suite 211, Level 2/5 Alexander Street, Crows Nest NSW 2065</p>
+</footer>
+
+<script>
+  const MARKET_META = {
+    'geelong':       { name: 'Geelong',      state: 'VIC' },
+    'bendigo':       { name: 'Bendigo',       state: 'VIC' },
+    'dubbo':         { name: 'Dubbo',         state: 'NSW' },
+    'bacchus-marsh': { name: 'Bacchus Marsh', state: 'VIC' },
+    'devonport':     { name: 'Devonport',     state: 'TAS' },
+    'hobart':        { name: 'Hobart',        state: 'TAS' },
+    'lara':          { name: 'Lara',          state: 'VIC' },
+    'launceston':    { name: 'Launceston',    state: 'TAS' },
+    'mackay':        { name: 'Mackay',        state: 'QLD' },
+    'melbourne':     { name: 'Melbourne',     state: 'VIC' },
+    'newcastle':     { name: 'Newcastle',     state: 'NSW' },
+    'rockhampton':   { name: 'Rockhampton',   state: 'QLD' },
+    'townsville':    { name: 'Townsville',    state: 'QLD' },
+  };
+
+  function fmt(d) {
+    if (!d) return '—';
+    return new Date(d).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  function fmtBudget(v) {
+    if (!v) return '—';
+    const n = parseFloat(String(v).replace(/[,$]/g, ''));
+    if (isNaN(n)) return v;
+    return '$' + n.toLocaleString('en-AU');
+  }
+
+  function renderBrief(brief) {
+    const wrap = document.getElementById('main-wrap');
+
+    const markets = (brief.targetMarkets || []).map(key => {
+      const m = MARKET_META[key] || { name: key, state: '' };
+      return `<span class="market-chip"><span class="chip-state">${m.state}</span>${m.name}</span>`;
+    }).join('') || '<span style="color:rgba(247,243,237,0.3);font-size:14px;">To be confirmed</span>';
+
+    const propTypes = (brief.propertyTypes || []).length
+      ? brief.propertyTypes.map(t => `<span class="prop-chip">${t}</span>`).join('')
+      : '';
+
+    const entityLine = brief.entityType === 'Individual'
+      ? 'Individual'
+      : `${brief.entityType}${brief.entityName ? ' — ' + brief.entityName : ''}`;
+
+    const coInvLine = brief.coInvestor === 'Yes' && brief.p2Name
+      ? `${brief.clientName} &amp; ${brief.p2Name}`
+      : brief.clientName || '—';
+
+    // Build meta items — only show non-empty ones
+    const metaItems = [
+      { label: 'Purchasing entity', value: entityLine },
+      { label: 'Purchaser(s)', value: coInvLine },
+      { label: 'Maximum budget', value: fmtBudget(brief.budgetMax) },
+      { label: 'Target timeframe', value: brief.timeline || '—' },
+      { label: 'Funding method', value: brief.fundingMethod || '—' },
+    ].map(item => `
+      <div class="meta-item">
+        <p class="meta-label">${item.label}</p>
+        <p class="meta-value">${item.value}</p>
+      </div>`).join('');
+
+    wrap.innerHTML = `
+      <a href="/clients/portal.html" class="back-link">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back to portal
+      </a>
+
+      <p class="eyebrow">Fairway Investing</p>
+      <h1>Your Buying Brief</h1>
+      <p class="updated">Last updated ${fmt(brief.updatedAt)}</p>
+
+      <div class="section">
+        <div class="card">
+          <p class="card-label">Strategy</p>
+          <p class="strategy-text">${brief.strategyNotes ? brief.strategyNotes.replace(/\n/g, '<br>') : '—'}</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="card">
+          <p class="card-label">Target markets</p>
+          <div class="market-chips">${markets}</div>
+        </div>
+      </div>
+
+      ${propTypes ? `
+      <div class="section">
+        <div class="card">
+          <p class="card-label">Property types</p>
+          <div class="prop-chips">${propTypes}</div>
+        </div>
+      </div>` : ''}
+
+      <div class="section">
+        <div class="card">
+          <p class="card-label">Parameters</p>
+          <div class="meta-grid">${metaItems}</div>
+        </div>
+      </div>`;
+  }
+
+  async function init() {
+    try {
+      const r = await fetch('/api/me');
+      if (!r.ok) { location.href = '/clients/'; return; }
+      const me = await r.json();
+      document.getElementById('user-name').textContent = me.name;
+    } catch { location.href = '/clients/'; return; }
+
+    try {
+      const r = await fetch('/api/brief');
+      if (!r.ok) throw new Error('Failed');
+      const data = await r.json();
+      if (!data.published) {
+        document.getElementById('main-wrap').innerHTML = `
+          <a href="/clients/portal.html" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Back to portal
+          </a>
+          <p class="eyebrow">Fairway Investing</p>
+          <h1>Your Buying Brief</h1>
+          <div class="card" style="margin-top:32px;text-align:center;padding:56px 32px">
+            <p style="font-size:14px;color:rgba(247,243,237,0.3);line-height:1.7">Your brief is being prepared. Luke will publish it to your portal once he has reviewed your questionnaire.</p>
+          </div>`;
+        return;
+      }
+      renderBrief(data.brief);
+    } catch {
+      document.getElementById('main-wrap').innerHTML = `
+        <p style="color:rgba(247,243,237,0.3);text-align:center;padding:80px 0">Unable to load your brief. Please try again.</p>`;
+    }
+  }
+
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    await fetch('/api/logout', { method: 'POST' }).catch(() => {});
+    location.href = '/clients/';
+  });
+
+  init();
+</script>
+</body>
+</html>
