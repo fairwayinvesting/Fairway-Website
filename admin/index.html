@@ -152,6 +152,21 @@
     .brief-status-badge{font-size:12px;font-weight:500;padding:4px 10px;border-radius:100px;margin-left:10px}
     .brief-status-draft{background:rgba(247,243,237,0.08);color:rgba(247,243,237,0.4)}
     .brief-status-published{background:rgba(100,180,100,0.15);color:rgba(140,210,140,0.9)}
+    .brief-check-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+    .brief-check-item{display:flex;align-items:flex-start;gap:9px;padding:5px 0;border-bottom:1px solid rgba(247,243,237,0.04)}
+    .brief-check-item:nth-last-child(-n+2){border-bottom:none}
+    .brief-check-item input[type=checkbox]{width:15px;height:15px;accent-color:#bd7a70;cursor:pointer;flex-shrink:0;margin-top:2px}
+    .brief-check-item label{font-size:13px;color:rgba(247,243,237,0.6);cursor:pointer;line-height:1.4}
+    .brief-custom-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px 5px 12px;border:1.5px solid rgba(189,122,112,0.45);border-radius:100px;background:rgba(189,122,112,0.08);font-size:12.5px;color:rgba(247,243,237,0.8)}
+    .brief-custom-chip button{background:none;border:none;color:rgba(247,243,237,0.35);cursor:pointer;font-size:15px;line-height:1;padding:0;margin:0}
+    .brief-add-row{display:flex;gap:8px;margin-top:10px}
+    .brief-add-row input{flex:1;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.1);border-radius:10px;padding:8px 12px;font-size:13px;font-family:'Outfit',sans-serif;font-weight:300;color:#f7f3ed;outline:none}
+    .brief-add-row input:focus{border-color:rgba(189,122,112,0.4)}
+    .brief-add-row button{padding:8px 14px;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:10px;color:rgba(247,243,237,0.55);font-size:13px;cursor:pointer;white-space:nowrap;font-family:'Outfit',sans-serif}
+    .brief-add-row button:hover{background:rgba(247,243,237,0.08);color:rgba(247,243,237,0.8)}
+    .brief-budget-row{display:flex;align-items:center;gap:10px}
+    .brief-budget-row input{flex:1}
+    .brief-budget-row span{color:rgba(247,243,237,0.25);font-size:16px;flex-shrink:0}
 
     /* Add date form — grid layout matching modal fields */
     .ms-add-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;margin-bottom:20px;}
@@ -837,10 +852,60 @@
         </div>
       </div>
 
-      <!-- Budget -->
+      <!-- Property criteria -->
       <div class="brief-field">
-        <label>Maximum budget</label>
-        <input type="text" id="brief-budget" inputmode="numeric" placeholder="e.g. 750,000">
+        <label>Property criteria</label>
+        <div class="brief-check-grid">
+          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-land550" value="Land size greater than 550sqm"><label for="bc-land550">Land size &gt; 550sqm</label></div>
+          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-yield38" value="Rental yield 3.8% or greater"><label for="bc-yield38">Rental yield 3.8%+</label></div>
+          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-regular" value="Regular shaped block"><label for="bc-regular">Regular shaped block</label></div>
+          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-yield4" value="Rental yield 4% or greater"><label for="bc-yield4">Rental yield 4%+</label></div>
+          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-3bed" value="Minimum 3 bedrooms, 1 bathroom"><label for="bc-3bed">Min 3 bed, 1 bath</label></div>
+          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-cosmetic" value="Cosmetic uplift potential"><label for="bc-cosmetic">Cosmetic uplift potential</label></div>
+          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-4bed" value="Minimum 4 bedrooms, 2 bathrooms"><label for="bc-4bed">Min 4 bed, 2 bath</label></div>
+          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-subdiv" value="Subdivision potential"><label for="bc-subdiv">Subdivision potential</label></div>
+          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-corner" value="Corner block"><label for="bc-corner">Corner block</label></div>
+          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-dualocc" value="Dual occupancy potential"><label for="bc-dualocc">Dual occupancy potential</label></div>
+          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-north" value="North-facing orientation"><label for="bc-north">North-facing orientation</label></div>
+          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-garage" value="Garage or off-street parking"><label for="bc-garage">Garage / off-street parking</label></div>
+        </div>
+        <div id="brief-custom-criteria" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"></div>
+        <div class="brief-add-row">
+          <input type="text" id="brief-criteria-input" placeholder="Add custom criterion…">
+          <button type="button" onclick="addCustomCriterion()">+ Add</button>
+        </div>
+      </div>
+
+      <!-- Excluded characteristics -->
+      <div class="brief-field">
+        <label>Excluded characteristics</label>
+        <div class="brief-check-grid">
+          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-irregular" value="Irregular shaped blocks"><label for="be-irregular">Irregular shaped blocks</label></div>
+          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-powerlines" value="Overhead powerlines"><label for="be-powerlines">Overhead powerlines</label></div>
+          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-pool" value="Swimming pools"><label for="be-pool">Swimming pools</label></div>
+          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-flood" value="Flood or bushfire-prone zones"><label for="be-flood">Flood or bushfire-prone zones</label></div>
+          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-railway" value="Railway-adjacent properties"><label for="be-railway">Railway-adjacent properties</label></div>
+          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-housing" value="High-density public housing nearby"><label for="be-housing">High-density public housing</label></div>
+          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-mainroad" value="Main road frontage"><label for="be-mainroad">Main road frontage</label></div>
+          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-strata" value="Body corporate or strata title"><label for="be-strata">Body corporate / strata</label></div>
+          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-leasehold" value="Leasehold title"><label for="be-leasehold">Leasehold title</label></div>
+          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-studio" value="Studio or 1 bedroom properties"><label for="be-studio">Studio or 1 bedroom</label></div>
+        </div>
+        <div id="brief-custom-exclusions" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"></div>
+        <div class="brief-add-row">
+          <input type="text" id="brief-exclusion-input" placeholder="Add custom exclusion…">
+          <button type="button" onclick="addCustomExclusion()">+ Add</button>
+        </div>
+      </div>
+
+      <!-- Budget range -->
+      <div class="brief-field">
+        <label>Target purchase range</label>
+        <div class="brief-budget-row">
+          <input type="text" id="brief-budget-min" inputmode="numeric" placeholder="Min (e.g. 550,000)">
+          <span>–</span>
+          <input type="text" id="brief-budget-max" inputmode="numeric" placeholder="Max (e.g. 800,000)">
+        </div>
       </div>
 
       <p class="error-msg" id="brief-error" style="display:none;margin-top:4px"></p>
@@ -1145,48 +1210,64 @@ async function notifyMarkets(id, name) {
 // ── Brief builder ─────────────────────────────────────────────────────────────
 let _briefClientId = null;
 let _customMarkets = [];
+let _customCriteria = [];
+let _customExclusions = [];
 
-function renderCustomMarkets() {
-  const el = document.getElementById('brief-custom-markets');
-  el.innerHTML = _customMarkets.map((m, i) =>
-    `<span style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1.5px solid rgba(189,122,112,0.5);border-radius:100px;background:rgba(189,122,112,0.1);font-size:13px;color:#f7f3ed;">
-      ${esc(m)}
-      <button type="button" onclick="removeCustomMarket(${i})" style="background:none;border:none;color:rgba(247,243,237,0.4);cursor:pointer;font-size:15px;line-height:1;padding:0;margin-left:2px">&times;</button>
-    </span>`
+function makeChips(arr, removeFn, elId) {
+  document.getElementById(elId).innerHTML = arr.map((v, i) =>
+    `<span class="brief-custom-chip">${esc(v)}<button type="button" onclick="${removeFn}(${i})">&times;</button></span>`
   ).join('');
 }
+
+function renderCustomMarkets()   { makeChips(_customMarkets,   'removeCustomMarket',   'brief-custom-markets'); }
+function renderCustomCriteria()  { makeChips(_customCriteria,  'removeCustomCriterion','brief-custom-criteria'); }
+function renderCustomExclusions(){ makeChips(_customExclusions,'removeCustomExclusion','brief-custom-exclusions'); }
 
 function addCustomMarket() {
   const input = document.getElementById('brief-custom-market-input');
   const val = input.value.trim();
-  if (!val) return;
-  if (!_customMarkets.includes(val)) {
-    _customMarkets.push(val);
-    renderCustomMarkets();
-  }
-  input.value = '';
-  input.focus();
+  if (!val || _customMarkets.includes(val)) { input.value = ''; return; }
+  _customMarkets.push(val); renderCustomMarkets(); input.value = ''; input.focus();
 }
+function removeCustomMarket(i)    { _customMarkets.splice(i,1);   renderCustomMarkets(); }
 
-function removeCustomMarket(i) {
-  _customMarkets.splice(i, 1);
-  renderCustomMarkets();
+function addCustomCriterion() {
+  const input = document.getElementById('brief-criteria-input');
+  const val = input.value.trim();
+  if (!val || _customCriteria.includes(val)) { input.value = ''; return; }
+  _customCriteria.push(val); renderCustomCriteria(); input.value = ''; input.focus();
 }
+function removeCustomCriterion(i) { _customCriteria.splice(i,1); renderCustomCriteria(); }
+
+function addCustomExclusion() {
+  const input = document.getElementById('brief-exclusion-input');
+  const val = input.value.trim();
+  if (!val || _customExclusions.includes(val)) { input.value = ''; return; }
+  _customExclusions.push(val); renderCustomExclusions(); input.value = ''; input.focus();
+}
+function removeCustomExclusion(i) { _customExclusions.splice(i,1); renderCustomExclusions(); }
 
 async function openBrief(clientId, clientName) {
   _briefClientId = clientId;
   _customMarkets = [];
+  _customCriteria = [];
+  _customExclusions = [];
 
   // Reset UI
   document.getElementById('brief-modal-title').textContent = clientName + ' — Buying Brief';
   document.getElementById('brief-strategy').value = '';
-  document.getElementById('brief-budget').value = '';
+  document.getElementById('brief-budget-min').value = '';
+  document.getElementById('brief-budget-max').value = '';
   document.getElementById('brief-q-summary').innerHTML = '';
   document.getElementById('brief-error').style.display = 'none';
   document.getElementById('brief-custom-market-input').value = '';
   document.getElementById('brief-custom-markets').innerHTML = '';
+  document.getElementById('brief-custom-criteria').innerHTML = '';
+  document.getElementById('brief-custom-exclusions').innerHTML = '';
+  document.getElementById('brief-criteria-input').value = '';
+  document.getElementById('brief-exclusion-input').value = '';
   document.getElementById('brief-status-badge').style.display = 'none';
-  document.querySelectorAll('.brief-type-check').forEach(c => c.checked = false);
+  document.querySelectorAll('.brief-type-check,.brief-criteria-check,.brief-exclusion-check').forEach(c => c.checked = false);
 
   // Build market checkboxes from MARKETS array
   const grid = document.getElementById('brief-market-grid');
@@ -1226,26 +1307,39 @@ async function openBrief(clientId, clientName) {
       badge.style.display = '';
 
       document.getElementById('brief-strategy').value = brief.strategyNotes || DEFAULT_STRATEGY;
-      document.getElementById('brief-budget').value = brief.budgetMax || (questionnaire && questionnaire.budget ? String(questionnaire.maxPurchasePrice || '').replace(/[^0-9]/g, '') : '');
+      document.getElementById('brief-budget-min').value = brief.budgetMin || '';
+      document.getElementById('brief-budget-max').value = brief.budgetMax || (questionnaire ? String(questionnaire.maxPurchasePrice || '').replace(/[^0-9]/g, '') : '');
 
       (brief.targetMarkets || []).forEach(key => {
         const cb = document.getElementById('bm-' + key);
         if (cb) cb.checked = true;
       });
-
       _customMarkets = (brief.customMarkets || []).slice();
       renderCustomMarkets();
 
       (brief.propertyTypes || []).forEach(type => {
-        document.querySelectorAll('.brief-type-check').forEach(cb => {
-          if (cb.value === type) cb.checked = true;
-        });
+        document.querySelectorAll('.brief-type-check').forEach(cb => { if (cb.value === type) cb.checked = true; });
       });
+
+      (brief.propertyCriteria || []).forEach(val => {
+        const cb = document.querySelector(`.brief-criteria-check[value="${val.replace(/"/g, '\\"')}"]`);
+        if (cb) cb.checked = true;
+      });
+      _customCriteria = (brief.customCriteria || []).slice();
+      renderCustomCriteria();
+
+      (brief.excludedCharacteristics || []).forEach(val => {
+        const cb = document.querySelector(`.brief-exclusion-check[value="${val.replace(/"/g, '\\"')}"]`);
+        if (cb) cb.checked = true;
+      });
+      _customExclusions = (brief.customExclusions || []).slice();
+      renderCustomExclusions();
+
     } else {
       // New brief — pre-fill defaults
       document.getElementById('brief-strategy').value = DEFAULT_STRATEGY;
-      if (questionnaire && questionnaire.budget) {
-        document.getElementById('brief-budget').value = String(questionnaire.maxPurchasePrice || '').replace(/[^0-9]/g, '');
+      if (questionnaire && questionnaire.maxPurchasePrice) {
+        document.getElementById('brief-budget-max').value = String(questionnaire.maxPurchasePrice).replace(/[^0-9]/g, '');
       }
     }
   } catch { /* silent — user can still type */ }
@@ -1265,10 +1359,10 @@ async function saveBrief(status) {
   btn.disabled = true;
   btn.textContent = status === 'published' ? 'Publishing…' : 'Saving…';
 
-  const targetMarkets = [...document.querySelectorAll('.brief-market-check:checked')].map(c => c.value);
-  const propertyTypes = [...document.querySelectorAll('.brief-type-check:checked')].map(c => c.value);
-  const budgetRaw = document.getElementById('brief-budget').value.trim();
-  const budget = budgetRaw.replace(/[,$]/g, '');
+  const targetMarkets   = [...document.querySelectorAll('.brief-market-check:checked')].map(c => c.value);
+  const propertyTypes   = [...document.querySelectorAll('.brief-type-check:checked')].map(c => c.value);
+  const propertyCriteria     = [...document.querySelectorAll('.brief-criteria-check:checked')].map(c => c.value);
+  const excludedCharacteristics = [...document.querySelectorAll('.brief-exclusion-check:checked')].map(c => c.value);
 
   const payload = {
     clientId: _briefClientId,
@@ -1276,7 +1370,12 @@ async function saveBrief(status) {
     targetMarkets,
     customMarkets: _customMarkets.slice(),
     propertyTypes,
-    budgetMax: budget,
+    propertyCriteria,
+    customCriteria: _customCriteria.slice(),
+    excludedCharacteristics,
+    customExclusions: _customExclusions.slice(),
+    budgetMin: document.getElementById('brief-budget-min').value.trim().replace(/[,$]/g, ''),
+    budgetMax: document.getElementById('brief-budget-max').value.trim().replace(/[,$]/g, ''),
     status,
   };
 
@@ -1308,6 +1407,12 @@ document.getElementById('brief-overlay').addEventListener('click', e => {
 
 document.getElementById('brief-custom-market-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); addCustomMarket(); }
+});
+document.getElementById('brief-criteria-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); addCustomCriterion(); }
+});
+document.getElementById('brief-exclusion-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); addCustomExclusion(); }
 });
 
 async function deleteClient(id, name) {

@@ -47,7 +47,8 @@ export default async (req) => {
 
   if (req.method === 'POST') {
     const body = await req.json().catch(() => ({}));
-    const { clientId, strategyNotes, targetMarkets, customMarkets, budgetMax, propertyTypes, status } = body;
+    const { clientId, strategyNotes, targetMarkets, customMarkets, budgetMin, budgetMax,
+            propertyTypes, propertyCriteria, customCriteria, excludedCharacteristics, customExclusions, status } = body;
     if (!clientId) return json({ error: 'clientId required' }, 400);
 
     // Look up client + questionnaire to bundle derived fields
@@ -69,8 +70,13 @@ export default async (req) => {
       strategyNotes: strategyNotes ?? existing?.strategyNotes ?? '',
       targetMarkets: targetMarkets ?? existing?.targetMarkets ?? [],
       customMarkets: customMarkets ?? existing?.customMarkets ?? [],
+      budgetMin: budgetMin ?? existing?.budgetMin ?? '',
       budgetMax: budgetMax ?? existing?.budgetMax ?? '',
       propertyTypes: propertyTypes ?? existing?.propertyTypes ?? [],
+      propertyCriteria: propertyCriteria ?? existing?.propertyCriteria ?? [],
+      customCriteria: customCriteria ?? existing?.customCriteria ?? [],
+      excludedCharacteristics: excludedCharacteristics ?? existing?.excludedCharacteristics ?? [],
+      customExclusions: customExclusions ?? existing?.customExclusions ?? [],
       // Derived from questionnaire — auto-bundled
       entityType: entity.type,
       entityName: entity.name,

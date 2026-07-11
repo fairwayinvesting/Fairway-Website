@@ -42,6 +42,14 @@
     .meta-label{font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.28);margin-bottom:6px}
     .meta-value{font-size:15px;font-weight:400;color:#f7f3ed}
 
+    .checklist{display:grid;grid-template-columns:1fr 1fr;gap:0}
+    .checklist-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(247,243,237,0.05)}
+    .checklist-item:nth-last-child(-n+2){border-bottom:none}
+    .checklist-icon{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+    .checklist-icon.include{background:rgba(100,190,120,0.15);border:1px solid rgba(100,190,120,0.3)}
+    .checklist-icon.exclude{background:rgba(220,80,80,0.1);border:1px solid rgba(220,80,80,0.25)}
+    .checklist-text{font-size:14px;color:rgba(247,243,237,0.75);line-height:1.4}
+
     .market-chips{display:flex;flex-wrap:wrap;gap:8px}
     .market-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(189,122,112,0.1);border:1px solid rgba(189,122,112,0.22);border-radius:100px;font-size:13.5px;font-weight:400;color:#f7f3ed}
     .chip-state{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#bd7a70}
@@ -70,6 +78,9 @@
       .meta-item:nth-child(even){padding-left:0}
       .meta-item:nth-last-child(-n+2){border-bottom:1px solid rgba(247,243,237,0.07)}
       .meta-item:last-child{border-bottom:none}
+      .checklist{grid-template-columns:1fr}
+      .checklist-item:nth-last-child(-n+2){border-bottom:1px solid rgba(247,243,237,0.05)}
+      .checklist-item:last-child{border-bottom:none}
     }
   </style>
 </head>
@@ -124,10 +135,31 @@
   }
 
   function fmtBudget(v) {
-    if (!v) return '—';
+    if (!v) return null;
     const n = parseFloat(String(v).replace(/[,$]/g, ''));
-    if (isNaN(n)) return v;
+    if (isNaN(n)) return null;
     return '$' + n.toLocaleString('en-AU');
+  }
+
+  function fmtBudgetRange(min, max) {
+    const lo = fmtBudget(min), hi = fmtBudget(max);
+    if (lo && hi) return `${lo} – ${hi}`;
+    if (hi) return `Up to ${hi}`;
+    if (lo) return `From ${lo}`;
+    return '—';
+  }
+
+  function renderChecklist(items, type) {
+    if (!items || !items.length) return '';
+    const icon = type === 'include'
+      ? `<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="rgba(100,190,120,0.9)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+      : `<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3 3l4 4M7 3l-4 4" stroke="rgba(210,80,80,0.8)" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+    return items.map(t =>
+      `<div class="checklist-item">
+        <span class="checklist-icon ${type}">${icon}</span>
+        <span class="checklist-text">${t}</span>
+      </div>`
+    ).join('');
   }
 
   function renderBrief(brief) {
@@ -146,6 +178,9 @@
       ? brief.propertyTypes.map(t => `<span class="prop-chip">${t}</span>`).join('')
       : '';
 
+    const allCriteria  = [...(brief.propertyCriteria || []), ...(brief.customCriteria || [])];
+    const allExclusions = [...(brief.excludedCharacteristics || []), ...(brief.customExclusions || [])];
+
     const entityLine = brief.entityType === 'Individual'
       ? 'Individual'
       : `${brief.entityType}${brief.entityName ? ' — ' + brief.entityName : ''}`;
@@ -154,11 +189,10 @@
       ? `${brief.clientName} &amp; ${brief.p2Name}`
       : brief.clientName || '—';
 
-    // Build meta items — only show non-empty ones
     const metaItems = [
       { label: 'Purchasing entity', value: entityLine },
       { label: 'Purchaser(s)', value: coInvLine },
-      { label: 'Maximum budget', value: fmtBudget(brief.budgetMax) },
+      { label: 'Purchase range', value: fmtBudgetRange(brief.budgetMin, brief.budgetMax) },
       { label: 'Target timeframe', value: brief.timeline || '—' },
       { label: 'Funding method', value: brief.fundingMethod || '—' },
     ].map(item => `
@@ -196,6 +230,22 @@
         <div class="card">
           <p class="card-label">Property types</p>
           <div class="prop-chips">${propTypes}</div>
+        </div>
+      </div>` : ''}
+
+      ${allCriteria.length ? `
+      <div class="section">
+        <div class="card">
+          <p class="card-label">Property criteria</p>
+          <div class="checklist">${renderChecklist(allCriteria, 'include')}</div>
+        </div>
+      </div>` : ''}
+
+      ${allExclusions.length ? `
+      <div class="section">
+        <div class="card">
+          <p class="card-label">Excluded characteristics</p>
+          <div class="checklist">${renderChecklist(allExclusions, 'exclude')}</div>
         </div>
       </div>` : ''}
 
