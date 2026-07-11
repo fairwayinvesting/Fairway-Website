@@ -154,7 +154,12 @@
     <div class="q-page-header">
       <p class="eyebrow">Getting started</p>
       <h1>Onboarding questionnaire</h1>
-      <p>Your answers help us build your client brief and find the right property for your situation. All information is stored securely and only shared when required.</p>
+      <p id="page-sub">Your answers help us build your client brief and find the right property for your situation. All information is stored securely and only shared when required.</p>
+    </div>
+
+    <div id="edit-banner" style="display:none;background:rgba(189,122,112,0.07);border:1px solid rgba(189,122,112,0.18);border-radius:12px;padding:14px 18px;margin-bottom:28px;display:none;align-items:center;gap:12px;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><path d="M11 2l3 3-8 8H3v-3l8-8z" stroke="#bd7a70" stroke-width="1.4" stroke-linejoin="round"/></svg>
+      <p style="font-size:13px;color:rgba(247,243,237,0.5);line-height:1.5;">You've already submitted this questionnaire. Make any changes below and click <strong style="color:rgba(247,243,237,0.7);font-weight:500;">Save changes</strong> to update your answers.</p>
     </div>
 
     <div class="progress-track">
@@ -782,8 +787,8 @@
     <div class="success-ring">
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M6 14l6 6 10-12" stroke="#bd7a70" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
-    <h2>All done, <span id="success-name">there</span>.</h2>
-    <p>Your questionnaire has been submitted. Luke will be in touch within one to two business days to walk you through next steps.</p>
+    <h2 id="success-heading">All done, <span id="success-name">there</span>.</h2>
+    <p id="success-msg">Your questionnaire has been submitted. Luke will be in touch within one to two business days to walk you through next steps.</p>
     <a href="/clients/portal.html" class="back-link">Back to portal</a>
   </div>
 </main>
@@ -800,9 +805,10 @@ let currentStep = 1;
 let propCount = 0;
 let propSeq = 0;
 let userData = {};
+let editMode = false;
 
-// ── AUTH ──────────────────────────────────────────────────────────────────
-async function checkAuth() {
+// ── AUTH + INIT ───────────────────────────────────────────────────────────
+async function init() {
   try {
     const r = await fetch('/api/me');
     if (!r.ok) { window.location = '/clients/'; return; }
@@ -810,7 +816,34 @@ async function checkAuth() {
     document.getElementById('user-name').textContent = userData.name || '';
     const emailEl = document.getElementById('email');
     if (emailEl && userData.email && !emailEl.value) emailEl.value = userData.email;
-  } catch { window.location = '/clients/'; }
+  } catch { window.location = '/clients/'; return; }
+
+  // Check for existing submission
+  try {
+    const qr = await fetch('/api/submit-questionnaire');
+    if (qr.ok) {
+      const qdata = await qr.json();
+      if (qdata.completed && qdata.data) {
+        editMode = true;
+        localStorage.removeItem(LS_KEY); // server data takes precedence
+        populateForm(qdata.data, false);
+        // Show edit UI
+        document.querySelector('.q-page-header h1').textContent = 'Edit your questionnaire';
+        document.getElementById('page-sub').textContent =
+          'Update any details below and save — your answers will be reflected in your client brief.';
+        const banner = document.getElementById('edit-banner');
+        if (banner) banner.style.display = 'flex';
+        // Update submit button text on last step
+        if (currentStep === TOTAL_STEPS) {
+          document.getElementById('btn-next').textContent = 'Save changes';
+        }
+        return;
+      }
+    }
+  } catch {}
+
+  // No existing submission — restore from localStorage draft
+  loadProgress();
 }
 
 // ── DOTS ──────────────────────────────────────────────────────────────────
@@ -840,7 +873,7 @@ function showStep(n) {
   currentStep = n;
   updateProgress();
   document.getElementById('btn-prev').style.visibility = n === 1 ? 'hidden' : 'visible';
-  document.getElementById('btn-next').textContent = n === TOTAL_STEPS ? 'Submit questionnaire' : 'Continue';
+  document.getElementById('btn-next').textContent = n === TOTAL_STEPS ? (editMode ? 'Save changes' : 'Submit questionnaire') : 'Continue';
   window.scrollTo({ top: 0, behavior: 'smooth' });
   saveProgress();
 }
@@ -1110,6 +1143,7 @@ function collectData() {
 
 // ── LOCALSTORAGE ──────────────────────────────────────────────────────────
 function saveProgress() {
+  if (editMode) return; // server is source of truth once submitted; don't overwrite with drafts
   try {
     const d = collectData();
     d._step = currentStep;
@@ -1123,61 +1157,61 @@ function setRadio(name, val) {
   if (el) { el.checked = true; el.dispatchEvent(new Event('change')); }
 }
 
+function populateForm(s, restoreStep) {
+  ['firstName','middleName','lastName','phone','homeAddress',
+   'p2FirstName','p2MiddleName','p2LastName','p2Phone','p2HomeAddress',
+   'companyName','companyPersonnel','companyAbn','companyAcn','companyTfn',
+   'trustName','trustBeneficiaries','trustAddress','trustAbn','trustTfn',
+   'smsfName','smsfMembers','smsfAddress','smsfAbn','smsfTfn',
+   'motivation','cashSavings','annualSalary','dependants','weeklyRentPaid','otherDebts',
+   'brokerName','brokerEmail','brokerPhone','brokerCapacity',
+   'accountantName','accountantEmail','accountantPhone','maxPurchasePrice',
+   'pporValue','pporLoan','pporRate'
+  ].forEach(id => { const e=document.getElementById(id); if(e&&s[id]) e.value=s[id]; });
+
+  if (s.dob) { const e=document.getElementById('dob'); if(e) e.value=s.dob; }
+  if (s.p2Dob) { const e=document.getElementById('p2Dob'); if(e) e.value=s.p2Dob; }
+  if (s.email) { const e=document.getElementById('email'); if(e&&!e.value) e.value=s.email; }
+
+  Object.entries({resState:'state',p2State:'p2State',p2Relationship:'p2Relationship',
+    timeframe:'timeframe',pporState:'pporState',pporType:'pporType',pporStructure:'pporStructure'
+  }).forEach(([id,key]) => { const e=document.getElementById(id); if(e&&s[key]) e.value=s[key]; });
+
+  setRadio('coInvestor', s.coInvestor);
+  setRadio('ownPpor', s.ownPpor);
+  setRadio('entityType', s.entityType);
+  setRadio('riskTolerance', s.riskTolerance);
+  setRadio('fundingMethod', s.fundingMethod);
+  setRadio('ownProperties', s.ownProperties);
+  setRadio('hasBroker', s.hasBroker);
+  setRadio('hasAccountant', s.hasAccountant);
+  setRadio('brokerIntro', s.brokerIntro);
+  setRadio('accountantIntro', s.accountantIntro);
+  setRadio('statesToAvoid', s.statesToAvoid);
+
+  if (s.properties && s.properties.length && s.ownProperties === 'Yes') {
+    while (propCount < s.properties.length && propCount < MAX_PROPS) addPropertyBlock();
+    document.querySelectorAll('.prop-block').forEach((block, i) => {
+      const p = s.properties[i]; if (!p) return;
+      block.querySelectorAll('[data-field]').forEach(el => { if (p[el.dataset.field]) el.value = p[el.dataset.field]; });
+    });
+  }
+
+  if (s.statesToAvoidList) {
+    s.statesToAvoidList.split(', ').filter(Boolean).forEach(v => {
+      const el = document.querySelector('#state-chips input[value="' + v + '"]');
+      if (el) el.checked = true;
+    });
+  }
+
+  if (restoreStep && s._step && s._step > 1) showStep(Math.min(s._step, TOTAL_STEPS));
+}
+
 function loadProgress() {
   try {
     const s = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
     if (!s.firstName && !s.lastName && !s.email) return;
-
-    ['firstName','middleName','lastName','phone','homeAddress',
-     'p2FirstName','p2MiddleName','p2LastName','p2Phone','p2HomeAddress',
-     'companyName','companyPersonnel','companyAbn','companyAcn','companyTfn',
-     'trustName','trustBeneficiaries','trustAddress','trustAbn','trustTfn',
-     'smsfName','smsfMembers','smsfAddress','smsfAbn','smsfTfn',
-     'motivation','cashSavings','annualSalary','dependants','weeklyRentPaid','otherDebts',
-     'brokerName','brokerEmail','brokerPhone','brokerCapacity',
-     'accountantName','accountantEmail','accountantPhone','maxPurchasePrice',
-     'pporValue','pporLoan','pporRate'
-    ].forEach(id => { const e=document.getElementById(id); if(e&&s[id]) e.value=s[id]; });
-
-    if (s.dob) { const e=document.getElementById('dob'); if(e) e.value=s.dob; }
-    if (s.p2Dob) { const e=document.getElementById('p2Dob'); if(e) e.value=s.p2Dob; }
-    if (s.email) { const e=document.getElementById('email'); if(e&&!e.value) e.value=s.email; }
-    // Selects: map element id → data key
-    ({resState:'state',p2State:'p2State',p2Relationship:'p2Relationship',
-      timeframe:'timeframe',pporState:'pporState',pporType:'pporType',pporStructure:'pporStructure'
-    }).entries && Object.entries({resState:'state',p2State:'p2State',p2Relationship:'p2Relationship',
-      timeframe:'timeframe',pporState:'pporState',pporType:'pporType',pporStructure:'pporStructure'
-    }).forEach(([id,key]) => { const e=document.getElementById(id); if(e&&s[key]) e.value=s[key]; });
-
-    setRadio('coInvestor', s.coInvestor);
-    setRadio('ownPpor', s.ownPpor);
-    setRadio('entityType', s.entityType);
-    setRadio('riskTolerance', s.riskTolerance);
-    setRadio('fundingMethod', s.fundingMethod);
-    setRadio('ownProperties', s.ownProperties);
-    setRadio('hasBroker', s.hasBroker);
-    setRadio('hasAccountant', s.hasAccountant);
-    setRadio('brokerIntro', s.brokerIntro);
-    setRadio('accountantIntro', s.accountantIntro);
-    setRadio('statesToAvoid', s.statesToAvoid);
-
-    if (s.properties && s.properties.length && s.ownProperties === 'Yes') {
-      // First block added by ownProperties change event; add remaining
-      while (propCount < s.properties.length && propCount < MAX_PROPS) addPropertyBlock();
-      document.querySelectorAll('.prop-block').forEach((block, i) => {
-        const p = s.properties[i]; if (!p) return;
-        block.querySelectorAll('[data-field]').forEach(el => { if (p[el.dataset.field]) el.value = p[el.dataset.field]; });
-      });
-    }
-
-    if (s.statesToAvoidList) {
-      s.statesToAvoidList.split(', ').filter(Boolean).forEach(v => {
-        const el = document.querySelector('#state-chips input[value="' + v + '"]');
-        if (el) el.checked = true;
-      });
-    }
-
-    if (s._step && s._step > 1) showStep(Math.min(s._step, TOTAL_STEPS));
+    populateForm(s, true);
   } catch {}
 }
 
@@ -1201,6 +1235,11 @@ async function submitForm() {
     document.getElementById('q-success').classList.add('show');
     document.getElementById('success-name').textContent =
       data.firstName || userData.name?.split(' ')[0] || 'there';
+    if (editMode) {
+      document.getElementById('success-heading').childNodes[0].textContent = 'Changes saved, ';
+      document.getElementById('success-msg').textContent =
+        'Your questionnaire has been updated. Luke will review any changes and be in touch if needed.';
+    }
   } catch (err) {
     document.getElementById('q-submitting').style.display = 'none';
     document.getElementById('q-main').style.display = 'block';
@@ -1238,7 +1277,7 @@ document.addEventListener('input', () => {
 initDots();
 setupConditionals();
 updateProgress();
-checkAuth().then(loadProgress);
+init();
 </script>
 </body>
 </html>

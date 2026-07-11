@@ -61,6 +61,10 @@ function buildSheetRow(timestamp, d) {
   ];
 }
 
+function blobKey(email) {
+  return email.toLowerCase().replace(/[^a-z0-9]/g, '-');
+}
+
 export default async (req) => {
   const cookie = req.headers.get('cookie') || '';
   const match = cookie.match(/fw_session=([^;]+)/);
@@ -68,6 +72,16 @@ export default async (req) => {
 
   const payload = verifyJWT(match[1], process.env.JWT_SECRET);
   if (!payload) return json({ error: 'Session expired' }, 401);
+
+  // GET — return existing submission if any
+  if (req.method === 'GET') {
+    try {
+      const store = getStore('fairway-questionnaires');
+      const existing = await store.get(blobKey(payload.email), { type: 'json' });
+      if (existing) return json({ completed: true, data: existing });
+    } catch {}
+    return json({ completed: false });
+  }
 
   const body = await req.json().catch(() => null);
   if (!body) return json({ error: 'Invalid request' }, 400);
@@ -82,8 +96,7 @@ export default async (req) => {
   // Primary store: Netlify Blobs (keyed by client email)
   try {
     const store = getStore('fairway-questionnaires');
-    const key = payload.email.toLowerCase().replace(/[^a-z0-9]/g, '-');
-    await store.setJSON(key, submission);
+    await store.setJSON(blobKey(payload.email), submission);
   } catch (err) {
     console.error('Blobs save failed:', err?.message || err);
   }
@@ -112,7 +125,7 @@ export default async (req) => {
 
 export const config = {
   path: '/api/submit-questionnaire',
-  method: ['POST'],
+  method: ['GET', 'POST'],
 };
 
 /*

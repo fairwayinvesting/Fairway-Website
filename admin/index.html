@@ -119,6 +119,8 @@
     .btn-dates{background:rgba(247,243,237,0.07);color:rgba(247,243,237,0.6);border:none;border-radius:7px;padding:7px 12px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:background .2s;white-space:nowrap;}
     .btn-dates:hover{background:rgba(247,243,237,0.12);}
     .btn-dates.active{background:rgba(189,122,112,0.15);color:#bd7a70;}
+    .btn-notify{background:rgba(100,160,120,0.1);color:rgba(140,200,155,0.85);}
+    .btn-notify:hover{background:rgba(100,160,120,0.2);}
 
     /* Add date form — grid layout matching modal fields */
     .ms-add-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;margin-bottom:20px;}
@@ -885,6 +887,9 @@ function renderTable() {
     const msLabel = cMs.length ? `Dates (${cMs.length})` : 'Dates';
     const dot = `<span class="status-dot ${c.active ? 'status-active' : 'status-inactive'}"></span>`;
     const msRow = `<tr id="ms-row-${c.id}" style="display:none;"><td colspan="5" style="padding:0;"><div class="ms-panel" id="ms-panel-${c.id}"></div></td></tr>`;
+    const notifyBtn = c.markets && c.markets.length
+      ? `<button class="btn-sm btn-notify" onclick="notifyMarkets('${c.id}','${esc(c.name)}')" title="Send markets ready email">✉ Notify</button>`
+      : '';
     if (mobile) {
       return `<tr style="border-bottom:1px solid rgba(247,243,237,0.05);">
         <td colspan="5" style="padding:14px 16px;">
@@ -896,6 +901,7 @@ function renderTable() {
             <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
               ${dot}
               <button class="btn-sm btn-edit" onclick="openEdit('${c.id}')">Edit</button>
+              ${notifyBtn}
               <button class="btn-dates" id="dates-btn-${c.id}" onclick="toggleMilestones('${c.id}')">${msLabel}</button>
               <button class="btn-sm btn-delete" onclick="deleteClient('${c.id}','${esc(c.name)}')">✕</button>
             </div>
@@ -910,6 +916,7 @@ function renderTable() {
       <td>${dot}${c.active ? 'Active' : 'Inactive'}</td>
       <td><div class="actions">
         <button class="btn-sm btn-edit" onclick="openEdit('${c.id}')">Edit</button>
+        ${notifyBtn}
         <button class="btn-dates" id="dates-btn-${c.id}" onclick="toggleMilestones('${c.id}')">${msLabel}</button>
         <button class="btn-sm btn-delete" onclick="deleteClient('${c.id}','${esc(c.name)}')">Delete</button>
       </div></td>
@@ -1027,6 +1034,20 @@ document.getElementById('modal-save').addEventListener('click', async function()
   this.disabled = false;
   this.textContent = 'Save client';
 });
+
+async function notifyMarkets(id, name) {
+  if (!confirm(`Send "${name}" an email letting them know their market reports are ready?`)) return;
+  const btn = document.querySelector(`button[onclick="notifyMarkets('${id}','${name.replace(/'/g,"\\'")}')"]`);
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+  const res = await api('PUT', '/api/admin/clients', { id, action: 'notify-markets' });
+  if (res.ok) {
+    if (btn) { btn.textContent = '✓ Sent'; setTimeout(() => { btn.disabled = false; btn.textContent = '✉ Notify'; }, 3000); }
+  } else {
+    const err = await res.json().catch(() => ({}));
+    alert('Failed to send: ' + (err.error || 'unknown error'));
+    if (btn) { btn.disabled = false; btn.textContent = '✉ Notify'; }
+  }
+}
 
 async function deleteClient(id, name) {
   if (!confirm(`Delete ${name}? This cannot be undone.`)) return;

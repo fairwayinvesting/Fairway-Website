@@ -17,7 +17,7 @@ function buildWelcomeEmail(name, email, setupToken) {
     </p>
     <p style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#B5715A;margin:0 0 16px;">Client portal</p>
     <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:36px;font-weight:400;color:#FAF6F1;margin:0 0 12px;line-height:1.15;">Welcome, ${firstName}.</h1>
-    <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 32px;line-height:1.65;">Your Fairway client portal is live. Click the button below to set your password and access your market research reports.</p>
+    <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 32px;line-height:1.65;">Your Fairway client portal is ready. Start by setting your password, then complete your onboarding questionnaire so we can build your client brief and get started.</p>
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:rgba(250,246,241,0.06);border:1px solid rgba(250,246,241,0.1);border-radius:12px;margin:0 0 32px;">
       <tr><td style="padding:28px 32px;">
         <p style="font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#B5715A;margin:0 0 16px;">Your login</p>
@@ -40,6 +40,36 @@ function buildWelcomeEmail(name, email, setupToken) {
     </tr></table>
     <p style="font-size:12px;color:rgba(250,246,241,0.25);margin:20px 0 0;line-height:1.6;">This link expires in 7 days. If it has expired, contact Luke and he can send a new one.</p>
     <p style="font-size:13px;color:rgba(250,246,241,0.3);margin:20px 0 0;line-height:1.6;">Any questions, reply to this email or call 0416 184 333.</p>
+  </td></tr>
+  <tr><td style="padding:24px 0 0;text-align:center;">
+    <p style="font-size:12px;color:rgba(250,246,241,0.25);margin:0;line-height:1.7;">Fairway Investing &middot; Suite 211, Level 2/5 Alexander Street, Crows Nest NSW 2065<br>
+    <a href="mailto:info@fairwayinvesting.com.au" style="color:#B5715A;text-decoration:none;">info@fairwayinvesting.com.au</a> &middot; 0416 184 333</p>
+  </td></tr>
+</table>
+</td></tr></table>
+</body></html>`;
+}
+
+function buildMarketsEmail(name) {
+  const firstName = name.split(' ')[0];
+  const portalLink = 'https://fairwayinvesting.com.au/clients/portal.html';
+  return `<!DOCTYPE html><html lang="en" style="background:#181614;"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your reports are ready — Fairway</title></head>
+<body style="margin:0;padding:0;background:#181614;font-family:Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#181614"><tr><td align="center" style="padding:40px 16px;background:#181614;">
+<table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;">
+  <tr><td style="background:#1C1815;border-radius:20px;border:1px solid rgba(181,113,90,0.2);padding:44px 48px;">
+    <p style="margin:0 0 36px;padding-bottom:32px;border-bottom:1px solid rgba(250,246,241,0.08);text-align:center;">
+      <img src="https://fairwayinvesting.com.au/logo-word.png" width="200" height="30" alt="Fairway Investing" style="display:inline-block;border:0;max-width:200px;">
+    </p>
+    <p style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#B5715A;margin:0 0 16px;">Market research</p>
+    <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:36px;font-weight:400;color:#FAF6F1;margin:0 0 12px;line-height:1.15;">Your reports are ready, ${firstName}.</h1>
+    <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 32px;line-height:1.65;">I've assigned your market research reports in the portal. Log in to explore the data on your target markets — prices, rents, yields, growth history and the infrastructure pipeline.</p>
+    <table cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="border-radius:100px;background:#B5715A;">
+        <a href="${portalLink}" style="display:inline-block;font-size:15px;font-weight:500;color:#FAF6F1;text-decoration:none;padding:15px 34px;">View your reports &rarr;</a>
+      </td>
+    </tr></table>
+    <p style="font-size:13px;color:rgba(250,246,241,0.3);margin:28px 0 0;line-height:1.6;">Any questions, reply to this email or call 0416 184 333.</p>
   </td></tr>
   <tr><td style="padding:24px 0 0;text-align:center;">
     <p style="font-size:12px;color:rgba(250,246,241,0.25);margin:0;line-height:1.7;">Fairway Investing &middot; Suite 211, Level 2/5 Alexander Street, Crows Nest NSW 2065<br>
@@ -134,9 +164,30 @@ export default async (req) => {
   }
 
   if (req.method === 'PUT') {
-    const { id, name, markets, active, password } = await req.json().catch(() => ({}));
+    const body = await req.json().catch(() => ({}));
+    const { id, name, markets, active, password, action } = body;
     const idx = clients.findIndex(c => c.id === id);
     if (idx === -1) return json({ error: 'Client not found' }, 404);
+
+    if (action === 'notify-markets') {
+      const client = clients[idx];
+      if (!client.markets || client.markets.length === 0) return json({ error: 'No markets assigned to this client' }, 400);
+      try {
+        await resend.emails.send({
+          from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
+          to: [client.email],
+          reply_to: 'luke@fairwayinvesting.com.au',
+          subject: 'Your market research reports are ready — Fairway',
+          html: buildMarketsEmail(client.name),
+        });
+      } catch (err) {
+        console.error('Markets email failed:', err?.message || err);
+        return json({ error: 'Email failed to send' }, 500);
+      }
+      appendAudit('markets_notified', `Sent markets notification to ${client.name} <${client.email}>`);
+      return json({ ok: true });
+    }
+
     if (name !== undefined) clients[idx].name = name.trim();
     if (markets !== undefined) clients[idx].markets = markets;
     if (active !== undefined) clients[idx].active = active;

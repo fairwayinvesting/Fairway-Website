@@ -57,6 +57,7 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     .loading p{font-size:14px;font-weight:300;color:rgba(247,243,237,0.3);}
 
+    .section-label{font-size:11px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:16px;}
     footer{border-top:1px solid rgba(247,243,237,0.06);padding:24px 44px;text-align:center;}
     footer p{font-size:12px;font-weight:300;color:rgba(247,243,237,0.2);}
 
@@ -92,29 +93,13 @@
     <p class="sub">Select a market below to view your area report, including data on prices, rents, yields, growth history and infrastructure pipeline.</p>
   </div>
 
-  <div class="actions-wrap">
-    <a href="/clients/questionnaire.html" class="action-card">
-      <div class="action-card-left">
-        <div class="action-icon">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 5h12M4 10h8M4 15h10" stroke="#bd7a70" stroke-width="1.6" stroke-linecap="round"/></svg>
-        </div>
-        <div class="action-card-text">
-          <p class="ac-label">Getting started</p>
-          <p class="ac-title">Onboarding questionnaire</p>
-          <p class="ac-sub">Complete your profile so we can build your client brief and find the right property.</p>
-        </div>
-      </div>
-      <span class="action-btn">Start questionnaire &rarr;</span>
-    </a>
-  </div>
+  <!-- QUESTIONNAIRE CARD (populated by JS) -->
+  <div class="actions-wrap" id="q-section"></div>
 
-  <div class="grid-wrap">
-    <div id="content">
-      <div class="loading">
-        <div class="spinner"></div>
-        <p>Loading your reports…</p>
-      </div>
-    </div>
+  <!-- AREA RESEARCH (populated by JS) -->
+  <div class="grid-wrap" id="reports-section" style="display:none">
+    <p class="section-label">Area research</p>
+    <div id="content"></div>
   </div>
 
   <footer>
@@ -138,6 +123,59 @@
       'townsville':    { name: 'Townsville',     state: 'QLD' },
     };
 
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    function renderQSection(completed) {
+      const qSec = document.getElementById('q-section');
+      if (completed) {
+        qSec.innerHTML = `
+          <a href="/clients/questionnaire.html" class="action-card" style="border-color:rgba(247,243,237,0.09);">
+            <div class="action-card-left">
+              <div class="action-icon" style="background:rgba(247,243,237,0.04);border-color:rgba(247,243,237,0.1);">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l5 5 7-8" stroke="#bd7a70" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="action-card-text">
+                <p class="ac-label" style="color:rgba(247,243,237,0.3);">Questionnaire complete</p>
+                <p class="ac-title" style="font-size:16px;">Onboarding questionnaire</p>
+                <p class="ac-sub">Your answers are on file. Click to review or update them.</p>
+              </div>
+            </div>
+            <span class="action-btn" style="background:transparent;border:1px solid rgba(247,243,237,0.12);color:rgba(247,243,237,0.5);font-weight:400;">Edit answers</span>
+          </a>`;
+      } else {
+        qSec.innerHTML = `
+          <a href="/clients/questionnaire.html" class="action-card">
+            <div class="action-card-left">
+              <div class="action-icon">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 5h12M4 10h8M4 15h10" stroke="#bd7a70" stroke-width="1.6" stroke-linecap="round"/></svg>
+              </div>
+              <div class="action-card-text">
+                <p class="ac-label">Step 1 — Action needed</p>
+                <p class="ac-title">Complete your questionnaire</p>
+                <p class="ac-sub">Tell us about your goals and financial position so we can get started.</p>
+              </div>
+            </div>
+            <span class="action-btn">Start questionnaire &rarr;</span>
+          </a>`;
+      }
+    }
+
+    function renderReports(markets) {
+      const section = document.getElementById('reports-section');
+      const content = document.getElementById('content');
+      if (!markets || markets.length === 0) return; // section stays hidden
+      section.style.display = 'block';
+      const cards = markets.map(key => {
+        const meta = MARKET_META[key] || { name: key, state: '' };
+        return `<a href="/reports/${key}.html" class="card">
+          <p class="card-state">${esc(meta.state)} &nbsp;&middot;&nbsp; Area report</p>
+          <p class="card-name">${esc(meta.name)}</p>
+          <span class="card-btn">View report &rarr;</span>
+        </a>`;
+      }).join('');
+      content.innerHTML = `<div class="grid">${cards}</div>`;
+    }
+
     async function init() {
       let me;
       try {
@@ -150,26 +188,18 @@
       document.getElementById('welcome-heading').textContent =
         `Welcome back, ${me.name.split(' ')[0]}`;
 
-      const content = document.getElementById('content');
+      // Fetch questionnaire status in parallel with rendering
+      let qCompleted = false;
+      try {
+        const qr = await fetch('/api/submit-questionnaire');
+        if (qr.ok) {
+          const qd = await qr.json();
+          qCompleted = qd.completed === true;
+        }
+      } catch {}
 
-      if (!me.markets || me.markets.length === 0) {
-        content.innerHTML = `<div class="empty">
-          <h2>No reports yet</h2>
-          <p>Your advisor will add your markets shortly. Check back soon.</p>
-        </div>`;
-        return;
-      }
-
-      const cards = me.markets.map(key => {
-        const meta = MARKET_META[key] || { name: key, state: '' };
-        return `<a href="/reports/${key}.html" class="card">
-          <p class="card-state">${meta.state} &nbsp;&middot;&nbsp; Area report</p>
-          <p class="card-name">${meta.name}</p>
-          <span class="card-btn">View report &rarr;</span>
-        </a>`;
-      }).join('');
-
-      content.innerHTML = `<div class="grid">${cards}</div>`;
+      renderQSection(qCompleted);
+      renderReports(me.markets);
     }
 
     document.getElementById('logout-btn').addEventListener('click', async function() {
