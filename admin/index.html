@@ -22,14 +22,48 @@
     .gate-card h2{font-family:'Fraunces',serif;font-size:26px;font-weight:400;margin-bottom:6px;}
     .gate-card p{font-size:14px;font-weight:300;color:rgba(247,243,237,0.4);margin-bottom:28px;}
 
-    nav{background:#22201d;border-bottom:1px solid rgba(247,243,237,0.08);padding:0 44px;}
-    .nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px;}
+    /* Top bar */
+    .admin-topbar{background:#22201d;border-bottom:1px solid rgba(247,243,237,0.08);padding:0 28px;position:sticky;top:0;z-index:100;}
+    .admin-topbar-inner{display:flex;align-items:center;justify-content:space-between;height:58px;}
     .nav-logo{display:flex;align-items:center;gap:10px;}
     .badge{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;background:rgba(189,122,112,0.2);color:#bd7a70;border:1px solid rgba(189,122,112,0.3);border-radius:100px;padding:3px 10px;}
-
-    main{max-width:1200px;margin:0 auto;padding:44px;}
-    .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px;flex-wrap:wrap;gap:16px;}
-    .page-header h1{font-family:'Fraunces',serif;font-size:32px;font-weight:400;}
+    /* Shell */
+    .admin-shell{display:flex;min-height:calc(100vh - 58px);}
+    .admin-sidebar{width:210px;flex-shrink:0;background:#22201d;border-right:1px solid rgba(247,243,237,0.07);position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;display:flex;flex-direction:column;}
+    .admin-main{flex:1;min-width:0;padding:40px 44px;}
+    /* Sidebar nav */
+    .snav{display:flex;flex-direction:column;gap:2px;padding:16px 12px;flex:1;}
+    .snav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13.5px;font-weight:400;color:rgba(247,243,237,0.45);cursor:pointer;transition:all .15s;border:none;background:none;text-align:left;width:100%;line-height:1;}
+    .snav-item:hover{color:rgba(247,243,237,0.85);background:rgba(247,243,237,0.05);}
+    .snav-item.active{color:#f7f3ed;background:rgba(189,122,112,0.12);}
+    .snav-item svg{flex-shrink:0;}
+    .snav-spacer{flex:1;}
+    .snav-divider{height:1px;background:rgba(247,243,237,0.07);margin:8px 0;}
+    /* Sections */
+    .admin-section{display:none;}
+    .admin-section.active{display:block;}
+    .sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:12px;}
+    .sec-header h1{font-family:'Fraunces',serif;font-size:28px;font-weight:400;}
+    /* Dashboard */
+    .dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+    .dash-stat{background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:20px 22px;cursor:default;}
+    .dash-stat-label{font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;}
+    .dash-stat-value{font-family:'Fraunces',serif;font-size:40px;font-weight:400;color:#f7f3ed;line-height:1;}
+    .dash-stat-sub{font-size:12px;color:rgba(247,243,237,0.3);margin-top:6px;}
+    .dash-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+    .dash-panel{background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:22px 24px;}
+    .dash-panel-title{font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:16px;}
+    .dash-row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid rgba(247,243,237,0.05);}
+    .dash-row:last-child{border-bottom:none;}
+    .dash-row-label{flex:1;min-width:0;font-size:13px;color:rgba(247,243,237,0.7);}
+    .dash-row-meta{font-size:12px;color:rgba(247,243,237,0.3);white-space:nowrap;padding-top:1px;}
+    /* Briefs section */
+    .brief-row{display:flex;align-items:center;gap:14px;padding:14px 18px;background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:12px;margin-bottom:10px;flex-wrap:wrap;}
+    .brief-row-name{font-size:14px;font-weight:400;color:#f7f3ed;flex:1;min-width:120px;}
+    .brief-row-email{font-size:12.5px;color:rgba(247,243,237,0.35);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    /* Settings subsections */
+    .settings-block{margin-bottom:40px;}
+    .settings-block>h2{font-family:'Fraunces',serif;font-size:20px;font-weight:400;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid rgba(247,243,237,0.07);}
 
     /* Buttons */
     .btn-primary{display:inline-flex;align-items:center;gap:8px;background:#bd7a70;border:none;border-radius:10px;padding:12px 22px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;color:#f7f3ed;cursor:pointer;transition:background .2s;}
@@ -277,15 +311,22 @@
     .spinner{width:24px;height:24px;border:2px solid rgba(247,243,237,0.1);border-top-color:#bd7a70;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px;}
     @keyframes spin{to{transform:rotate(360deg)}}
 
+    @media(max-width:900px){
+      .dash-stats{grid-template-columns:1fr 1fr;}
+      .dash-cols{grid-template-columns:1fr;}
+    }
     @media(max-width:760px){
-      nav,main{padding-left:20px;padding-right:20px;}
+      .admin-sidebar{display:none;}
+      .admin-topbar{padding:0 20px;}
+      .admin-main{padding:28px 20px;}
       .markets-grid{grid-template-columns:1fr;}
       .td-email,.td-markets{display:none;}
       .ms-add-grid{grid-template-columns:1fr;}
-      .page-header h1{font-size:26px;}
+      .sec-header h1{font-size:24px;}
+      .dash-stats{grid-template-columns:1fr 1fr;}
     }
     @media(max-width:520px){
-      main{padding:24px 16px;}
+      .admin-main{padding:20px 16px;}
       .modal{padding:24px 20px;}
       .gate-card{padding:32px 24px;}
       /* Brief modal — mobile */
@@ -343,8 +384,9 @@
   </div>
 </div>
 
-<nav>
-  <div class="nav-inner">
+<!-- Top bar -->
+<header class="admin-topbar">
+  <div class="admin-topbar-inner">
     <div class="nav-logo">
       <img src="/logo-icon.png" alt="" style="height:26px;width:auto;">
       <img src="/logo-word.png" alt="Fairway Investing" style="height:16px;width:auto;">
@@ -352,274 +394,270 @@
     </div>
     <a href="/" style="font-size:13px;color:rgba(247,243,237,0.3);transition:color .2s;" onmouseover="this.style.color='rgba(247,243,237,0.6)'" onmouseout="this.style.color='rgba(247,243,237,0.3)'">&larr; Main site</a>
   </div>
-</nav>
+</header>
 
-<main>
-  <!-- Milestones dashboard -->
-  <div id="milestones-section" style="margin-bottom:48px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
-      <h2 style="font-family:'Fraunces',serif;font-size:24px;font-weight:400;">Upcoming dates</h2>
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-        <span id="ms-summary" style="font-size:12px;font-weight:300;color:rgba(247,243,237,0.3);"></span>
-        <button class="btn-primary" id="ms-add-btn" onclick="toggleAddDateForm()" style="padding:9px 18px;font-size:13px;">+ Add date</button>
+<div class="admin-shell">
+
+  <!-- ── Sidebar ── -->
+  <aside class="admin-sidebar">
+    <nav class="snav">
+      <button class="snav-item active" onclick="showSection('dashboard',this)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6.5" height="6.5" rx="1.5" fill="currentColor" opacity=".8"/><rect x="8.5" y="1" width="6.5" height="6.5" rx="1.5" fill="currentColor" opacity=".8"/><rect x="1" y="8.5" width="6.5" height="6.5" rx="1.5" fill="currentColor" opacity=".8"/><rect x="8.5" y="8.5" width="6.5" height="6.5" rx="1.5" fill="currentColor" opacity=".8"/></svg>
+        Dashboard
+      </button>
+      <button class="snav-item" onclick="showSection('clients',this)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Clients
+      </button>
+      <button class="snav-item" onclick="showSection('briefs',this)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2.5" y="1.5" width="11" height="13" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 5.5h6M5 8.5h6M5 11h3.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+        Briefs
+      </button>
+      <button class="snav-item" onclick="showSection('reports',this)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 13l3.5-4 3 3L14 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Reports
+      </button>
+      <button class="snav-item" onclick="showSection('presentations',this)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5L1.5 7H3v7h10V7h1.5L8 1.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><rect x="6" y="10" width="4" height="4" rx=".75" stroke="currentColor" stroke-width="1.25"/></svg>
+        Presentations
+      </button>
+      <button class="snav-item" onclick="showSection('dates',this)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3.5" width="13" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 2v3M11 2v3M1.5 7h13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Dates
+      </button>
+      <div class="snav-spacer"></div>
+      <div class="snav-divider"></div>
+      <button class="snav-item" onclick="showSection('settings',this)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 1.5v1.3M8 13.2v1.3M1.5 8h1.3M13.2 8h1.3M3.4 3.4l.9.9M11.7 11.7l.9.9M3.4 12.6l.9-.9M11.7 4.3l.9-.9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Settings
+      </button>
+    </nav>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="admin-main">
+
+    <!-- Dashboard -->
+    <div id="sec-dashboard" class="admin-section active">
+      <div class="sec-header">
+        <h1>Overview</h1>
+      </div>
+      <div class="dash-stats">
+        <div class="dash-stat">
+          <div class="dash-stat-label">Active clients</div>
+          <div class="dash-stat-value" id="ds-clients">—</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-label">Upcoming dates</div>
+          <div class="dash-stat-value" id="ds-dates">—</div>
+          <div class="dash-stat-sub">next 14 days</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-label">Presentations</div>
+          <div class="dash-stat-value" id="ds-pres">—</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-label">Markets tracked</div>
+          <div class="dash-stat-value">13</div>
+        </div>
+      </div>
+      <div class="dash-cols">
+        <div class="dash-panel">
+          <div class="dash-panel-title">Upcoming this week</div>
+          <div id="dash-dates"><span style="font-size:13px;color:rgba(247,243,237,0.2);">Loading…</span></div>
+        </div>
+        <div class="dash-panel">
+          <div class="dash-panel-title">Recent activity</div>
+          <div id="dash-activity"><span style="font-size:13px;color:rgba(247,243,237,0.2);">Loading…</span></div>
+        </div>
       </div>
     </div>
-    <!-- Inline add-date form -->
-    <div id="ms-add-panel" style="display:none;background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:28px;margin-bottom:16px;">
-      <p style="font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:20px;">Add a date</p>
-      <div class="ms-add-grid">
-        <div class="ms-add-field">
-          <label class="ms-add-label">Client</label>
-          <select id="ms-add-client" class="ms-add-input">
-            <option value="">Select client…</option>
-          </select>
-        </div>
-        <div class="ms-add-field">
-          <label class="ms-add-label">Date type</label>
-          <select id="ms-add-type" class="ms-add-input"></select>
-        </div>
-        <div class="ms-add-field">
-          <label class="ms-add-label">Date</label>
-          <input type="date" id="ms-add-date" class="ms-add-input" style="color-scheme:dark;">
-        </div>
-        <div class="ms-add-field">
-          <label class="ms-add-label">Notes <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">(optional)</span></label>
-          <input type="text" id="ms-add-notes" class="ms-add-input" placeholder="e.g. 21 days from exchange">
-        </div>
+
+    <!-- Clients -->
+    <div id="sec-clients" class="admin-section">
+      <div class="sec-header">
+        <h1>Clients</h1>
+        <button class="btn-primary" id="add-btn">+ Add client</button>
       </div>
-      <div style="display:flex;gap:10px;">
-        <button class="btn-primary" id="ms-add-submit" onclick="addMilestoneFromDashboard()">Add date</button>
-        <button class="btn-secondary" onclick="toggleAddDateForm()">Cancel</button>
+      <div id="clients-grid" class="client-cards-grid">
+        <div style="grid-column:1/-1;text-align:center;padding:48px;color:rgba(247,243,237,0.25);font-size:14px;">Loading…</div>
       </div>
     </div>
-    <p id="ms-empty" style="display:none;font-size:14px;color:rgba(247,243,237,0.25);padding:32px 0;text-align:center;">No upcoming dates — use the + Add date button above to get started.</p>
-    <div class="table-wrap" id="ms-table-wrap">
-      <div class="ms-scroll">
-        <table class="ms-table">
+
+    <!-- Briefs -->
+    <div id="sec-briefs" class="admin-section">
+      <div class="sec-header">
+        <h1>Buying Briefs</h1>
+      </div>
+      <div id="briefs-list"><span style="font-size:14px;color:rgba(247,243,237,0.25);">Loading…</span></div>
+    </div>
+
+    <!-- Reports -->
+    <div id="sec-reports" class="admin-section">
+      <div class="sec-header">
+        <h1>Area Reports</h1>
+        <span style="font-size:12px;font-weight:300;color:rgba(247,243,237,0.3);">Opens in new tab — admin session bypasses client login</span>
+      </div>
+      <div id="reports-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;"></div>
+    </div>
+
+    <!-- Presentations -->
+    <div id="sec-presentations" class="admin-section">
+      <div class="sec-header">
+        <h1>Presentations</h1>
+        <button class="btn-primary" onclick="openPresModal()">+ New presentation</button>
+      </div>
+      <div class="table-wrap">
+        <table>
           <thead><tr>
-            <th style="width:110px;">Urgency</th>
+            <th>Property</th>
             <th>Client</th>
-            <th>Milestone</th>
-            <th>Date</th>
-            <th></th>
+            <th>Actions</th>
           </tr></thead>
-          <tbody id="ms-tbody"></tbody>
+          <tbody id="pres-tbody">
+            <tr class="empty-row"><td colspan="3">Loading…</td></tr>
+          </tbody>
         </table>
       </div>
     </div>
-    <button class="ms-archive-toggle" id="ms-archive-btn" onclick="toggleMilestoneArchive()" style="display:none;">▸ Show completed</button>
-    <div class="ms-archive-wrap" id="ms-archive-wrap">
-      <div class="table-wrap">
+
+    <!-- Dates -->
+    <div id="sec-dates" class="admin-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+        <h1 style="font-family:'Fraunces',serif;font-size:28px;font-weight:400;">Upcoming Dates</h1>
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+          <span id="ms-summary" style="font-size:12px;font-weight:300;color:rgba(247,243,237,0.3);"></span>
+          <button class="btn-primary" id="ms-add-btn" onclick="toggleAddDateForm()" style="padding:9px 18px;font-size:13px;">+ Add date</button>
+        </div>
+      </div>
+      <div id="ms-add-panel" style="display:none;background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:28px;margin-bottom:16px;">
+        <p style="font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:20px;">Add a date</p>
+        <div class="ms-add-grid">
+          <div class="ms-add-field">
+            <label class="ms-add-label">Client</label>
+            <select id="ms-add-client" class="ms-add-input"><option value="">Select client…</option></select>
+          </div>
+          <div class="ms-add-field">
+            <label class="ms-add-label">Date type</label>
+            <select id="ms-add-type" class="ms-add-input"></select>
+          </div>
+          <div class="ms-add-field">
+            <label class="ms-add-label">Date</label>
+            <input type="date" id="ms-add-date" class="ms-add-input" style="color-scheme:dark;">
+          </div>
+          <div class="ms-add-field">
+            <label class="ms-add-label">Notes <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">(optional)</span></label>
+            <input type="text" id="ms-add-notes" class="ms-add-input" placeholder="e.g. 21 days from exchange">
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-primary" id="ms-add-submit" onclick="addMilestoneFromDashboard()">Add date</button>
+          <button class="btn-secondary" onclick="toggleAddDateForm()">Cancel</button>
+        </div>
+      </div>
+      <p id="ms-empty" style="display:none;font-size:14px;color:rgba(247,243,237,0.25);padding:32px 0;text-align:center;">No upcoming dates — use the + Add date button above to get started.</p>
+      <div class="table-wrap" id="ms-table-wrap">
         <div class="ms-scroll">
           <table class="ms-table">
             <thead><tr>
+              <th style="width:110px;">Urgency</th>
               <th>Client</th>
               <th>Milestone</th>
               <th>Date</th>
-              <th>Completed</th>
               <th></th>
             </tr></thead>
-            <tbody id="ms-archive-tbody"></tbody>
+            <tbody id="ms-tbody"></tbody>
           </table>
         </div>
       </div>
+      <button class="ms-archive-toggle" id="ms-archive-btn" onclick="toggleMilestoneArchive()" style="display:none;">▸ Show completed</button>
+      <div class="ms-archive-wrap" id="ms-archive-wrap">
+        <div class="table-wrap"><div class="ms-scroll">
+          <table class="ms-table">
+            <thead><tr>
+              <th>Client</th><th>Milestone</th><th>Date</th><th>Completed</th><th></th>
+            </tr></thead>
+            <tbody id="ms-archive-tbody"></tbody>
+          </table>
+        </div></div>
+      </div>
     </div>
-  </div>
 
-  <div class="page-header">
-    <h1>Client management</h1>
-    <button class="btn-primary" id="add-btn">+ Add client</button>
-  </div>
-  <div id="clients-grid" class="client-cards-grid">
-    <div style="grid-column:1/-1;text-align:center;padding:48px;color:rgba(247,243,237,0.25);font-size:14px;">Loading…</div>
-  </div>
+    <!-- Settings -->
+    <div id="sec-settings" class="admin-section">
+      <div class="sec-header">
+        <h1>Settings</h1>
+      </div>
 
-  <!-- Property Presentations -->
-  <div style="margin-top:52px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-      <h2 style="font-family:'Fraunces',serif;font-size:24px;font-weight:400;">Property presentations</h2>
-      <button class="btn-primary" onclick="openPresModal()">+ New presentation</button>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th>Property</th>
-          <th>Client</th>
-          <th>Actions</th>
-        </tr></thead>
-        <tbody id="pres-tbody">
-          <tr class="empty-row"><td colspan="3">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Site pages -->
-  <div style="margin-top:52px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-      <h2 style="font-family:'Fraunces',serif;font-size:24px;font-weight:400;">Site pages</h2>
-      <span style="font-size:12px;font-weight:300;color:rgba(247,243,237,0.3);">Opens in new tab</span>
-    </div>
-    <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Public</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:22px;">
-      <a href="/" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Main site</span>
-        <span class="plc-name">Homepage</span>
-        <span class="plc-url">fairwayinvesting.com.au</span>
-      </a>
-      <a href="/discovery-call.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Booking confirmation</span>
-        <span class="plc-name">Discovery call</span>
-        <span class="plc-url">/discovery-call.html</span>
-      </a>
-      <a href="/strategy-session.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Booking confirmation</span>
-        <span class="plc-name">Strategy session</span>
-        <span class="plc-url">/strategy-session.html</span>
-      </a>
-      <a href="/privacy.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Legal</span>
-        <span class="plc-name">Privacy Policy</span>
-        <span class="plc-url">/privacy.html</span>
-      </a>
-      <a href="/terms.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Legal</span>
-        <span class="plc-name">Terms of Service</span>
-        <span class="plc-url">/terms.html</span>
-      </a>
-      <a href="/404.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">System</span>
-        <span class="plc-name">404 Not found</span>
-        <span class="plc-url">/404.html</span>
-      </a>
-    </div>
-    <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Client portal</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:22px;">
-      <a href="/clients/" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Portal</span>
-        <span class="plc-name">Client login</span>
-        <span class="plc-url">/clients/</span>
-      </a>
-      <a href="/clients/portal.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Portal</span>
-        <span class="plc-name">Client dashboard</span>
-        <span class="plc-url">/clients/portal.html</span>
-      </a>
-      <a href="/clients/setup.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Portal</span>
-        <span class="plc-name">Password setup</span>
-        <span class="plc-url">/clients/setup.html</span>
-      </a>
-      <a href="/clients/questionnaire.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Portal</span>
-        <span class="plc-name">Onboarding questionnaire</span>
-        <span class="plc-url">/clients/questionnaire.html</span>
-      </a>
-    </div>
-    <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Partner referral pages</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:22px;">
-      <a href="/p/alex-pagonis-x2e3b.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Mortgage Broker</span>
-        <span class="plc-name">Alex Pagonis</span>
-        <span class="plc-url">/p/alex-pagonis-x2e3b</span>
-      </a>
-      <a href="/p/dylan-bertovic-qsct7.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Mortgage Broker</span>
-        <span class="plc-name">Dylan Bertovic</span>
-        <span class="plc-url">/p/dylan-bertovic-qsct7</span>
-      </a>
-      <a href="/p/hung-chuy-rkph.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Mortgage Broker</span>
-        <span class="plc-name">Hung Chuy</span>
-        <span class="plc-url">/p/hung-chuy-rkph</span>
-      </a>
-      <a href="/p/jay-morosi-t04bf.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Mortgage Broker</span>
-        <span class="plc-name">Jay Morosi</span>
-        <span class="plc-url">/p/jay-morosi-t04bf</span>
-      </a>
-      <a href="/p/julianne-zammit-ohxyf.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Mortgage Broker</span>
-        <span class="plc-name">Julianne Zammit</span>
-        <span class="plc-url">/p/julianne-zammit-ohxyf</span>
-      </a>
-      <a href="/p/justin-purll-xxgqk.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Mortgage Broker</span>
-        <span class="plc-name">Justin Purll</span>
-        <span class="plc-url">/p/justin-purll-xxgqk</span>
-      </a>
-      <a href="/p/matt-curle-873tj.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Mortgage Broker</span>
-        <span class="plc-name">Matt Curle</span>
-        <span class="plc-url">/p/matt-curle-873tj</span>
-      </a>
-      <a href="/p/patrick-noll-zgeyc.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Mortgage Broker</span>
-        <span class="plc-name">Patrick Noll</span>
-        <span class="plc-url">/p/patrick-noll-zgeyc</span>
-      </a>
-      <a href="/p/sam-wetzler-sj4aj.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Mortgage Broker</span>
-        <span class="plc-name">Sam Wetzler</span>
-        <span class="plc-url">/p/sam-wetzler-sj4aj</span>
-      </a>
-      <a href="/p/shiv-neel-i8wtg.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Tax Agent</span>
-        <span class="plc-name">Shiv Lal</span>
-        <span class="plc-url">/p/shiv-neel-i8wtg</span>
-      </a>
-    </div>
-    <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Property presentations</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
-      <a href="/p/property.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Presentation</span>
-        <span class="plc-name">Viewer template</span>
-        <span class="plc-url">/p/property.html</span>
-      </a>
-    </div>
-  </div>
-
-  <div style="margin-top:52px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-      <h2 style="font-family:'Fraunces',serif;font-size:24px;font-weight:400;">Area reports</h2>
-      <span style="font-size:12px;font-weight:300;color:rgba(247,243,237,0.3);">Opens in new tab &mdash; admin session bypasses client login</span>
-    </div>
-    <div id="reports-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;"></div>
-  </div>
-
-  <!-- Audit log -->
-  <div style="margin-top:52px;" id="audit-section">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-      <h2 style="font-family:'Fraunces',serif;font-size:24px;font-weight:400;">Activity log</h2>
-      <button class="btn-secondary" onclick="loadAuditLog()" style="padding:8px 18px;font-size:13px;">Refresh</button>
-    </div>
-    <div id="audit-list" style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);line-height:1.8;">Loading…</div>
-  </div>
-
-  <!-- Security / 2FA -->
-  <div style="margin-top:52px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-      <h2 style="font-family:'Fraunces',serif;font-size:24px;font-weight:400;">Security</h2>
-    </div>
-    <div class="totp-setup">
-      <div id="totp-status-active" style="display:none;">
-        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-          <div style="width:8px;height:8px;border-radius:50%;background:#6dbf7b;flex-shrink:0;"></div>
-          <div style="flex:1;min-width:180px;">
-            <p style="font-size:13.5px;font-weight:400;color:#f7f3ed;margin-bottom:3px;">2FA is enabled</p>
-            <p style="font-size:12px;color:rgba(247,243,237,0.35);margin:0;line-height:1.5;">Your admin login requires a 6-digit authenticator code.</p>
+      <div class="settings-block">
+        <h2>Security</h2>
+        <div class="totp-setup">
+          <div id="totp-status-active" style="display:none;">
+            <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+              <div style="width:8px;height:8px;border-radius:50%;background:#6dbf7b;flex-shrink:0;"></div>
+              <div style="flex:1;min-width:180px;">
+                <p style="font-size:13.5px;font-weight:400;color:#f7f3ed;margin-bottom:3px;">2FA is enabled</p>
+                <p style="font-size:12px;color:rgba(247,243,237,0.35);margin:0;line-height:1.5;">Your admin login requires a 6-digit authenticator code.</p>
+              </div>
+              <button class="btn-secondary" id="totp-reconfig-btn" style="font-size:12px;padding:7px 12px;white-space:nowrap;">Reconfigure</button>
+            </div>
           </div>
-          <button class="btn-secondary" id="totp-reconfig-btn" style="font-size:12px;padding:7px 12px;white-space:nowrap;">Reconfigure</button>
+          <div id="totp-section">
+            <p style="font-size:13.5px;color:rgba(247,243,237,0.4);margin-bottom:18px;">Two-factor authentication (2FA) adds an extra layer of security to your admin login.</p>
+            <button class="btn-secondary" id="totp-setup-btn">Set up 2FA</button>
+          </div>
+          <div id="totp-panel" style="display:none;margin-top:20px;"></div>
         </div>
       </div>
-      <div id="totp-section">
-        <p style="font-size:13.5px;color:rgba(247,243,237,0.4);margin-bottom:18px;">Two-factor authentication (2FA) adds an extra layer of security to your admin login.</p>
-        <button class="btn-secondary" id="totp-setup-btn">Set up 2FA</button>
+
+      <div class="settings-block">
+        <h2>Activity log</h2>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+          <button class="btn-secondary" onclick="loadAuditLog()" style="padding:8px 18px;font-size:13px;">Refresh</button>
+        </div>
+        <div id="audit-list" style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);line-height:1.8;">Loading…</div>
       </div>
-      <div id="totp-panel" style="display:none;margin-top:20px;"></div>
+
+      <div class="settings-block">
+        <h2>Site pages</h2>
+        <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Public</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:22px;">
+          <a href="/" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Main site</span><span class="plc-name">Homepage</span><span class="plc-url">fairwayinvesting.com.au</span></a>
+          <a href="/discovery-call.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Booking confirmation</span><span class="plc-name">Discovery call</span><span class="plc-url">/discovery-call.html</span></a>
+          <a href="/strategy-session.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Booking confirmation</span><span class="plc-name">Strategy session</span><span class="plc-url">/strategy-session.html</span></a>
+          <a href="/privacy.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Legal</span><span class="plc-name">Privacy Policy</span><span class="plc-url">/privacy.html</span></a>
+          <a href="/terms.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Legal</span><span class="plc-name">Terms of Service</span><span class="plc-url">/terms.html</span></a>
+          <a href="/404.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">System</span><span class="plc-name">404 Not found</span><span class="plc-url">/404.html</span></a>
+        </div>
+        <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Client portal</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:22px;">
+          <a href="/clients/" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Portal</span><span class="plc-name">Client login</span><span class="plc-url">/clients/</span></a>
+          <a href="/clients/portal.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Portal</span><span class="plc-name">Client dashboard</span><span class="plc-url">/clients/portal.html</span></a>
+          <a href="/clients/setup.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Portal</span><span class="plc-name">Password setup</span><span class="plc-url">/clients/setup.html</span></a>
+          <a href="/clients/questionnaire.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Portal</span><span class="plc-name">Onboarding questionnaire</span><span class="plc-url">/clients/questionnaire.html</span></a>
+        </div>
+        <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Partner referral pages</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:22px;">
+          <a href="/p/alex-pagonis-x2e3b.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Mortgage Broker</span><span class="plc-name">Alex Pagonis</span><span class="plc-url">/p/alex-pagonis-x2e3b</span></a>
+          <a href="/p/dylan-bertovic-qsct7.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Mortgage Broker</span><span class="plc-name">Dylan Bertovic</span><span class="plc-url">/p/dylan-bertovic-qsct7</span></a>
+          <a href="/p/hung-chuy-rkph.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Mortgage Broker</span><span class="plc-name">Hung Chuy</span><span class="plc-url">/p/hung-chuy-rkph</span></a>
+          <a href="/p/jay-morosi-t04bf.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Mortgage Broker</span><span class="plc-name">Jay Morosi</span><span class="plc-url">/p/jay-morosi-t04bf</span></a>
+          <a href="/p/julianne-zammit-ohxyf.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Mortgage Broker</span><span class="plc-name">Julianne Zammit</span><span class="plc-url">/p/julianne-zammit-ohxyf</span></a>
+          <a href="/p/justin-purll-xxgqk.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Mortgage Broker</span><span class="plc-name">Justin Purll</span><span class="plc-url">/p/justin-purll-xxgqk</span></a>
+          <a href="/p/matt-curle-873tj.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Mortgage Broker</span><span class="plc-name">Matt Curle</span><span class="plc-url">/p/matt-curle-873tj</span></a>
+          <a href="/p/patrick-noll-zgeyc.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Mortgage Broker</span><span class="plc-name">Patrick Noll</span><span class="plc-url">/p/patrick-noll-zgeyc</span></a>
+          <a href="/p/sam-wetzler-sj4aj.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Mortgage Broker</span><span class="plc-name">Sam Wetzler</span><span class="plc-url">/p/sam-wetzler-sj4aj</span></a>
+          <a href="/p/shiv-neel-i8wtg.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Tax Agent</span><span class="plc-name">Shiv Lal</span><span class="plc-url">/p/shiv-neel-i8wtg</span></a>
+        </div>
+        <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Property presentations</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
+          <a href="/p/property.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Presentation</span><span class="plc-name">Viewer template</span><span class="plc-url">/p/property.html</span></a>
+        </div>
+      </div>
     </div>
-  </div>
-</main>
+
+  </div><!-- end admin-main -->
+</div><!-- end admin-shell -->
 
 <!-- Presentations modal -->
 <input type="file" id="pres-file-input" accept="image/*" style="display:none">
@@ -1009,6 +1047,58 @@ let clients = [];
 let milestones = [];
 let presentations = [];
 
+// ── Section nav ───────────────────────────────────────────────────────────────
+function showSection(id, btn) {
+  document.querySelectorAll('.admin-section').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.snav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (id === 'briefs') renderBriefs();
+}
+
+function renderDashboard() {
+  const activeCount = clients.filter(c => c.active).length;
+  document.getElementById('ds-clients').textContent = activeCount || '0';
+  document.getElementById('ds-pres').textContent = presentations.length || '0';
+
+  const now = new Date(); now.setHours(0,0,0,0);
+  const in14 = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+  const upcoming = milestones.filter(m => !m.completed).map(m => {
+    const d = new Date(m.date + 'T00:00:00');
+    return { ...m, _d: d };
+  }).filter(m => m._d >= now && m._d <= in14).sort((a,b) => a._d - b._d);
+  document.getElementById('ds-dates').textContent = upcoming.length || '0';
+
+  const datesEl = document.getElementById('dash-dates');
+  if (!upcoming.length) {
+    datesEl.innerHTML = '<p style="font-size:13px;color:rgba(247,243,237,0.25);padding:4px 0;">No upcoming dates in the next 14 days.</p>';
+  } else {
+    datesEl.innerHTML = upcoming.slice(0, 6).map(m => {
+      const client = clients.find(c => c.id === m.clientId);
+      const days = Math.round((m._d - now) / 86400000);
+      const dLabel = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days}d`;
+      const urg = days <= 3 ? '#e8a87c' : days === 0 ? '#f08080' : 'rgba(247,243,237,0.3)';
+      return `<div class="dash-row">
+        <div class="dash-row-label">${esc(client?.name || '—')}<span style="display:block;font-size:11.5px;color:rgba(247,243,237,0.3);">${esc(m.label)}</span></div>
+        <div class="dash-row-meta" style="color:${urg};">${dLabel}</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function renderBriefs() {
+  const el = document.getElementById('briefs-list');
+  if (!clients.length) { el.innerHTML = '<p style="font-size:14px;color:rgba(247,243,237,0.25);">No clients yet.</p>'; return; }
+  const sorted = [...clients].sort((a,b) => a.name.localeCompare(b.name));
+  el.innerHTML = sorted.map(c => `
+    <div class="brief-row">
+      <span class="status-dot ${c.active ? 'status-active' : 'status-inactive'}"></span>
+      <span class="brief-row-name">${esc(c.name)}</span>
+      <span class="brief-row-email">${esc(c.email)}</span>
+      <button class="btn-sm btn-brief" onclick="openBrief('${c.id}','${esc(c.name)}')">Open Brief</button>
+    </div>`).join('');
+}
+
 // ── Gate ──────────────────────────────────────────────────────────────────────
 let _gatePw = '';
 
@@ -1021,6 +1111,7 @@ async function completeLogin(pw) {
   adminPassword = pw;
   sessionStorage.setItem('fw_admin_pw', pw);
   document.getElementById('gate').classList.add('hidden');
+  showSection('dashboard', document.querySelector('.snav-item'));
   loadClients();
   loadMilestones();
   loadPresentations();
@@ -1098,6 +1189,7 @@ async function loadClients() {
   clients = await res.json();
   renderTable();
   renderReports();
+  renderDashboard();
   if (presentations.length) renderPresentations();
 }
 
@@ -1522,6 +1614,7 @@ async function loadMilestones() {
   milestones = await res.json();
   renderMilestonesDashboard();
   updateMilestoneBadges();
+  renderDashboard();
 }
 
 function updateMilestoneBadges() {
@@ -1817,7 +1910,7 @@ async function loadAuditLog() {
   if (!res.ok) { el.textContent = 'Could not load activity log.'; return; }
   const entries = await res.json();
   if (!entries.length) { el.textContent = 'No activity recorded yet.'; return; }
-  el.innerHTML = entries.slice(0, 50).map(e => {
+  const rowHtml = e => {
     const d = new Date(e.ts);
     const dateStr = d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
     const timeStr = d.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
@@ -1827,7 +1920,21 @@ async function loadAuditLog() {
       <span style="color:rgba(189,122,112,0.85);flex-shrink:0;font-size:12px;font-weight:500;padding-top:1px;">${label}</span>
       <span>${e.detail || ''}</span>
     </div>`;
-  }).join('');
+  };
+  el.innerHTML = entries.slice(0, 50).map(rowHtml).join('');
+  // Dashboard mini feed — 5 most recent
+  const actEl = document.getElementById('dash-activity');
+  if (actEl) {
+    actEl.innerHTML = entries.slice(0, 5).map(e => {
+      const d = new Date(e.ts);
+      const rel = d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+      const label = actionLabels[e.action] || e.action;
+      return `<div class="dash-row">
+        <div class="dash-row-label" style="font-size:12.5px;">${label}<span style="display:block;font-size:11.5px;color:rgba(247,243,237,0.3);margin-top:1px;">${e.detail || ''}</span></div>
+        <div class="dash-row-meta">${rel}</div>
+      </div>`;
+    }).join('');
+  }
 }
 
 // ── Presentations ─────────────────────────────────────────────────────────────
@@ -1837,6 +1944,7 @@ async function loadPresentations() {
   const res = await api('GET', '/api/admin/presentations');
   presentations = await res.json();
   renderPresentations();
+  renderDashboard();
 }
 
 function renderPresentations() {
