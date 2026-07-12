@@ -169,7 +169,7 @@ export default async (req) => {
 
   if (req.method === 'PUT') {
     const body = await req.json().catch(() => ({}));
-    const { id, name, markets, active, password, action } = body;
+    const { id, name, markets, active, password, action, datesArchived } = body;
     const idx = clients.findIndex(c => c.id === id);
     if (idx === -1) return json({ error: 'Client not found' }, 404);
 
@@ -200,6 +200,7 @@ export default async (req) => {
     if (name !== undefined) client.name = name.trim();
     if (markets !== undefined) client.markets = markets;
     if (active !== undefined) client.active = active;
+    if (datesArchived !== undefined) client.datesArchived = datesArchived;
     if (password) {
       const salt = crypto.randomBytes(16).toString('hex');
       client.passwordHash = await pbkdf2Hash(password, salt);

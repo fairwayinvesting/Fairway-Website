@@ -127,13 +127,13 @@
     .ms-table td{padding:12px 16px;font-size:13.5px;font-weight:300;border-bottom:1px solid rgba(247,243,237,0.05);vertical-align:middle;}
     .ms-table tr:last-child td{border-bottom:none;}
     .ms-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-    .urg-overdue td{color:#f08080;}
-    .urg-overdue .urg-badge{background:rgba(240,128,128,0.12);border:1px solid rgba(240,128,128,0.3);color:#f08080;}
-    .urg-critical td{color:#e8a87c;}
-    .urg-critical .urg-badge{background:rgba(232,168,124,0.12);border:1px solid rgba(232,168,124,0.3);color:#e8a87c;}
-    .urg-soon td{color:rgba(247,243,237,0.75);}
-    .urg-soon .urg-badge{background:rgba(247,243,237,0.07);border:1px solid rgba(247,243,237,0.12);color:rgba(247,243,237,0.5);}
-    .urg-ok td{color:rgba(247,243,237,0.45);}
+    .urg-overdue td{color:#e05060;}
+    .urg-overdue .urg-badge{background:rgba(200,60,80,0.15);border:1px solid rgba(200,60,80,0.35);color:#e05060;}
+    .urg-critical td{color:#f08080;}
+    .urg-critical .urg-badge{background:rgba(240,128,128,0.12);border:1px solid rgba(240,128,128,0.3);color:#f08080;}
+    .urg-soon td{color:#e8a87c;}
+    .urg-soon .urg-badge{background:rgba(232,168,124,0.12);border:1px solid rgba(232,168,124,0.3);color:#e8a87c;}
+    .urg-ok td{color:rgba(247,243,237,0.55);}
     .urg-ok .urg-badge{background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.2);color:#6dbf7b;}
     .urg-badge{display:inline-block;font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;border-radius:100px;padding:2px 9px;white-space:nowrap;}
     .ms-client{font-weight:400;color:#f7f3ed;}
@@ -223,13 +223,24 @@
     .ms-archive-toggle:hover{color:rgba(247,243,237,0.55);}
     .ms-archive-wrap{display:none;margin-top:6px;}
 
-    /* Add date form — grid layout matching modal fields */
-    .ms-add-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;margin-bottom:20px;}
+    /* Add date form */
     .ms-add-field{display:flex;flex-direction:column;}
     .ms-add-label{font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.4);margin-bottom:7px;display:block;}
     .ms-add-input{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:0 14px;height:46px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:300;color:#f7f3ed;outline:none;transition:border-color .2s;width:100%;box-sizing:border-box;}
     .ms-add-input:focus{border-color:rgba(189,122,112,0.6);}
     .ms-add-input option{background:#22201d;}
+    /* Multi-row milestone entry */
+    .ms-row{display:grid;grid-template-columns:1.2fr 1fr 1.6fr auto;gap:10px;align-items:center;background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.08);border-radius:10px;padding:12px 14px;margin-bottom:8px;}
+    @media(max-width:640px){.ms-row{grid-template-columns:1fr 1fr;row-gap:10px;}.ms-row .ms-add-input{}.ms-row-remove{grid-column:1/-1;justify-self:end;}}
+    .ms-row-remove{background:none;border:none;color:rgba(247,243,237,0.25);font-size:18px;cursor:pointer;line-height:1;padding:4px;transition:color .15s;flex-shrink:0;}
+    .ms-row-remove:hover{color:rgba(247,243,237,0.6);}
+    .ms-add-more{background:none;border:none;font-family:'Outfit',sans-serif;font-size:13px;font-weight:400;color:#bd7a70;cursor:pointer;padding:4px 0;display:inline-flex;align-items:center;gap:5px;}
+    .ms-add-more:hover{color:#d09490;}
+    /* Urgency legend */
+    .urg-legend{display:flex;gap:18px;font-size:11px;color:rgba(247,243,237,0.4);flex-wrap:wrap;margin-top:10px;padding:0 4px;}
+    /* Completed clients */
+    .ms-completed-card{background:#1e1c19;border:1px solid rgba(247,243,237,0.07);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:13px;margin-bottom:8px;}
+    .ms-archive-ready{background:rgba(109,191,123,0.06);border:1px solid rgba(109,191,123,0.15);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px;}
 
     /* TOTP setup */
     .totp-setup{background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:28px 32px;}
@@ -253,6 +264,8 @@
     .pres-tab-pane{display:none;}.pres-tab-pane.active{display:block;}
     .pres-field-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;}
     .pres-field-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .pres-demo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+    @media(max-width:480px){.pres-demo-grid{grid-template-columns:1fr 1fr;}}
     .field textarea{width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:300;color:#f7f3ed;outline:none;resize:vertical;min-height:100px;transition:border-color .2s;}
     .field textarea:focus{border-color:rgba(189,122,112,0.6);}
     .field textarea::placeholder{color:rgba(247,243,237,0.2);}
@@ -324,7 +337,7 @@
       .admin-main{padding:28px 20px;}
       .markets-grid{grid-template-columns:1fr;}
       .td-email,.td-markets{display:none;}
-      .ms-add-grid{grid-template-columns:1fr;}
+      .ms-row{grid-template-columns:1fr 1fr;}.ms-row-header{display:none!important;}
       .sec-header h1{font-size:24px;}
       .dash-stats{grid-template-columns:1fr 1fr;}
     }
@@ -534,27 +547,21 @@
         </div>
       </div>
       <div id="ms-add-panel" style="display:none;background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:28px;margin-bottom:16px;">
-        <p style="font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:20px;">Add a date</p>
-        <div class="ms-add-grid">
-          <div class="ms-add-field">
-            <label class="ms-add-label">Client</label>
-            <select id="ms-add-client" class="ms-add-input"><option value="">Select client…</option></select>
-          </div>
-          <div class="ms-add-field">
-            <label class="ms-add-label">Date type</label>
-            <select id="ms-add-type" class="ms-add-input"></select>
-          </div>
-          <div class="ms-add-field">
-            <label class="ms-add-label">Date</label>
-            <input type="date" id="ms-add-date" class="ms-add-input" style="color-scheme:dark;">
-          </div>
-          <div class="ms-add-field">
-            <label class="ms-add-label">Notes <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">(optional)</span></label>
-            <input type="text" id="ms-add-notes" class="ms-add-input" placeholder="e.g. 21 days from exchange">
-          </div>
+        <p style="font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:18px;">Add milestones for a client</p>
+        <div class="ms-add-field" style="margin-bottom:16px;max-width:280px;">
+          <label class="ms-add-label">Client</label>
+          <select id="ms-add-client" class="ms-add-input" onchange="updateSaveBtnLabel()"><option value="">Select client…</option></select>
         </div>
-        <div style="display:flex;gap:10px;">
-          <button class="btn-primary" id="ms-add-submit" onclick="addMilestoneFromDashboard()">Add date</button>
+        <div class="ms-row-header" style="font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);display:grid;grid-template-columns:1.2fr 1fr 1.6fr auto;gap:10px;padding:0 14px;margin-bottom:4px;">
+          <span>Milestone type</span><span>Date</span><span>Notes (optional)</span><span></span>
+        </div>
+        <div id="ms-rows"></div>
+        <button class="ms-add-more" onclick="addMilestoneRow()">
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Add another milestone
+        </button>
+        <div style="display:flex;gap:10px;margin-top:18px;align-items:center;flex-wrap:wrap;">
+          <button class="btn-primary" id="ms-add-submit" onclick="saveMilestoneBatch()">Save dates</button>
           <button class="btn-secondary" onclick="toggleAddDateForm()">Cancel</button>
         </div>
       </div>
@@ -573,7 +580,21 @@
           </table>
         </div>
       </div>
-      <button class="ms-archive-toggle" id="ms-archive-btn" onclick="toggleMilestoneArchive()" style="display:none;">▸ Show completed</button>
+      <div class="urg-legend" id="ms-legend" style="display:none;">
+        <span><span style="color:#e05060;">●</span> Overdue</span>
+        <span><span style="color:#f08080;">●</span> Under 7 days</span>
+        <span><span style="color:#e8a87c;">●</span> 7–14 days</span>
+        <span><span style="color:#6dbf7b;">●</span> 14+ days</span>
+      </div>
+      <div id="ms-archive-ready-wrap" style="display:none;margin-top:20px;">
+        <p style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">All dates complete</p>
+        <div id="ms-archive-ready-list"></div>
+      </div>
+      <div id="ms-completed-wrap" style="display:none;margin-top:20px;">
+        <p style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">Completed clients</p>
+        <div id="ms-completed-list"></div>
+      </div>
+      <button class="ms-archive-toggle" id="ms-archive-btn" onclick="toggleMilestoneArchive()" style="display:none;margin-top:14px;">▸ Show completed milestones</button>
       <div class="ms-archive-wrap" id="ms-archive-wrap">
         <div class="table-wrap"><div class="ms-scroll">
           <table class="ms-table">
@@ -596,13 +617,10 @@
         <h2>Security</h2>
         <div class="totp-setup">
           <div id="totp-status-active" style="display:none;">
-            <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-              <div style="width:8px;height:8px;border-radius:50%;background:#6dbf7b;flex-shrink:0;"></div>
-              <div style="flex:1;min-width:180px;">
-                <p style="font-size:13.5px;font-weight:400;color:#f7f3ed;margin-bottom:3px;">2FA is enabled</p>
-                <p style="font-size:12px;color:rgba(247,243,237,0.35);margin:0;line-height:1.5;">Your admin login requires a 6-digit authenticator code.</p>
-              </div>
-              <button class="btn-secondary" id="totp-reconfig-btn" style="font-size:12px;padding:7px 12px;white-space:nowrap;">Reconfigure</button>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+              <span style="font-size:14px;color:rgba(247,243,237,0.55);">Two-factor authentication</span>
+              <span style="background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.25);color:#6dbf7b;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;border-radius:100px;padding:3px 10px;white-space:nowrap;">On</span>
+              <button id="totp-reconfig-btn" style="background:none;border:none;font-family:'Outfit',sans-serif;font-size:13px;font-weight:400;color:#bd7a70;cursor:pointer;padding:0;margin-left:2px;">Manage</button>
             </div>
           </div>
           <div id="totp-section">
@@ -759,21 +777,21 @@
             <div class="toggle-wrap" onclick="event.stopPropagation()"><label class="toggle"><input type="checkbox" id="demo-enabled" onchange="toggleAnalysis('demo',true)"><span class="toggle-slider"></span></label></div>
           </div>
           <div class="pres-analysis-body" id="analysis-demo">
-            <div class="pres-field-row">
-              <div class="field"><label>Owner occupier (%)</label><input type="text" id="demo-owner" placeholder="58" oninput="updateDemoBar()"></div>
-              <div class="field"><label>Renter (%)</label><input type="text" id="demo-renter" placeholder="38" oninput="updateDemoBar()"></div>
-              <div class="field"><label>Public housing (%)</label><input type="text" id="demo-public" placeholder="4" oninput="updateDemoBar()"></div>
+            <div class="pres-demo-grid">
+              <div class="field"><label style="white-space:nowrap;">Owner-occupier %</label><input type="text" id="demo-owner" placeholder="58" oninput="updateDemoBar()"></div>
+              <div class="field"><label style="white-space:nowrap;">Renter %</label><input type="text" id="demo-renter" placeholder="38" oninput="updateDemoBar()"></div>
+              <div class="field"><label style="white-space:nowrap;">Public housing %</label><input type="text" id="demo-public" placeholder="4" oninput="updateDemoBar()"></div>
             </div>
-            <div style="margin-top:4px;margin-bottom:16px;">
-              <div style="height:6px;border-radius:100px;overflow:hidden;background:rgba(247,243,237,0.06);display:flex;">
-                <div id="dbar-owner" style="background:#bd7a70;height:100%;width:0;transition:width .25s;"></div>
-                <div id="dbar-renter" style="background:rgba(189,122,112,0.45);height:100%;width:0;transition:width .25s;"></div>
-                <div id="dbar-public" style="background:rgba(189,122,112,0.2);height:100%;width:0;transition:width .25s;"></div>
+            <div style="margin-top:12px;margin-bottom:16px;">
+              <div style="height:7px;border-radius:100px;overflow:hidden;background:rgba(247,243,237,0.06);display:flex;">
+                <div id="dbar-owner" style="background:#bd7a70;height:100%;width:0;transition:width .3s;"></div>
+                <div id="dbar-renter" style="background:#8a9a7b;height:100%;width:0;transition:width .3s;"></div>
+                <div id="dbar-public" style="background:#e8a87c;height:100%;width:0;transition:width .3s;"></div>
               </div>
               <div style="display:flex;gap:14px;margin-top:7px;flex-wrap:wrap;">
-                <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(247,243,237,0.35);"><span style="width:8px;height:8px;border-radius:2px;background:#bd7a70;display:inline-block;flex-shrink:0;"></span>Owner occupier</span>
-                <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(247,243,237,0.35);"><span style="width:8px;height:8px;border-radius:2px;background:rgba(189,122,112,0.45);display:inline-block;flex-shrink:0;"></span>Renter</span>
-                <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(247,243,237,0.35);"><span style="width:8px;height:8px;border-radius:2px;background:rgba(189,122,112,0.2);display:inline-block;flex-shrink:0;"></span>Public housing</span>
+                <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(247,243,237,0.35);"><span style="width:8px;height:8px;border-radius:2px;background:#bd7a70;display:inline-block;flex-shrink:0;"></span>Owner</span>
+                <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(247,243,237,0.35);"><span style="width:8px;height:8px;border-radius:2px;background:#8a9a7b;display:inline-block;flex-shrink:0;"></span>Renter</span>
+                <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(247,243,237,0.35);"><span style="width:8px;height:8px;border-radius:2px;background:#e8a87c;display:inline-block;flex-shrink:0;"></span>Public</span>
               </div>
             </div>
             <div class="field"><label>Notes <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">(optional)</span></label><textarea id="demo-notes" style="min-height:70px;" placeholder="Any context on the area demographics…"></textarea></div>
@@ -1659,7 +1677,7 @@ function daysFromToday(dateStr) {
 
 function urgencyClass(days) {
   if (days < 0) return 'urg-overdue';
-  if (days <= 3) return 'urg-critical';
+  if (days < 7) return 'urg-critical';
   if (days <= 14) return 'urg-soon';
   return 'urg-ok';
 }
@@ -1679,18 +1697,20 @@ function formatDate(dateStr) {
 function renderMilestonesDashboard() {
   const tbody = document.getElementById('ms-tbody');
   const summaryEl = document.getElementById('ms-summary');
-  const active = milestones.filter(m => !m.completed).sort((a, b) => new Date(a.date) - new Date(b.date));
-  const done = milestones.filter(m => m.completed);
+  const archivedIds = new Set(clients.filter(c => c.datesArchived).map(c => c.id));
+  const active = milestones.filter(m => !m.completed && !archivedIds.has(m.clientId)).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const done = milestones.filter(m => m.completed && !archivedIds.has(m.clientId));
   const overdue = active.filter(m => daysFromToday(m.date) < 0).length;
   summaryEl.textContent = active.length
     ? `${active.length} active${overdue ? ' · ' + overdue + ' overdue' : ''}`
     : '';
   const emptyEl = document.getElementById('ms-empty');
   const tableWrap = document.getElementById('ms-table-wrap');
+  const legendEl = document.getElementById('ms-legend');
   const archiveBtn = document.getElementById('ms-archive-btn');
   if (done.length) {
     archiveBtn.style.display = 'flex';
-    archiveBtn.textContent = `▸ Show completed (${done.length})`;
+    archiveBtn.textContent = `▸ Show completed milestones (${done.length})`;
     document.getElementById('ms-archive-wrap').style.display = 'none';
   } else {
     archiveBtn.style.display = 'none';
@@ -1698,25 +1718,70 @@ function renderMilestonesDashboard() {
   if (!active.length) {
     emptyEl.style.display = 'block';
     tableWrap.style.display = 'none';
+    if (legendEl) legendEl.style.display = 'none';
     tbody.innerHTML = '';
-    return;
+  } else {
+    emptyEl.style.display = 'none';
+    tableWrap.style.display = 'block';
+    if (legendEl) legendEl.style.display = 'flex';
+    tbody.innerHTML = active.map(m => {
+      const days = daysFromToday(m.date);
+      const urg = urgencyClass(days);
+      return `<tr class="${urg}">
+        <td><span class="urg-badge">${urgencyLabel(days)}</span></td>
+        <td class="ms-client">${esc(m.clientName)}</td>
+        <td class="ms-label">${esc(m.label)}${m.notes ? `<span style="display:block;font-size:11px;color:rgba(247,243,237,0.3);margin-top:2px;">${esc(m.notes)}</span>` : ''}</td>
+        <td class="ms-date">${formatDate(m.date)}</td>
+        <td><div class="actions">
+          <button class="btn-sm btn-done" onclick="completeMilestone('${m.id}')" title="Mark done">✓</button>
+          <button class="btn-sm btn-delete" onclick="deleteMilestoneConfirm('${m.id}')" title="Delete">✕</button>
+        </div></td>
+      </tr>`;
+    }).join('');
   }
-  emptyEl.style.display = 'none';
-  tableWrap.style.display = 'block';
-  tbody.innerHTML = active.map(m => {
-    const days = daysFromToday(m.date);
-    const urg = urgencyClass(days);
-    return `<tr class="${urg}">
-      <td><span class="urg-badge">${urgencyLabel(days)}</span></td>
-      <td class="ms-client">${esc(m.clientName)}</td>
-      <td class="ms-label">${esc(m.label)}${m.notes ? `<span style="display:block;font-size:11px;color:rgba(247,243,237,0.3);margin-top:2px;">${esc(m.notes)}</span>` : ''}</td>
-      <td class="ms-date">${formatDate(m.date)}</td>
-      <td><div class="actions">
-        <button class="btn-sm btn-done" onclick="completeMilestone('${m.id}')" title="Mark done">✓</button>
-        <button class="btn-sm btn-delete" onclick="deleteMilestoneConfirm('${m.id}')" title="Delete">✕</button>
-      </div></td>
-    </tr>`;
-  }).join('');
+
+  // Archive-ready: active (non-archived) clients who have milestones and all are done
+  const activeClientIds = [...new Set(milestones.filter(m => !archivedIds.has(m.clientId)).map(m => m.clientId))];
+  const archiveReady = activeClientIds.filter(cid => {
+    const cMs = milestones.filter(m => m.clientId === cid && !archivedIds.has(m.clientId));
+    return cMs.length > 0 && cMs.every(m => m.completed);
+  });
+  const readyWrap = document.getElementById('ms-archive-ready-wrap');
+  const readyList = document.getElementById('ms-archive-ready-list');
+  if (archiveReady.length) {
+    readyWrap.style.display = 'block';
+    readyList.innerHTML = archiveReady.map(cid => {
+      const c = clients.find(x => x.id === cid);
+      if (!c) return '';
+      const count = milestones.filter(m => m.clientId === cid).length;
+      return `<div class="ms-archive-ready">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="flex-shrink:0;"><circle cx="9" cy="9" r="8" stroke="#6dbf7b" stroke-width="1.5"/><path d="M5.5 9l2.5 2.5 4.5-4.5" stroke="#6dbf7b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div style="flex:1;"><div style="font-size:14px;color:rgba(247,243,237,0.8);">${esc(c.name)}</div><div style="font-size:12px;color:rgba(247,243,237,0.35);">All ${count} milestone${count !== 1 ? 's' : ''} complete</div></div>
+        <button onclick="archiveClient('${cid}')" style="background:rgba(109,191,123,0.12);border:1px solid rgba(109,191,123,0.25);color:#6dbf7b;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;border-radius:7px;padding:6px 13px;cursor:pointer;white-space:nowrap;">Archive client</button>
+      </div>`;
+    }).join('');
+  } else {
+    readyWrap.style.display = 'none';
+  }
+
+  // Completed (archived) clients
+  const completedClients = clients.filter(c => c.datesArchived);
+  const completedWrap = document.getElementById('ms-completed-wrap');
+  const completedList = document.getElementById('ms-completed-list');
+  if (completedClients.length) {
+    completedWrap.style.display = 'block';
+    completedList.innerHTML = completedClients.map(c => {
+      const cMs = milestones.filter(m => m.clientId === c.id);
+      const lastDate = cMs.length ? cMs.map(m => m.date).sort().pop() : null;
+      return `<div class="ms-completed-card">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;"><circle cx="10" cy="10" r="9" stroke="#6dbf7b" stroke-width="1.5"/><path d="M6 10l3 3 5-5" stroke="#6dbf7b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div style="flex:1;"><div style="font-size:14px;color:rgba(247,243,237,0.65);">${esc(c.name)}</div>${lastDate ? `<div style="font-size:12px;color:rgba(247,243,237,0.35);">Last date: ${formatDate(lastDate)}</div>` : ''}</div>
+        <button onclick="reopenClient('${c.id}')" style="background:none;border:none;font-family:'Outfit',sans-serif;font-size:13px;font-weight:400;color:#bd7a70;cursor:pointer;padding:0;">Reopen</button>
+      </div>`;
+    }).join('');
+  } else {
+    completedWrap.style.display = 'none';
+  }
 }
 
 function clientName(clientId) {
@@ -1765,6 +1830,37 @@ function renderClientMilestones(clientId) {
   </div>`;
 }
 
+let _msRows = [];
+
+function addMilestoneRow() {
+  _msRows.push({ type: Object.keys(MS_TYPES)[0], date: '', notes: '' });
+  renderMilestoneRows();
+}
+
+function removeMilestoneRow(idx) {
+  _msRows.splice(idx, 1);
+  if (_msRows.length === 0) _msRows.push({ type: Object.keys(MS_TYPES)[0], date: '', notes: '' });
+  renderMilestoneRows();
+}
+
+function renderMilestoneRows() {
+  const typeOpts = Object.entries(MS_TYPES).map(([k,v]) => `<option value="${k}">${v}</option>`).join('');
+  document.getElementById('ms-rows').innerHTML = _msRows.map((row, idx) => `
+    <div class="ms-row">
+      <select class="ms-add-input" style="height:42px;" onchange="_msRows[${idx}].type=this.value">${typeOpts.replace(`value="${row.type}"`, `value="${row.type}" selected`)}</select>
+      <input type="date" class="ms-add-input" style="height:42px;color-scheme:dark;" value="${row.date}" onchange="_msRows[${idx}].date=this.value">
+      <input type="text" class="ms-add-input" style="height:42px;" placeholder="Notes (optional)" value="${esc(row.notes)}" oninput="_msRows[${idx}].notes=this.value">
+      <button class="ms-row-remove" onclick="removeMilestoneRow(${idx})" title="Remove">×</button>
+    </div>`).join('');
+  updateSaveBtnLabel();
+}
+
+function updateSaveBtnLabel() {
+  const n = _msRows.length;
+  const btn = document.getElementById('ms-add-submit');
+  if (btn) btn.textContent = n > 1 ? `Save ${n} dates` : 'Save date';
+}
+
 function toggleAddDateForm() {
   const panel = document.getElementById('ms-add-panel');
   const isOpen = panel.style.display !== 'none';
@@ -1772,40 +1868,57 @@ function toggleAddDateForm() {
     panel.style.display = 'none';
     document.getElementById('ms-add-btn').textContent = '+ Add date';
   } else {
-    // Populate client dropdown fresh
     const sel = document.getElementById('ms-add-client');
     sel.innerHTML = '<option value="">Select client…</option>' +
-      clients.filter(c => c.active).map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
-    // Populate type dropdown
-    document.getElementById('ms-add-type').innerHTML =
-      Object.entries(MS_TYPES).map(([k,v]) => `<option value="${k}">${v}</option>`).join('');
-    document.getElementById('ms-add-date').value = '';
-    document.getElementById('ms-add-notes').value = '';
+      clients.filter(c => c.active && !c.datesArchived).map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+    _msRows = [{ type: Object.keys(MS_TYPES)[0], date: '', notes: '' }];
+    renderMilestoneRows();
     panel.style.display = 'block';
     document.getElementById('ms-add-btn').textContent = '✕ Cancel';
     sel.focus();
   }
 }
 
-async function addMilestoneFromDashboard() {
+async function saveMilestoneBatch() {
   const clientId = document.getElementById('ms-add-client').value;
-  const type = document.getElementById('ms-add-type').value;
-  const date = document.getElementById('ms-add-date').value;
-  const notes = document.getElementById('ms-add-notes').value.trim();
   if (!clientId) { alert('Please select a client.'); return; }
-  if (!date) { alert('Please select a date.'); return; }
-  const name = clientName(clientId);
-  const label = type === 'custom' ? (notes || 'Custom') : MS_TYPES[type];
+  const valid = _msRows.filter(r => r.date);
+  if (!valid.length) { alert('Please add at least one date.'); return; }
   const btn = document.getElementById('ms-add-submit');
   btn.textContent = 'Saving…'; btn.disabled = true;
-  const res = await api('POST', '/api/admin/milestones', { clientId, clientName: name, type, label, date, notes });
-  btn.textContent = 'Add date'; btn.disabled = false;
-  if (!res.ok) { alert('Failed to save. Please try again.'); return; }
-  const data = await res.json();
-  milestones.push({ id: data.id, clientId, clientName: name, type, label, date, notes, completed: false, completedAt: null, createdAt: new Date().toISOString() });
+  const name = clientName(clientId);
+  for (const row of valid) {
+    const label = row.type === 'custom' ? (row.notes || 'Custom') : MS_TYPES[row.type];
+    try {
+      const res = await api('POST', '/api/admin/milestones', { clientId, clientName: name, type: row.type, label, date: row.date, notes: row.notes });
+      if (res.ok) {
+        const data = await res.json();
+        milestones.push({ id: data.id, clientId, clientName: name, type: row.type, label, date: row.date, notes: row.notes, completed: false, completedAt: null, createdAt: new Date().toISOString() });
+      }
+    } catch {}
+  }
+  btn.textContent = 'Save dates'; btn.disabled = false;
   toggleAddDateForm();
   renderMilestonesDashboard();
   updateMilestoneBadges();
+}
+
+async function archiveClient(clientId) {
+  const c = clients.find(x => x.id === clientId);
+  if (!c || !confirm(`Archive ${c.name}? They'll move to "Completed clients" and can be reopened any time.`)) return;
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, datesArchived: true });
+  if (!res.ok) { alert('Failed to archive.'); return; }
+  c.datesArchived = true;
+  renderMilestonesDashboard();
+}
+
+async function reopenClient(clientId) {
+  const c = clients.find(x => x.id === clientId);
+  if (!c) return;
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, datesArchived: false });
+  if (!res.ok) { alert('Failed to reopen.'); return; }
+  c.datesArchived = false;
+  renderMilestonesDashboard();
 }
 
 async function completeMilestone(id, clientId) {
