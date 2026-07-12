@@ -695,18 +695,7 @@
           <a href="/clients/questionnaire.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Portal</span><span class="plc-name">Onboarding questionnaire</span><span class="plc-url">/clients/questionnaire.html</span></a>
         </div>
         <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Partner referral pages</p>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:22px;">
-          <a href="/p/alex-pagonis-x2e3b.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Mortgage Broker</span><span class="plc-name">Alex Pagonis</span><span class="plc-url">/p/alex-pagonis-x2e3b</span></a>
-          <a href="/p/dylan-bertovic-qsct7.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Mortgage Broker</span><span class="plc-name">Dylan Bertovic</span><span class="plc-url">/p/dylan-bertovic-qsct7</span></a>
-          <a href="/p/hung-chuy-rkph.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Mortgage Broker</span><span class="plc-name">Hung Chuy</span><span class="plc-url">/p/hung-chuy-rkph</span></a>
-          <a href="/p/jay-morosi-t04bf.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Mortgage Broker</span><span class="plc-name">Jay Morosi</span><span class="plc-url">/p/jay-morosi-t04bf</span></a>
-          <a href="/p/julianne-zammit-ohxyf.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Mortgage Broker</span><span class="plc-name">Julianne Zammit</span><span class="plc-url">/p/julianne-zammit-ohxyf</span></a>
-          <a href="/p/justin-purll-xxgqk.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Mortgage Broker</span><span class="plc-name">Justin Purll</span><span class="plc-url">/p/justin-purll-xxgqk</span></a>
-          <a href="/p/matt-curle-873tj.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Mortgage Broker</span><span class="plc-name">Matt Curle</span><span class="plc-url">/p/matt-curle-873tj</span></a>
-          <a href="/p/patrick-noll-zgeyc.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Mortgage Broker</span><span class="plc-name">Patrick Noll</span><span class="plc-url">/p/patrick-noll-zgeyc</span></a>
-          <a href="/p/sam-wetzler-sj4aj.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Mortgage Broker</span><span class="plc-name">Sam Wetzler</span><span class="plc-url">/p/sam-wetzler-sj4aj</span></a>
-          <a href="/p/shiv-neel-i8wtg.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Tax Agent</span><span class="plc-name">Shiv Lal</span><span class="plc-url">/p/shiv-neel-i8wtg</span></a>
-        </div>
+        <div id="partner-list-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:22px;"></div>
         <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Property presentations</p>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
           <a href="/p/property.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Presentation</span><span class="plc-name">Viewer template</span><span class="plc-url">/p/property.html</span></a>
@@ -1108,6 +1097,31 @@ const MARKETS = [
   { key: 'townsville',    name: 'Townsville',    state: 'QLD' },
 ];
 
+// ── Partner registry ──────────────────────────────────────────────────────────
+const DEFAULT_PARTNER_ROLE = 'Mortgage broker';
+const PARTNERS = [
+  { slug: 'alex-pagonis-x2e3b',   name: 'Alex Pagonis'      },
+  { slug: 'dylan-bertovic-qsct7', name: 'Dylan Bertovic'    },
+  { slug: 'hung-chuy-rkph',       name: 'Hung Chuy'         },
+  { slug: 'jay-morosi-t04bf',     name: 'Jay Morosi'        },
+  { slug: 'julianne-zammit-ohxyf',name: 'Julianne Zammit'  },
+  { slug: 'justin-purll-xxgqk',   name: 'Justin Purll'      },
+  { slug: 'matt-curle-873tj',     name: 'Matt Curle'        },
+  { slug: 'patrick-noll-zgeyc',   name: 'Patrick Noll'      },
+  { slug: 'sam-wetzler-sj4aj',    name: 'Sam Wetzler'       },
+  { slug: 'shiv-neel-i8wtg',      name: 'Shiv Lal',         role: 'Tax agent' },
+];
+
+function renderPartnerList() {
+  const grid = document.getElementById('partner-list-grid');
+  if (!grid) return;
+  grid.innerHTML = PARTNERS.map(p => {
+    const role = p.role || DEFAULT_PARTNER_ROLE;
+    const path = `/p/${p.slug}`;
+    return `<a href="${path}.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">${role}</span><span class="plc-name">${p.name}</span><span class="plc-url">${path}</span></a>`;
+  }).join('');
+}
+
 let adminPassword = '';
 let clients = [];
 let milestones = [];
@@ -1178,6 +1192,7 @@ async function completeLogin(pw) {
   sessionStorage.setItem('fw_admin_pw', pw);
   document.getElementById('gate').classList.add('hidden');
   showSection('dashboard', document.querySelector('.snav-item'));
+  renderPartnerList();
   loadClients();
   loadMilestones();
   loadPresentations();
@@ -1749,7 +1764,13 @@ function updateMilestoneBadges() {
     const btn = document.getElementById('dates-btn-' + c.id);
     if (!btn) return;
     const count = milestones.filter(m => m.clientId === c.id && !m.completed).length;
-    btn.textContent = count ? `Dates (${count})` : 'Dates';
+    const badge = btn.querySelector('.cc-badge');
+    if (count) {
+      if (badge) { badge.textContent = count; }
+      else { btn.insertAdjacentHTML('beforeend', `<span class="cc-badge">${count}</span>`); }
+    } else {
+      if (badge) badge.remove();
+    }
   });
 }
 
