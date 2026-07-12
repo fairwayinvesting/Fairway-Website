@@ -287,6 +287,68 @@ function render(d) {
     }</div></div>`;
   }
 
+  // Cashflow
+  if (d.cashflow?.enabled) {
+    const c = calcCashflow(d.cashflow);
+    if (c) {
+      const pos = c.netWeekly >= 0;
+      html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Cashflow analysis</p>
+      <div class="p-cf-grid">
+        <div class="p-cf-item"><span class="p-cf-label">Purchase price</span><span class="p-cf-val">${fmt(c.price)}</span></div>
+        <div class="p-cf-item"><span class="p-cf-label">Weekly rent</span><span class="p-cf-val">${fmt(c.wRent)}<span style="font-size:14px;font-weight:300;color:rgba(247,243,237,0.4)">/wk</span></span></div>
+        <div class="p-cf-item"><span class="p-cf-label">Gross yield</span><span class="p-cf-val">${c.grossYield.toFixed(2)}<span style="font-size:14px;font-weight:300;color:rgba(247,243,237,0.4)">%</span></span></div>
+        <div class="p-cf-item"><span class="p-cf-label">Loan (${c.lvr}% LVR)</span><span class="p-cf-val">${fmt(c.loan)}</span></div>
+        <div class="p-cf-item"><span class="p-cf-label">Annual holding costs</span><span class="p-cf-val">${fmt(c.totalCosts)}</span></div>
+        <div class="p-cf-item ${pos ? 'p-cf-positive' : 'p-cf-negative'}"><span class="p-cf-label">Net cash flow</span><span class="p-cf-val">${fmtSigned(c.netWeekly)}<span style="font-size:14px;font-weight:300">/wk</span></span></div>
+      </div>
+      <p class="p-cf-note">Holding costs include interest at ${d.cashflow.interestRate || '—'}%${d.cashflow.managementFee ? `, ${d.cashflow.managementFee}% management` : ''}${d.cashflow.annualRates ? `, council rates, insurance` : ''}.</p>
+      </div>`;
+    }
+  }
+
+  // Risk profile — with migration from old {bushfireImageUrl,floodImageUrl} shape
+  if (d.riskProfile?.enabled) {
+    const rawR = d.riskProfile;
+    let rItems = Array.isArray(rawR.items) ? rawR.items : [];
+    if (!rItems.length) {
+      if (rawR.bushfireImageUrl) rItems.push({ label: 'Bushfire risk', imageUrl: rawR.bushfireImageUrl });
+      if (rawR.floodImageUrl)    rItems.push({ label: 'Flood zone',    imageUrl: rawR.floodImageUrl });
+    }
+    const visibleItems = rItems.filter(i => i.imageUrl);
+    if (visibleItems.length || rawR.notes) {
+      html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Risk profile</p>`;
+      if (rawR.notes) html += `<p style="font-size:14px;color:rgba(247,243,237,0.5);line-height:1.7;margin-bottom:20px;">${esc(rawR.notes)}</p>`;
+      if (visibleItems.length) {
+        const cols = visibleItems.length === 1 ? '1fr' : '1fr 1fr';
+        html += `<div style="display:grid;grid-template-columns:${cols};gap:14px;">`;
+        visibleItems.forEach(item => {
+          html += `<div><p style="font-size:10px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">${esc(item.label||'Risk')}</p><img src="${esc(item.imageUrl)}" class="p-section-img" style="margin-top:0;cursor:zoom-in;" alt="${esc(item.label||'Risk map')}" onclick="openLightbox(this.src,this.alt)"></div>`;
+        });
+        html += `</div>`;
+      }
+      html += `</div>`;
+    }
+  }
+
+  // Demographics
+  if (d.demographics?.enabled) {
+    const dm = d.demographics;
+    html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Area demographics</p><div class="p-demo-bars">`;
+    const bars = [['Owner occupier', dm.ownerOccupier], ['Renter', dm.renter], ['Public housing', dm.publicHousing]].filter(([,v]) => v);
+    bars.forEach(([label, pct]) => {
+      const num = parseFloat(pct) || 0;
+      html += `<div class="p-demo-bar-row">
+        <span class="p-demo-bar-label">${esc(label)}</span>
+        <div class="p-demo-bar-track"><div class="p-demo-bar-fill" style="width:${Math.min(num,100)}%"></div></div>
+        <span class="p-demo-bar-pct">${num}%</span>
+      </div>`;
+    });
+    html += `</div>`;
+    if (dm.notes) html += `<p style="font-size:14px;color:rgba(247,243,237,0.5);line-height:1.7;margin-bottom:10px;">${esc(dm.notes)}</p>`;
+    if (dm.imageUrl) html += `<img src="${esc(dm.imageUrl)}" class="p-section-img" alt="Demographics">`;
+    html += `</div>`;
+  }
+
   // Comparable sales
   if (d.comparableSales?.enabled && d.comparableSales?.items?.length) {
     html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Comparable sales</p><div class="p-comp-grid">`;
@@ -315,63 +377,6 @@ function render(d) {
       </div>`;
     });
     html += `</div></div>`;
-  }
-
-  // Cashflow
-  if (d.cashflow?.enabled) {
-    const c = calcCashflow(d.cashflow);
-    if (c) {
-      const pos = c.netWeekly >= 0;
-      html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Cashflow analysis</p>
-      <div class="p-cf-grid">
-        <div class="p-cf-item"><span class="p-cf-label">Purchase price</span><span class="p-cf-val">${fmt(c.price)}</span></div>
-        <div class="p-cf-item"><span class="p-cf-label">Weekly rent</span><span class="p-cf-val">${fmt(c.wRent)}<span style="font-size:14px;font-weight:300;color:rgba(247,243,237,0.4)">/wk</span></span></div>
-        <div class="p-cf-item"><span class="p-cf-label">Gross yield</span><span class="p-cf-val">${c.grossYield.toFixed(2)}<span style="font-size:14px;font-weight:300;color:rgba(247,243,237,0.4)">%</span></span></div>
-        <div class="p-cf-item"><span class="p-cf-label">Loan (${c.lvr}% LVR)</span><span class="p-cf-val">${fmt(c.loan)}</span></div>
-        <div class="p-cf-item"><span class="p-cf-label">Annual holding costs</span><span class="p-cf-val">${fmt(c.totalCosts)}</span></div>
-        <div class="p-cf-item ${pos ? 'p-cf-positive' : 'p-cf-negative'}"><span class="p-cf-label">Net cash flow</span><span class="p-cf-val">${fmtSigned(c.netWeekly)}<span style="font-size:14px;font-weight:300">/wk</span></span></div>
-      </div>
-      <p class="p-cf-note">Holding costs include interest at ${d.cashflow.interestRate || '—'}%${d.cashflow.managementFee ? `, ${d.cashflow.managementFee}% management` : ''}${d.cashflow.annualRates ? `, council rates, insurance` : ''}.</p>
-      </div>`;
-    }
-  }
-
-  // Risk profile
-  if (d.riskProfile?.enabled) {
-    const r = d.riskProfile;
-    const hasBushfire = r.bushfireImageUrl;
-    const hasFlood = r.floodImageUrl;
-    if (hasBushfire || hasFlood || r.notes) {
-      html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Risk profile</p>`;
-      if (r.notes) html += `<p style="font-size:14px;color:rgba(247,243,237,0.5);line-height:1.7;margin-bottom:20px;">${esc(r.notes)}</p>`;
-      if (hasBushfire || hasFlood) {
-        const both = hasBushfire && hasFlood;
-        html += `<div style="display:grid;grid-template-columns:${both ? '1fr 1fr' : '1fr'};gap:14px;">`;
-        if (hasBushfire) html += `<div><p style="font-size:10px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">Bushfire risk</p><img src="${esc(r.bushfireImageUrl)}" class="p-section-img" style="margin-top:0;cursor:zoom-in;" alt="Bushfire risk map" onclick="openLightbox(this.src,this.alt)"></div>`;
-        if (hasFlood) html += `<div><p style="font-size:10px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">Flood zone</p><img src="${esc(r.floodImageUrl)}" class="p-section-img" style="margin-top:0;cursor:zoom-in;" alt="Flood zone map" onclick="openLightbox(this.src,this.alt)"></div>`;
-        html += `</div>`;
-      }
-      html += `</div>`;
-    }
-  }
-
-  // Demographics
-  if (d.demographics?.enabled) {
-    const dm = d.demographics;
-    html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Area demographics</p><div class="p-demo-bars">`;
-    const bars = [['Owner occupier', dm.ownerOccupier], ['Renter', dm.renter], ['Public housing', dm.publicHousing]].filter(([,v]) => v);
-    bars.forEach(([label, pct]) => {
-      const num = parseFloat(pct) || 0;
-      html += `<div class="p-demo-bar-row">
-        <span class="p-demo-bar-label">${esc(label)}</span>
-        <div class="p-demo-bar-track"><div class="p-demo-bar-fill" style="width:${Math.min(num,100)}%"></div></div>
-        <span class="p-demo-bar-pct">${num}%</span>
-      </div>`;
-    });
-    html += `</div>`;
-    if (dm.notes) html += `<p style="font-size:14px;color:rgba(247,243,237,0.5);line-height:1.7;margin-bottom:10px;">${esc(dm.notes)}</p>`;
-    if (dm.imageUrl) html += `<img src="${esc(dm.imageUrl)}" class="p-section-img" alt="Demographics">`;
-    html += `</div>`;
   }
 
   // Custom sections

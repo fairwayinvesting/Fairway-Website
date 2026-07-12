@@ -169,6 +169,23 @@
     .brief-budget-row input{flex:1}
     .brief-budget-row span{color:rgba(247,243,237,0.25);font-size:16px;flex-shrink:0}
 
+    /* Client cards */
+    .client-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+    .client-card{background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:20px 22px;display:flex;flex-direction:column;gap:0;transition:border-color .2s;}
+    .client-card:hover{border-color:rgba(247,243,237,0.14);}
+    .cc-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+    .cc-name{font-size:15px;font-weight:400;color:#f7f3ed;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .cc-email{font-size:12.5px;color:rgba(247,243,237,0.35);margin-bottom:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .cc-markets{display:flex;flex-wrap:wrap;gap:5px;min-height:22px;margin-bottom:14px;}
+    .cc-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;}
+    .cc-divider{height:1px;background:rgba(247,243,237,0.06);margin:0 -22px 14px;}
+    .cc-inactive{opacity:0.6;}
+
+    /* Milestone archive */
+    .ms-archive-toggle{background:none;border:none;font-family:'Outfit',sans-serif;font-size:12px;font-weight:400;color:rgba(247,243,237,0.3);cursor:pointer;padding:10px 0;display:flex;align-items:center;gap:6px;transition:color .2s;}
+    .ms-archive-toggle:hover{color:rgba(247,243,237,0.55);}
+    .ms-archive-wrap{display:none;margin-top:6px;}
+
     /* Add date form — grid layout matching modal fields */
     .ms-add-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;margin-bottom:20px;}
     .ms-add-field{display:flex;flex-direction:column;}
@@ -239,6 +256,9 @@
     .btn-send{background:rgba(109,191,123,0.12);color:#6dbf7b;border:1px solid rgba(109,191,123,0.25);border-radius:7px;padding:7px 14px;font-family:'Outfit',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .2s;}
     .btn-send:hover{background:rgba(109,191,123,0.22);}
     .btn-add-block{background:rgba(247,243,237,0.05);color:rgba(247,243,237,0.5);border:1px solid rgba(247,243,237,0.09);border-radius:7px;padding:6px 12px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;}
+    .pres-client-pill{padding:10px 14px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.08);border-radius:8px;cursor:pointer;font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.55);transition:all .15s;user-select:none;line-height:1.2;}
+    .pres-client-pill:hover{background:rgba(247,243,237,0.07);}
+    .pres-client-pill.selected{background:rgba(189,122,112,0.15);border-color:rgba(189,122,112,0.4);color:#f7f3ed;}
     .btn-add-block:hover{background:rgba(247,243,237,0.09);}
     .btn-remove{background:none;border:none;color:rgba(247,243,237,0.25);font-size:16px;cursor:pointer;padding:2px 4px;line-height:1;flex-shrink:0;transition:color .15s;}
     .btn-remove:hover{color:#f08080;}
@@ -387,27 +407,31 @@
         </table>
       </div>
     </div>
+    <button class="ms-archive-toggle" id="ms-archive-btn" onclick="toggleMilestoneArchive()" style="display:none;">▸ Show completed</button>
+    <div class="ms-archive-wrap" id="ms-archive-wrap">
+      <div class="table-wrap">
+        <div class="ms-scroll">
+          <table class="ms-table">
+            <thead><tr>
+              <th>Client</th>
+              <th>Milestone</th>
+              <th>Date</th>
+              <th>Completed</th>
+              <th></th>
+            </tr></thead>
+            <tbody id="ms-archive-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="page-header">
     <h1>Client management</h1>
     <button class="btn-primary" id="add-btn">+ Add client</button>
   </div>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Client</th>
-          <th class="td-email">Email</th>
-          <th class="td-markets">Markets</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="tbody">
-        <tr class="empty-row"><td colspan="5">Loading…</td></tr>
-      </tbody>
-    </table>
+  <div id="clients-grid" class="client-cards-grid">
+    <div style="grid-column:1/-1;text-align:center;padding:48px;color:rgba(247,243,237,0.25);font-size:14px;">Loading…</div>
   </div>
 
   <!-- Property Presentations -->
@@ -500,17 +524,17 @@
         <span class="plc-url">/p/alex-pagonis-x2e3b</span>
       </a>
       <a href="/p/dylan-bertovic-qsct7.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Finance Broker</span>
+        <span class="plc-label">Mortgage Broker</span>
         <span class="plc-name">Dylan Bertovic</span>
         <span class="plc-url">/p/dylan-bertovic-qsct7</span>
       </a>
       <a href="/p/hung-chuy-rkph.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Partner</span>
+        <span class="plc-label">Mortgage Broker</span>
         <span class="plc-name">Hung Chuy</span>
         <span class="plc-url">/p/hung-chuy-rkph</span>
       </a>
       <a href="/p/jay-morosi-t04bf.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Partner</span>
+        <span class="plc-label">Mortgage Broker</span>
         <span class="plc-name">Jay Morosi</span>
         <span class="plc-url">/p/jay-morosi-t04bf</span>
       </a>
@@ -525,7 +549,7 @@
         <span class="plc-url">/p/justin-purll-xxgqk</span>
       </a>
       <a href="/p/matt-curle-873tj.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Finance Broker</span>
+        <span class="plc-label">Mortgage Broker</span>
         <span class="plc-name">Matt Curle</span>
         <span class="plc-url">/p/matt-curle-873tj</span>
       </a>
@@ -535,12 +559,12 @@
         <span class="plc-url">/p/patrick-noll-zgeyc</span>
       </a>
       <a href="/p/sam-wetzler-sj4aj.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Partner</span>
+        <span class="plc-label">Mortgage Broker</span>
         <span class="plc-name">Sam Wetzler</span>
         <span class="plc-url">/p/sam-wetzler-sj4aj</span>
       </a>
       <a href="/p/shiv-neel-i8wtg.html" target="_blank" rel="noopener" class="page-link-card">
-        <span class="plc-label">Partner</span>
+        <span class="plc-label">Tax Agent</span>
         <span class="plc-name">Shiv Lal</span>
         <span class="plc-url">/p/shiv-neel-i8wtg</span>
       </a>
@@ -578,11 +602,21 @@
       <h2 style="font-family:'Fraunces',serif;font-size:24px;font-weight:400;">Security</h2>
     </div>
     <div class="totp-setup">
+      <div id="totp-status-active" style="display:none;">
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+          <div style="width:8px;height:8px;border-radius:50%;background:#6dbf7b;flex-shrink:0;"></div>
+          <div style="flex:1;min-width:180px;">
+            <p style="font-size:13.5px;font-weight:400;color:#f7f3ed;margin-bottom:3px;">2FA is enabled</p>
+            <p style="font-size:12px;color:rgba(247,243,237,0.35);margin:0;line-height:1.5;">Your admin login requires a 6-digit authenticator code.</p>
+          </div>
+          <button class="btn-secondary" id="totp-reconfig-btn" style="font-size:12px;padding:7px 12px;white-space:nowrap;">Reconfigure</button>
+        </div>
+      </div>
       <div id="totp-section">
         <p style="font-size:13.5px;color:rgba(247,243,237,0.4);margin-bottom:18px;">Two-factor authentication (2FA) adds an extra layer of security to your admin login.</p>
-        <button class="btn-secondary" id="totp-setup-btn">Set up / view 2FA</button>
+        <button class="btn-secondary" id="totp-setup-btn">Set up 2FA</button>
       </div>
-      <div id="totp-panel" style="display:none;"></div>
+      <div id="totp-panel" style="display:none;margin-top:20px;"></div>
     </div>
   </div>
 </main>
@@ -668,19 +702,13 @@
         <!-- Risk profile -->
         <div class="pres-analysis-block">
           <div class="pres-analysis-head" onclick="toggleAnalysis('risk')">
-            <span class="pres-analysis-title">Risk profile (bushfire &amp; flood)</span>
+            <span class="pres-analysis-title">Risk profile</span>
             <div class="toggle-wrap" onclick="event.stopPropagation()"><label class="toggle"><input type="checkbox" id="risk-enabled" onchange="toggleAnalysis('risk',true)"><span class="toggle-slider"></span></label></div>
           </div>
           <div class="pres-analysis-body" id="analysis-risk">
-            <div class="field"><label>Bushfire risk screenshot</label>
-              <div style="display:flex;gap:8px;margin-bottom:6px;"><button class="btn-upload" onclick="triggerSectionUpload('risk-bushfire')">↑ Upload</button><input type="url" id="risk-bushfire-image" class="pres-media-input" placeholder="or paste URL" style="flex:1;"></div>
-              <img id="risk-bushfire-preview" style="display:none;margin-top:4px;width:100%;max-height:160px;object-fit:cover;border-radius:8px;border:1px solid rgba(247,243,237,0.07);">
-            </div>
-            <div class="field"><label>Flood zone screenshot</label>
-              <div style="display:flex;gap:8px;margin-bottom:6px;"><button class="btn-upload" onclick="triggerSectionUpload('risk-flood')">↑ Upload</button><input type="url" id="risk-flood-image" class="pres-media-input" placeholder="or paste URL" style="flex:1;"></div>
-              <img id="risk-flood-preview" style="display:none;margin-top:4px;width:100%;max-height:160px;object-fit:cover;border-radius:8px;border:1px solid rgba(247,243,237,0.07);">
-            </div>
-            <div class="field"><label>Notes <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">(optional)</span></label><textarea id="risk-notes" style="min-height:70px;" placeholder="Any relevant context…"></textarea></div>
+            <div class="field"><label>Notes <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">(optional)</span></label><textarea id="risk-notes" style="min-height:60px;" placeholder="Overall risk summary…"></textarea></div>
+            <div id="risk-items-list"></div>
+            <button class="btn-add-block" onclick="addRiskItem()" style="margin-top:4px;">+ Add risk item</button>
           </div>
         </div>
         <!-- Demographics -->
@@ -691,9 +719,21 @@
           </div>
           <div class="pres-analysis-body" id="analysis-demo">
             <div class="pres-field-row">
-              <div class="field"><label>Owner occupier (%)</label><input type="text" id="demo-owner" placeholder="58"></div>
-              <div class="field"><label>Renter (%)</label><input type="text" id="demo-renter" placeholder="38"></div>
-              <div class="field"><label>Public housing (%)</label><input type="text" id="demo-public" placeholder="4"></div>
+              <div class="field"><label>Owner occupier (%)</label><input type="text" id="demo-owner" placeholder="58" oninput="updateDemoBar()"></div>
+              <div class="field"><label>Renter (%)</label><input type="text" id="demo-renter" placeholder="38" oninput="updateDemoBar()"></div>
+              <div class="field"><label>Public housing (%)</label><input type="text" id="demo-public" placeholder="4" oninput="updateDemoBar()"></div>
+            </div>
+            <div style="margin-top:4px;margin-bottom:16px;">
+              <div style="height:6px;border-radius:100px;overflow:hidden;background:rgba(247,243,237,0.06);display:flex;">
+                <div id="dbar-owner" style="background:#bd7a70;height:100%;width:0;transition:width .25s;"></div>
+                <div id="dbar-renter" style="background:rgba(189,122,112,0.45);height:100%;width:0;transition:width .25s;"></div>
+                <div id="dbar-public" style="background:rgba(189,122,112,0.2);height:100%;width:0;transition:width .25s;"></div>
+              </div>
+              <div style="display:flex;gap:14px;margin-top:7px;flex-wrap:wrap;">
+                <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(247,243,237,0.35);"><span style="width:8px;height:8px;border-radius:2px;background:#bd7a70;display:inline-block;flex-shrink:0;"></span>Owner occupier</span>
+                <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(247,243,237,0.35);"><span style="width:8px;height:8px;border-radius:2px;background:rgba(189,122,112,0.45);display:inline-block;flex-shrink:0;"></span>Renter</span>
+                <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(247,243,237,0.35);"><span style="width:8px;height:8px;border-radius:2px;background:rgba(189,122,112,0.2);display:inline-block;flex-shrink:0;"></span>Public housing</span>
+              </div>
             </div>
             <div class="field"><label>Notes <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">(optional)</span></label><textarea id="demo-notes" style="min-height:70px;" placeholder="Any context on the area demographics…"></textarea></div>
             <div class="field"><label>Demographics screenshot</label>
@@ -985,6 +1025,7 @@ async function completeLogin(pw) {
   loadMilestones();
   loadPresentations();
   loadAuditLog();
+  loadTotpStatus();
 }
 
 document.getElementById('gate-btn').addEventListener('click', async function() {
@@ -1061,57 +1102,34 @@ async function loadClients() {
 }
 
 function renderTable() {
-  const tbody = document.getElementById('tbody');
-  if (!clients.length) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No clients yet. Add your first client above.</td></tr>';
-    return;
-  }
-  const mobile = window.innerWidth <= 760;
-  tbody.innerHTML = clients.map(c => {
+  // Milestone panels live outside the grid so expand works
+  let panelHtml = '';
+  grid.innerHTML = clients.map(c => {
     const cMs = milestones.filter(m => m.clientId === c.id && !m.completed);
     const msLabel = cMs.length ? `Dates (${cMs.length})` : 'Dates';
-    const dot = `<span class="status-dot ${c.active ? 'status-active' : 'status-inactive'}"></span>`;
-    const msRow = `<tr id="ms-row-${c.id}" style="display:none;"><td colspan="5" style="padding:0;"><div class="ms-panel" id="ms-panel-${c.id}"></div></td></tr>`;
     const notifyBtn = c.markets && c.markets.length
       ? `<button class="btn-sm btn-notify" onclick="notifyMarkets('${c.id}','${esc(c.name)}')" title="Send markets ready email">✉ Notify</button>`
       : '';
-    const briefBtn = `<button class="btn-sm btn-brief" onclick="openBrief('${c.id}','${esc(c.name)}')">Brief</button>`;
-    if (mobile) {
-      return `<tr style="border-bottom:1px solid rgba(247,243,237,0.05);">
-        <td colspan="5" style="padding:13px 16px;">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
-            <div style="min-width:0;flex:1;padding-top:3px;">
-              <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;">${dot}<span style="font-weight:400;color:#f7f3ed;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(c.name)}</span></div>
-              <div style="font-size:12px;color:rgba(247,243,237,0.3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(c.email)}</div>
-            </div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
-              <div style="display:flex;gap:5px;">
-                ${briefBtn}
-                <button class="btn-sm btn-edit" onclick="openEdit('${c.id}')">Edit</button>
-              </div>
-              <div style="display:flex;gap:5px;align-items:center;">
-                <button class="btn-dates" id="dates-btn-${c.id}" onclick="toggleMilestones('${c.id}')">${msLabel}</button>
-                ${notifyBtn}
-                <button class="btn-sm btn-delete" onclick="deleteClient('${c.id}','${esc(c.name)}')" style="padding:6px 10px;">✕</button>
-              </div>
-            </div>
-          </div>
-        </td>
-      </tr>${msRow}`;
-    }
-    return `<tr>
-      <td class="td-name">${esc(c.name)}</td>
-      <td class="td-email">${esc(c.email)}</td>
-      <td class="td-markets">${c.markets.length ? c.markets.map(m => `<span class="pill">${marketName(m)}</span>`).join('') : '<span style="color:rgba(247,243,237,0.25);font-size:13px;">None</span>'}</td>
-      <td>${dot}${c.active ? 'Active' : 'Inactive'}</td>
-      <td><div class="actions">
+    const markets = c.markets?.length
+      ? c.markets.map(m => `<span class="pill">${esc(marketName(m))}</span>`).join('')
+      : `<span style="font-size:11.5px;color:rgba(247,243,237,0.2);">No markets assigned</span>`;
+    return `<div class="client-card${c.active ? '' : ' cc-inactive'}" id="cc-${c.id}">
+      <div class="cc-header">
+        <span class="status-dot ${c.active ? 'status-active' : 'status-inactive'}"></span>
+        <span class="cc-name">${esc(c.name)}</span>
+      </div>
+      <p class="cc-email">${esc(c.email)}</p>
+      <div class="cc-divider"></div>
+      <div class="cc-markets">${markets}</div>
+      <div class="cc-actions">
         <button class="btn-sm btn-edit" onclick="openEdit('${c.id}')">Edit</button>
-        ${briefBtn}
+        <button class="btn-sm btn-brief" onclick="openBrief('${c.id}','${esc(c.name)}')">Brief</button>
         ${notifyBtn}
         <button class="btn-dates" id="dates-btn-${c.id}" onclick="toggleMilestones('${c.id}')">${msLabel}</button>
-        <button class="btn-sm btn-delete" onclick="deleteClient('${c.id}','${esc(c.name)}')">Delete</button>
-      </div></td>
-    </tr>${msRow}`;
+        <button class="btn-sm btn-delete" onclick="deleteClient('${c.id}','${esc(c.name)}')" style="margin-left:auto;">✕</button>
+      </div>
+      <div class="ms-panel" id="ms-panel-${c.id}" style="display:none;margin-top:14px;border-top:1px solid rgba(247,243,237,0.06);padding-top:14px;margin-bottom:-4px;padding-left:0;padding-right:0;background:transparent;border-radius:0;"></div>
+    </div>`;
   }).join('');
 }
 
@@ -1545,12 +1563,21 @@ function renderMilestonesDashboard() {
   const tbody = document.getElementById('ms-tbody');
   const summaryEl = document.getElementById('ms-summary');
   const active = milestones.filter(m => !m.completed).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const done = milestones.filter(m => m.completed);
   const overdue = active.filter(m => daysFromToday(m.date) < 0).length;
   summaryEl.textContent = active.length
     ? `${active.length} active${overdue ? ' · ' + overdue + ' overdue' : ''}`
     : '';
   const emptyEl = document.getElementById('ms-empty');
   const tableWrap = document.getElementById('ms-table-wrap');
+  const archiveBtn = document.getElementById('ms-archive-btn');
+  if (done.length) {
+    archiveBtn.style.display = 'flex';
+    archiveBtn.textContent = `▸ Show completed (${done.length})`;
+    document.getElementById('ms-archive-wrap').style.display = 'none';
+  } else {
+    archiveBtn.style.display = 'none';
+  }
   if (!active.length) {
     emptyEl.style.display = 'block';
     tableWrap.style.display = 'none';
@@ -1565,7 +1592,7 @@ function renderMilestonesDashboard() {
     return `<tr class="${urg}">
       <td><span class="urg-badge">${urgencyLabel(days)}</span></td>
       <td class="ms-client">${esc(m.clientName)}</td>
-      <td class="ms-label">${esc(m.label)}</td>
+      <td class="ms-label">${esc(m.label)}${m.notes ? `<span style="display:block;font-size:11px;color:rgba(247,243,237,0.3);margin-top:2px;">${esc(m.notes)}</span>` : ''}</td>
       <td class="ms-date">${formatDate(m.date)}</td>
       <td><div class="actions">
         <button class="btn-sm btn-done" onclick="completeMilestone('${m.id}')" title="Mark done">✓</button>
@@ -1581,14 +1608,15 @@ function clientName(clientId) {
 }
 
 function toggleMilestones(clientId) {
-  const row = document.getElementById('ms-row-' + clientId);
+  const panel = document.getElementById('ms-panel-' + clientId);
   const btn = document.getElementById('dates-btn-' + clientId);
-  if (row.style.display === 'none') {
-    row.style.display = 'table-row';
+  if (!panel) return;
+  if (panel.style.display === 'none') {
+    panel.style.display = 'block';
     btn.classList.add('active');
     renderClientMilestones(clientId);
   } else {
-    row.style.display = 'none';
+    panel.style.display = 'none';
     btn.classList.remove('active');
   }
 }
@@ -1673,6 +1701,33 @@ async function completeMilestone(id, clientId) {
   if (clientId) renderClientMilestones(clientId);
 }
 
+function toggleMilestoneArchive() {
+  const wrap = document.getElementById('ms-archive-wrap');
+  const btn = document.getElementById('ms-archive-btn');
+  const open = wrap.style.display !== 'none';
+  if (open) {
+    wrap.style.display = 'none';
+    btn.textContent = btn.textContent.replace('▾', '▸');
+  } else {
+    wrap.style.display = 'block';
+    btn.textContent = btn.textContent.replace('▸', '▾');
+    renderMilestonesArchive();
+  }
+}
+
+function renderMilestonesArchive() {
+  const tbody = document.getElementById('ms-archive-tbody');
+  const done = milestones.filter(m => m.completed).sort((a, b) => new Date(b.completedAt||b.date) - new Date(a.completedAt||a.date));
+  if (!done.length) { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:rgba(247,243,237,0.2);padding:24px;">No completed dates yet.</td></tr>`; return; }
+  tbody.innerHTML = done.map(m => `<tr style="opacity:0.55;">
+    <td class="ms-client">${esc(m.clientName)}</td>
+    <td class="ms-label">${esc(m.label)}${m.notes ? `<span style="display:block;font-size:11px;color:rgba(247,243,237,0.3);margin-top:2px;">${esc(m.notes)}</span>` : ''}</td>
+    <td class="ms-date">${formatDate(m.date)}</td>
+    <td class="ms-date">${m.completedAt ? new Date(m.completedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short'}) : '—'}</td>
+    <td><div class="actions"><button class="btn-sm btn-delete" onclick="deleteMilestoneConfirm('${m.id}')" title="Delete">✕</button></div></td>
+  </tr>`).join('');
+}
+
 async function deleteMilestoneConfirm(id, clientId) {
   if (!confirm('Delete this date?')) return;
   const res = await api('DELETE', `/api/admin/milestones?id=${encodeURIComponent(id)}`);
@@ -1684,10 +1739,26 @@ async function deleteMilestoneConfirm(id, clientId) {
 }
 
 // ── TOTP Setup ────────────────────────────────────────────────────────────────
-document.getElementById('totp-setup-btn').addEventListener('click', async function() {
-  this.textContent = 'Loading…'; this.disabled = true;
+async function loadTotpStatus() {
+  try {
+    const res = await api('GET', '/api/admin/totp-setup');
+    const { configured } = await res.json();
+    if (configured) {
+      document.getElementById('totp-status-active').style.display = 'block';
+      document.getElementById('totp-section').style.display = 'none';
+      document.getElementById('totp-reconfig-btn').addEventListener('click', openTotpPanel);
+    } else {
+      document.getElementById('totp-setup-btn').addEventListener('click', openTotpPanel);
+    }
+  } catch { document.getElementById('totp-setup-btn').addEventListener('click', openTotpPanel); }
+}
+
+async function openTotpPanel() {
+  const btn = document.getElementById('totp-setup-btn') || document.getElementById('totp-reconfig-btn');
+  if (btn) { btn.textContent = 'Loading…'; btn.disabled = true; }
   const res = await api('GET', '/api/admin/totp-setup');
   const { secret, uri, configured } = await res.json();
+  if (btn) { btn.textContent = btn.id === 'totp-reconfig-btn' ? 'Reconfigure' : 'Set up 2FA'; btn.disabled = false; }
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(uri)}`;
   const panel = document.getElementById('totp-panel');
   panel.innerHTML = `
@@ -1708,9 +1779,10 @@ document.getElementById('totp-setup-btn').addEventListener('click', async functi
         </div>
       </div>
     </div>`;
-  document.getElementById('totp-panel').style.display = 'block';
+  panel.style.display = 'block';
+  document.getElementById('totp-status-active').style.display = 'none';
   document.getElementById('totp-section').style.display = 'none';
-});
+}
 
 async function testTotpCode(secret) {
   const code = document.getElementById('totp-test-input').value.trim();
@@ -1760,7 +1832,7 @@ async function loadAuditLog() {
 }
 
 // ── Presentations ─────────────────────────────────────────────────────────────
-let _presImages = [], _presVideos = [], _presSections = [], _presSales = [], _presRentals = [], _uploadTarget = null;
+let _presImages = [], _presVideos = [], _presSections = [], _presSales = [], _presRentals = [], _presRiskItems = [], _uploadTarget = null;
 
 async function loadPresentations() {
   const res = await api('GET', '/api/admin/presentations');
@@ -1915,6 +1987,60 @@ function toggleAnalysis(key, fromCheckbox) {
   else { const open = body.classList.toggle('open'); if (cb) cb.checked = open; }
 }
 
+// ── Demographics bar ─────────────────────────────────────────────────────────
+function updateDemoBar() {
+  const o = parseFloat(document.getElementById('demo-owner').value)||0;
+  const r = parseFloat(document.getElementById('demo-renter').value)||0;
+  const p = parseFloat(document.getElementById('demo-public').value)||0;
+  const t = o+r+p || 100;
+  document.getElementById('dbar-owner').style.width=(o/t*100)+'%';
+  document.getElementById('dbar-renter').style.width=(r/t*100)+'%';
+  document.getElementById('dbar-public').style.width=(p/t*100)+'%';
+}
+
+// ── Risk profile (extensible) ─────────────────────────────────────────────────
+function migrateRisk(r) {
+  if (!r) return { enabled: false, items: [], notes: '' };
+  if (Array.isArray(r.items)) return r;
+  const items = [];
+  if (r.bushfireImageUrl) items.push({ id: uid(), label: 'Bushfire risk', imageUrl: r.bushfireImageUrl });
+  if (r.floodImageUrl) items.push({ id: uid(), label: 'Flood zone', imageUrl: r.floodImageUrl });
+  return { enabled: !!r.enabled, items, notes: r.notes || '' };
+}
+
+function renderRiskItems() {
+  const list = document.getElementById('risk-items-list');
+  if (!list) return;
+  list.innerHTML = _presRiskItems.map((item, idx) => `
+    <div class="pres-media-item" style="margin-bottom:10px;">
+      <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center;">
+        <input type="text" class="pres-media-input" placeholder="Label (e.g. Bushfire risk)" value="${esc(item.label||'')}" oninput="_presRiskItems[${idx}].label=this.value" style="flex:1;">
+        <button class="btn-remove" onclick="removeRiskItem(${idx})">✕</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:4px;">
+        <button class="btn-upload" onclick="triggerSectionUpload('risk-item-${idx}')">↑ Upload</button>
+        <input type="url" class="pres-media-input" placeholder="or paste image URL" value="${esc(item.imageUrl||'')}" oninput="_presRiskItems[${idx}].imageUrl=this.value;updateRiskPreview(${idx},this.value)" style="flex:1;">
+      </div>
+      ${item.imageUrl ? `<img src="${esc(item.imageUrl)}" id="risk-item-preview-${idx}" style="width:100%;max-height:140px;object-fit:cover;border-radius:8px;border:1px solid rgba(247,243,237,0.07);margin-top:4px;">` : `<img id="risk-item-preview-${idx}" style="display:none;width:100%;max-height:140px;object-fit:cover;border-radius:8px;border:1px solid rgba(247,243,237,0.07);margin-top:4px;">`}
+    </div>`).join('');
+}
+
+function updateRiskPreview(idx, url) {
+  const img = document.getElementById('risk-item-preview-'+idx);
+  if (!img) return;
+  img.src = url; img.style.display = url ? 'block' : 'none';
+}
+
+function addRiskItem() {
+  _presRiskItems.push({ id: uid(), label: '', imageUrl: '' });
+  renderRiskItems();
+}
+
+function removeRiskItem(idx) {
+  _presRiskItems.splice(idx, 1);
+  renderRiskItems();
+}
+
 // ── Media helpers ─────────────────────────────────────────────────────────────
 function uid() { return Math.random().toString(36).slice(2, 9); }
 
@@ -1987,12 +2113,9 @@ document.getElementById('pres-file-input').addEventListener('change', async func
   const url = json.url;
   if (_uploadTarget === 'image') {
     _presImages.push({ id: uid(), url, caption: '' }); renderImgList();
-  } else if (_uploadTarget === 'risk-bushfire') {
-    document.getElementById('risk-bushfire-image').value = url;
-    const prev = document.getElementById('risk-bushfire-preview'); prev.src = url; prev.style.display = 'block';
-  } else if (_uploadTarget === 'risk-flood') {
-    document.getElementById('risk-flood-image').value = url;
-    const prev = document.getElementById('risk-flood-preview'); prev.src = url; prev.style.display = 'block';
+  } else if (typeof _uploadTarget === 'string' && _uploadTarget.startsWith('risk-item-')) {
+    const idx = parseInt(_uploadTarget.replace('risk-item-', ''), 10);
+    if (_presRiskItems[idx]) { _presRiskItems[idx].imageUrl = url; renderRiskItems(); }
   } else if (_uploadTarget === 'demo') {
     document.getElementById('demo-image').value = url;
     const prev = document.getElementById('demo-image-preview'); prev.src = url; prev.style.display = 'block';
@@ -2040,14 +2163,14 @@ function openPresModal(id) {
   document.getElementById('pres-modal-error').style.display = 'none';
   switchPresTab('details', document.querySelector('.pres-tab'));
 
-  _presImages = []; _presVideos = []; _presSections = [];
+  _presImages = []; _presVideos = []; _presSections = []; _presRiskItems = [];
 
   // Build client checkboxes
   const grid = document.getElementById('pres-clients-grid');
   const note = document.getElementById('pres-clients-note');
   const active = clients.filter(c => c.active);
   note.style.display = active.length ? 'none' : 'block';
-  grid.innerHTML = active.map(c => `<label class="market-check"><input type="checkbox" class="pres-client-check" value="${c.id}"><span>${esc(c.name)}</span></label>`).join('');
+  grid.innerHTML = active.map(c => `<div class="pres-client-pill" data-cid="${c.id}" onclick="this.classList.toggle('selected')">${esc(c.name)}</div>`).join('');
 
   if (id) {
     const p = presentations.find(x => x.id === id);
@@ -2080,14 +2203,12 @@ function openPresModal(id) {
     document.getElementById('cf-rates').value = cf.annualRates || '';
     document.getElementById('cf-insurance').value = cf.annualInsurance || '';
     document.getElementById('cf-maint').value = cf.annualMaintenance || '';
-    const rp = p.riskProfile || {};
-    document.getElementById('risk-enabled').checked = !!rp.enabled;
-    document.getElementById('analysis-risk').classList.toggle('open', !!rp.enabled);
-    document.getElementById('risk-bushfire-image').value = rp.bushfireImageUrl || '';
-    const rbp = document.getElementById('risk-bushfire-preview'); rbp.src = rp.bushfireImageUrl || ''; rbp.style.display = rp.bushfireImageUrl ? 'block' : 'none';
-    document.getElementById('risk-flood-image').value = rp.floodImageUrl || '';
-    const rfp = document.getElementById('risk-flood-preview'); rfp.src = rp.floodImageUrl || ''; rfp.style.display = rp.floodImageUrl ? 'block' : 'none';
-    document.getElementById('risk-notes').value = rp.notes || '';
+    const rpMigrated = migrateRisk(p.riskProfile);
+    document.getElementById('risk-enabled').checked = !!rpMigrated.enabled;
+    document.getElementById('analysis-risk').classList.toggle('open', !!rpMigrated.enabled);
+    document.getElementById('risk-notes').value = rpMigrated.notes || '';
+    _presRiskItems = rpMigrated.items.map(i => ({ ...i, id: i.id || uid() }));
+    renderRiskItems();
     const dm = p.demographics || {};
     document.getElementById('demo-enabled').checked = !!dm.enabled;
     document.getElementById('analysis-demo').classList.toggle('open', !!dm.enabled);
@@ -2097,6 +2218,7 @@ function openPresModal(id) {
     document.getElementById('demo-notes').value = dm.notes || '';
     document.getElementById('demo-image').value = dm.imageUrl || '';
     const dip = document.getElementById('demo-image-preview'); dip.src = dm.imageUrl || ''; dip.style.display = dm.imageUrl ? 'block' : 'none';
+    updateDemoBar();
     // Custom sections
     _presSections = (p.customSections || []).map(s => ({ ...s, id: s.id || uid(), blocks: (s.blocks||[]).map(b => ({...b, id: b.id || uid()})) }));
     renderSecList();
@@ -2114,7 +2236,7 @@ function openPresModal(id) {
     // Clients
     document.getElementById('pres-status').value = p.status || '';
     document.getElementById('pres-expires').value = p.expiresAt ? p.expiresAt.slice(0, 10) : '';
-    (p.assignedClients || []).forEach(cid => { const cb = grid.querySelector(`.pres-client-check[value="${cid}"]`); if (cb) cb.checked = true; });
+    (p.assignedClients || []).forEach(cid => { const pill = grid.querySelector(`.pres-client-pill[data-cid="${cid}"]`); if (pill) pill.classList.add('selected'); });
     // Links with revoke
     const linksSection = document.getElementById('pres-links-section');
     const revokedList = p.revokedClients || [];
@@ -2258,11 +2380,11 @@ async function savePresentation() {
     images: _presImages.filter(i => i.url),
     videos: _presVideos.filter(v => v.url),
     cashflow: { enabled: document.getElementById('cf-enabled').checked, purchasePrice: document.getElementById('cf-price').value, weeklyRent: document.getElementById('cf-rent').value, interestRate: document.getElementById('cf-rate').value, lvr: document.getElementById('cf-lvr').value || '80', managementFee: document.getElementById('cf-mgmt').value || '8', annualRates: document.getElementById('cf-rates').value, annualInsurance: document.getElementById('cf-insurance').value, annualMaintenance: document.getElementById('cf-maint').value },
-    riskProfile: { enabled: document.getElementById('risk-enabled').checked, bushfireImageUrl: document.getElementById('risk-bushfire-image').value.trim(), floodImageUrl: document.getElementById('risk-flood-image').value.trim(), notes: document.getElementById('risk-notes').value.trim() },
+    riskProfile: { enabled: document.getElementById('risk-enabled').checked, items: _presRiskItems.filter(i => i.label || i.imageUrl), notes: document.getElementById('risk-notes').value.trim() },
     demographics: { enabled: document.getElementById('demo-enabled').checked, ownerOccupier: document.getElementById('demo-owner').value.trim(), renter: document.getElementById('demo-renter').value.trim(), publicHousing: document.getElementById('demo-public').value.trim(), notes: document.getElementById('demo-notes').value.trim(), imageUrl: document.getElementById('demo-image').value.trim() },
     customSections: _presSections,
     status: document.getElementById('pres-status').value,
-    assignedClients: Array.from(document.querySelectorAll('.pres-client-check:checked')).map(el => el.value),
+    assignedClients: Array.from(document.querySelectorAll('.pres-client-pill.selected')).map(el => el.dataset.cid),
     revocationReason: document.getElementById('pres-revocation-reason').value.trim(),
   };
   syncComparables('sales'); syncComparables('rentals');
@@ -2314,7 +2436,7 @@ async function notifyPresentationFromModal() {
   const btn = document.getElementById('pres-send-btn');
   btn.disabled = true; btn.textContent = 'Saving…';
   // Save the current client assignment first — this generates tokens if new clients were added
-  const assignedClients = Array.from(document.querySelectorAll('.pres-client-check:checked')).map(el => el.value);
+  const assignedClients = Array.from(document.querySelectorAll('.pres-client-pill.selected')).map(el => el.dataset.cid);
   const saveRes = await api('PUT', '/api/admin/presentations', { id, assignedClients });
   btn.disabled = false; btn.textContent = '✉ Save & Notify';
   if (!saveRes.ok) {
