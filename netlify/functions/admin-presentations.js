@@ -20,19 +20,21 @@ function buildPropertyEmail(clientName, address, suburb, price, propertyType, be
   const typeLabel = typeLabels[propertyType] || 'Property';
   const specParts = [typeLabel, bedrooms && `${bedrooms} bed`, bathrooms && `${bathrooms} bath`, carspaces && `${carspaces} car`].filter(Boolean);
   const specLine = specParts.join(' &nbsp;&middot;&nbsp; ');
-  return `<!DOCTYPE html><html lang="en" style="background:#181614;"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Property presentation — Fairway</title></head>
+  return `<!DOCTYPE html><html lang="en" style="background:#181614;"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Property presentation — Fairway</title>
+<style>@media only screen and (max-width:600px){.ew{padding:32px 22px!important;border-radius:14px!important;}.eh1{font-size:22px!important;}.eprop{padding:18px 20px 16px!important;}}</style>
+</head>
 <body style="margin:0;padding:0;background:#181614;font-family:Helvetica,Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#181614"><tr><td align="center" style="padding:40px 16px;">
 <table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;">
-  <tr><td style="background:#1C1815;border-radius:20px;border:1px solid rgba(181,113,90,0.2);padding:44px 48px;">
+  <tr><td class="ew" style="background:#1C1815;border-radius:20px;border:1px solid rgba(181,113,90,0.2);padding:44px 48px;">
     <p style="margin:0 0 36px;padding-bottom:32px;border-bottom:1px solid rgba(250,246,241,0.08);text-align:center;">
       <img src="https://fairwayinvesting.com.au/logo-word.png" width="200" height="30" alt="Fairway Investing" style="display:inline-block;border:0;max-width:200px;">
     </p>
     <p style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#B5715A;margin:0 0 16px;">Property presentation</p>
-    <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:30px;font-weight:400;color:#FAF6F1;margin:0 0 16px;line-height:1.25;">${firstName}, I've found one I want you to see.</h1>
+    <h1 class="eh1" style="font-family:Georgia,'Times New Roman',serif;font-size:30px;font-weight:400;color:#FAF6F1;margin:0 0 16px;line-height:1.25;">${firstName}, I've found one I want you to see.</h1>
     <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 32px;line-height:1.65;">I've put together a full analysis on this property. Inside you'll find my assessment, the cashflow numbers, comparable sales, and a risk profile &mdash; everything you need to form a view before we talk.</p>
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:rgba(250,246,241,0.05);border:1px solid rgba(250,246,241,0.1);border-radius:14px;margin:0 0 32px;">
-      <tr><td style="padding:24px 28px 20px;">
+      <tr><td class="eprop" style="padding:24px 28px 20px;">
         <p style="font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#B5715A;margin:0 0 12px;">The property</p>
         <p style="font-size:20px;font-weight:400;color:#FAF6F1;margin:0 0 4px;line-height:1.3;">${address}</p>
         ${suburb ? `<p style="font-size:14px;color:rgba(250,246,241,0.4);margin:0 0 14px;">${suburb}</p>` : '<p style="margin:0 0 14px;"></p>'}

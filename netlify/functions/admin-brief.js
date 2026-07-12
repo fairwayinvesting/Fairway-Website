@@ -38,16 +38,18 @@ async function appendAudit(action, detail) {
 function buildBriefEmail(name) {
   const firstName = name.split(' ')[0];
   const portalLink = 'https://fairwayinvesting.com.au/clients/brief.html';
-  return `<!DOCTYPE html><html lang="en" style="background:#181614;"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your Buying Brief is ready — Fairway</title></head>
+  return `<!DOCTYPE html><html lang="en" style="background:#181614;"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your Buying Brief is ready — Fairway</title>
+<style>@media only screen and (max-width:600px){.ew{padding:32px 22px!important;border-radius:14px!important;}.eh1{font-size:26px!important;}}</style>
+</head>
 <body style="margin:0;padding:0;background:#181614;font-family:Helvetica,Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#181614"><tr><td align="center" style="padding:40px 16px;background:#181614;">
 <table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;">
-  <tr><td style="background:#1C1815;border-radius:20px;border:1px solid rgba(181,113,90,0.2);padding:44px 48px;">
+  <tr><td class="ew" style="background:#1C1815;border-radius:20px;border:1px solid rgba(181,113,90,0.2);padding:44px 48px;">
     <p style="margin:0 0 36px;padding-bottom:32px;border-bottom:1px solid rgba(250,246,241,0.08);text-align:center;">
       <img src="https://fairwayinvesting.com.au/logo-word.png" width="200" height="30" alt="Fairway Investing" style="display:inline-block;border:0;max-width:200px;">
     </p>
     <p style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#B5715A;margin:0 0 16px;">Buying Brief</p>
-    <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:36px;font-weight:400;color:#FAF6F1;margin:0 0 12px;line-height:1.15;">Your brief is ready, ${firstName}.</h1>
+    <h1 class="eh1" style="font-family:Georgia,'Times New Roman',serif;font-size:36px;font-weight:400;color:#FAF6F1;margin:0 0 12px;line-height:1.15;">Your brief is ready, ${firstName}.</h1>
     <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 32px;line-height:1.65;">I've published your Buying Brief to your portal. It outlines your acquisition strategy, target markets, property criteria, and the key parameters we'll be working to. Log in to review it and let me know if anything needs adjusting.</p>
     <table cellpadding="0" cellspacing="0" border="0"><tr>
       <td style="border-radius:100px;background:#B5715A;">
