@@ -207,16 +207,30 @@
     .brief-budget-row span{color:rgba(247,243,237,0.25);font-size:16px;flex-shrink:0}
 
     /* Client cards */
-    .client-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
-    .client-card{background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:20px 22px;display:flex;flex-direction:column;gap:0;transition:border-color .2s;}
+    .client-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
+    .client-card{background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:0;transition:border-color .2s;}
     .client-card:hover{border-color:rgba(247,243,237,0.14);}
-    .cc-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
-    .cc-name{font-size:15px;font-weight:400;color:#f7f3ed;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-    .cc-email{font-size:12.5px;color:rgba(247,243,237,0.35);margin-bottom:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-    .cc-markets{display:flex;flex-wrap:wrap;gap:5px;min-height:22px;margin-bottom:14px;}
-    .cc-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;}
-    .cc-divider{height:1px;background:rgba(247,243,237,0.06);margin:0 -22px 14px;}
-    .cc-inactive{opacity:0.6;}
+    .cc-header{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+    .cc-avatar{width:40px;height:40px;border-radius:50%;background:rgba(189,122,112,0.18);color:#bd7a70;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:0.02em;}
+    .cc-inactive .cc-avatar{background:rgba(247,243,237,0.07);color:rgba(247,243,237,0.3);}
+    .cc-meta{flex:1;min-width:0;}
+    .cc-name{font-size:15px;font-weight:400;color:#f7f3ed;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3;}
+    .cc-email{font-size:12px;color:rgba(247,243,237,0.35);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px;}
+    .cc-status-pill{font-size:10.5px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;border-radius:100px;padding:3px 9px;white-space:nowrap;flex-shrink:0;}
+    .cc-status-active{color:#6dbf7b;background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.2);}
+    .cc-status-inactive{color:rgba(247,243,237,0.3);background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);}
+    .cc-markets{display:flex;flex-wrap:wrap;gap:5px;min-height:20px;margin-bottom:14px;}
+    .cc-divider{height:1px;background:rgba(247,243,237,0.06);margin:0 -20px 14px;}
+    .cc-actions{display:flex;gap:6px;align-items:center;margin-top:auto;flex-wrap:wrap;}
+    .cc-icon-btn{display:inline-flex;align-items:center;gap:5px;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:7px 11px;font-family:'Outfit',sans-serif;font-size:12.5px;font-weight:400;color:rgba(247,243,237,0.65);cursor:pointer;transition:background .15s,border-color .15s,color .15s;position:relative;white-space:nowrap;}
+    .cc-icon-btn:hover{background:rgba(247,243,237,0.09);border-color:rgba(247,243,237,0.18);color:#f7f3ed;}
+    .cc-icon-btn svg{flex-shrink:0;}
+    .cc-badge{min-width:16px;height:16px;border-radius:100px;background:#bd7a70;color:#22201d;font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0 4px;line-height:1;}
+    .cc-more-btn{background:none;border:1px solid rgba(247,243,237,0.1);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(247,243,237,0.4);transition:border-color .15s,color .15s;font-size:16px;flex-shrink:0;}
+    .cc-more-btn:hover{border-color:rgba(247,243,237,0.2);color:rgba(247,243,237,0.7);}
+    .cc-icon-btn.active{background:rgba(189,122,112,0.12);border-color:rgba(189,122,112,0.3);color:#bd7a70;}
+    .cc-inactive{opacity:0.65;}
+    @media(max-width:480px){.cc-icon-btn{flex:1;justify-content:center;}}
 
     /* Milestone archive */
     .ms-archive-toggle{background:none;border:none;font-family:'Outfit',sans-serif;font-size:12px;font-weight:400;color:rgba(247,243,237,0.3);cursor:pointer;padding:10px 0;display:flex;align-items:center;gap:6px;transition:color .2s;}
@@ -1249,31 +1263,38 @@ function renderTable() {
   const grid = document.getElementById('clients-grid');
   grid.innerHTML = clients.map(c => {
     const cMs = milestones.filter(m => m.clientId === c.id && !m.completed);
-    const msLabel = cMs.length ? `Dates (${cMs.length})` : 'Dates';
-    const notifyBtn = c.markets && c.markets.length
-      ? `<button class="btn-sm btn-notify" onclick="notifyMarkets('${c.id}','${esc(c.name)}')" title="Send markets ready email">✉ Notify</button>`
-      : '';
+    const msCount = cMs.length;
     const markets = c.markets?.length
       ? c.markets.map(m => `<span class="pill">${esc(marketName(m))}</span>`).join('')
       : `<span style="font-size:11.5px;color:rgba(247,243,237,0.2);">No markets assigned</span>`;
+    const initials = pcpInitials(c.name);
+    const notifyIcon = c.markets?.length ? `
+      <button class="cc-icon-btn" onclick="notifyMarkets('${c.id}','${esc(c.name)}')" title="Send markets ready email">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="4" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M2 5l6 5 6-5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        Notify
+      </button>` : '';
     return `<div class="client-card${c.active ? '' : ' cc-inactive'}" id="cc-${c.id}">
       <div class="cc-header">
-        <span class="status-dot ${c.active ? 'status-active' : 'status-inactive'}"></span>
-        <span class="cc-name">${esc(c.name)}</span>
+        <div class="cc-avatar">${esc(initials)}</div>
+        <div class="cc-meta">
+          <div class="cc-name">${esc(c.name)}</div>
+          <div class="cc-email">${esc(c.email)}</div>
+        </div>
+        <span class="cc-status-pill ${c.active ? 'cc-status-active' : 'cc-status-inactive'}">${c.active ? 'Active' : 'Inactive'}</span>
       </div>
-      <p class="cc-email">${esc(c.email)}</p>
       <div class="cc-divider"></div>
       <div class="cc-markets">${markets}</div>
       <div class="cc-actions">
-        <button class="btn-sm btn-edit" onclick="openEdit('${c.id}')">Edit</button>
-        <button class="btn-sm btn-brief" onclick="openBrief('${c.id}','${esc(c.name)}')">Brief</button>
-        ${notifyBtn}
-        <button class="btn-dates" id="dates-btn-${c.id}" onclick="toggleMilestones('${c.id}')">${msLabel}</button>
-        <button class="btn-sm btn-preview-client" id="preview-btn-${c.id}" onclick="previewClient('${c.id}')" title="View client portal as ${esc(c.name)}">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="vertical-align:-1px;"><ellipse cx="8" cy="8" rx="7" ry="4.5" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
-          View portal
+        <button class="cc-icon-btn" onclick="openBrief('${c.id}','${esc(c.name)}')" title="Open client brief">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="10" height="12" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M6 6h4M6 9h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Brief
         </button>
-        <button class="btn-sm btn-delete" onclick="deleteClient('${c.id}','${esc(c.name)}')" style="margin-left:auto;">✕</button>
+        <button class="cc-icon-btn" id="dates-btn-${c.id}" onclick="toggleMilestones('${c.id}')" title="Upcoming dates">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M5 2v2M11 2v2M2 7h12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Dates${msCount ? ` <span class="cc-badge">${msCount}</span>` : ''}
+        </button>
+        ${notifyIcon}
+        <button class="cc-more-btn" onclick="showClientMenu('${c.id}','${esc(c.name)}')" title="More actions">···</button>
       </div>
       <div class="ms-panel" id="ms-panel-${c.id}" style="display:none;margin-top:14px;border-top:1px solid rgba(247,243,237,0.06);padding-top:14px;margin-bottom:-4px;padding-left:0;padding-right:0;background:transparent;border-radius:0;"></div>
     </div>`;
@@ -1657,6 +1678,38 @@ async function deleteClient(id, name) {
   if (!res.ok) return;
   clients = clients.filter(c => c.id !== id);
   renderTable();
+}
+
+let _clientMenuOpen = null;
+function showClientMenu(id, name) {
+  // Remove any existing menu
+  const old = document.getElementById('cc-menu-popup');
+  if (old) { old.remove(); _clientMenuOpen = null; }
+  if (_clientMenuOpen === id) return; // toggle off
+  _clientMenuOpen = id;
+  const btn = document.querySelector(`#cc-${id} .cc-more-btn`);
+  if (!btn) return;
+  const menu = document.createElement('div');
+  menu.id = 'cc-menu-popup';
+  menu.style.cssText = 'position:absolute;z-index:900;background:#2a2825;border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:6px;min-width:160px;box-shadow:0 8px 24px rgba(0,0,0,0.5);';
+  const items = [
+    { label: 'Edit client', action: `openEdit('${id}');closeClientMenu()` },
+    { label: 'View portal', action: `previewClient('${id}');closeClientMenu()` },
+    { label: 'Delete', action: `deleteClient('${id}','${name}');closeClientMenu()`, danger: true },
+  ];
+  menu.innerHTML = items.map(i => `<button onclick="${i.action}" style="display:block;width:100%;text-align:left;background:none;border:none;font-family:'Outfit',sans-serif;font-size:13.5px;font-weight:400;color:${i.danger ? '#f08080' : 'rgba(247,243,237,0.75)'};padding:8px 12px;border-radius:7px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='rgba(247,243,237,0.07)'" onmouseout="this.style.background='none'">${i.label}</button>`).join('');
+  document.body.appendChild(menu);
+  // Position below button
+  const rect = btn.getBoundingClientRect();
+  menu.style.top = (rect.bottom + window.scrollY + 6) + 'px';
+  menu.style.left = Math.max(8, rect.right + window.scrollX - menu.offsetWidth) + 'px';
+  setTimeout(() => document.addEventListener('click', closeClientMenu, { once: true }), 0);
+}
+function closeClientMenu() {
+  const m = document.getElementById('cc-menu-popup');
+  if (m) m.remove();
+  _clientMenuOpen = null;
+  document.removeEventListener('click', closeClientMenu);
 }
 
 function renderReports() {
