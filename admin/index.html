@@ -306,9 +306,21 @@
     .btn-send{background:rgba(109,191,123,0.12);color:#6dbf7b;border:1px solid rgba(109,191,123,0.25);border-radius:7px;padding:7px 14px;font-family:'Outfit',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .2s;}
     .btn-send:hover{background:rgba(109,191,123,0.22);}
     .btn-add-block{background:rgba(247,243,237,0.05);color:rgba(247,243,237,0.5);border:1px solid rgba(247,243,237,0.09);border-radius:7px;padding:6px 12px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;}
-    .pres-client-pill{padding:10px 14px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.08);border-radius:8px;cursor:pointer;font-size:13.5px;font-weight:300;color:rgba(247,243,237,0.55);transition:all .15s;user-select:none;line-height:1.2;}
-    .pres-client-pill:hover{background:rgba(247,243,237,0.07);}
-    .pres-client-pill.selected{background:rgba(189,122,112,0.15);border-color:rgba(189,122,112,0.4);color:#f7f3ed;}
+    /* Client picker rows (Clients tab in presentation modal) */
+    .pcp-row{display:flex;align-items:center;gap:13px;background:#22201d;border:1px solid rgba(247,243,237,0.1);border-radius:10px;padding:12px 15px;cursor:pointer;transition:border-color .15s,background .15s;user-select:none;margin-bottom:8px;}
+    .pcp-row:hover{border-color:rgba(247,243,237,0.18);}
+    .pcp-row.selected{background:#2a231f;border-color:#bd7a70;}
+    .pcp-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:13px;flex-shrink:0;transition:background .15s,color .15s;}
+    .pcp-info{flex:1;min-width:0;}
+    .pcp-name{font-size:15px;color:#f7f3ed;line-height:1.3;}
+    .pcp-email{font-size:12px;color:rgba(247,243,237,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .pcp-pill{font-size:11px;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;}
+    .pcp-pill-green{color:#6dbf7b;background:rgba(109,191,123,0.12);}
+    .pcp-pill-amber{color:#e8a87c;background:rgba(232,168,124,0.12);}
+    .pcp-pill-neutral{color:rgba(247,243,237,0.4);background:rgba(247,243,237,0.06);}
+    .pcp-tick{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+    .pcp-row:not(.selected) .pcp-tick{border:1.5px solid rgba(247,243,237,0.25);}
+    .pcp-row.selected .pcp-tick{background:#bd7a70;color:#22201d;}
     .btn-add-block:hover{background:rgba(247,243,237,0.09);}
     .btn-remove{background:none;border:none;color:rgba(247,243,237,0.25);font-size:16px;cursor:pointer;padding:2px 4px;line-height:1;flex-shrink:0;transition:color .15s;}
     .btn-remove:hover{color:#f08080;}
@@ -849,9 +861,14 @@
             <p class="field-note">Link stops working after this date for all clients.</p>
           </div>
         </div>
-        <div class="field"><label>Assign clients</label>
-          <div class="markets-grid" id="pres-clients-grid" style="grid-template-columns:1fr 1fr;"></div>
+        <div class="field">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <label style="margin-bottom:0;">Assign clients</label>
+            <span style="font-size:13px;"><span id="pcp-count" style="color:#bd7a70;"></span><span id="pcp-select-all" style="color:rgba(247,243,237,0.35);cursor:pointer;display:none;" onclick="pcpSelectAll()"> · Select all</span></span>
+          </div>
+          <div id="pres-clients-grid"></div>
           <p class="field-note" id="pres-clients-note" style="display:none;">No active clients found.</p>
+          <p class="field-note" style="margin-top:10px;">Each selected client gets a unique tracked link. Unticking a client here revokes their access on save.</p>
         </div>
         <div id="pres-links-section" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid rgba(247,243,237,0.07);">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
@@ -2284,6 +2301,40 @@ function removeRiskItem(idx) {
 // ── Media helpers ─────────────────────────────────────────────────────────────
 function uid() { return Math.random().toString(36).slice(2, 9); }
 
+function pcpInitials(name) {
+  const parts = name.trim().split(/\s+/);
+  return parts.length >= 2 ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase() : name.slice(0,2).toUpperCase();
+}
+
+function toggleClientPick(el) {
+  const isNowSelected = el.classList.toggle('selected');
+  const avatar = el.querySelector('.pcp-avatar');
+  const tick = el.querySelector('.pcp-tick');
+  if (isNowSelected) {
+    avatar.style.background = '#bd7a70';
+    avatar.style.color = '#22201d';
+    tick.innerHTML = '<svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  } else {
+    avatar.style.background = 'rgba(247,243,237,0.1)';
+    avatar.style.color = 'rgba(247,243,237,0.55)';
+    tick.innerHTML = '';
+  }
+  updatePcpCount();
+}
+
+function updatePcpCount() {
+  const rows = document.querySelectorAll('.pcp-row');
+  const selected = document.querySelectorAll('.pcp-row.selected').length;
+  const countEl = document.getElementById('pcp-count');
+  const allEl = document.getElementById('pcp-select-all');
+  if (countEl) countEl.textContent = selected > 0 ? `${selected} selected` : '';
+  if (allEl) allEl.style.display = (rows.length > 0 && selected < rows.length) ? 'inline' : 'none';
+}
+
+function pcpSelectAll() {
+  document.querySelectorAll('.pcp-row:not(.selected)').forEach(el => toggleClientPick(el));
+}
+
 function renderImgList() {
   const list = document.getElementById('pres-img-list');
   list.innerHTML = _presImages.map(img => `
@@ -2405,12 +2456,41 @@ function openPresModal(id) {
 
   _presImages = []; _presVideos = []; _presSections = []; _presRiskItems = [];
 
-  // Build client checkboxes
+  // Build client picker rows
   const grid = document.getElementById('pres-clients-grid');
   const note = document.getElementById('pres-clients-note');
   const active = clients.filter(c => c.active);
   note.style.display = active.length ? 'none' : 'block';
-  grid.innerHTML = active.map(c => `<div class="pres-client-pill" data-cid="${c.id}" onclick="this.classList.toggle('selected')">${esc(c.name)}</div>`).join('');
+  const presForPicker = id ? presentations.find(x => x.id === id) : null;
+  const pickerAssigned = presForPicker ? (presForPicker.assignedClients || []) : [];
+  const pickerRevoked = presForPicker ? (presForPicker.revokedClients || []) : [];
+  const pickerSent = presForPicker ? (presForPicker.sentClients || []) : [];
+  const pickerViews = presForPicker ? (presForPicker.views || {}) : {};
+  grid.innerHTML = active.map(c => {
+    const isAssigned = pickerAssigned.includes(c.id) && !pickerRevoked.includes(c.id);
+    const vd = pickerViews[c.id];
+    let pill = '';
+    if (isAssigned) {
+      if (vd?.firstViewedAt) {
+        const times = vd.viewCount > 1 ? ` · ${vd.viewCount}×` : '';
+        pill = `<span class="pcp-pill pcp-pill-green">Viewed${times}</span>`;
+      } else if (pickerSent.includes(c.id)) {
+        pill = `<span class="pcp-pill pcp-pill-amber">Notified</span>`;
+      } else {
+        pill = `<span class="pcp-pill pcp-pill-neutral">Not notified</span>`;
+      }
+    }
+    const avatarBg = isAssigned ? '#bd7a70' : 'rgba(247,243,237,0.1)';
+    const avatarColor = isAssigned ? '#22201d' : 'rgba(247,243,237,0.55)';
+    const tickInner = isAssigned ? '<svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '';
+    return `<div class="pcp-row${isAssigned ? ' selected' : ''}" data-cid="${c.id}" onclick="toggleClientPick(this)">
+      <div class="pcp-avatar" style="background:${avatarBg};color:${avatarColor};">${pcpInitials(c.name)}</div>
+      <div class="pcp-info"><div class="pcp-name">${esc(c.name)}</div><div class="pcp-email">${esc(c.email)}</div></div>
+      ${pill}
+      <div class="pcp-tick">${tickInner}</div>
+    </div>`;
+  }).join('');
+  updatePcpCount();
 
   if (id) {
     const p = presentations.find(x => x.id === id);
@@ -2476,7 +2556,7 @@ function openPresModal(id) {
     // Clients
     document.getElementById('pres-status').value = p.status || '';
     document.getElementById('pres-expires').value = p.expiresAt ? p.expiresAt.slice(0, 10) : '';
-    (p.assignedClients || []).forEach(cid => { const pill = grid.querySelector(`.pres-client-pill[data-cid="${cid}"]`); if (pill) pill.classList.add('selected'); });
+    // Client selection pre-applied in grid render above
     // Links with revoke
     const linksSection = document.getElementById('pres-links-section');
     const revokedList = p.revokedClients || [];
@@ -2624,7 +2704,7 @@ async function savePresentation() {
     demographics: { enabled: document.getElementById('demo-enabled').checked, ownerOccupier: document.getElementById('demo-owner').value.trim(), renter: document.getElementById('demo-renter').value.trim(), publicHousing: document.getElementById('demo-public').value.trim(), notes: document.getElementById('demo-notes').value.trim(), imageUrl: document.getElementById('demo-image').value.trim() },
     customSections: _presSections,
     status: document.getElementById('pres-status').value,
-    assignedClients: Array.from(document.querySelectorAll('.pres-client-pill.selected')).map(el => el.dataset.cid),
+    assignedClients: Array.from(document.querySelectorAll('.pcp-row.selected')).map(el => el.dataset.cid),
     revocationReason: document.getElementById('pres-revocation-reason').value.trim(),
   };
   syncComparables('sales'); syncComparables('rentals');
@@ -2676,7 +2756,7 @@ async function notifyPresentationFromModal() {
   const btn = document.getElementById('pres-send-btn');
   btn.disabled = true; btn.textContent = 'Saving…';
   // Save the current client assignment first — this generates tokens if new clients were added
-  const assignedClients = Array.from(document.querySelectorAll('.pres-client-pill.selected')).map(el => el.dataset.cid);
+  const assignedClients = Array.from(document.querySelectorAll('.pcp-row.selected')).map(el => el.dataset.cid);
   const saveRes = await api('PUT', '/api/admin/presentations', { id, assignedClients });
   btn.disabled = false; btn.textContent = '✉ Save & Notify';
   if (!saveRes.ok) {
