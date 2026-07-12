@@ -1102,8 +1102,7 @@ async function loadClients() {
 }
 
 function renderTable() {
-  // Milestone panels live outside the grid so expand works
-  let panelHtml = '';
+  const grid = document.getElementById('clients-grid');
   grid.innerHTML = clients.map(c => {
     const cMs = milestones.filter(m => m.clientId === c.id && !m.completed);
     const msLabel = cMs.length ? `Dates (${cMs.length})` : 'Dates';
