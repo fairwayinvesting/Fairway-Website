@@ -287,6 +287,36 @@ function render(d) {
     }</div></div>`;
   }
 
+  // Comparable sales
+  if (d.comparableSales?.enabled && d.comparableSales?.items?.length) {
+    html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Comparable sales</p><div class="p-comp-grid">`;
+    d.comparableSales.items.forEach(item => {
+      const meta = [item.date ? `Sold ${item.date}` : '', item.beds && item.beds+'bd', item.baths && item.baths+'ba', item.cars && item.cars+'car', item.landSize].filter(Boolean).join(' · ');
+      html += `<div class="p-comp-card">
+        <div class="p-comp-address">${esc(item.address)}</div>
+        ${item.price ? `<div class="p-comp-value">${esc(item.price)}</div>` : ''}
+        ${meta ? `<div class="p-comp-meta">${esc(meta)}</div>` : ''}
+        ${item.notes ? `<p class="p-comp-notes">${esc(item.notes)}</p>` : ''}
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // Comparable rentals
+  if (d.comparableRentals?.enabled && d.comparableRentals?.items?.length) {
+    html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Comparable rentals</p><div class="p-comp-grid">`;
+    d.comparableRentals.items.forEach(item => {
+      const meta = [item.date ? `Leased ${item.date}` : '', item.beds && item.beds+'bd', item.baths && item.baths+'ba', item.cars && item.cars+'car'].filter(Boolean).join(' · ');
+      html += `<div class="p-comp-card">
+        <div class="p-comp-address">${esc(item.address)}</div>
+        ${item.weeklyRent ? `<div class="p-comp-value">${esc(item.weeklyRent)}<span style="font-size:14px;font-weight:300;color:rgba(247,243,237,0.35)">/wk</span></div>` : ''}
+        ${meta ? `<div class="p-comp-meta">${esc(meta)}</div>` : ''}
+        ${item.notes ? `<p class="p-comp-notes">${esc(item.notes)}</p>` : ''}
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
   // Cashflow
   if (d.cashflow?.enabled) {
     const c = calcCashflow(d.cashflow);
@@ -353,36 +383,6 @@ function render(d) {
     if (dm.notes) html += `<p style="font-size:14px;color:rgba(247,243,237,0.5);line-height:1.7;margin-bottom:10px;">${esc(dm.notes)}</p>`;
     if (dm.imageUrl) html += `<img src="${esc(dm.imageUrl)}" class="p-section-img" alt="Demographics">`;
     html += `</div>`;
-  }
-
-  // Comparable sales
-  if (d.comparableSales?.enabled && d.comparableSales?.items?.length) {
-    html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Comparable sales</p><div class="p-comp-grid">`;
-    d.comparableSales.items.forEach(item => {
-      const meta = [item.date ? `Sold ${item.date}` : '', item.beds && item.beds+'bd', item.baths && item.baths+'ba', item.cars && item.cars+'car', item.landSize].filter(Boolean).join(' · ');
-      html += `<div class="p-comp-card">
-        <div class="p-comp-address">${esc(item.address)}</div>
-        ${item.price ? `<div class="p-comp-value">${esc(item.price)}</div>` : ''}
-        ${meta ? `<div class="p-comp-meta">${esc(meta)}</div>` : ''}
-        ${item.notes ? `<p class="p-comp-notes">${esc(item.notes)}</p>` : ''}
-      </div>`;
-    });
-    html += `</div></div>`;
-  }
-
-  // Comparable rentals
-  if (d.comparableRentals?.enabled && d.comparableRentals?.items?.length) {
-    html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Comparable rentals</p><div class="p-comp-grid">`;
-    d.comparableRentals.items.forEach(item => {
-      const meta = [item.date ? `Leased ${item.date}` : '', item.beds && item.beds+'bd', item.baths && item.baths+'ba', item.cars && item.cars+'car'].filter(Boolean).join(' · ');
-      html += `<div class="p-comp-card">
-        <div class="p-comp-address">${esc(item.address)}</div>
-        ${item.weeklyRent ? `<div class="p-comp-value">${esc(item.weeklyRent)}<span style="font-size:14px;font-weight:300;color:rgba(247,243,237,0.35)">/wk</span></div>` : ''}
-        ${meta ? `<div class="p-comp-meta">${esc(meta)}</div>` : ''}
-        ${item.notes ? `<p class="p-comp-notes">${esc(item.notes)}</p>` : ''}
-      </div>`;
-    });
-    html += `</div></div>`;
   }
 
   // Custom sections
