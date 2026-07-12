@@ -157,6 +157,9 @@
     .btn-notify:hover{background:rgba(100,160,120,0.2);}
     .btn-brief{background:rgba(100,130,200,0.1);color:rgba(140,165,230,0.85);}
     .btn-brief:hover{background:rgba(100,130,200,0.2);}
+    .btn-preview-client{background:rgba(189,122,112,0.08);color:rgba(189,122,112,0.7);border:1px solid rgba(189,122,112,0.2);}
+    .btn-preview-client:hover{background:rgba(189,122,112,0.15);color:#bd7a70;}
+    .btn-preview-client:disabled{opacity:0.5;cursor:default;}
 
     /* Brief modal */
     #brief-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:600;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
@@ -1217,6 +1220,10 @@ function renderTable() {
         <button class="btn-sm btn-brief" onclick="openBrief('${c.id}','${esc(c.name)}')">Brief</button>
         ${notifyBtn}
         <button class="btn-dates" id="dates-btn-${c.id}" onclick="toggleMilestones('${c.id}')">${msLabel}</button>
+        <button class="btn-sm btn-preview-client" id="preview-btn-${c.id}" onclick="previewClient('${c.id}')" title="View client portal as ${esc(c.name)}">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="vertical-align:-1px;"><ellipse cx="8" cy="8" rx="7" ry="4.5" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+          View portal
+        </button>
         <button class="btn-sm btn-delete" onclick="deleteClient('${c.id}','${esc(c.name)}')" style="margin-left:auto;">✕</button>
       </div>
       <div class="ms-panel" id="ms-panel-${c.id}" style="display:none;margin-top:14px;border-top:1px solid rgba(247,243,237,0.06);padding-top:14px;margin-bottom:-4px;padding-left:0;padding-right:0;background:transparent;border-radius:0;"></div>
@@ -1576,6 +1583,24 @@ document.getElementById('brief-criteria-input').addEventListener('keydown', e =>
 document.getElementById('brief-exclusion-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); addCustomExclusion(); }
 });
+
+async function previewClient(clientId) {
+  const btn = document.getElementById('preview-btn-' + clientId);
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:1.5px;margin-right:6px;"></span>Opening…'; }
+  try {
+    const res = await api('POST', '/api/admin/impersonate', { clientId });
+    const data = await res.json();
+    if (data.error) { alert('Could not open portal: ' + data.error); return; }
+    window.open(data.url, '_blank');
+  } catch {
+    alert('Could not generate preview link. Check your connection.');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="vertical-align:-1px;"><ellipse cx="8" cy="8" rx="7" ry="4.5" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg> View portal';
+    }
+  }
+}
 
 async function deleteClient(id, name) {
   if (!confirm(`Delete ${name}? This cannot be undone.`)) return;
