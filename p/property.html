@@ -306,27 +306,33 @@ function render(d) {
     }
   }
 
-  // Risk profile — with migration from old {bushfireImageUrl,floodImageUrl} shape
+  // Risk profile — with migration from old shapes
   if (d.riskProfile?.enabled) {
     const rawR = d.riskProfile;
-    let rItems = Array.isArray(rawR.items) ? rawR.items : [];
-    if (!rItems.length) {
-      if (rawR.bushfireImageUrl) rItems.push({ label: 'Bushfire risk', imageUrl: rawR.bushfireImageUrl });
-      if (rawR.floodImageUrl)    rItems.push({ label: 'Flood zone',    imageUrl: rawR.floodImageUrl });
+    // Normalise to risks[] regardless of stored schema version
+    let rItems;
+    if (Array.isArray(rawR.risks)) {
+      rItems = rawR.risks.filter(i => i.on);
+    } else if (Array.isArray(rawR.items)) {
+      rItems = rawR.items;
+    } else {
+      rItems = [];
+      if (rawR.bushfireImageUrl) rItems.push({ label: 'Bushfire risk', imageUrl: rawR.bushfireImageUrl, notes: '' });
+      if (rawR.floodImageUrl)    rItems.push({ label: 'Flood zone',    imageUrl: rawR.floodImageUrl,    notes: '' });
     }
-    const visibleItems = rItems.filter(i => i.imageUrl);
-    if (visibleItems.length || rawR.notes) {
+    const visibleItems = rItems.filter(i => i.imageUrl || i.notes);
+    if (visibleItems.length) {
       html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Risk profile</p>`;
-      if (rawR.notes) html += `<p style="font-size:14px;color:rgba(247,243,237,0.5);line-height:1.7;margin-bottom:20px;">${esc(rawR.notes)}</p>`;
-      if (visibleItems.length) {
-        const cols = visibleItems.length === 1 ? '1fr' : '1fr 1fr';
-        html += `<div style="display:grid;grid-template-columns:${cols};gap:14px;">`;
-        visibleItems.forEach(item => {
-          html += `<div><p style="font-size:10px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">${esc(item.label||'Risk')}</p><img src="${esc(item.imageUrl)}" class="p-section-img" style="margin-top:0;cursor:zoom-in;" alt="${esc(item.label||'Risk map')}" onclick="openLightbox(this.src,this.alt)"></div>`;
-        });
+      const cols = visibleItems.length === 1 ? '1fr' : '1fr 1fr';
+      html += `<div style="display:grid;grid-template-columns:${cols};gap:14px;">`;
+      visibleItems.forEach(item => {
+        html += `<div>`;
+        html += `<p style="font-size:10px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">${esc(item.label||'Risk')}</p>`;
+        if (item.imageUrl) html += `<img src="${esc(item.imageUrl)}" class="p-section-img" style="margin-top:0;cursor:zoom-in;" alt="${esc(item.label||'Risk map')}" onclick="openLightbox(this.src,this.alt)">`;
+        if (item.notes) html += `<p style="font-size:13px;color:rgba(247,243,237,0.5);line-height:1.65;margin-top:8px;">${esc(item.notes)}</p>`;
         html += `</div>`;
-      }
-      html += `</div>`;
+      });
+      html += `</div></div>`;
     }
   }
 

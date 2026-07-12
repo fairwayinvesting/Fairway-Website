@@ -70,7 +70,7 @@ function defaultPres(fields) {
     images: [],
     videos: [],
     cashflow: { enabled: false, purchasePrice: '', weeklyRent: '', interestRate: '', lvr: '80', managementFee: '8', annualRates: '', annualInsurance: '', annualMaintenance: '' },
-    riskProfile: { enabled: false, items: [], notes: '' },
+    riskProfile: { enabled: false, risks: [] },
     demographics: { enabled: false, ownerOccupier: '', renter: '', publicHousing: '', notes: '', imageUrl: '' },
     customSections: [],
     comparableSales: { enabled: false, items: [] },
