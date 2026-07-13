@@ -103,8 +103,6 @@ export default async (req) => {
 
     // ── Notify action ─────────────────────────────────────────────────────────
     if (action === 'notify') {
-      const brief = await briefStore.get(clientId, { type: 'json' }).catch(() => null);
-      if (!brief || brief.status !== 'published') return json({ error: 'Brief is not published' }, 400);
       try {
         await resend.emails.send({
           from: 'Luke at Fairway <info@fairwayinvesting.com.au>',

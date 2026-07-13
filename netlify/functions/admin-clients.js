@@ -177,7 +177,6 @@ export default async (req) => {
 
     if (action === 'notify-markets') {
       const client = clients[idx];
-      if (!client.markets || client.markets.length === 0) return json({ error: 'No markets assigned to this client' }, 400);
       try {
         await resend.emails.send({
           from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
