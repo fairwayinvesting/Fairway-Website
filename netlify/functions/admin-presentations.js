@@ -172,24 +172,49 @@ export default async (req) => {
 
     // Regular update — merge all known fields
     const pres = presentations[idx];
+    const prevRevokedCount = (pres.revokedClients || []).length; // capture before any mutations
     const fields = ['address','suburb','price','bedrooms','bathrooms','carspaces','landSize',
                     'propertyType','summary','highlights','images','videos','cashflow',
                     'riskProfile','demographics','customSections',
                     'comparableSales','comparableRentals',
                     'revocationReason','status','expiresAt','revokedClients'];
     fields.forEach(f => { if (body[f] !== undefined) pres[f] = body[f]; });
+
     if (body.assignedClients !== undefined) {
-      body.assignedClients.forEach(cid => {
-        if (!pres.tokens[cid]) { pres.tokens[cid] = genToken(); pres.views[cid] = { firstViewedAt: null, viewCount: 0 }; }
-      });
-      pres.assignedClients = body.assignedClients;
+      const prevAssigned = pres.assignedClients || [];
+      const prevRevokedSet = new Set(pres.revokedClients || []);
+      const newSelectedSet = new Set(body.assignedClients);
+
+      // Previously active = assigned but not yet revoked
+      const prevActive = prevAssigned.filter(cid => !prevRevokedSet.has(cid));
+
+      // Grant: generate token for newly selected; restore if previously revoked
+      for (const cid of body.assignedClients) {
+        if (!pres.tokens[cid]) {
+          pres.tokens[cid] = genToken();
+          pres.views[cid] = { firstViewedAt: null, viewCount: 0 };
+        }
+        pres.revokedClients = (pres.revokedClients || []).filter(id => id !== cid);
+      }
+
+      // Revoke: was active, no longer selected → add to revokedClients
+      // Keep in assignedClients so the token lookup in property-view.js still finds the
+      // presentation and reaches the revoked check (→ 403 "access removed"), not 404.
+      for (const cid of prevActive) {
+        if (!newSelectedSet.has(cid) && !(pres.revokedClients || []).includes(cid)) {
+          pres.revokedClients = [...(pres.revokedClients || []), cid];
+        }
+      }
+
+      // assignedClients = union of all previously assigned + newly selected
+      pres.assignedClients = [...new Set([...prevAssigned, ...body.assignedClients])];
     }
-    const prevRevoked = (presentations[idx].revokedClients || []).length;
+
     presentations[idx] = pres;
     await store.setJSON('all', presentations);
-    const nowRevoked = (pres.revokedClients || []).length;
-    if (nowRevoked > prevRevoked) {
-      appendAudit('access_revoked', `Revoked access on "${pres.address}" (${nowRevoked} client${nowRevoked !== 1 ? 's' : ''} total)`);
+    const nowRevokedCount = (pres.revokedClients || []).length;
+    if (nowRevokedCount > prevRevokedCount) {
+      appendAudit('access_revoked', `Revoked access on "${pres.address}" (${nowRevokedCount} client${nowRevokedCount !== 1 ? 's' : ''} total)`);
     }
     return json({ ok: true, pres });
   }
