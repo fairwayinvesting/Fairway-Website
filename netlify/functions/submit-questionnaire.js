@@ -237,6 +237,10 @@ function doPost(e) {
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     if (data.headers && data.headers.length) {
       sheet.appendRow(data.headers);
+      sheet.getRange(sheet.getLastRow(), 1, 1, data.headers.length)
+        .setBackground('#bd7a70')
+        .setFontColor('#ffffff')
+        .setFontWeight('bold');
     }
     sheet.appendRow(data.row);
     return ContentService.createTextOutput(JSON.stringify({ ok: true }))
