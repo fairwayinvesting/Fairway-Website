@@ -206,31 +206,41 @@
     .brief-budget-row input{flex:1}
     .brief-budget-row span{color:rgba(247,243,237,0.25);font-size:16px;flex-shrink:0}
 
-    /* Client cards */
-    .client-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
-    .client-card{background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:0;transition:border-color .2s;}
-    .client-card:hover{border-color:rgba(247,243,237,0.14);}
-    .cc-header{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+    /* Client cards — horizontal rows */
+    .client-cards-list{display:flex;flex-direction:column;gap:10px;}
+    .client-card{background:#22201d;border:1px solid rgba(247,243,237,0.09);border-radius:12px;display:flex;flex-direction:column;transition:border-color .2s;}
+    .client-card:hover{border-color:rgba(247,243,237,0.15);}
+    .cc-row{display:flex;align-items:center;gap:14px;padding:14px 16px;}
     .cc-avatar{width:40px;height:40px;border-radius:50%;background:rgba(189,122,112,0.18);color:#bd7a70;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:0.02em;}
     .cc-inactive .cc-avatar{background:rgba(247,243,237,0.07);color:rgba(247,243,237,0.3);}
-    .cc-meta{flex:1;min-width:0;}
-    .cc-name{font-size:15px;font-weight:400;color:#f7f3ed;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3;}
+    .cc-meta{min-width:160px;flex-shrink:0;}
+    .cc-name{font-size:15px;font-weight:400;color:#f7f3ed;line-height:1.3;}
+    .cc-dot{font-size:10px;margin-left:4px;}
+    .cc-dot-active{color:#6dbf7b;}
+    .cc-dot-inactive{color:rgba(247,243,237,0.2);}
     .cc-email{font-size:12px;color:rgba(247,243,237,0.35);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px;}
-    .cc-status-pill{font-size:10.5px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;border-radius:100px;padding:3px 9px;white-space:nowrap;flex-shrink:0;}
-    .cc-status-active{color:#6dbf7b;background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.2);}
-    .cc-status-inactive{color:rgba(247,243,237,0.3);background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);}
-    .cc-markets{display:flex;flex-wrap:wrap;gap:5px;min-height:20px;margin-bottom:14px;}
-    .cc-divider{height:1px;background:rgba(247,243,237,0.06);margin:0 -20px 14px;}
-    .cc-actions{display:flex;gap:6px;align-items:center;margin-top:auto;flex-wrap:wrap;}
-    .cc-icon-btn{display:inline-flex;align-items:center;gap:5px;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:7px 11px;font-family:'Outfit',sans-serif;font-size:12.5px;font-weight:400;color:rgba(247,243,237,0.65);cursor:pointer;transition:background .15s,border-color .15s,color .15s;position:relative;white-space:nowrap;}
-    .cc-icon-btn:hover{background:rgba(247,243,237,0.09);border-color:rgba(247,243,237,0.18);color:#f7f3ed;}
-    .cc-icon-btn svg{flex-shrink:0;}
-    .cc-badge{min-width:16px;height:16px;border-radius:100px;background:#bd7a70;color:#22201d;font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0 4px;line-height:1;}
-    .cc-more-btn{background:none;border:1px solid rgba(247,243,237,0.1);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(247,243,237,0.4);transition:border-color .15s,color .15s;font-size:16px;flex-shrink:0;}
-    .cc-more-btn:hover{border-color:rgba(247,243,237,0.2);color:rgba(247,243,237,0.7);}
-    .cc-icon-btn.active{background:rgba(189,122,112,0.12);border-color:rgba(189,122,112,0.3);color:#bd7a70;}
+    .cc-markets{flex:1;display:flex;flex-wrap:wrap;gap:5px;}
+    .cc-btn-cluster{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+    .cc-sq-btn{width:32px;height:32px;border-radius:7px;background:rgba(247,243,237,0.06);border:none;color:rgba(247,243,237,0.7);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s,color .15s;position:relative;flex-shrink:0;font-family:'Outfit',sans-serif;gap:4px;}
+    .cc-sq-btn:hover{background:rgba(247,243,237,0.11);color:#f7f3ed;}
+    .cc-sq-btn.active{background:rgba(189,122,112,0.12);color:#bd7a70;}
+    .cc-sq-btn.notify-on{background:rgba(109,191,123,0.14);color:#6dbf7b;}
+    .cc-sq-btn.notify-on:hover{background:rgba(109,191,123,0.22);}
+    .cc-dots{background:none !important;color:rgba(247,243,237,0.45);}
+    .cc-dots:hover{background:rgba(247,243,237,0.06) !important;color:rgba(247,243,237,0.75);}
+    .cc-badge{position:absolute;top:-4px;right:-4px;min-width:15px;height:15px;border-radius:100px;background:#bd7a70;color:#22201d;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px;line-height:1;}
+    .cc-btn-label{display:none;}
     .cc-inactive{opacity:0.65;}
-    @media(max-width:480px){.cc-icon-btn{flex:1;justify-content:center;}}
+    @media(max-width:640px){
+      .cc-row{flex-wrap:wrap;gap:11px;padding:14px;}
+      .cc-meta{flex:1;min-width:0;}
+      .cc-markets{order:3;width:100%;}
+      .cc-btn-cluster{order:4;width:100%;border-top:1px solid rgba(247,243,237,0.07);padding-top:11px;}
+      .cc-sq-btn{width:auto;flex:1;height:auto;padding:8px 0;font-size:12px;border-radius:7px;}
+      .cc-sq-btn.cc-dots{flex:0;width:38px;padding:8px 0;}
+      .cc-btn-label{display:inline;}
+      .cc-badge{position:static;margin-left:3px;}
+    }
 
     /* Milestone archive */
     .ms-archive-toggle{background:none;border:none;font-family:'Outfit',sans-serif;font-size:12px;font-weight:400;color:rgba(247,243,237,0.3);cursor:pointer;padding:10px 0;display:flex;align-items:center;gap:6px;transition:color .2s;}
@@ -532,7 +542,7 @@
         <h1>Clients</h1>
         <button class="btn-primary" id="add-btn">+ Add client</button>
       </div>
-      <div id="clients-grid" class="client-cards-grid">
+      <div id="clients-grid" class="client-cards-list">
         <div style="grid-column:1/-1;text-align:center;padding:48px;color:rgba(247,243,237,0.25);font-size:14px;">Loading…</div>
       </div>
     </div>
@@ -1277,41 +1287,37 @@ async function loadClients() {
 function renderTable() {
   const grid = document.getElementById('clients-grid');
   grid.innerHTML = clients.map(c => {
-    const cMs = milestones.filter(m => m.clientId === c.id && !m.completed);
-    const msCount = cMs.length;
+    const msCount = milestones.filter(m => m.clientId === c.id && !m.completed).length;
     const markets = c.markets?.length
       ? c.markets.map(m => `<span class="pill">${esc(marketName(m))}</span>`).join('')
       : `<span style="font-size:11.5px;color:rgba(247,243,237,0.2);">No markets assigned</span>`;
     const initials = pcpInitials(c.name);
-    const notifyIcon = c.markets?.length ? `
-      <button class="cc-icon-btn" onclick="notifyMarkets('${c.id}','${esc(c.name)}')" title="Send markets ready email">
-        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="4" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M2 5l6 5 6-5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-        Notify
-      </button>` : '';
+    const hasMarkets = !!(c.markets?.length);
     return `<div class="client-card${c.active ? '' : ' cc-inactive'}" id="cc-${c.id}">
-      <div class="cc-header">
+      <div class="cc-row">
         <div class="cc-avatar">${esc(initials)}</div>
         <div class="cc-meta">
-          <div class="cc-name">${esc(c.name)}</div>
+          <div class="cc-name">${esc(c.name)}<span class="cc-dot ${c.active ? 'cc-dot-active' : 'cc-dot-inactive'}">●</span></div>
           <div class="cc-email">${esc(c.email)}</div>
         </div>
-        <span class="cc-status-pill ${c.active ? 'cc-status-active' : 'cc-status-inactive'}">${c.active ? 'Active' : 'Inactive'}</span>
+        <div class="cc-markets">${markets}</div>
+        <div class="cc-btn-cluster">
+          <button class="cc-sq-btn" onclick="openBrief('${c.id}','${esc(c.name)}')" title="Client brief">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="10" height="12" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M6 6h4M6 9h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <span class="cc-btn-label">Brief</span>
+          </button>
+          <button class="cc-sq-btn" id="dates-btn-${c.id}" onclick="toggleMilestones('${c.id}')" title="Upcoming dates">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M5 2v2M11 2v2M2 7h12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <span class="cc-btn-label">Dates</span>${msCount ? `<span class="cc-badge">${msCount}</span>` : ''}
+          </button>
+          <button class="cc-sq-btn${hasMarkets ? ' notify-on' : ''}"${hasMarkets ? ` onclick="notifyMarkets('${c.id}','${esc(c.name)}')"` : ' style="opacity:0.3;cursor:default;"'} title="Send markets ready email">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="2" y="4" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M2 5l6 5 6-5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            <span class="cc-btn-label">Notify</span>
+          </button>
+          <button class="cc-sq-btn cc-dots" onclick="showClientMenu('${c.id}','${esc(c.name)}')" title="More actions">···</button>
+        </div>
       </div>
-      <div class="cc-divider"></div>
-      <div class="cc-markets">${markets}</div>
-      <div class="cc-actions">
-        <button class="cc-icon-btn" onclick="openBrief('${c.id}','${esc(c.name)}')" title="Open client brief">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="10" height="12" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M6 6h4M6 9h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-          Brief
-        </button>
-        <button class="cc-icon-btn" id="dates-btn-${c.id}" onclick="toggleMilestones('${c.id}')" title="Upcoming dates">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M5 2v2M11 2v2M2 7h12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-          Dates${msCount ? ` <span class="cc-badge">${msCount}</span>` : ''}
-        </button>
-        ${notifyIcon}
-        <button class="cc-more-btn" onclick="showClientMenu('${c.id}','${esc(c.name)}')" title="More actions">···</button>
-      </div>
-      <div class="ms-panel" id="ms-panel-${c.id}" style="display:none;margin-top:14px;border-top:1px solid rgba(247,243,237,0.06);padding-top:14px;margin-bottom:-4px;padding-left:0;padding-right:0;background:transparent;border-radius:0;"></div>
+      <div class="ms-panel" id="ms-panel-${c.id}" style="display:none;"></div>
     </div>`;
   }).join('');
 }
@@ -1702,7 +1708,7 @@ function showClientMenu(id, name) {
   if (old) { old.remove(); _clientMenuOpen = null; }
   if (_clientMenuOpen === id) return; // toggle off
   _clientMenuOpen = id;
-  const btn = document.querySelector(`#cc-${id} .cc-more-btn`);
+  const btn = document.querySelector(`#cc-${id} .cc-dots`);
   if (!btn) return;
   const menu = document.createElement('div');
   menu.id = 'cc-menu-popup';
