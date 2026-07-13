@@ -1686,6 +1686,7 @@ async function deleteClient(id, name) {
   if (!res.ok) return;
   clients = clients.filter(c => c.id !== id);
   renderTable();
+  renderBriefs();
 }
 
 let _clientMenuOpen = null;
