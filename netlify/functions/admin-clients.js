@@ -237,12 +237,11 @@ export default async (req) => {
     if (updated.length === clients.length) return json({ error: 'Not found' }, 404);
     await store.setJSON('all', updated);
     if (toDelete) {
-      // Clean up questionnaire submission so email can be reused cleanly
-      try {
-        const qStore = getStore('fairway-questionnaires');
-        const qKey = toDelete.email.toLowerCase().replace(/[^a-z0-9]/g, '-');
-        await qStore.delete(qKey);
-      } catch { /* best-effort */ }
+      await Promise.all([
+        getStore('fairway-questionnaires').delete(toDelete.email.toLowerCase().replace(/[^a-z0-9]/g, '-')).catch(() => {}),
+        getStore('fairway-briefs').delete(toDelete.id).catch(() => {}),
+        getStore('fairway-milestones').delete(toDelete.id).catch(() => {}),
+      ]);
       appendAudit('client_deleted', `Deleted client ${toDelete.name} <${toDelete.email}>`);
     }
     return json({ ok: true });
