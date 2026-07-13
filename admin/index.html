@@ -121,45 +121,45 @@
     .error-msg{font-size:13px;font-weight:300;color:#cf9b92;margin-top:14px;display:none;}
     .error-msg.visible{display:block;}
 
-    /* Milestones dashboard table */
-    .ms-table{width:100%;border-collapse:collapse;min-width:480px;}
-    .ms-table th{font-size:10.5px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);padding:11px 16px;text-align:left;border-bottom:1px solid rgba(247,243,237,0.07);}
-    .ms-table td{padding:12px 16px;font-size:13.5px;font-weight:300;border-bottom:1px solid rgba(247,243,237,0.05);vertical-align:middle;}
-    .ms-table tr:last-child td{border-bottom:none;}
-    .ms-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-    .urg-overdue td{color:#e05060;}
+    /* Milestone urgency badges */
     .urg-overdue .urg-badge{background:rgba(200,60,80,0.15);border:1px solid rgba(200,60,80,0.35);color:#e05060;}
-    .urg-critical td{color:#f08080;}
     .urg-critical .urg-badge{background:rgba(240,128,128,0.12);border:1px solid rgba(240,128,128,0.3);color:#f08080;}
-    .urg-soon td{color:#e8a87c;}
     .urg-soon .urg-badge{background:rgba(232,168,124,0.12);border:1px solid rgba(232,168,124,0.3);color:#e8a87c;}
-    .urg-ok td{color:rgba(247,243,237,0.55);}
     .urg-ok .urg-badge{background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.2);color:#6dbf7b;}
-    .urg-badge{display:inline-block;font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;border-radius:100px;padding:2px 9px;white-space:nowrap;}
-    .ms-client{font-weight:400;color:#f7f3ed;}
-    .ms-label{color:rgba(247,243,237,0.6);}
-    .ms-date{font-variant-numeric:tabular-nums;color:rgba(247,243,237,0.45);font-size:12.5px;}
-    .btn-done{background:rgba(109,191,123,0.1);color:#6dbf7b;border:1px solid rgba(109,191,123,0.2);}
-    .btn-done:hover{background:rgba(109,191,123,0.2);}
+    .urg-badge{display:inline-flex;align-items:center;font-size:10px;font-weight:600;letter-spacing:0.06em;border-radius:100px;padding:4px 11px;white-space:nowrap;min-width:68px;justify-content:center;}
 
-    /* Client milestone panel */
-    .ms-panel{background:#1a1916;border-top:1px solid rgba(247,243,237,0.05);padding:20px 20px 24px;}
-    .ms-panel-inner{max-width:700px;}
-    .ms-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(247,243,237,0.05);flex-wrap:wrap;}
-    .ms-item:last-of-type{border-bottom:none;}
-    .ms-item-label{flex:1;min-width:120px;font-size:13.5px;color:rgba(247,243,237,0.75);}
-    .ms-item-date{font-size:12.5px;color:rgba(247,243,237,0.4);font-variant-numeric:tabular-nums;white-space:nowrap;}
-    .ms-item-days{font-size:12px;white-space:nowrap;}
-    .btn-dates{background:rgba(247,243,237,0.07);color:rgba(247,243,237,0.6);border:none;border-radius:7px;padding:7px 12px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:background .2s;white-space:nowrap;}
-    .btn-dates:hover{background:rgba(247,243,237,0.12);}
-    .btn-dates.active{background:rgba(189,122,112,0.15);color:#bd7a70;}
-    .btn-notify{background:rgba(100,160,120,0.1);color:rgba(140,200,155,0.85);}
-    .btn-notify:hover{background:rgba(100,160,120,0.2);}
-    .btn-brief{background:rgba(100,130,200,0.1);color:rgba(140,165,230,0.85);}
-    .btn-brief:hover{background:rgba(100,130,200,0.2);}
+    /* Milestone grouped rows (dashboard + inline panel) */
+    .ms-group{margin-bottom:22px;}
+    .ms-group-head{font-size:11.5px;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.45);margin-bottom:10px;font-weight:500;}
+    .ms-group-rows{background:#22201d;border:1px solid rgba(247,243,237,0.1);border-radius:12px;overflow:hidden;}
+    .ms-row-item{display:flex;align-items:center;gap:14px;padding:13px 16px;border-bottom:1px solid rgba(247,243,237,0.07);}
+    .ms-row-item:last-child{border-bottom:none;}
+    .ms-row-label{flex:1;font-size:14px;color:#f7f3ed;font-weight:300;}
+    .ms-row-date{font-size:13px;color:rgba(247,243,237,0.5);white-space:nowrap;}
+    .ms-check-btn{width:30px;height:30px;border-radius:7px;background:rgba(109,191,123,0.15);color:#6dbf7b;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:background .15s;}
+    .ms-check-btn:hover{background:rgba(109,191,123,0.3);}
+    .ms-del-btn{background:none;border:none;color:rgba(247,243,237,0.18);cursor:pointer;font-size:15px;padding:4px;transition:color .15s;flex-shrink:0;line-height:1;}
+    .ms-del-btn:hover{color:rgba(247,243,237,0.5);}
+    @media(max-width:640px){
+      .ms-row-item{flex-wrap:wrap;gap:10px;padding:12px 13px;}
+      .ms-row-label{order:2;width:calc(100% - 30px - 14px);flex:none;}
+      .ms-row-date{display:none;}
+      .ms-row-label-date{font-size:11px;color:rgba(247,243,237,0.4);display:block;margin-top:2px;}
+    }
+
+    /* Client milestone panel (inline in card) */
+    .ms-panel{background:#1a1916;border-top:1px solid rgba(247,243,237,0.05);padding:16px 16px 20px;}
     .btn-preview-client{background:rgba(189,122,112,0.08);color:rgba(189,122,112,0.7);border:1px solid rgba(189,122,112,0.2);}
     .btn-preview-client:hover{background:rgba(189,122,112,0.15);color:#bd7a70;}
     .btn-preview-client:disabled{opacity:0.5;cursor:default;}
+    /* kept for archive table */
+    .ms-table{width:100%;border-collapse:collapse;min-width:480px;}
+    .ms-table th{font-size:10.5px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);padding:11px 16px;text-align:left;border-bottom:1px solid rgba(247,243,237,0.07);}
+    .ms-table td{padding:12px 16px;font-size:13.5px;font-weight:300;border-bottom:1px solid rgba(247,243,237,0.05);vertical-align:middle;color:rgba(247,243,237,0.6);}
+    .ms-table tr:last-child td{border-bottom:none;}
+    .ms-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    .btn-done{background:rgba(109,191,123,0.1);color:#6dbf7b;border:1px solid rgba(109,191,123,0.2);}
+    .btn-done:hover{background:rgba(109,191,123,0.2);}
 
     /* Brief modal */
     #brief-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:600;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
@@ -613,20 +613,7 @@
         </div>
       </div>
       <p id="ms-empty" style="display:none;font-size:14px;color:rgba(247,243,237,0.25);padding:32px 0;text-align:center;">No upcoming dates — use the + Add date button above to get started.</p>
-      <div class="table-wrap" id="ms-table-wrap">
-        <div class="ms-scroll">
-          <table class="ms-table">
-            <thead><tr>
-              <th style="width:110px;">Urgency</th>
-              <th>Client</th>
-              <th>Milestone</th>
-              <th>Date</th>
-              <th></th>
-            </tr></thead>
-            <tbody id="ms-tbody"></tbody>
-          </table>
-        </div>
-      </div>
+      <div id="ms-groups"></div>
       <div class="urg-legend" id="ms-legend" style="display:none;">
         <span><span style="color:#e05060;">●</span> Overdue</span>
         <span><span style="color:#f08080;">●</span> Under 7 days</span>
@@ -1806,19 +1793,24 @@ function formatDate(dateStr) {
 }
 
 function renderMilestonesDashboard() {
-  const tbody = document.getElementById('ms-tbody');
   const summaryEl = document.getElementById('ms-summary');
   const archivedIds = new Set(clients.filter(c => c.datesArchived).map(c => c.id));
   const active = milestones.filter(m => !m.completed && !archivedIds.has(m.clientId)).sort((a, b) => new Date(a.date) - new Date(b.date));
   const done = milestones.filter(m => m.completed && !archivedIds.has(m.clientId));
-  const overdue = active.filter(m => daysFromToday(m.date) < 0).length;
-  summaryEl.textContent = active.length
-    ? `${active.length} active${overdue ? ' · ' + overdue + ' overdue' : ''}`
-    : '';
+
+  // Summary: "N active clients · N completed"
+  const activeClientCount = new Set(active.map(m => m.clientId)).size;
+  const completedClientCount = clients.filter(c => c.datesArchived).length;
+  const stats = [];
+  if (activeClientCount) stats.push(`${activeClientCount} active client${activeClientCount !== 1 ? 's' : ''}`);
+  if (completedClientCount) stats.push(`${completedClientCount} completed`);
+  summaryEl.textContent = stats.join(' · ');
+
   const emptyEl = document.getElementById('ms-empty');
-  const tableWrap = document.getElementById('ms-table-wrap');
+  const groupsEl = document.getElementById('ms-groups');
   const legendEl = document.getElementById('ms-legend');
   const archiveBtn = document.getElementById('ms-archive-btn');
+
   if (done.length) {
     archiveBtn.style.display = 'flex';
     archiveBtn.textContent = `▸ Show completed milestones (${done.length})`;
@@ -1826,32 +1818,48 @@ function renderMilestonesDashboard() {
   } else {
     archiveBtn.style.display = 'none';
   }
+
   if (!active.length) {
     emptyEl.style.display = 'block';
-    tableWrap.style.display = 'none';
+    groupsEl.innerHTML = '';
     if (legendEl) legendEl.style.display = 'none';
-    tbody.innerHTML = '';
   } else {
     emptyEl.style.display = 'none';
-    tableWrap.style.display = 'block';
     if (legendEl) legendEl.style.display = 'flex';
-    tbody.innerHTML = active.map(m => {
-      const days = daysFromToday(m.date);
-      const urg = urgencyClass(days);
-      return `<tr class="${urg}">
-        <td><span class="urg-badge">${urgencyLabel(days)}</span></td>
-        <td class="ms-client">${esc(m.clientName)}</td>
-        <td class="ms-label">${esc(m.label)}${m.notes ? `<span style="display:block;font-size:11px;color:rgba(247,243,237,0.3);margin-top:2px;">${esc(m.notes)}</span>` : ''}</td>
-        <td class="ms-date">${formatDate(m.date)}</td>
-        <td><div class="actions">
-          <button class="btn-sm btn-done" onclick="completeMilestone('${m.id}')" title="Mark done">✓</button>
-          <button class="btn-sm btn-delete" onclick="deleteMilestoneConfirm('${m.id}')" title="Delete">✕</button>
-        </div></td>
-      </tr>`;
+
+    // Group by client, preserve chronological order within each group
+    const byClient = [];
+    const seen = new Map();
+    active.forEach(m => {
+      if (!seen.has(m.clientId)) {
+        seen.set(m.clientId, []);
+        byClient.push({ clientId: m.clientId, clientName: m.clientName, items: seen.get(m.clientId) });
+      }
+      seen.get(m.clientId).push(m);
+    });
+
+    groupsEl.innerHTML = byClient.map(group => {
+      const rows = group.items.map(m => {
+        const days = daysFromToday(m.date);
+        const urg = urgencyClass(days);
+        return `<div class="ms-row-item ${urg}">
+          <span class="urg-badge">${urgencyLabel(days)}</span>
+          <span class="ms-row-label">${esc(m.label)}${m.notes ? `<span style="font-size:11px;color:rgba(247,243,237,0.3);display:block;margin-top:2px;">${esc(m.notes)}</span>` : ''}
+            <span class="ms-row-label-date">${formatDate(m.date)}</span>
+          </span>
+          <span class="ms-row-date">${formatDate(m.date)}</span>
+          <button class="ms-check-btn" onclick="completeMilestone('${m.id}')" title="Mark done">✓</button>
+          <button class="ms-del-btn" onclick="deleteMilestoneConfirm('${m.id}')" title="Delete">×</button>
+        </div>`;
+      }).join('');
+      return `<div class="ms-group">
+        <div class="ms-group-head">Active — ${esc(group.clientName)}</div>
+        <div class="ms-group-rows">${rows}</div>
+      </div>`;
     }).join('');
   }
 
-  // Archive-ready: active (non-archived) clients who have milestones and all are done
+  // Archive-ready: non-archived clients who have milestones and all are done
   const activeClientIds = [...new Set(milestones.filter(m => !archivedIds.has(m.clientId)).map(m => m.clientId))];
   const archiveReady = activeClientIds.filter(cid => {
     const cMs = milestones.filter(m => m.clientId === cid && !archivedIds.has(m.clientId));
@@ -1883,10 +1891,11 @@ function renderMilestonesDashboard() {
     completedWrap.style.display = 'block';
     completedList.innerHTML = completedClients.map(c => {
       const cMs = milestones.filter(m => m.clientId === c.id);
+      const count = cMs.length;
       const lastDate = cMs.length ? cMs.map(m => m.date).sort().pop() : null;
       return `<div class="ms-completed-card">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;"><circle cx="10" cy="10" r="9" stroke="#6dbf7b" stroke-width="1.5"/><path d="M6 10l3 3 5-5" stroke="#6dbf7b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <div style="flex:1;"><div style="font-size:14px;color:rgba(247,243,237,0.65);">${esc(c.name)}</div>${lastDate ? `<div style="font-size:12px;color:rgba(247,243,237,0.35);">Last date: ${formatDate(lastDate)}</div>` : ''}</div>
+        <div style="flex:1;"><div style="font-size:14px;color:rgba(247,243,237,0.75);">${esc(c.name)}</div><div style="font-size:12px;color:rgba(247,243,237,0.35);">All ${count} milestone${count !== 1 ? 's' : ''} met${lastDate ? ` · last date ${formatDate(lastDate)}` : ''}</div></div>
         <button onclick="reopenClient('${c.id}')" style="background:none;border:none;font-family:'Outfit',sans-serif;font-size:13px;font-weight:400;color:#bd7a70;cursor:pointer;padding:0;">Reopen</button>
       </div>`;
     }).join('');
@@ -1917,28 +1926,27 @@ function toggleMilestones(clientId) {
 function renderClientMilestones(clientId) {
   const panel = document.getElementById('ms-panel-' + clientId);
   if (!panel) return;
-  const name = clientName(clientId);
   const cMs = milestones.filter(m => m.clientId === clientId);
   const active = cMs.filter(m => !m.completed).sort((a, b) => new Date(a.date) - new Date(b.date));
   const done = cMs.filter(m => m.completed);
-  const msHtml = active.length ? active.map(m => {
+  if (!active.length) {
+    panel.innerHTML = `<p style="font-size:13px;color:rgba(247,243,237,0.25);padding:4px 0 2px;">${done.length ? `All ${done.length} date${done.length !== 1 ? 's' : ''} completed.` : 'No upcoming dates.'}</p>`;
+    return;
+  }
+  const rows = active.map(m => {
     const days = daysFromToday(m.date);
     const urg = urgencyClass(days);
-    return `<div class="ms-item">
-      <span class="ms-item-label ${urg}">${esc(m.label)}${m.notes ? `<span style="font-size:12px;color:rgba(247,243,237,0.3);display:block;">${esc(m.notes)}</span>` : ''}</span>
-      <span class="ms-item-date">${formatDate(m.date)}</span>
-      <span class="ms-item-days ${urg}">${urgencyLabel(days)}</span>
-      <div class="actions">
-        <button class="btn-sm btn-done" onclick="completeMilestone('${m.id}','${clientId}')">✓ Done</button>
-        <button class="btn-sm btn-delete" onclick="deleteMilestoneConfirm('${m.id}','${clientId}')">×</button>
-      </div>
+    return `<div class="ms-row-item ${urg}">
+      <span class="urg-badge">${urgencyLabel(days)}</span>
+      <span class="ms-row-label">${esc(m.label)}${m.notes ? `<span style="font-size:11px;color:rgba(247,243,237,0.3);display:block;margin-top:2px;">${esc(m.notes)}</span>` : ''}
+        <span class="ms-row-label-date">${formatDate(m.date)}</span>
+      </span>
+      <span class="ms-row-date">${formatDate(m.date)}</span>
+      <button class="ms-check-btn" onclick="completeMilestone('${m.id}','${clientId}')" title="Mark done">✓</button>
+      <button class="ms-del-btn" onclick="deleteMilestoneConfirm('${m.id}','${clientId}')" title="Delete">×</button>
     </div>`;
-  }).join('') : '<p style="font-size:13px;color:rgba(247,243,237,0.25);padding:8px 0;">No upcoming dates.</p>';
-
-  panel.innerHTML = `<div class="ms-panel-inner">
-    ${msHtml}
-    ${done.length ? `<p style="font-size:12px;color:rgba(247,243,237,0.2);margin-top:12px;">${done.length} completed date${done.length > 1 ? 's' : ''}</p>` : ''}
-  </div>`;
+  }).join('');
+  panel.innerHTML = `<div class="ms-group-rows" style="border-radius:0;border-left:none;border-right:none;border-top:none;">${rows}</div>${done.length ? `<p style="font-size:12px;color:rgba(247,243,237,0.2);margin-top:10px;padding:0 0 4px;">${done.length} completed date${done.length !== 1 ? 's' : ''}</p>` : ''}`;
 }
 
 let _msRows = [];
