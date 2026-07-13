@@ -229,37 +229,15 @@ Paste this into your Google Sheet → Extensions → Apps Script.
 Deploy as a web app: Execute as "Me", access "Anyone".
 Copy the deployment URL into Netlify env var: QUESTIONNAIRE_SHEET_ENDPOINT
 
-Each submission sends { headers: [...], row: [...] }.
-The script keeps row 1 as a header row (auto-updated if the questionnaire
-changes), then appends the data row below.
+Each submission appends two rows: questions on one row, answers directly below.
 
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-
-    // Maintain header row: write/refresh row 1 whenever headers change.
     if (data.headers && data.headers.length) {
-      const lastCol = Math.max(data.headers.length, sheet.getLastColumn());
-      const existingHeaders = sheet.getLastRow() > 0
-        ? sheet.getRange(1, 1, 1, lastCol).getValues()[0]
-        : [];
-      const needsHeader =
-        existingHeaders[0] !== data.headers[0] ||           // row 1 is data
-        existingHeaders.join('|') !== data.headers.join('|'); // headers changed
-
-      if (needsHeader) {
-        if (sheet.getLastRow() === 0 || existingHeaders[0] === data.headers[0]) {
-          // Sheet empty or header row already exists — overwrite row 1
-          sheet.getRange(1, 1, 1, data.headers.length).setValues([data.headers]);
-        } else {
-          // Row 1 is a data row — insert blank row at top then write headers
-          sheet.insertRowBefore(1);
-          sheet.getRange(1, 1, 1, data.headers.length).setValues([data.headers]);
-        }
-      }
+      sheet.appendRow(data.headers);
     }
-
     sheet.appendRow(data.row);
     return ContentService.createTextOutput(JSON.stringify({ ok: true }))
       .setMimeType(ContentService.MimeType.JSON);
