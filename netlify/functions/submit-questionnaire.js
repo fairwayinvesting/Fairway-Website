@@ -54,6 +54,48 @@ function verifyJWT(token, secret) {
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
 
+function buildSheetHeaders() {
+  const propHeaders = [];
+  for (let i = 0; i < 7; i++) {
+    const n = `Property ${i + 1}`;
+    propHeaders.push(
+      `${n} State`, `${n} Type`, `${n} Purchase Date`,
+      `${n} Valuation`, `${n} Loan Balance`, `${n} Weekly Rent`,
+      `${n} Interest Rate`, `${n} Loan Structure`, `${n} Own Another?`
+    );
+  }
+  return [
+    'Submitted At',
+    'First Name', 'Middle Name', 'Last Name',
+    'Date of Birth', 'Email', 'Phone',
+    'State', 'Home Address',
+    'Co-Investor?',
+    'P2 First Name', 'P2 Middle Name', 'P2 Last Name',
+    'P2 Date of Birth', 'P2 Email', 'P2 Phone',
+    'P2 State', 'P2 Home Address',
+    'Entity Type',
+    'Company Name', 'Company Personnel', 'Company ABN', 'Company ACN', 'Company TFN',
+    'Trust Name', 'Trust Beneficiaries', 'Trust Address', 'Trust ABN', 'Trust TFN',
+    'SMSF Name', 'SMSF Members', 'SMSF Address', 'SMSF ABN', 'SMSF TFN',
+    'Motivation', 'Timeframe', 'Risk Tolerance',
+    'Funding Method', 'Cash Savings', 'Annual Salary',
+    'Dependants', 'Weekly Rent Paid', 'Other Debts',
+    'Own Investment Properties?',
+    ...propHeaders,
+    'Has Broker?',
+    'Broker Name', 'Broker Email', 'Broker Phone',
+    'Broker Capacity', 'Broker Introduced?',
+    'Has Accountant?',
+    'Accountant Name', 'Accountant Email', 'Accountant Phone',
+    'Accountant Introduced?',
+    'States to Avoid?', 'States to Avoid List',
+    'Max Purchase Price',
+    'Own PPOR?',
+    'PPOR State', 'PPOR Type', 'PPOR Value',
+    'PPOR Loan', 'PPOR Interest Rate', 'PPOR Loan Structure',
+  ];
+}
+
 function buildSheetRow(timestamp, d) {
   const props = d.properties || [];
   const propCols = [];
@@ -156,11 +198,12 @@ export default async (req) => {
   const sheetEndpoint = process.env.QUESTIONNAIRE_SHEET_ENDPOINT;
   if (sheetEndpoint) {
     try {
+      const headers = buildSheetHeaders();
       const row = buildSheetRow(submission.submittedAt, submission);
       await fetch(sheetEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ row }),
+        body: JSON.stringify({ headers, row }),
       });
     } catch (err) {
       console.error('Sheet POST failed:', err?.message || err);
@@ -185,10 +228,37 @@ Paste this into your Google Sheet → Extensions → Apps Script.
 Deploy as a web app: Execute as "Me", access "Anyone".
 Copy the deployment URL into Netlify env var: QUESTIONNAIRE_SHEET_ENDPOINT
 
+Each submission sends { headers: [...], row: [...] }.
+The script keeps row 1 as a header row (auto-updated if the questionnaire
+changes), then appends the data row below.
+
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+
+    // Maintain header row: write/refresh row 1 whenever headers change.
+    if (data.headers && data.headers.length) {
+      const lastCol = Math.max(data.headers.length, sheet.getLastColumn());
+      const existingHeaders = sheet.getLastRow() > 0
+        ? sheet.getRange(1, 1, 1, lastCol).getValues()[0]
+        : [];
+      const needsHeader =
+        existingHeaders[0] !== data.headers[0] ||           // row 1 is data
+        existingHeaders.join('|') !== data.headers.join('|'); // headers changed
+
+      if (needsHeader) {
+        if (sheet.getLastRow() === 0 || existingHeaders[0] === data.headers[0]) {
+          // Sheet empty or header row already exists — overwrite row 1
+          sheet.getRange(1, 1, 1, data.headers.length).setValues([data.headers]);
+        } else {
+          // Row 1 is a data row — insert blank row at top then write headers
+          sheet.insertRowBefore(1);
+          sheet.getRange(1, 1, 1, data.headers.length).setValues([data.headers]);
+        }
+      }
+    }
+
     sheet.appendRow(data.row);
     return ContentService.createTextOutput(JSON.stringify({ ok: true }))
       .setMimeType(ContentService.MimeType.JSON);
