@@ -296,5 +296,19 @@
 
   init();
 </script>
+<script>
+(function(){
+  var tok=(document.cookie.split(';').find(function(s){return s.trim().startsWith('fw_session=');})||'').replace(/^\s*fw_session=/,'');
+  if(!tok)return;
+  var p;try{p=JSON.parse(atob(tok.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));}catch(e){return;}
+  if(!p||!p.preview)return;
+  var bar=document.createElement('div');
+  bar.style.cssText='position:fixed;top:0;left:0;right:0;z-index:9999;background:#bd7a70;color:#22201d;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;padding:11px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,0.2);';
+  bar.innerHTML='<span style="flex:1;">Previewing portal as <strong>'+(p.name||'client')+'</strong> — do not submit any forms.</span>'
+    +'<button onclick="document.cookie=\'fw_session=;expires=Thu,01 Jan 1970 00:00:00 GMT;path=/\';location.href=\'/admin/\';" style="background:rgba(0,0,0,0.18);color:#22201d;border:none;border-radius:6px;padding:6px 14px;font-family:Outfit,sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">Exit preview</button>';
+  document.body.prepend(bar);
+  document.body.style.paddingTop='44px';
+})();
+</script>
 </body>
 </html>
