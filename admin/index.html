@@ -161,6 +161,27 @@
     .btn-done{background:rgba(109,191,123,0.1);color:#6dbf7b;border:1px solid rgba(109,191,123,0.2);}
     .btn-done:hover{background:rgba(109,191,123,0.2);}
 
+    /* Share dates modal */
+    #share-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:650;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
+    #share-overlay.open{opacity:1;pointer-events:all;}
+    .share-modal{background:#22201d;border:1px solid rgba(247,243,237,0.1);border-radius:20px;width:100%;max-width:480px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;}
+    .share-modal-head{padding:24px 28px 18px;border-bottom:1px solid rgba(247,243,237,0.07);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .share-modal-head h2{font-family:'Fraunces',serif;font-size:20px;font-weight:400;color:#f7f3ed;}
+    .share-modal-body{padding:22px 28px;overflow-y:auto;flex:1;}
+    .share-modal-foot{padding:16px 28px;border-top:1px solid rgba(247,243,237,0.07);display:flex;gap:10px;justify-content:flex-end;flex-shrink:0;}
+    .share-recipient-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;margin-bottom:8px;}
+    .share-recipient-row input{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:9px 12px;font-size:13px;color:#f7f3ed;font-family:'Outfit',sans-serif;outline:none;width:100%;}
+    .share-recipient-row input:focus{border-color:rgba(189,122,112,0.4);}
+    .share-remove-btn{background:none;border:none;color:rgba(247,243,237,0.25);font-size:18px;cursor:pointer;line-height:1;padding:4px 6px;flex-shrink:0;}
+    .share-remove-btn:hover{color:rgba(247,243,237,0.6);}
+    .share-add-btn{background:none;border:1px dashed rgba(247,243,237,0.15);border-radius:8px;color:rgba(247,243,237,0.4);font-size:13px;font-family:'Outfit',sans-serif;cursor:pointer;padding:8px 14px;width:100%;margin-top:4px;transition:all .15s;}
+    .share-add-btn:hover{border-color:rgba(247,243,237,0.3);color:rgba(247,243,237,0.7);}
+    .share-dates-preview{background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.07);border-radius:10px;padding:14px 16px;margin-bottom:18px;}
+    .share-date-item{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid rgba(247,243,237,0.05);font-size:13px;}
+    .share-date-item:last-child{border-bottom:none;}
+    .share-date-label{color:#f7f3ed;font-weight:400;}
+    .share-date-val{color:rgba(247,243,237,0.4);font-size:12px;}
+
     /* Brief modal */
     #brief-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:600;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
     #brief-overlay.open{opacity:1;pointer-events:all}
@@ -706,6 +727,36 @@
 
   </div><!-- end admin-main -->
 </div><!-- end admin-shell -->
+
+<!-- Share dates modal -->
+<div id="share-overlay">
+  <div class="share-modal">
+    <div class="share-modal-head">
+      <h2>Share upcoming dates</h2>
+      <button class="brief-modal-head-close" onclick="closeShareModal()">×</button>
+    </div>
+    <div class="share-modal-body">
+      <input type="hidden" id="share-client-id">
+      <p id="share-client-label" style="font-size:13px;color:rgba(247,243,237,0.4);margin-bottom:18px;"></p>
+
+      <div class="share-dates-preview" id="share-dates-preview"></div>
+
+      <p style="font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">Recipients</p>
+      <div id="share-recipients"></div>
+      <button class="share-add-btn" onclick="addShareRecipient()">+ Add recipient</button>
+
+      <div class="field" style="margin-top:18px;">
+        <label>Note <span style="font-weight:300;color:rgba(247,243,237,0.3);">(optional)</span></label>
+        <textarea id="share-note" rows="3" placeholder="Add a personal note to include in the email…" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:10px 13px;font-size:13px;color:#f7f3ed;font-family:'Outfit',sans-serif;outline:none;width:100%;resize:vertical;"></textarea>
+      </div>
+      <p id="share-status" style="font-size:13px;margin-top:12px;display:none;"></p>
+    </div>
+    <div class="share-modal-foot">
+      <button class="btn-secondary" onclick="closeShareModal()">Cancel</button>
+      <button class="btn-primary" id="share-send-btn" onclick="sendShareDates()">Send email</button>
+    </div>
+  </div>
+</div>
 
 <!-- Presentations modal -->
 <input type="file" id="pres-file-input" accept="image/*" style="display:none">
@@ -1858,7 +1909,10 @@ function renderMilestonesDashboard() {
         </div>`;
       }).join('');
       return `<div class="ms-group">
-        <div class="ms-group-head">Active — ${esc(group.clientName)}</div>
+        <div class="ms-group-head" style="display:flex;align-items:center;justify-content:space-between;">
+          <span>Active — ${esc(group.clientName)}</span>
+          <button onclick="openShareModal('${group.clientId}')" style="background:none;border:1px solid rgba(189,122,112,0.3);color:#bd7a70;font-family:'Outfit',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;border-radius:6px;padding:4px 11px;cursor:pointer;white-space:nowrap;">Share</button>
+        </div>
         <div class="ms-group-rows">${rows}</div>
       </div>`;
     }).join('');
@@ -1951,7 +2005,7 @@ function renderClientMilestones(clientId) {
       <button class="ms-del-btn" onclick="deleteMilestoneConfirm('${m.id}','${clientId}')" title="Delete">×</button>
     </div>`;
   }).join('');
-  panel.innerHTML = `<div class="ms-group-rows" style="border-radius:0;border-left:none;border-right:none;border-top:none;">${rows}</div>${done.length ? `<p style="font-size:12px;color:rgba(247,243,237,0.2);margin-top:10px;padding:0 0 4px;">${done.length} completed date${done.length !== 1 ? 's' : ''}</p>` : ''}`;
+  panel.innerHTML = `<div class="ms-group-rows" style="border-radius:0;border-left:none;border-right:none;border-top:none;">${rows}</div><div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding:0 0 4px;">${done.length ? `<p style="font-size:12px;color:rgba(247,243,237,0.2);margin:0;">${done.length} completed date${done.length !== 1 ? 's' : ''}</p>` : '<span></span>'}<button onclick="openShareModal('${clientId}')" style="background:none;border:1px solid rgba(189,122,112,0.3);color:#bd7a70;font-family:'Outfit',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;border-radius:6px;padding:4px 11px;cursor:pointer;">Share dates</button></div>`;
 }
 
 let _msRows = [];
@@ -2096,6 +2150,115 @@ async function deleteMilestoneConfirm(id, clientId) {
   renderMilestonesDashboard();
   updateMilestoneBadges();
   if (cid) renderClientMilestones(cid);
+}
+
+// ── Share dates modal ─────────────────────────────────────────────────────────
+
+function openShareModal(clientId) {
+  const client = clients.find(c => c.id === clientId);
+  if (!client) return;
+
+  const upcoming = milestones
+    .filter(m => m.clientId === clientId && !m.completed)
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  if (!upcoming.length) {
+    alert('No upcoming dates to share for this client.');
+    return;
+  }
+
+  document.getElementById('share-client-id').value = clientId;
+  document.getElementById('share-client-label').textContent =
+    `Sending ${upcoming.length} upcoming date${upcoming.length !== 1 ? 's' : ''} for ${client.name}`;
+
+  // Preview of dates being sent
+  const fmt = d => new Date(d).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
+  document.getElementById('share-dates-preview').innerHTML =
+    upcoming.map(m => `<div class="share-date-item"><span class="share-date-label">${esc(m.label)}</span><span class="share-date-val">${fmt(m.date)}</span></div>`).join('');
+
+  // Pre-populate with client's email
+  const recipientsEl = document.getElementById('share-recipients');
+  recipientsEl.innerHTML = '';
+  _addRecipientRow(client.name, client.email);
+
+  document.getElementById('share-note').value = '';
+  const statusEl = document.getElementById('share-status');
+  statusEl.style.display = 'none';
+  document.getElementById('share-send-btn').disabled = false;
+  document.getElementById('share-send-btn').textContent = 'Send email';
+
+  document.getElementById('share-overlay').classList.add('open');
+}
+
+function closeShareModal() {
+  document.getElementById('share-overlay').classList.remove('open');
+}
+
+document.getElementById('share-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeShareModal();
+});
+
+function _addRecipientRow(name = '', email = '') {
+  const wrap = document.getElementById('share-recipients');
+  const row = document.createElement('div');
+  row.className = 'share-recipient-row';
+  row.innerHTML = `
+    <input type="text"  placeholder="Name"  value="${esc(name)}"  style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:9px 12px;font-size:13px;color:#f7f3ed;font-family:'Outfit',sans-serif;outline:none;width:100%;">
+    <input type="email" placeholder="Email" value="${esc(email)}" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:9px 12px;font-size:13px;color:#f7f3ed;font-family:'Outfit',sans-serif;outline:none;width:100%;">
+    <button class="share-remove-btn" onclick="this.closest('.share-recipient-row').remove()" title="Remove">×</button>`;
+  wrap.appendChild(row);
+}
+
+function addShareRecipient() {
+  _addRecipientRow();
+}
+
+async function sendShareDates() {
+  const clientId = document.getElementById('share-client-id').value;
+  const client = clients.find(c => c.id === clientId);
+  const note = document.getElementById('share-note').value.trim();
+  const statusEl = document.getElementById('share-status');
+  const btn = document.getElementById('share-send-btn');
+
+  const rows = document.querySelectorAll('#share-recipients .share-recipient-row');
+  const recipients = [...rows].map(r => ({
+    name:  r.querySelectorAll('input')[0].value.trim(),
+    email: r.querySelectorAll('input')[1].value.trim(),
+  })).filter(r => r.email);
+
+  if (!recipients.length) {
+    statusEl.textContent = 'Add at least one recipient email.';
+    statusEl.style.color = '#e07070';
+    statusEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  statusEl.style.display = 'none';
+
+  const res = await api('POST', '/api/admin/milestones', {
+    clientId,
+    action: 'share',
+    clientName: client?.name || '',
+    recipients,
+    note: note || null,
+  });
+
+  if (res.ok) {
+    btn.textContent = 'Sent ✓';
+    statusEl.textContent = `Email sent to ${recipients.map(r => r.email).join(', ')}`;
+    statusEl.style.color = '#6dbf7b';
+    statusEl.style.display = 'block';
+    setTimeout(closeShareModal, 2000);
+  } else {
+    const err = await res.json().catch(() => ({}));
+    btn.disabled = false;
+    btn.textContent = 'Send email';
+    statusEl.textContent = err.error || 'Failed to send. Try again.';
+    statusEl.style.color = '#e07070';
+    statusEl.style.display = 'block';
+  }
 }
 
 // ── TOTP Setup ────────────────────────────────────────────────────────────────
