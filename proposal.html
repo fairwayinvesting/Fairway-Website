@@ -118,6 +118,21 @@
     .prop-equity{color:#6dbf7b;font-weight:500;}
     .portfolio-note{text-align:center;margin-top:18px;font-size:12.5px;color:rgba(247,243,237,0.25);line-height:1.65;}
 
+    /* ── Auth overlay ── */
+    #auth-overlay{position:fixed;inset:0;z-index:999;background:#1a1916;display:flex;align-items:center;justify-content:center;}
+    #auth-overlay.hidden{display:none;}
+    .auth-box{width:100%;max-width:360px;padding:0 24px;}
+    .auth-box .auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:36px;}
+    .auth-box h2{font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#f7f3ed;margin-bottom:8px;}
+    .auth-box p{font-size:14px;color:rgba(247,243,237,0.4);margin-bottom:28px;line-height:1.6;}
+    .auth-field{width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:14px 16px;font-size:15px;color:#f7f3ed;font-family:'Outfit',sans-serif;outline:none;transition:border-color .2s;}
+    .auth-field:focus{border-color:rgba(189,122,112,0.5);}
+    .auth-field.error{border-color:rgba(220,80,80,0.6);}
+    .auth-btn{margin-top:14px;width:100%;background:#bd7a70;color:#f7f3ed;border:none;border-radius:100px;padding:14px;font-size:15px;font-weight:500;font-family:'Outfit',sans-serif;cursor:pointer;transition:opacity .2s;}
+    .auth-btn:hover{opacity:0.85;}
+    .auth-btn:disabled{opacity:0.5;cursor:default;}
+    .auth-error{font-size:13px;color:#e07070;margin-top:10px;display:none;}
+
     /* ── Mobile fallback: revert to normal scroll ── */
     @media(max-width:900px){
       html,body{height:auto;overflow:auto;}
@@ -138,6 +153,21 @@
   </style>
 </head>
 <body>
+
+<!-- Auth overlay — shown until password verified -->
+<div id="auth-overlay">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <img src="/logo-icon.png" alt="" style="height:28px;width:auto;">
+      <img src="/logo-word.png" alt="Fairway Investing" style="height:17px;width:auto;">
+    </div>
+    <h2>Private access</h2>
+    <p>This presentation is for Fairway team use only. Enter your admin password to continue.</p>
+    <input id="auth-input" class="auth-field" type="password" placeholder="Admin password" autocomplete="current-password">
+    <button id="auth-btn" class="auth-btn">Continue</button>
+    <div id="auth-error" class="auth-error">Incorrect password. Try again.</div>
+  </div>
+</div>
 
 <header class="site-header">
   <div class="header-logo">
@@ -440,6 +470,49 @@
 </div><!-- /slideshow -->
 
 <script>
+  // ── Auth gate ────────────────────────────────────────────────────────────────
+  const overlay = document.getElementById('auth-overlay');
+  const authInput = document.getElementById('auth-input');
+  const authBtn = document.getElementById('auth-btn');
+  const authError = document.getElementById('auth-error');
+
+  if (sessionStorage.getItem('proposal_authed') === '1') {
+    overlay.classList.add('hidden');
+  }
+
+  async function tryAuth() {
+    const pw = authInput.value.trim();
+    if (!pw) return;
+    authBtn.disabled = true;
+    authError.style.display = 'none';
+    authInput.classList.remove('error');
+    try {
+      const res = await fetch('/api/admin/verify', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${pw}` },
+      });
+      if (res.ok) {
+        sessionStorage.setItem('proposal_authed', '1');
+        overlay.classList.add('hidden');
+      } else {
+        authInput.classList.add('error');
+        authError.style.display = 'block';
+        authBtn.disabled = false;
+        authInput.select();
+      }
+    } catch {
+      authError.textContent = 'Connection error. Try again.';
+      authError.style.display = 'block';
+      authBtn.disabled = false;
+    }
+  }
+
+  authBtn.addEventListener('click', tryAuth);
+  authInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryAuth(); });
+</script>
+
+<script>
+  // ── Slideshow ─────────────────────────────────────────────────────────────────
   const TOTAL = 6;
   const track = document.getElementById('track');
   const dots = document.querySelectorAll('.slide-dot');
