@@ -119,8 +119,8 @@
     .portfolio-note{text-align:center;margin-top:18px;font-size:12.5px;color:rgba(247,243,237,0.25);line-height:1.65;}
 
     /* ── Auth overlay ── */
-    #auth-overlay{position:fixed;inset:0;z-index:999;background:#1a1916;display:flex;align-items:center;justify-content:center;}
-    #auth-overlay.hidden{display:none;}
+    #auth-overlay{position:fixed;inset:0;z-index:999;background:#1a1916;display:flex;align-items:center;justify-content:center;transition:opacity 0.3s;}
+    #auth-overlay.hidden{opacity:0;pointer-events:none;}
     .auth-box{width:100%;max-width:360px;padding:0 24px;}
     .auth-box .auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:36px;}
     .auth-box h2{font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#f7f3ed;margin-bottom:8px;}
@@ -476,9 +476,10 @@
   const authBtn = document.getElementById('auth-btn');
   const authError = document.getElementById('auth-error');
 
-  if (sessionStorage.getItem('proposal_authed') === '1') {
-    overlay.classList.add('hidden');
-  }
+  // Silent cookie check — if fw_admin session cookie is present and valid, skip overlay
+  fetch('/api/admin/verify', { method: 'POST', credentials: 'same-origin' })
+    .then(r => { if (r.ok) overlay.classList.add('hidden'); })
+    .catch(() => {});
 
   async function tryAuth() {
     const pw = authInput.value.trim();
@@ -489,10 +490,10 @@
     try {
       const res = await fetch('/api/admin/verify', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: { 'Authorization': `Bearer ${pw}` },
       });
       if (res.ok) {
-        sessionStorage.setItem('proposal_authed', '1');
         overlay.classList.add('hidden');
       } else {
         authInput.classList.add('error');
