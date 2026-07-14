@@ -1853,8 +1853,8 @@ function renderMilestonesDashboard() {
             <span class="ms-row-label-date">${formatDate(m.date)}</span>
           </span>
           <span class="ms-row-date">${formatDate(m.date)}</span>
-          <button class="ms-check-btn" onclick="completeMilestone('${m.id}')" title="Mark done">✓</button>
-          <button class="ms-del-btn" onclick="deleteMilestoneConfirm('${m.id}')" title="Delete">×</button>
+          <button class="ms-check-btn" onclick="completeMilestone('${m.id}','${m.clientId}')" title="Mark done">✓</button>
+          <button class="ms-del-btn" onclick="deleteMilestoneConfirm('${m.id}','${m.clientId}')" title="Delete">×</button>
         </div>`;
       }).join('');
       return `<div class="ms-group">
@@ -2046,13 +2046,16 @@ async function reopenClient(clientId) {
 }
 
 async function completeMilestone(id, clientId) {
-  const res = await api('PUT', '/api/admin/milestones', { id, completed: true });
+  // clientId is required by the backend for isolated per-client writes
+  const cid = clientId || milestones.find(x => x.id === id)?.clientId;
+  if (!cid) { console.error('completeMilestone: no clientId for', id); return; }
+  const res = await api('PUT', '/api/admin/milestones', { id, clientId: cid, completed: true });
   if (!res.ok) return;
   const m = milestones.find(x => x.id === id);
   if (m) { m.completed = true; m.completedAt = new Date().toISOString(); }
   renderMilestonesDashboard();
   updateMilestoneBadges();
-  if (clientId) renderClientMilestones(clientId);
+  if (cid) renderClientMilestones(cid);
 }
 
 function toggleMilestoneArchive() {
@@ -2078,18 +2081,21 @@ function renderMilestonesArchive() {
     <td class="ms-label">${esc(m.label)}${m.notes ? `<span style="display:block;font-size:11px;color:rgba(247,243,237,0.3);margin-top:2px;">${esc(m.notes)}</span>` : ''}</td>
     <td class="ms-date">${formatDate(m.date)}</td>
     <td class="ms-date">${m.completedAt ? new Date(m.completedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short'}) : '—'}</td>
-    <td><div class="actions"><button class="btn-sm btn-delete" onclick="deleteMilestoneConfirm('${m.id}')" title="Delete">✕</button></div></td>
+    <td><div class="actions"><button class="btn-sm btn-delete" onclick="deleteMilestoneConfirm('${m.id}','${m.clientId}')" title="Delete">✕</button></div></td>
   </tr>`).join('');
 }
 
 async function deleteMilestoneConfirm(id, clientId) {
   if (!confirm('Delete this date?')) return;
-  const res = await api('DELETE', `/api/admin/milestones?id=${encodeURIComponent(id)}`);
+  // clientId is required by the backend for isolated per-client writes
+  const cid = clientId || milestones.find(x => x.id === id)?.clientId;
+  if (!cid) { console.error('deleteMilestoneConfirm: no clientId for', id); return; }
+  const res = await api('DELETE', `/api/admin/milestones?id=${encodeURIComponent(id)}&clientId=${encodeURIComponent(cid)}`);
   if (!res.ok) return;
   milestones = milestones.filter(x => x.id !== id);
   renderMilestonesDashboard();
   updateMilestoneBadges();
-  if (clientId) renderClientMilestones(clientId);
+  if (cid) renderClientMilestones(cid);
 }
 
 // ── TOTP Setup ────────────────────────────────────────────────────────────────
