@@ -629,7 +629,10 @@
     <div id="sec-presentations" class="admin-section">
       <div class="sec-header">
         <h1>Presentations</h1>
-        <button class="btn-primary" onclick="openPresModal()">+ New presentation</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn-secondary" onclick="copyAgentLink()" id="copy-agent-btn" style="font-size:12px;">Copy agent link</button>
+          <button class="btn-primary" onclick="openPresModal()">+ New presentation</button>
+        </div>
       </div>
       <div class="table-wrap">
         <table>
@@ -814,6 +817,11 @@
 
       <!-- Details tab -->
       <div class="pres-tab-pane active" id="pres-tab-details">
+        <!-- Agent submission callout (hidden unless source=agent) -->
+        <div id="pres-agent-callout" style="display:none;background:rgba(251,191,36,0.05);border:1px solid rgba(251,191,36,0.2);border-radius:10px;padding:14px 16px;margin-bottom:18px;">
+          <p style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#fbbf24;margin-bottom:8px;">Agent submission</p>
+          <div id="pres-agent-callout-body" style="font-size:13px;color:rgba(247,243,237,0.55);line-height:1.6;"></div>
+        </div>
         <div class="field"><label>Property address</label><input type="text" id="pres-address" placeholder="e.g. 14 Smith Street"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
           <div class="field"><label>Suburb</label><input type="text" id="pres-suburb" placeholder="e.g. Geelong West VIC"></div>
@@ -831,6 +839,9 @@
         <div class="field"><label>Luke's assessment</label><textarea id="pres-summary" placeholder="Your commentary on this property…" style="min-height:120px;"></textarea></div>
         <div class="field"><label>Key highlights <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">(one per line, max 6)</span></label>
           <textarea id="pres-highlights" placeholder="0.88% rental vacancy&#10;Houses selling in 21 days&#10;Strong cashflow profile"></textarea>
+        </div>
+        <div class="field"><label>Known issues / defects <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">Optional</span></label>
+          <textarea id="pres-known-issues" placeholder="Any structural issues, council notices, easements, heritage overlays, strata issues…" style="min-height:72px;"></textarea>
         </div>
       </div>
 
@@ -2566,6 +2577,21 @@ async function loadPresentations() {
   renderDashboard();
 }
 
+async function copyAgentLink() {
+  const btn = document.getElementById('copy-agent-btn');
+  try {
+    const res = await api('GET', '/api/admin/agent-link');
+    if (!res.ok) { alert('AGENT_SUBMIT_KEY env var not set in Netlify. Add it in Site settings → Environment variables.'); return; }
+    const { url } = await res.json();
+    await navigator.clipboard.writeText(url);
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = orig; }, 2000);
+  } catch {
+    alert('Could not copy link. Check AGENT_SUBMIT_KEY is set in Netlify environment variables.');
+  }
+}
+
 function renderPresentations() {
   const tbody = document.getElementById('pres-tbody');
   if (!presentations.length) {
@@ -2615,8 +2641,8 @@ function renderPresentations() {
     const notifyLabel = unrevoked.some(cid => !sentList.includes(cid)) ? '✉ Notify' : '✉ Re-notify';
     return `<tr>
       <td>
-        <div class="td-name">${esc(p.address)}${propStatusHtml}</div>
-        <div style="font-size:12px;color:rgba(247,243,237,0.3);margin-top:3px;">${p.price ? esc(p.price) : ''}${expiry}</div>
+        <div class="td-name">${esc(p.address)}${propStatusHtml}${p.source === 'agent' ? '<span class="pill" style="background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.3);color:#fbbf24;margin-left:6px;">From Agent</span>' : ''}</div>
+        <div style="font-size:12px;color:rgba(247,243,237,0.3);margin-top:3px;">${p.source === 'agent' && p.agentSubmission ? `${esc(p.agentSubmission.agentName)}${p.agentSubmission.agentAgency ? ' · ' + esc(p.agentSubmission.agentAgency) : ''}` : p.price ? esc(p.price) : ''}${expiry}</div>
       </td>
       <td>${clientCell}</td>
       <td><div class="actions">
@@ -3020,6 +3046,20 @@ function openPresModal(id) {
     document.getElementById('pres-land').value = p.landSize || '';
     document.getElementById('pres-summary').value = p.summary || '';
     document.getElementById('pres-highlights').value = (p.highlights || []).join('\n');
+    document.getElementById('pres-known-issues').value = p.knownIssues || '';
+    // Agent callout
+    const callout = document.getElementById('pres-agent-callout');
+    const calloutBody = document.getElementById('pres-agent-callout-body');
+    if (p.source === 'agent' && p.agentSubmission) {
+      const a = p.agentSubmission;
+      const parts = [a.agentName, a.agentAgency, a.agentPhone, a.agentEmail].filter(Boolean).join(' · ');
+      const submittedAt = a.submittedAt ? new Date(a.submittedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+      calloutBody.innerHTML = `<p style="font-weight:400;color:rgba(247,243,237,0.75);margin-bottom:${a.agentAssessment ? '10px' : '0'}">${esc(parts)}${submittedAt ? `<span style="color:rgba(247,243,237,0.3);margin-left:8px;">· ${submittedAt}</span>` : ''}</p>${a.agentAssessment ? `<p style="font-size:12.5px;font-style:italic;color:rgba(247,243,237,0.45);">"${esc(a.agentAssessment)}"</p>` : ''}`;
+      callout.style.display = 'block';
+    } else {
+      callout.style.display = 'none';
+      calloutBody.innerHTML = '';
+    }
     // Media
     _presImages = (p.images || []).map(i => ({ ...i, id: i.id || uid() }));
     _presVideos = (p.videos || []).map(v => ({ ...v, id: v.id || uid() }));
@@ -3112,7 +3152,8 @@ function openPresModal(id) {
   } else {
     document.getElementById('pres-modal-title').textContent = 'New presentation';
     document.getElementById('pres-edit-id').value = '';
-    ['pres-address','pres-suburb','pres-price','pres-beds','pres-baths','pres-cars','pres-land','pres-summary','pres-highlights','cf-price','cf-rent','cf-rate','cf-lvr','cf-mgmt','cf-rates','cf-insurance','cf-maint','demo-owner','demo-renter','demo-public','demo-notes','demo-image','pres-revocation-reason'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    ['pres-address','pres-suburb','pres-price','pres-beds','pres-baths','pres-cars','pres-land','pres-summary','pres-highlights','pres-known-issues','cf-price','cf-rent','cf-rate','cf-lvr','cf-mgmt','cf-rates','cf-insurance','cf-maint','demo-owner','demo-renter','demo-public','demo-notes','demo-image','pres-revocation-reason'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    document.getElementById('pres-agent-callout').style.display = 'none';
     document.getElementById('pres-type').value = 'house';
     document.getElementById('pres-status').value = '';
     document.getElementById('pres-expires').value = '';
@@ -3210,6 +3251,7 @@ async function savePresentation() {
     landSize: document.getElementById('pres-land').value.trim(),
     summary: document.getElementById('pres-summary').value.trim(),
     highlights,
+    knownIssues: document.getElementById('pres-known-issues').value.trim(),
     images: _presImages.filter(i => i.url),
     videos: _presVideos.filter(v => v.url),
     cashflow: { enabled: document.getElementById('cf-enabled').checked, purchasePrice: document.getElementById('cf-price').value, weeklyRent: document.getElementById('cf-rent').value, interestRate: document.getElementById('cf-rate').value, lvr: document.getElementById('cf-lvr').value || '80', managementFee: document.getElementById('cf-mgmt').value || '8', annualRates: document.getElementById('cf-rates').value, annualInsurance: document.getElementById('cf-insurance').value, annualMaintenance: document.getElementById('cf-maint').value },

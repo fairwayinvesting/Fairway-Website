@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Property Submission — Fairway Investing</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Outfit',sans-serif;font-weight:300;background:#1a1916;color:#f7f3ed;-webkit-font-smoothing:antialiased;min-height:100vh;}
+
+    nav{background:#22201d;border-bottom:1px solid rgba(247,243,237,0.08);padding:0 24px;height:60px;display:flex;align-items:center;}
+    .nav-inner{display:flex;align-items:center;gap:10px;}
+
+    .page{max-width:620px;margin:0 auto;padding:40px 24px 80px;}
+
+    .eyebrow{font-size:11px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:#bd7a70;margin-bottom:10px;}
+    h1{font-family:'Fraunces',serif;font-size:32px;font-weight:400;color:#f7f3ed;margin-bottom:8px;line-height:1.2;}
+    .intro{font-size:15px;color:rgba(247,243,237,0.45);line-height:1.65;margin-bottom:36px;}
+
+    .section-head{font-size:10.5px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin:32px 0 14px;padding-bottom:10px;border-bottom:1px solid rgba(247,243,237,0.07);}
+
+    .field{margin-bottom:16px;}
+    .field label{display:block;font-size:11.5px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:rgba(247,243,237,0.45);margin-bottom:6px;}
+    .field label .opt{font-weight:300;text-transform:none;letter-spacing:0;opacity:0.6;}
+    .field input,.field textarea,.field select{width:100%;background:#22201d;border:1px solid rgba(247,243,237,0.12);border-radius:8px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:14px;font-weight:300;padding:11px 14px;transition:border-color .15s;-webkit-appearance:none;}
+    .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:rgba(189,122,112,0.6);}
+    .field input::placeholder,.field textarea::placeholder{color:rgba(247,243,237,0.2);}
+    .field textarea{resize:vertical;min-height:90px;line-height:1.55;}
+    .field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(247,243,237,0.3)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;cursor:pointer;}
+
+    .row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+    .row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;}
+    @media(max-width:520px){.row-2{grid-template-columns:1fr;}.row-3{grid-template-columns:1fr 1fr;}.row-4{grid-template-columns:1fr 1fr;}}
+
+    /* Feature list */
+    .feature-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+    .feature-row{display:flex;gap:8px;align-items:center;}
+    .feature-row input{flex:1;}
+    .feature-remove{background:none;border:none;color:rgba(247,243,237,0.25);font-size:18px;cursor:pointer;line-height:1;padding:4px 6px;transition:color .15s;flex-shrink:0;}
+    .feature-remove:hover{color:rgba(247,243,237,0.55);}
+    .add-feature-btn{background:none;border:1px dashed rgba(247,243,237,0.18);border-radius:8px;color:rgba(247,243,237,0.4);font-family:'Outfit',sans-serif;font-size:13px;font-weight:400;padding:9px 14px;cursor:pointer;width:100%;text-align:left;transition:all .15s;}
+    .add-feature-btn:hover{border-color:rgba(247,243,237,0.3);color:rgba(247,243,237,0.65);}
+
+    /* Media */
+    .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
+    @media(max-width:400px){.photo-grid{grid-template-columns:repeat(2,1fr);}}
+    .photo-thumb{position:relative;aspect-ratio:4/3;border-radius:8px;overflow:hidden;background:#22201d;border:1px solid rgba(247,243,237,0.1);}
+    .photo-thumb img{width:100%;height:100%;object-fit:cover;}
+    .photo-thumb .ph-rm{position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.6);border:none;color:#f7f3ed;width:22px;height:22px;border-radius:50%;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+    .photo-thumb .ph-spin{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(26,25,22,0.7);}
+    .photo-upload-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;aspect-ratio:4/3;background:rgba(247,243,237,0.03);border:1.5px dashed rgba(247,243,237,0.18);border-radius:8px;cursor:pointer;transition:all .15s;gap:6px;}
+    .photo-upload-btn:hover{border-color:rgba(189,122,112,0.4);background:rgba(189,122,112,0.05);}
+    .photo-upload-btn svg{opacity:0.35;}
+    .photo-upload-btn span{font-size:11.5px;color:rgba(247,243,237,0.35);}
+    .photo-limit{font-size:12px;color:rgba(247,243,237,0.25);margin-top:4px;}
+    .photo-error{font-size:12px;color:#e07070;margin-top:6px;}
+
+    /* Video */
+    .video-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+    .video-row{display:flex;gap:8px;align-items:center;}
+    .video-row input{flex:1;}
+
+    /* Submit */
+    .submit-wrap{margin-top:36px;}
+    .submit-btn{width:100%;background:#bd7a70;border:none;border-radius:100px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:15px;font-weight:500;padding:16px;cursor:pointer;transition:background .2s;}
+    .submit-btn:hover{background:#c9867d;}
+    .submit-btn:disabled{opacity:0.5;cursor:not-allowed;}
+    .form-error{font-size:13px;color:#e07070;margin-top:12px;display:none;}
+    .field-error{border-color:rgba(220,80,80,0.6)!important;}
+
+    /* Spinner */
+    .spin{width:20px;height:20px;border:2px solid rgba(247,243,237,0.2);border-top-color:#bd7a70;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* States */
+    #loading-state,#error-state,#success-state{display:none;}
+    #form-state{display:none;}
+    #loading-state{text-align:center;padding:80px 24px;color:rgba(247,243,237,0.35);font-size:14px;}
+    #error-state{text-align:center;padding:80px 24px;}
+    #success-state{text-align:center;padding:80px 24px;}
+    .success-icon{width:56px;height:56px;background:rgba(109,191,123,0.12);border:1px solid rgba(109,191,123,0.25);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <img src="/logo-icon.png" alt="" style="height:26px;width:auto;">
+      <img src="/logo-word.png" alt="Fairway Investing" style="height:16px;width:auto;">
+    </div>
+  </nav>
+
+  <div class="page">
+
+    <!-- Loading -->
+    <div id="loading-state">
+      <div class="spin" style="margin:0 auto 16px;display:block;width:28px;height:28px;"></div>
+      Verifying access…
+    </div>
+
+    <!-- Invalid key -->
+    <div id="error-state">
+      <p style="font-size:32px;margin-bottom:16px;">🔒</p>
+      <h1 style="margin-bottom:10px;">Invalid link</h1>
+      <p style="color:rgba(247,243,237,0.4);font-size:15px;">This link is invalid or has expired. Contact Luke for a new one.</p>
+    </div>
+
+    <!-- Success -->
+    <div id="success-state">
+      <div class="success-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 11l5 5 9-9" stroke="#6dbf7b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h1 style="font-size:26px;margin-bottom:10px;">Submission received</h1>
+      <p style="color:rgba(247,243,237,0.45);font-size:15px;line-height:1.65;">Thanks — Luke will review the details and be in touch if he needs anything further.</p>
+    </div>
+
+    <!-- Form -->
+    <div id="form-state">
+      <p class="eyebrow">Property submission</p>
+      <h1>Submit a property</h1>
+      <p class="intro">Fill in the details below and attach photos and a video walkthrough. Luke will review your submission directly.</p>
+
+      <!-- Your details -->
+      <p class="section-head">Your details</p>
+      <div class="row-2">
+        <div class="field"><label>Your name <span style="color:#e07070;">*</span></label><input type="text" id="f-name" placeholder="Jane Smith" autocomplete="name"></div>
+        <div class="field"><label>Agency</label><input type="text" id="f-agency" placeholder="Ray White Geelong" autocomplete="organization"></div>
+      </div>
+      <div class="row-2">
+        <div class="field"><label>Phone</label><input type="tel" id="f-phone" placeholder="0412 345 678" autocomplete="tel"></div>
+        <div class="field"><label>Email</label><input type="email" id="f-email" placeholder="jane@raywhite.com.au" autocomplete="email"></div>
+      </div>
+
+      <!-- Property details -->
+      <p class="section-head">Property details</p>
+      <div class="row-2">
+        <div class="field" style="grid-column:1/-1;"><label>Street address <span style="color:#e07070;">*</span></label><input type="text" id="f-address" placeholder="14 Smith Street" autocomplete="street-address"></div>
+      </div>
+      <div class="row-3">
+        <div class="field"><label>Suburb <span style="color:#e07070;">*</span></label><input type="text" id="f-suburb" placeholder="Geelong West"></div>
+        <div class="field"><label>State</label>
+          <select id="f-state"><option value="">—</option><option>VIC</option><option>NSW</option><option>QLD</option><option>WA</option><option>SA</option><option>TAS</option><option>ACT</option><option>NT</option></select>
+        </div>
+        <div class="field"><label>Property type</label>
+          <select id="f-type"><option value="house">House</option><option value="unit">Unit</option><option value="townhouse">Townhouse</option><option value="duplex">Duplex</option><option value="land">Vacant land</option></select>
+        </div>
+      </div>
+      <div class="row-4">
+        <div class="field"><label>Beds</label><input type="text" id="f-beds" placeholder="3" inputmode="numeric"></div>
+        <div class="field"><label>Baths</label><input type="text" id="f-baths" placeholder="1" inputmode="numeric"></div>
+        <div class="field"><label>Car spaces</label><input type="text" id="f-cars" placeholder="2" inputmode="numeric"></div>
+        <div class="field"><label>Land size</label><input type="text" id="f-land" placeholder="612m²"></div>
+      </div>
+      <div class="row-2">
+        <div class="field"><label>Asking / price guide</label><input type="text" id="f-price" placeholder="$485,000"></div>
+        <div class="field"><label>Rental estimate <span class="opt">/week</span></label><input type="text" id="f-rent" placeholder="$420 pw" inputmode="numeric"></div>
+      </div>
+
+      <!-- Description & features -->
+      <p class="section-head">Property information</p>
+      <div class="field">
+        <label>Property description</label>
+        <textarea id="f-desc" placeholder="Describe the property — condition, layout, street appeal, recent upgrades, anything notable…" style="min-height:120px;"></textarea>
+      </div>
+      <div class="field">
+        <label>Key features <span class="opt">Add standout selling points</span></label>
+        <div class="feature-list" id="feature-list"></div>
+        <button class="add-feature-btn" onclick="addFeature()">+ Add feature</button>
+      </div>
+      <div class="field">
+        <label>Known issues or defects <span class="opt">Optional but important</span></label>
+        <textarea id="f-issues" placeholder="e.g. Roof needs repair, council notice on file, heritage overlay, asbestos in eaves, strata issues…" style="min-height:90px;"></textarea>
+      </div>
+
+      <!-- Assessment -->
+      <p class="section-head">Your assessment</p>
+      <div class="field">
+        <label>Agent's commentary</label>
+        <textarea id="f-assessment" placeholder="Your honest take — why is this a good opportunity? Condition, comparable sales, tenant history, vendor motivation, anything relevant…" style="min-height:130px;"></textarea>
+      </div>
+
+      <!-- Photos -->
+      <p class="section-head">Photos</p>
+      <div class="photo-grid" id="photo-grid">
+        <label class="photo-upload-btn" id="photo-add-btn">
+          <input type="file" id="photo-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoFiles(this.files)">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 5v12M5 11h12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <span>Add photos</span>
+        </label>
+      </div>
+      <p class="photo-limit">JPEG or PNG. Each photo is automatically compressed before upload.</p>
+      <p class="photo-error" id="photo-error"></p>
+
+      <!-- Videos -->
+      <p class="section-head">Video walkthrough</p>
+      <p style="font-size:13px;color:rgba(247,243,237,0.35);margin-bottom:14px;line-height:1.6;">Paste a link to a video walkthrough — YouTube, Vimeo, Streamable, or a listing video URL. For short phone videos, upload to <strong style="color:rgba(247,243,237,0.5);">streamable.com</strong> (free, drag &amp; drop) first.</p>
+      <div class="video-list" id="video-list"></div>
+      <button class="add-feature-btn" onclick="addVideo()">+ Add video link</button>
+
+      <!-- Submit -->
+      <div class="submit-wrap">
+        <button class="submit-btn" id="submit-btn" onclick="submitForm()">Submit property</button>
+        <p class="form-error" id="form-error"></p>
+      </div>
+    </div>
+
+  </div><!-- end .page -->
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const AGENT_KEY = params.get('k') || '';
+    let uploadedImages = []; // [{ url, thumbDataUrl }]
+    let videoRows = [];      // [{ id, url }]
+    let _photoIdCounter = 0;
+    let _videoIdCounter = 0;
+
+    function uid() { return ++_photoIdCounter; }
+    function vuid() { return ++_videoIdCounter; }
+
+    // ── Initialise ──────────────────────────────────────────────────────────────
+    async function init() {
+      show('loading-state');
+      try {
+        const res = await fetch(`/api/agent-submit?k=${encodeURIComponent(AGENT_KEY)}`);
+        if (!res.ok) { show('error-state'); return; }
+        show('form-state');
+        addFeature(); // start with one blank feature row
+        addVideo();   // start with one blank video row
+      } catch {
+        show('error-state');
+      }
+    }
+
+    function show(id) {
+      ['loading-state','error-state','success-state','form-state'].forEach(s => {
+        document.getElementById(s).style.display = s === id ? 'block' : 'none';
+      });
+    }
+
+    // ── Features ────────────────────────────────────────────────────────────────
+    function addFeature(val = '') {
+      const list = document.getElementById('feature-list');
+      const id = uid();
+      const row = document.createElement('div');
+      row.className = 'feature-row';
+      row.id = 'fr-' + id;
+      row.innerHTML = `<input type="text" placeholder="e.g. Solar panels, ducted heating, 600m to shops…" value="${val.replace(/"/g,'&quot;')}">
+        <button class="feature-remove" onclick="document.getElementById('fr-${id}').remove()" title="Remove">×</button>`;
+      list.appendChild(row);
+      row.querySelector('input').focus();
+    }
+
+    function getFeatures() {
+      return Array.from(document.querySelectorAll('#feature-list .feature-row input'))
+        .map(i => i.value.trim()).filter(Boolean);
+    }
+
+    // ── Videos ──────────────────────────────────────────────────────────────────
+    function addVideo(val = '') {
+      const list = document.getElementById('video-list');
+      const id = vuid();
+      const row = document.createElement('div');
+      row.className = 'video-row';
+      row.id = 'vr-' + id;
+      row.innerHTML = `<input type="url" placeholder="https://streamable.com/xxx or youtube.com/watch?v=…" value="${val.replace(/"/g,'&quot;')}">
+        <button class="feature-remove" onclick="document.getElementById('vr-${id}').remove()" title="Remove">×</button>`;
+      list.appendChild(row);
+    }
+
+    function getVideos() {
+      return Array.from(document.querySelectorAll('#video-list .video-row input'))
+        .map(i => i.value.trim()).filter(Boolean).map(url => ({ url }));
+    }
+
+    // ── Photos ──────────────────────────────────────────────────────────────────
+    async function handlePhotoFiles(files) {
+      document.getElementById('photo-error').textContent = '';
+      const MAX = 20;
+      if (uploadedImages.length >= MAX) {
+        document.getElementById('photo-error').textContent = `Maximum ${MAX} photos.`;
+        return;
+      }
+      const toProcess = Array.from(files).slice(0, MAX - uploadedImages.length);
+      for (const file of toProcess) {
+        await uploadPhoto(file);
+      }
+      // Reset input so same file can be re-added if needed
+      document.getElementById('photo-input').value = '';
+    }
+
+    async function uploadPhoto(file) {
+      const id = uid();
+      const errEl = document.getElementById('photo-error');
+
+      // Add spinner thumb
+      const grid = document.getElementById('photo-grid');
+      const addBtn = document.getElementById('photo-add-btn');
+      const thumb = document.createElement('div');
+      thumb.className = 'photo-thumb';
+      thumb.id = 'pt-' + id;
+      thumb.innerHTML = `<div class="ph-spin"><div class="spin"></div></div>`;
+      grid.insertBefore(thumb, addBtn);
+
+      try {
+        // Compress via canvas
+        const dataUrl = await compressImage(file, 1600, 0.82);
+        const mimeType = 'image/jpeg';
+
+        const res = await fetch('/api/agent-media', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-agent-key': AGENT_KEY },
+          body: JSON.stringify({ dataUrl, mimeType }),
+        });
+        if (!res.ok) throw new Error('Upload failed');
+        const { url } = await res.json();
+
+        uploadedImages.push({ id, url });
+        thumb.innerHTML = `<img src="${dataUrl}" alt="">
+          <button class="ph-rm" onclick="removePhoto(${id})" title="Remove">×</button>`;
+      } catch (e) {
+        thumb.remove();
+        errEl.textContent = `Failed to upload "${file.name}". Please try again.`;
+      }
+    }
+
+    function removePhoto(id) {
+      uploadedImages = uploadedImages.filter(i => i.id !== id);
+      const el = document.getElementById('pt-' + id);
+      if (el) el.remove();
+    }
+
+    function compressImage(file, maxDim, quality) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = new Image();
+          img.onload = () => {
+            let w = img.width, h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+              else       { w = Math.round(w * maxDim / h); h = maxDim; }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // ── Submit ──────────────────────────────────────────────────────────────────
+    async function submitForm() {
+      const errEl = document.getElementById('form-error');
+      errEl.style.display = 'none';
+
+      const name    = document.getElementById('f-name').value.trim();
+      const address = document.getElementById('f-address').value.trim();
+      const suburb  = document.getElementById('f-suburb').value.trim();
+
+      // Clear previous error highlights
+      ['f-name','f-address','f-suburb'].forEach(id => {
+        document.getElementById(id).classList.remove('field-error');
+      });
+
+      let valid = true;
+      if (!name)    { document.getElementById('f-name').classList.add('field-error'); valid = false; }
+      if (!address) { document.getElementById('f-address').classList.add('field-error'); valid = false; }
+      if (!suburb)  { document.getElementById('f-suburb').classList.add('field-error'); valid = false; }
+      if (!valid) {
+        errEl.textContent = 'Please fill in the required fields marked with *.';
+        errEl.style.display = 'block';
+        document.querySelector('.field-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      // Check any photos still uploading
+      if (document.querySelector('.ph-spin')) {
+        errEl.textContent = 'Please wait for photos to finish uploading.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Submitting…';
+
+      const body = {
+        agentName:       name,
+        agentAgency:     document.getElementById('f-agency').value.trim(),
+        agentPhone:      document.getElementById('f-phone').value.trim(),
+        agentEmail:      document.getElementById('f-email').value.trim(),
+        address,
+        suburb,
+        state:           document.getElementById('f-state').value,
+        propertyType:    document.getElementById('f-type').value,
+        bedrooms:        document.getElementById('f-beds').value.trim(),
+        bathrooms:       document.getElementById('f-baths').value.trim(),
+        carspaces:       document.getElementById('f-cars').value.trim(),
+        landSize:        document.getElementById('f-land').value.trim(),
+        price:           document.getElementById('f-price').value.trim(),
+        weeklyRent:      document.getElementById('f-rent').value.trim(),
+        description:     document.getElementById('f-desc').value.trim(),
+        features:        getFeatures(),
+        knownIssues:     document.getElementById('f-issues').value.trim(),
+        agentAssessment: document.getElementById('f-assessment').value.trim(),
+        images:          uploadedImages.map(i => ({ url: i.url })),
+        videos:          getVideos(),
+      };
+
+      try {
+        const res = await fetch(`/api/agent-submit?k=${encodeURIComponent(AGENT_KEY)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) {
+          const d = await res.json().catch(() => ({}));
+          throw new Error(d.error || 'Submission failed');
+        }
+        show('success-state');
+      } catch (e) {
+        btn.disabled = false;
+        btn.textContent = 'Submit property';
+        errEl.textContent = e.message || 'Something went wrong. Please try again.';
+        errEl.style.display = 'block';
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

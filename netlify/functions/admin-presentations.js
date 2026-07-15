@@ -66,7 +66,10 @@ function defaultPres(fields) {
     address: '', suburb: '', price: '',
     bedrooms: '', bathrooms: '', carspaces: '', landSize: '',
     propertyType: 'house',
+    source: 'manual',
+    agentSubmission: null,
     summary: '', highlights: [],
+    knownIssues: '',
     images: [],
     videos: [],
     cashflow: { enabled: false, purchasePrice: '', weeklyRent: '', interestRate: '', lvr: '80', managementFee: '8', annualRates: '', annualInsurance: '', annualMaintenance: '' },
@@ -174,7 +177,7 @@ export default async (req) => {
     const pres = presentations[idx];
     const prevRevokedCount = (pres.revokedClients || []).length; // capture before any mutations
     const fields = ['address','suburb','price','bedrooms','bathrooms','carspaces','landSize',
-                    'propertyType','summary','highlights','images','videos','cashflow',
+                    'propertyType','summary','highlights','knownIssues','agentSubmission','images','videos','cashflow',
                     'riskProfile','demographics','customSections',
                     'comparableSales','comparableRentals',
                     'revocationReason','status','expiresAt','revokedClients'];
