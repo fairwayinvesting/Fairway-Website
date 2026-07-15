@@ -75,7 +75,7 @@ export default async (req) => {
     const mediaLine = [photoCount && `${photoCount} photo${photoCount !== 1 ? 's' : ''}`, videoCount && `${videoCount} video${videoCount !== 1 ? 's' : ''}`].filter(Boolean).join(' · ') || 'No media';
 
     // Slack
-    const slackUrl = process.env.SLACK_WEBHOOK_URL;
+    const slackUrl = process.env.SLACK_AGENT_WEBHOOK_URL || process.env.SLACK_WEBHOOK_URL;
     if (slackUrl) {
       await fetch(slackUrl, {
         method: 'POST',
