@@ -29,7 +29,7 @@ export default async (req) => {
       return new Response(JSON.stringify({ error: 'Account not found' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
     return new Response(
-      JSON.stringify({ name: client.name, email: client.email, markets: client.markets || [] }),
+      JSON.stringify({ name: client.name, email: client.email, markets: client.markets || [], pipelineStage: client.pipelineStage || null }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch {

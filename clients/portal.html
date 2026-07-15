@@ -61,6 +61,25 @@
     footer{border-top:1px solid rgba(247,243,237,0.06);padding:24px 44px;text-align:center;}
     footer p{font-size:12px;font-weight:300;color:rgba(247,243,237,0.2);}
 
+    /* Journey progress bar */
+    .journey-wrap{padding:0 44px 32px;max-width:1060px;margin:0 auto;}
+    .journey-bar{display:flex;align-items:flex-start;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;}
+    .journey-bar::-webkit-scrollbar{display:none;}
+    .jstep{display:flex;flex-direction:column;align-items:center;flex:1;min-width:80px;position:relative;}
+    .jstep:not(:last-child)::after{content:'';position:absolute;top:10px;left:calc(50% + 11px);right:calc(-50% + 11px);height:1.5px;background:rgba(247,243,237,0.1);}
+    .jstep.done:not(:last-child)::after,.jstep.active:not(:last-child)::after{background:rgba(189,122,112,0.35);}
+    .jstep-dot{width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(247,243,237,0.15);background:transparent;flex-shrink:0;margin-bottom:8px;transition:all .2s;position:relative;z-index:1;}
+    .jstep.done .jstep-dot{background:#bd7a70;border-color:#bd7a70;}
+    .jstep.done .jstep-dot::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:600;}
+    .jstep.active .jstep-dot{background:#bd7a70;border-color:#bd7a70;box-shadow:0 0 0 4px rgba(189,122,112,0.18);}
+    .jstep-label{font-size:10.5px;font-weight:400;color:rgba(247,243,237,0.25);text-align:center;line-height:1.3;padding:0 4px;}
+    .jstep.done .jstep-label{color:rgba(247,243,237,0.45);}
+    .jstep.active .jstep-label{color:#f7f3ed;font-weight:500;}
+    @media(max-width:520px){
+      .jstep-label{font-size:9.5px;}
+      .jstep{min-width:64px;}
+    }
+
     @media(max-width:800px){
       nav,footer{padding-left:20px;padding-right:20px;}
       .hero,.grid-wrap,.empty,.loading,.actions-wrap{padding-left:20px;padding-right:20px;}
@@ -90,6 +109,11 @@
   <div class="hero">
     <p class="eyebrow">Client portal</p>
     <h1 id="welcome-heading">Welcome back</h1>
+  </div>
+
+  <!-- JOURNEY PROGRESS (populated by JS, hidden until stage is set) -->
+  <div class="journey-wrap" id="journey-section" style="display:none">
+    <div class="journey-bar" id="journey-bar"></div>
   </div>
 
   <!-- QUESTIONNAIRE CARD (populated by JS) -->
@@ -132,6 +156,31 @@
     };
 
     function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    const JOURNEY_STAGES = [
+      { key: 'onboarding',     label: 'Getting started' },
+      { key: 'strategy',       label: 'Strategy ready' },
+      { key: 'searching',      label: 'Property search' },
+      { key: 'due_diligence',  label: 'Due diligence' },
+      { key: 'under_contract', label: 'Under contract' },
+      { key: 'settled',        label: 'Settled ✓' },
+    ];
+
+    function renderJourney(stage) {
+      if (!stage) return;
+      const wrap = document.getElementById('journey-section');
+      const bar  = document.getElementById('journey-bar');
+      const idx  = JOURNEY_STAGES.findIndex(s => s.key === stage);
+      if (idx === -1) return;
+      bar.innerHTML = JOURNEY_STAGES.map((s, i) => {
+        const cls = i < idx ? 'done' : i === idx ? 'active' : '';
+        return `<div class="jstep ${cls}">
+          <div class="jstep-dot"></div>
+          <div class="jstep-label">${s.label}</div>
+        </div>`;
+      }).join('');
+      wrap.style.display = 'block';
+    }
 
     function renderQSection(completed) {
       const qSec = document.getElementById('q-section');
@@ -278,6 +327,7 @@
 
       document.getElementById('user-name').textContent = me.name;
       document.getElementById('welcome-heading').textContent = `Welcome back, ${me.name.split(' ')[0]}.`;
+      renderJourney(me.pipelineStage);
 
       // Fetch questionnaire, brief and presentations in parallel
       let qCompleted = false;
