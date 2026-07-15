@@ -2584,9 +2584,8 @@ async function copyAgentLink() {
     if (!res.ok) { alert('AGENT_SUBMIT_KEY env var not set in Netlify. Add it in Site settings → Environment variables.'); return; }
     const { url } = await res.json();
     await navigator.clipboard.writeText(url);
-    const orig = btn.textContent;
     btn.textContent = 'Copied!';
-    setTimeout(() => { btn.textContent = orig; }, 2000);
+    setTimeout(() => { btn.textContent = 'Copy agent link'; }, 2000);
   } catch {
     alert('Could not copy link. Check AGENT_SUBMIT_KEY is set in Netlify environment variables.');
   }
