@@ -1,13 +1,22 @@
 import { getStore } from '@netlify/blobs';
 
-// Runs nightly at 3am UTC. Snapshots all three data stores into fairway-backups.
+// Runs nightly at 3am UTC. Snapshots all data stores into fairway-backups.
 // Keeps the last 30 daily snapshots — older ones are pruned automatically.
+
+async function getAllMilestones() {
+  const store = getStore('fairway-milestones');
+  const { blobs } = await store.list().catch(() => ({ blobs: [] }));
+  const arrays = await Promise.all(
+    blobs.filter(b => b.key !== 'all').map(b => store.get(b.key, { type: 'json' }).catch(() => []))
+  );
+  return arrays.flat();
+}
 
 export default async () => {
   const [clients, presentations, milestones] = await Promise.all([
     getStore('fairway-clients').get('all', { type: 'json' }).catch(() => null),
     getStore('fairway-presentations').get('all', { type: 'json' }).catch(() => null),
-    getStore('fairway-milestones').get('all', { type: 'json' }).catch(() => null),
+    getAllMilestones(),
   ]);
 
   const timestamp = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
@@ -17,7 +26,7 @@ export default async () => {
     createdAt: new Date().toISOString(),
     clients: clients || [],
     presentations: presentations || [],
-    milestones: milestones || [],
+    milestones: milestones,
   };
 
   // Write today's snapshot
