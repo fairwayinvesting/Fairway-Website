@@ -1382,6 +1382,7 @@ async function loadClients() {
   clients = await res.json();
   renderTable();
   renderPipeline();
+  renderBriefs();
   renderReports();
   renderDashboard();
   if (presentations.length) renderPresentations();
