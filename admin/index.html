@@ -2578,16 +2578,26 @@ async function loadPresentations() {
   renderDashboard();
 }
 
+let _agentLinkCache = null;
 async function copyAgentLink() {
   const btn = document.getElementById('copy-agent-btn');
+  if (btn.disabled) return;
   try {
-    const res = await api('GET', '/api/admin/agent-link');
-    if (!res.ok) { alert('AGENT_SUBMIT_KEY env var not set in Netlify. Add it in Site settings → Environment variables.'); return; }
-    const { url } = await res.json();
-    await navigator.clipboard.writeText(url);
+    if (!_agentLinkCache) {
+      btn.textContent = 'Getting link…';
+      btn.disabled = true;
+      const res = await api('GET', '/api/admin/agent-link');
+      btn.disabled = false;
+      if (!res.ok) { btn.textContent = 'Copy agent link'; alert('AGENT_SUBMIT_KEY env var not set in Netlify. Add it in Site settings → Environment variables.'); return; }
+      const { url } = await res.json();
+      _agentLinkCache = url;
+    }
+    await navigator.clipboard.writeText(_agentLinkCache);
     btn.textContent = 'Copied!';
     setTimeout(() => { btn.textContent = 'Copy agent link'; }, 2000);
   } catch {
+    btn.disabled = false;
+    btn.textContent = 'Copy agent link';
     alert('Could not copy link. Check AGENT_SUBMIT_KEY is set in Netlify environment variables.');
   }
 }
