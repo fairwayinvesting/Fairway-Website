@@ -68,6 +68,7 @@ function defaultPres(fields) {
     propertyType: 'house',
     source: 'manual',
     agentSubmission: null,
+    propertyDescription: '',
     summary: '', highlights: [],
     knownIssues: '',
     images: [],
@@ -177,7 +178,7 @@ export default async (req) => {
     const pres = presentations[idx];
     const prevRevokedCount = (pres.revokedClients || []).length; // capture before any mutations
     const fields = ['address','suburb','price','bedrooms','bathrooms','carspaces','landSize',
-                    'propertyType','summary','highlights','knownIssues','agentSubmission','images','videos','cashflow',
+                    'propertyType','propertyDescription','summary','highlights','knownIssues','agentSubmission','images','videos','cashflow',
                     'riskProfile','demographics','customSections',
                     'comparableSales','comparableRentals',
                     'revocationReason','status','expiresAt','revokedClients'];

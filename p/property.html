@@ -275,9 +275,9 @@ function render(d) {
     html += `</div>`;
   }
 
-  // Assessment
-  if (d.summary) {
-    html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Luke's assessment</p><p class="p-summary">${esc(d.summary)}</p></div>`;
+  // Property description
+  if (d.propertyDescription) {
+    html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Property description</p><p class="p-summary">${esc(d.propertyDescription)}</p></div>`;
   }
 
   // Highlights
@@ -285,6 +285,16 @@ function render(d) {
     html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Key highlights</p><div class="p-highlights">${
       d.highlights.map(h => `<div class="p-highlight"><div class="p-highlight-dot"></div><div class="p-highlight-text">${esc(h)}</div></div>`).join('')
     }</div></div>`;
+  }
+
+  // Known issues
+  if (d.knownIssues) {
+    html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Known issues</p><p class="p-summary" style="color:rgba(247,243,237,0.6);">${esc(d.knownIssues)}</p></div>`;
+  }
+
+  // Luke's assessment
+  if (d.summary) {
+    html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Luke's assessment</p><p class="p-summary">${esc(d.summary)}</p></div>`;
   }
 
   // Comparable sales

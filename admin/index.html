@@ -836,6 +836,7 @@
           <div class="field"><label>Car spaces</label><input type="text" id="pres-cars" placeholder="1"></div>
           <div class="field"><label>Land size</label><input type="text" id="pres-land" placeholder="612m²"></div>
         </div>
+        <div class="field"><label>Property description <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">Factual overview visible to client</span></label><textarea id="pres-prop-desc" placeholder="Describe the property — layout, condition, street appeal, recent upgrades…" style="min-height:100px;"></textarea></div>
         <div class="field"><label>Luke's assessment</label><textarea id="pres-summary" placeholder="Your commentary on this property…" style="min-height:120px;"></textarea></div>
         <div class="field"><label>Key highlights <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">(one per line, max 6)</span></label>
           <textarea id="pres-highlights" placeholder="0.88% rental vacancy&#10;Houses selling in 21 days&#10;Strong cashflow profile"></textarea>
@@ -3043,6 +3044,7 @@ function openPresModal(id) {
     document.getElementById('pres-baths').value = p.bathrooms || '';
     document.getElementById('pres-cars').value = p.carspaces || '';
     document.getElementById('pres-land').value = p.landSize || '';
+    document.getElementById('pres-prop-desc').value = p.propertyDescription || '';
     document.getElementById('pres-summary').value = p.summary || '';
     document.getElementById('pres-highlights').value = (p.highlights || []).join('\n');
     document.getElementById('pres-known-issues').value = p.knownIssues || '';
@@ -3151,7 +3153,7 @@ function openPresModal(id) {
   } else {
     document.getElementById('pres-modal-title').textContent = 'New presentation';
     document.getElementById('pres-edit-id').value = '';
-    ['pres-address','pres-suburb','pres-price','pres-beds','pres-baths','pres-cars','pres-land','pres-summary','pres-highlights','pres-known-issues','cf-price','cf-rent','cf-rate','cf-lvr','cf-mgmt','cf-rates','cf-insurance','cf-maint','demo-owner','demo-renter','demo-public','demo-notes','demo-image','pres-revocation-reason'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    ['pres-address','pres-suburb','pres-price','pres-beds','pres-baths','pres-cars','pres-land','pres-prop-desc','pres-summary','pres-highlights','pres-known-issues','cf-price','cf-rent','cf-rate','cf-lvr','cf-mgmt','cf-rates','cf-insurance','cf-maint','demo-owner','demo-renter','demo-public','demo-notes','demo-image','pres-revocation-reason'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.getElementById('pres-agent-callout').style.display = 'none';
     document.getElementById('pres-type').value = 'house';
     document.getElementById('pres-status').value = '';
@@ -3248,6 +3250,7 @@ async function savePresentation() {
     bathrooms: document.getElementById('pres-baths').value.trim(),
     carspaces: document.getElementById('pres-cars').value.trim(),
     landSize: document.getElementById('pres-land').value.trim(),
+    propertyDescription: document.getElementById('pres-prop-desc').value.trim(),
     summary: document.getElementById('pres-summary').value.trim(),
     highlights,
     knownIssues: document.getElementById('pres-known-issues').value.trim(),

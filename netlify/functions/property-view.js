@@ -62,12 +62,13 @@ export default async (req) => {
       firstName = client ? client.name.split(' ')[0] : '';
     }
     const { id, address, suburb, price, bedrooms, bathrooms, carspaces, landSize,
-            propertyType, summary, highlights, images, videos,
+            propertyType, propertyDescription, summary, highlights, knownIssues, images, videos,
             cashflow, riskProfile, demographics, customSections,
             comparableSales, comparableRentals, status } = found;
     return json({
       id, address, suburb, price, bedrooms, bathrooms, carspaces, landSize,
-      propertyType, summary, highlights,
+      propertyType, propertyDescription: propertyDescription || '', summary, highlights,
+      knownIssues: knownIssues || '',
       images: images || [], videos: videos || [],
       cashflow: cashflow || {}, riskProfile: riskProfile || {},
       demographics: demographics || {}, customSections: customSections || [],
