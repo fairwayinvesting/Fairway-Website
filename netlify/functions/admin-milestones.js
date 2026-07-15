@@ -27,6 +27,7 @@ const json = (data, status = 200) =>
 export const MILESTONE_LABELS = {
   finance:       'Subject to Finance',
   building_pest: 'Building & Pest',
+  bp_inspection: 'B&P Inspection Date',
   contracts:     'Contracts Exchanged',
   cooling_off:   'Cooling Off End',
   settlement:    'Settlement',
