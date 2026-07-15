@@ -16,9 +16,8 @@
     a{color:inherit;text-decoration:none;}
 
     /* Gate overlay */
-    #gate{position:fixed;inset:0;background:#1a1916;z-index:999;display:flex;align-items:center;justify-content:center;padding:24px;}
-    #gate.hidden{display:none;}
-    .authed #gate:not(.force-show){display:none;}
+    #gate{position:fixed;inset:0;background:#1a1916;z-index:999;display:none;align-items:center;justify-content:center;padding:24px;}
+    #gate.show{display:flex;}
     .gate-card{background:#22201d;border:1px solid rgba(247,243,237,0.09);border-radius:20px;padding:44px 40px;width:100%;max-width:380px;}
     .gate-card h2{font-family:'Fraunces',serif;font-size:26px;font-weight:400;margin-bottom:6px;}
     .gate-card p{font-size:14px;font-weight:300;color:rgba(247,243,237,0.4);margin-bottom:28px;}
@@ -465,7 +464,6 @@
       .brief-q-summary{flex-wrap:nowrap;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch;}
     }
   </style>
-  <script>if(sessionStorage.getItem('fw_admin_pw')){document.documentElement.classList.add('authed');}</script>
 </head>
 <body>
 
@@ -1293,8 +1291,8 @@ async function tryAuth(pw) {
 
 async function completeLogin(pw) {
   adminPassword = pw;
-  sessionStorage.setItem('fw_admin_pw', pw);
-  document.getElementById('gate').classList.add('hidden');
+  localStorage.setItem('fw_admin_pw', pw);
+  document.getElementById('gate').classList.remove('show');
   const lastSection = localStorage.getItem('fw_admin_section') || 'dashboard';
   const navBtn = Array.from(document.querySelectorAll('.snav-item')).find(b => (b.getAttribute('onclick') || '').includes(`'${lastSection}'`)) || document.querySelector('.snav-item');
   showSection(lastSection, navBtn);
@@ -1353,15 +1351,14 @@ document.getElementById('gate-back-btn').addEventListener('click', function() {
 
 // Auto-restore from session
 (async function() {
-  const stored = sessionStorage.getItem('fw_admin_pw');
+  const stored = localStorage.getItem('fw_admin_pw');
   if (stored && await tryAuth(stored)) {
     _gatePw = stored;
     fetch('/api/admin-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: stored }) });
     await completeLogin(stored);
   } else {
-    // Session invalid or missing — show gate
-    document.documentElement.classList.remove('authed');
-    document.getElementById('gate').classList.add('force-show');
+    localStorage.removeItem('fw_admin_pw');
+    document.getElementById('gate').classList.add('show');
   }
 })();
 
