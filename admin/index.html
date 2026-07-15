@@ -491,6 +491,8 @@
   </div>
 </div>
 
+<div id="admin-ui" style="display:none">
+
 <!-- Top bar -->
 <header class="admin-topbar">
   <div class="admin-topbar-inner">
@@ -767,6 +769,8 @@
 
   </div><!-- end admin-main -->
 </div><!-- end admin-shell -->
+
+</div><!-- end admin-ui -->
 
 <!-- Share dates modal -->
 <div id="share-overlay">
@@ -1293,6 +1297,7 @@ async function completeLogin(pw) {
   adminPassword = pw;
   localStorage.setItem('fw_admin_pw', pw);
   document.getElementById('gate').classList.remove('show');
+  document.getElementById('admin-ui').style.display = '';
   const lastSection = localStorage.getItem('fw_admin_section') || 'dashboard';
   const navBtn = Array.from(document.querySelectorAll('.snav-item')).find(b => (b.getAttribute('onclick') || '').includes(`'${lastSection}'`)) || document.querySelector('.snav-item');
   showSection(lastSection, navBtn);
@@ -1512,6 +1517,7 @@ async function moveClientStage(clientId, newStage, selectEl) {
       c.pipelineStageUpdatedAt = new Date().toISOString();
     }
     selectEl.disabled = false;
+    renderTable();
     renderPipeline();
   } catch {
     selectEl.disabled = false;

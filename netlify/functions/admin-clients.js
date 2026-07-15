@@ -110,7 +110,7 @@ function checkAdmin(req) {
 }
 
 const json = (data, status = 200) =>
-  new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+  new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 
 export default async (req) => {
   if (!checkAdmin(req)) return json({ error: 'Unauthorized' }, 401);
