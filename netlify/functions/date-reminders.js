@@ -189,7 +189,7 @@ function buildEmail(dateHeading, overdue, thisWeek, comingUp) {
     ${emailSection('This Week', '📍', thisWeek)}
     ${emailSection('Coming Up (8–14 days)', '📋', comingUp)}
 
-    <p style="font-size:12px;color:rgba(250,246,241,0.2);margin:24px 0 0;line-height:1.6;">This digest is sent each morning at 8 AM AEST. Log in to the <a href="https://fairwayinvesting.com.au/admin/" style="color:#B5715A;text-decoration:none;">admin portal</a> to manage dates.</p>
+    <p style="font-size:12px;color:rgba(250,246,241,0.2);margin:24px 0 0;line-height:1.6;">Emails are sent at the 10, 5, 3 and 1-day marks, plus immediately for any overdue dates. Log in to the <a href="https://fairwayinvesting.com.au/admin/" style="color:#B5715A;text-decoration:none;">admin portal</a> to manage dates.</p>
   </td></tr>
 </table>
 </td></tr></table>
@@ -219,7 +219,7 @@ export default async () => {
 
   const errors = [];
 
-  // Slack
+  // ── Slack: daily digest of everything in 14-day window ────────────────────
   const slackUrl = process.env.SLACK_WEBHOOK_URL;
   if (slackUrl) {
     try {
@@ -233,22 +233,31 @@ export default async () => {
     console.warn('date-reminders: SLACK_WEBHOOK_URL not set — skipping Slack');
   }
 
-  // Email
-  try {
-    const subject = overdue.length
-      ? `⚠️ ${overdue.length} overdue date${overdue.length !== 1 ? 's' : ''} — Fairway digest`
-      : `📅 Upcoming dates — Fairway digest`;
+  // ── Email: only on trigger days (10, 5, 3, 1) or when overdue ────────────
+  // Overdue milestones always trigger an email — a missed date needs immediate attention.
+  const EMAIL_TRIGGER_DAYS = [10, 5, 3, 1];
+  const emailTriggers = active.filter(m => m.days < 0 || EMAIL_TRIGGER_DAYS.includes(m.days));
 
-    await resend.emails.send({
-      from: 'Fairway Digest <info@fairwayinvesting.com.au>',
-      to: ['luke@fairwayinvesting.com.au'],
-      subject,
-      html: buildEmail(dateHeading, overdue, thisWeek, comingUp),
-    });
-    console.log('date-reminders: email sent');
-  } catch (err) {
-    errors.push(`Email: ${err.message}`);
-    console.error('date-reminders: email failed', err.message);
+  if (emailTriggers.length) {
+    try {
+      const triggerDaysList = [...new Set(emailTriggers.map(m => m.days < 0 ? 'overdue' : `${m.days}d`))].join(', ');
+      const subject = overdue.length
+        ? `⚠️ ${overdue.length} overdue date${overdue.length !== 1 ? 's' : ''} — Fairway`
+        : `📅 Date reminder (${triggerDaysList}) — Fairway`;
+
+      await resend.emails.send({
+        from: 'Fairway Digest <info@fairwayinvesting.com.au>',
+        to: ['luke@fairwayinvesting.com.au'],
+        subject,
+        html: buildEmail(dateHeading, overdue, thisWeek, comingUp),
+      });
+      console.log(`date-reminders: email sent — triggers: ${triggerDaysList}`);
+    } catch (err) {
+      errors.push(`Email: ${err.message}`);
+      console.error('date-reminders: email failed', err.message);
+    }
+  } else {
+    console.log('date-reminders: no email triggers today — skipping email');
   }
 
   if (errors.length) {
