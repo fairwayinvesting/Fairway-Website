@@ -615,6 +615,7 @@
         <h1 style="font-family:'Fraunces',serif;font-size:28px;font-weight:400;">Upcoming Dates</h1>
         <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
           <span id="ms-summary" style="font-size:12px;font-weight:300;color:rgba(247,243,237,0.3);"></span>
+          <button class="btn-secondary" id="ms-test-btn" onclick="testReminders()" style="padding:9px 18px;font-size:13px;">Send test digest</button>
           <button class="btn-primary" id="ms-add-btn" onclick="toggleAddDateForm()" style="padding:9px 18px;font-size:13px;">+ Add date</button>
         </div>
       </div>
@@ -2151,6 +2152,30 @@ async function deleteMilestoneConfirm(id, clientId) {
   renderMilestonesDashboard();
   updateMilestoneBadges();
   if (cid) renderClientMilestones(cid);
+}
+
+// ── Test reminders ────────────────────────────────────────────────────────────
+
+async function testReminders() {
+  const btn = document.getElementById('ms-test-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  try {
+    const res = await api('POST', '/api/admin/test-reminders');
+    const data = await res.json();
+    if (data.message) {
+      alert(data.message);
+    } else {
+      const parts = [];
+      if (data.results?.slack) parts.push(`Slack: ${data.results.slack}`);
+      if (data.results?.email) parts.push(`Email: ${data.results.email}`);
+      alert(`Test digest sent.\n${parts.join('\n')}`);
+    }
+  } catch {
+    alert('Failed to send test digest. Check the browser console.');
+  }
+  btn.disabled = false;
+  btn.textContent = 'Send test digest';
 }
 
 // ── Share dates modal ─────────────────────────────────────────────────────────
