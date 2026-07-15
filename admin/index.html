@@ -817,11 +817,16 @@
       </div>
 
       <div class="settings-block">
-        <h2>Activity log</h2>
-        <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
-          <button class="btn-secondary" onclick="loadAuditLog()" style="padding:8px 18px;font-size:13px;">Refresh</button>
+        <h2 onclick="toggleAuditLog(this)" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;">
+          Activity log
+          <svg id="audit-chevron" width="18" height="18" viewBox="0 0 18 18" fill="none" style="transition:transform .2s;flex-shrink:0;opacity:0.5;transform:rotate(-90deg);"><path d="M4.5 6.75L9 11.25L13.5 6.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </h2>
+        <div id="audit-body" style="display:none;">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+            <button class="btn-secondary" onclick="loadAuditLog()" style="padding:8px 18px;font-size:13px;">Refresh</button>
+          </div>
+          <div id="audit-list" style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);line-height:1.8;"></div>
         </div>
-        <div id="audit-list" style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);line-height:1.8;">Loading…</div>
       </div>
 
       <div class="settings-block">
@@ -2758,8 +2763,20 @@ const actionLabels = {
   access_revoked: 'Access revoked',
 };
 
+function toggleAuditLog(h2el) {
+  const body = document.getElementById('audit-body');
+  const chevron = document.getElementById('audit-chevron');
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  chevron.style.transform = open ? 'rotate(0deg)' : 'rotate(-90deg)';
+  if (open && !document.getElementById('audit-list').textContent.trim()) loadAuditLog();
+}
+
 async function loadAuditLog() {
   const el = document.getElementById('audit-list');
+  if (!el) return;
+  const body = document.getElementById('audit-body');
+  if (body && body.style.display === 'none') return;
   const res = await api('GET', '/api/admin/audit-log');
   if (!res.ok) { el.textContent = 'Could not load activity log.'; return; }
   const entries = await res.json();
