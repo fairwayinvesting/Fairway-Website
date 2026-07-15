@@ -62,6 +62,18 @@
     footer p{font-size:12px;font-weight:300;color:rgba(247,243,237,0.2);}
 
     /* Journey progress bar */
+    /* Settlement countdown */
+    .settlement-wrap{padding:0 44px 24px;max-width:1060px;margin:0 auto;}
+    .settlement-card{background:#22201d;border:1px solid rgba(189,122,112,0.22);border-radius:18px;padding:24px 28px;display:flex;align-items:center;gap:24px;}
+    .settlement-days{font-family:'Fraunces',serif;font-size:52px;font-weight:400;color:#f7f3ed;line-height:1;flex-shrink:0;min-width:80px;}
+    .settlement-days.urgent{color:#e8a87c;}
+    .settlement-days.past{color:rgba(247,243,237,0.3);}
+    .settlement-text p{margin:0;line-height:1.4;}
+    .settlement-eyebrow{font-size:10.5px;font-weight:600;letter-spacing:0.13em;text-transform:uppercase;color:#bd7a70;margin-bottom:5px!important;}
+    .settlement-label{font-family:'Fraunces',serif;font-size:19px;font-weight:400;color:#f7f3ed;}
+    .settlement-date{font-size:13px;color:rgba(247,243,237,0.4);margin-top:4px!important;}
+    @media(max-width:520px){.settlement-card{flex-direction:column;align-items:flex-start;gap:12px;}.settlement-days{font-size:42px;}}
+
     .journey-wrap{padding:0 44px 32px;max-width:1060px;margin:0 auto;}
     .journey-bar{display:flex;align-items:flex-start;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;}
     .journey-bar::-webkit-scrollbar{display:none;}
@@ -109,6 +121,11 @@
   <div class="hero">
     <p class="eyebrow">Client portal</p>
     <h1 id="welcome-heading">Welcome back</h1>
+  </div>
+
+  <!-- SETTLEMENT COUNTDOWN (populated by JS, hidden until settlement date set) -->
+  <div class="settlement-wrap" id="settlement-section" style="display:none">
+    <div class="settlement-card" id="settlement-card"></div>
   </div>
 
   <!-- JOURNEY PROGRESS (populated by JS, hidden until stage is set) -->
@@ -165,6 +182,36 @@
       { key: 'under_contract', label: 'Under contract' },
       { key: 'settled',        label: 'Settled ✓' },
     ];
+
+    function renderSettlement(dateStr) {
+      if (!dateStr) return;
+      const wrap = document.getElementById('settlement-section');
+      const card = document.getElementById('settlement-card');
+      const today = new Date(); today.setHours(0,0,0,0);
+      const settle = new Date(dateStr + 'T00:00:00');
+      const days = Math.round((settle - today) / 86400000);
+      const fmt = settle.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+      let daysHTML, labelHTML, urgent = '';
+      if (days > 0) {
+        if (days <= 14) urgent = ' urgent';
+        daysHTML = `<div class="settlement-days${urgent}">${days}</div>`;
+        labelHTML = `<p class="settlement-eyebrow">Settlement countdown</p>
+          <p class="settlement-label">${days === 1 ? '1 day' : days + ' days'} to settlement</p>
+          <p class="settlement-date">${fmt}</p>`;
+      } else if (days === 0) {
+        daysHTML = `<div class="settlement-days urgent">Today</div>`;
+        labelHTML = `<p class="settlement-eyebrow">Settlement</p>
+          <p class="settlement-label">Settlement is today</p>
+          <p class="settlement-date">${fmt}</p>`;
+      } else {
+        daysHTML = `<div class="settlement-days past">✓</div>`;
+        labelHTML = `<p class="settlement-eyebrow">Settled</p>
+          <p class="settlement-label">Congratulations!</p>
+          <p class="settlement-date">Settled on ${fmt}</p>`;
+      }
+      card.innerHTML = `${daysHTML}<div class="settlement-text">${labelHTML}</div>`;
+      wrap.style.display = 'block';
+    }
 
     function renderJourney(stage) {
       if (!stage) return;
@@ -327,6 +374,7 @@
 
       document.getElementById('user-name').textContent = me.name;
       document.getElementById('welcome-heading').textContent = `Welcome back, ${me.name.split(' ')[0]}.`;
+      renderSettlement(me.settlementDate);
       renderJourney(me.pipelineStage);
 
       // Fetch questionnaire, brief and presentations in parallel

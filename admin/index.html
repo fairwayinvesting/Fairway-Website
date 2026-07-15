@@ -65,6 +65,41 @@
     .settings-block{margin-bottom:40px;}
     .settings-block>h2{font-family:'Fraunces',serif;font-size:20px;font-weight:400;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid rgba(247,243,237,0.07);}
 
+    /* Compliance */
+    .comp-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+    .comp-item{background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.09);border-radius:12px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;}
+    .comp-item-body{flex:1;min-width:0;}
+    .comp-item-label{font-size:13.5px;font-weight:400;color:#f7f3ed;margin-bottom:3px;}
+    .comp-item-detail{font-size:12px;color:rgba(247,243,237,0.38);line-height:1.6;}
+    .comp-badge{font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;border-radius:100px;padding:3px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+    .comp-ok{background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.25);color:#6dbf7b;}
+    .comp-soon{background:rgba(232,168,124,0.1);border:1px solid rgba(232,168,124,0.3);color:#e8a87c;}
+    .comp-expired{background:rgba(240,128,128,0.1);border:1px solid rgba(240,128,128,0.3);color:#f08080;}
+    .comp-none{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);color:rgba(247,243,237,0.35);}
+    .comp-add{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(247,243,237,0.35);background:none;border:1px dashed rgba(247,243,237,0.12);border-radius:8px;padding:9px 14px;cursor:pointer;transition:all .2s;font-family:'Outfit',sans-serif;width:100%;}
+    .comp-add:hover{color:rgba(247,243,237,0.65);border-color:rgba(247,243,237,0.28);}
+    .comp-section-head{font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin:0 0 10px;}
+    .cpd-bar-wrap{background:rgba(247,243,237,0.06);border-radius:100px;height:7px;overflow:hidden;}
+    .cpd-bar{height:100%;border-radius:100px;background:#bd7a70;transition:width .3s;}
+    .comp-alert{display:flex;align-items:center;gap:10px;background:rgba(232,168,124,0.08);border:1px solid rgba(232,168,124,0.22);border-radius:10px;padding:11px 14px;margin-bottom:16px;font-size:13px;color:#e8a87c;}
+
+    /* Shortlist */
+    .sl-tabs{display:flex;gap:6px;flex-wrap:wrap;}
+    .sl-tab{font-size:12px;font-weight:400;color:rgba(247,243,237,0.4);background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.09);border-radius:100px;padding:6px 14px;cursor:pointer;transition:all .15s;font-family:'Outfit',sans-serif;}
+    .sl-tab.active{background:rgba(189,122,112,0.12);border-color:rgba(189,122,112,0.3);color:#f7f3ed;}
+    .sl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
+    .sl-card{background:#22201d;border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:17px 18px;display:flex;flex-direction:column;}
+    .sl-card-address{font-family:'Fraunces',serif;font-size:16px;font-weight:400;color:#f7f3ed;line-height:1.3;margin-bottom:3px;}
+    .sl-card-sub{font-size:12px;color:rgba(247,243,237,0.35);margin-bottom:8px;}
+    .sl-card-price{font-size:14px;font-weight:500;color:#f7f3ed;margin-bottom:8px;}
+    .sl-card-specs{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:rgba(247,243,237,0.4);margin-bottom:8px;}
+    .sl-card-agent{font-size:12px;color:rgba(247,243,237,0.35);border-top:1px solid rgba(247,243,237,0.06);padding-top:10px;margin-top:8px;flex:1;}
+    .sl-card-actions{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;align-items:center;}
+    .sl-status{font-size:10px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;border-radius:100px;padding:3px 9px;}
+    .sl-s-to_review{background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.12);color:rgba(247,243,237,0.45);}
+    .sl-s-shortlisted{background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.25);color:#6dbf7b;}
+    .sl-s-passed{background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.08);color:rgba(247,243,237,0.25);}
+
     /* Buttons */
     .btn-primary{display:inline-flex;align-items:center;gap:8px;background:#bd7a70;border:none;border-radius:10px;padding:12px 22px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;color:#f7f3ed;cursor:pointer;transition:background .2s;}
     .btn-primary:hover{background:#cf9b92;}
@@ -538,6 +573,10 @@
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3.5" width="13" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 2v3M11 2v3M1.5 7h13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         Dates
       </button>
+      <button class="snav-item" onclick="showSection('shortlist',this)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 2h10a1 1 0 011 1v10.5l-5-3-5 3V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        Shortlist
+      </button>
       <a class="snav-item" href="/proposal.html" target="_blank" style="text-decoration:none;">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="10" height="13" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 5h5M4.5 8h5M4.5 11h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M12 9l2.5 2.5-2.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Proposal
@@ -708,10 +747,55 @@
       </div>
     </div>
 
+    <!-- Shortlist -->
+    <div id="sec-shortlist" class="admin-section">
+      <div class="sec-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <h1>Shortlist</h1>
+        <button class="btn-primary" onclick="openSlModal()" style="font-size:13px;padding:10px 20px;">+ Add property</button>
+      </div>
+      <div id="sl-tabs" class="sl-tabs" style="margin-bottom:20px;">
+        <button class="sl-tab active" onclick="setSlFilter('all',this)">All</button>
+        <button class="sl-tab" onclick="setSlFilter('to_review',this)">To review</button>
+        <button class="sl-tab" onclick="setSlFilter('shortlisted',this)">Shortlisted</button>
+        <button class="sl-tab" onclick="setSlFilter('passed',this)">Passed</button>
+      </div>
+      <div id="sl-grid" class="sl-grid"></div>
+    </div>
+
     <!-- Settings -->
     <div id="sec-settings" class="admin-section">
       <div class="sec-header">
         <h1>Settings</h1>
+      </div>
+
+      <div class="settings-block" id="compliance-block">
+        <h2>Compliance</h2>
+        <div id="comp-alert" style="display:none;" class="comp-alert">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2L1.5 13h13L8 2z" stroke="#e8a87c" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 7v3M8 11.5v.5" stroke="#e8a87c" stroke-width="1.4" stroke-linecap="round"/></svg>
+          <span id="comp-alert-text"></span>
+        </div>
+
+        <p class="comp-section-head">Licences</p>
+        <div id="comp-licences" class="comp-list"></div>
+        <button class="comp-add" onclick="openCompModal('licence')">+ Add licence</button>
+
+        <p class="comp-section-head" style="margin-top:22px;">Insurance</p>
+        <div id="comp-insurances" class="comp-list"></div>
+        <button class="comp-add" onclick="openCompModal('insurance')">+ Add insurance</button>
+
+        <p class="comp-section-head" style="margin-top:22px;">Memberships</p>
+        <div id="comp-memberships" class="comp-list"></div>
+        <button class="comp-add" onclick="openCompModal('membership')">+ Add membership</button>
+
+        <p class="comp-section-head" style="margin-top:22px;">CPD — <span id="cpd-year"></span></p>
+        <div id="cpd-block" style="background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.09);border-radius:12px;padding:16px 18px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span id="cpd-label" style="font-size:13.5px;color:#f7f3ed;"></span>
+            <button onclick="openCpdModal()" style="background:none;border:none;font-family:'Outfit',sans-serif;font-size:12.5px;color:#bd7a70;cursor:pointer;padding:0;">Edit</button>
+          </div>
+          <div class="cpd-bar-wrap"><div class="cpd-bar" id="cpd-bar"></div></div>
+          <div id="cpd-sub" style="font-size:12px;color:rgba(247,243,237,0.35);margin-top:6px;"></div>
+        </div>
       </div>
 
       <div class="settings-block">
@@ -1069,6 +1153,122 @@
   </div>
 </div>
 
+<!-- Compliance modal -->
+<div id="comp-modal-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:600;display:none;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)closeCompModal()">
+  <div style="background:#22201d;border:1px solid rgba(247,243,237,0.1);border-radius:20px;padding:28px 32px;width:100%;max-width:460px;max-height:88vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <h2 id="comp-modal-title" style="font-family:'Fraunces',serif;font-size:20px;font-weight:400;margin:0;">Add item</h2>
+      <button onclick="closeCompModal()" style="background:none;border:none;color:rgba(247,243,237,0.4);font-size:22px;cursor:pointer;line-height:1;padding:0;">&times;</button>
+    </div>
+    <div class="field"><label>Category</label>
+      <select id="comp-cat" onchange="updateCompCat()" style="width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:14px;padding:11px 14px;">
+        <option value="licence">Licence</option>
+        <option value="insurance">Insurance</option>
+        <option value="membership">Membership</option>
+      </select>
+    </div>
+    <div class="field"><label>Name / label</label><input type="text" id="comp-label" placeholder="e.g. Real Estate Licence NSW"></div>
+    <div class="field"><label id="comp-num-lbl">Number</label><input type="text" id="comp-number" placeholder="Licence / policy / member number"></div>
+    <div id="comp-insurance-extra" style="display:none;">
+      <div class="field"><label>Insurer</label><input type="text" id="comp-insurer" placeholder="e.g. QBE, Vero, Allianz"></div>
+      <div class="field"><label>Cover amount</label><input type="text" id="comp-cover" placeholder="e.g. $2,000,000"></div>
+    </div>
+    <div id="comp-membership-extra" style="display:none;">
+      <div class="field"><label>Organisation</label><input type="text" id="comp-org" placeholder="e.g. REBAA, PIPA"></div>
+    </div>
+    <div class="field"><label>Expiry date</label><input type="date" id="comp-expiry"></div>
+    <div class="field"><label>Notes <span style="color:rgba(247,243,237,0.3);font-weight:300;">(optional)</span></label><textarea id="comp-notes" rows="2" style="resize:vertical;width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:14px;padding:11px 14px;"></textarea></div>
+    <div style="display:flex;gap:10px;margin-top:20px;align-items:center;">
+      <button class="btn-primary" onclick="saveCompItem()" id="comp-save-btn" style="font-size:13px;padding:10px 22px;">Save</button>
+      <button class="btn-secondary" onclick="closeCompModal()" style="font-size:13px;padding:10px 18px;">Cancel</button>
+      <button id="comp-delete-btn" onclick="deleteCompItem()" style="margin-left:auto;background:none;border:none;font-family:'Outfit',sans-serif;font-size:13px;color:rgba(240,128,128,0.65);cursor:pointer;padding:0;display:none;">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- CPD edit modal -->
+<div id="cpd-modal-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:600;display:none;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)closeCpdModal()">
+  <div style="background:#22201d;border:1px solid rgba(247,243,237,0.1);border-radius:20px;padding:28px 32px;width:100%;max-width:380px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <h2 style="font-family:'Fraunces',serif;font-size:20px;font-weight:400;margin:0;">CPD hours</h2>
+      <button onclick="closeCpdModal()" style="background:none;border:none;color:rgba(247,243,237,0.4);font-size:22px;cursor:pointer;line-height:1;padding:0;">&times;</button>
+    </div>
+    <div class="row-2">
+      <div class="field"><label>Year</label><input type="number" id="cpd-year-input" min="2020" max="2040" style="width:100%;"></div>
+      <div class="field"><label>Required hours</label><input type="number" id="cpd-required-input" min="0" max="100" style="width:100%;"></div>
+    </div>
+    <div class="field"><label>Completed hours</label><input type="number" id="cpd-completed-input" min="0" max="100" style="width:100%;"></div>
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button class="btn-primary" onclick="saveCpd()" style="font-size:13px;padding:10px 22px;">Save</button>
+      <button class="btn-secondary" onclick="closeCpdModal()" style="font-size:13px;padding:10px 18px;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Shortlist modal -->
+<div id="sl-modal-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:600;display:none;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)closeSlModal()">
+  <div style="background:#22201d;border:1px solid rgba(247,243,237,0.1);border-radius:20px;padding:28px 32px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <h2 id="sl-modal-title" style="font-family:'Fraunces',serif;font-size:20px;font-weight:400;margin:0;">Add property</h2>
+      <button onclick="closeSlModal()" style="background:none;border:none;color:rgba(247,243,237,0.4);font-size:22px;cursor:pointer;line-height:1;padding:0;">&times;</button>
+    </div>
+    <div class="row-2">
+      <div class="field" style="grid-column:1/-1;"><label>Address <span style="color:#e07070;">*</span></label><input type="text" id="sl-address" placeholder="14 Burke Street"></div>
+    </div>
+    <div class="row-2">
+      <div class="field"><label>Suburb</label><input type="text" id="sl-suburb" placeholder="Geelong"></div>
+      <div class="field"><label>State</label>
+        <select id="sl-state" style="width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:14px;padding:11px 14px;">
+          <option value="VIC">VIC</option><option value="NSW">NSW</option><option value="QLD">QLD</option>
+          <option value="SA">SA</option><option value="WA">WA</option><option value="TAS">TAS</option>
+          <option value="ACT">ACT</option><option value="NT">NT</option>
+        </select>
+      </div>
+    </div>
+    <div class="row-2">
+      <div class="field"><label>Price guide</label><input type="text" id="sl-price" placeholder="$520,000"></div>
+      <div class="field"><label>Type</label>
+        <select id="sl-type" style="width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:14px;padding:11px 14px;">
+          <option value="house">House</option><option value="unit">Unit</option><option value="townhouse">Townhouse</option><option value="duplex">Duplex</option><option value="land">Land</option>
+        </select>
+      </div>
+    </div>
+    <div class="row-2">
+      <div class="field"><label>Bed</label><input type="text" id="sl-beds" placeholder="3"></div>
+      <div class="field"><label>Bath</label><input type="text" id="sl-baths" placeholder="2"></div>
+    </div>
+    <div class="row-2">
+      <div class="field"><label>Car</label><input type="text" id="sl-cars" placeholder="1"></div>
+      <div class="field"><label>Land (m²)</label><input type="text" id="sl-land" placeholder="450"></div>
+    </div>
+    <p style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin:16px 0 10px;">Source</p>
+    <div class="row-2">
+      <div class="field"><label>Source</label>
+        <select id="sl-source" onchange="updateSlSourceFields()" style="width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:14px;padding:11px 14px;">
+          <option value="own">Own research</option>
+          <option value="agent">From agent</option>
+        </select>
+      </div>
+    </div>
+    <div id="sl-agent-fields" style="display:none;">
+      <div class="row-2">
+        <div class="field"><label>Agent name</label><input type="text" id="sl-agent-name" placeholder="James Smith"></div>
+        <div class="field"><label>Agency</label><input type="text" id="sl-agent-agency" placeholder="Ray White Geelong"></div>
+      </div>
+      <div class="row-2">
+        <div class="field"><label>Phone</label><input type="text" id="sl-agent-phone" placeholder="0400 000 000"></div>
+        <div class="field"><label>Email</label><input type="email" id="sl-agent-email" placeholder="james@raywhite.com"></div>
+      </div>
+    </div>
+    <div class="field" style="margin-top:4px;"><label>Notes</label><textarea id="sl-notes" rows="3" placeholder="Quick notes on the property..." style="resize:vertical;width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:14px;padding:11px 14px;"></textarea></div>
+    <div style="display:flex;gap:10px;margin-top:20px;align-items:center;">
+      <button class="btn-primary" onclick="saveSlItem()" id="sl-save-btn" style="font-size:13px;padding:10px 22px;">Save</button>
+      <button class="btn-secondary" onclick="closeSlModal()" style="font-size:13px;padding:10px 18px;">Cancel</button>
+      <button id="sl-delete-btn" onclick="deleteSlItem()" style="margin-left:auto;background:none;border:none;font-family:'Outfit',sans-serif;font-size:13px;color:rgba(240,128,128,0.65);cursor:pointer;padding:0;display:none;">Delete</button>
+    </div>
+  </div>
+</div>
+
 <!-- Brief modal -->
 <div id="brief-overlay">
   <div class="brief-modal">
@@ -1231,6 +1431,11 @@ let adminPassword = '';
 let clients = [];
 let milestones = [];
 let presentations = [];
+let complianceData = null;
+let shortlistItems = [];
+let slFilter = 'all';
+let slEditId = null;
+let compEditId = null;
 
 // ── Section nav ───────────────────────────────────────────────────────────────
 function showSection(id, btn) {
@@ -1239,6 +1444,8 @@ function showSection(id, btn) {
   document.getElementById('sec-' + id).classList.add('active');
   if (btn) btn.classList.add('active');
   if (id === 'briefs') renderBriefs();
+  if (id === 'shortlist') loadShortlist();
+  if (id === 'settings') loadCompliance();
   localStorage.setItem('fw_admin_section', id);
 }
 
@@ -1307,6 +1514,8 @@ async function completeLogin(pw) {
   loadPresentations();
   loadAuditLog();
   loadTotpStatus();
+  loadCompliance();
+  loadShortlist();
 }
 
 document.getElementById('gate-btn').addEventListener('click', async function() {
@@ -2590,6 +2799,284 @@ async function loadPresentations() {
   presentations = await res.json();
   renderPresentations();
   renderDashboard();
+}
+
+// ── Compliance ────────────────────────────────────────────────────────────────
+async function loadCompliance() {
+  const res = await api('GET', '/api/admin/compliance');
+  if (res.ok) { complianceData = await res.json(); renderCompliance(); }
+}
+
+function compExpiryStatus(expiry) {
+  if (!expiry) return { cls: 'comp-none', label: 'No expiry' };
+  const today = new Date(); today.setHours(0,0,0,0);
+  const exp = new Date(expiry + 'T00:00:00');
+  const days = Math.round((exp - today) / 86400000);
+  if (days < 0)  return { cls: 'comp-expired', label: 'Expired' };
+  if (days <= 30) return { cls: 'comp-expired', label: `${days}d left` };
+  if (days <= 60) return { cls: 'comp-soon', label: `${days}d left` };
+  return { cls: 'comp-ok', label: `${days}d left` };
+}
+
+function renderCompliance() {
+  if (!complianceData) return;
+  const { items = [], cpd = {} } = complianceData;
+
+  // Alert banner
+  const urgent = items.filter(i => { const s = compExpiryStatus(i.expiry); return s.cls !== 'comp-ok' && s.cls !== 'comp-none'; });
+  const alertEl = document.getElementById('comp-alert');
+  const alertText = document.getElementById('comp-alert-text');
+  if (urgent.length) {
+    alertText.textContent = `${urgent.length} item${urgent.length !== 1 ? 's' : ''} expired or expiring within 60 days`;
+    alertEl.style.display = 'flex';
+  } else {
+    alertEl.style.display = 'none';
+  }
+
+  const renderList = (cat, containerId) => {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    const catItems = items.filter(i => i.category === cat);
+    if (!catItems.length) { el.innerHTML = ''; return; }
+    el.innerHTML = catItems.map(item => {
+      const { cls, label } = compExpiryStatus(item.expiry);
+      const expFmt = item.expiry ? new Date(item.expiry + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+      let detail = [item.number && `# ${item.number}`, expFmt && `Expires ${expFmt}`].filter(Boolean).join(' · ');
+      if (cat === 'insurance') {
+        const extra = [item.insurer, item.coverAmount].filter(Boolean).join(' · ');
+        if (extra) detail = extra + (detail ? '<br>' + detail : '');
+      }
+      if (cat === 'membership' && item.organisation) detail = item.organisation + (detail ? ' · ' + detail : '');
+      if (item.notes) detail += (detail ? '<br>' : '') + `<span style="color:rgba(247,243,237,0.25);">${esc(item.notes)}</span>`;
+      return `<div class="comp-item">
+        <div class="comp-item-body">
+          <div class="comp-item-label">${esc(item.label)}</div>
+          ${detail ? `<div class="comp-item-detail">${detail}</div>` : ''}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
+          <span class="comp-badge ${cls}">${label}</span>
+          <button onclick="openCompModal('${cat}','${item.id}')" style="background:none;border:none;font-family:'Outfit',sans-serif;font-size:12px;color:#bd7a70;cursor:pointer;padding:0;">Edit</button>
+        </div>
+      </div>`;
+    }).join('');
+  };
+
+  renderList('licence', 'comp-licences');
+  renderList('insurance', 'comp-insurances');
+  renderList('membership', 'comp-memberships');
+
+  // CPD
+  const year = cpd.year || new Date().getFullYear();
+  const req  = Number(cpd.required) || 0;
+  const done = Number(cpd.completed) || 0;
+  document.getElementById('cpd-year').textContent = year;
+  document.getElementById('cpd-label').textContent = req ? `${done} of ${req} hours completed` : 'No target set';
+  document.getElementById('cpd-bar').style.width = req ? Math.min(100, Math.round(done / req * 100)) + '%' : '0%';
+  const rem = req - done;
+  document.getElementById('cpd-sub').textContent = req ? (rem > 0 ? `${rem} hours remaining` : 'Target reached ✓') : 'Set a required hours target to track progress.';
+}
+
+function openCompModal(cat, itemId) {
+  compEditId = itemId || null;
+  const data = complianceData || {};
+  const item = itemId ? (data.items || []).find(i => i.id === itemId) : null;
+  document.getElementById('comp-modal-title').textContent = item ? 'Edit item' : 'Add item';
+  document.getElementById('comp-cat').value = item ? item.category : cat;
+  document.getElementById('comp-label').value = item ? item.label : '';
+  document.getElementById('comp-number').value = item ? (item.number || '') : '';
+  document.getElementById('comp-insurer').value = item ? (item.insurer || '') : '';
+  document.getElementById('comp-cover').value = item ? (item.coverAmount || '') : '';
+  document.getElementById('comp-org').value = item ? (item.organisation || '') : '';
+  document.getElementById('comp-expiry').value = item ? (item.expiry || '') : '';
+  document.getElementById('comp-notes').value = item ? (item.notes || '') : '';
+  document.getElementById('comp-delete-btn').style.display = item ? 'block' : 'none';
+  updateCompCat();
+  document.getElementById('comp-modal-overlay').style.display = 'flex';
+}
+function closeCompModal() { document.getElementById('comp-modal-overlay').style.display = 'none'; compEditId = null; }
+
+function updateCompCat() {
+  const cat = document.getElementById('comp-cat').value;
+  document.getElementById('comp-insurance-extra').style.display = cat === 'insurance' ? 'block' : 'none';
+  document.getElementById('comp-membership-extra').style.display = cat === 'membership' ? 'block' : 'none';
+  document.getElementById('comp-num-lbl').textContent = cat === 'insurance' ? 'Policy number' : cat === 'membership' ? 'Member ID' : 'Licence number';
+}
+
+async function saveCompItem() {
+  const btn = document.getElementById('comp-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  const cat = document.getElementById('comp-cat').value;
+  const newItem = {
+    id: compEditId || crypto.randomUUID(),
+    category: cat,
+    label: document.getElementById('comp-label').value.trim(),
+    number: document.getElementById('comp-number').value.trim(),
+    insurer: document.getElementById('comp-insurer').value.trim(),
+    coverAmount: document.getElementById('comp-cover').value.trim(),
+    organisation: document.getElementById('comp-org').value.trim(),
+    expiry: document.getElementById('comp-expiry').value,
+    notes: document.getElementById('comp-notes').value.trim(),
+  };
+  if (!newItem.label) { alert('Please enter a name/label.'); btn.disabled = false; btn.textContent = 'Save'; return; }
+  const items = [...(complianceData?.items || [])];
+  const idx = items.findIndex(i => i.id === newItem.id);
+  if (idx === -1) items.push(newItem); else items[idx] = newItem;
+  const res = await api('PUT', '/api/admin/compliance', { items });
+  if (res.ok) { const d = await res.json(); complianceData = d.data; renderCompliance(); closeCompModal(); }
+  else { alert('Save failed.'); }
+  btn.disabled = false; btn.textContent = 'Save';
+}
+
+async function deleteCompItem() {
+  if (!compEditId || !confirm('Delete this item?')) return;
+  const items = (complianceData?.items || []).filter(i => i.id !== compEditId);
+  const res = await api('PUT', '/api/admin/compliance', { items });
+  if (res.ok) { const d = await res.json(); complianceData = d.data; renderCompliance(); closeCompModal(); }
+  else { alert('Delete failed.'); }
+}
+
+function openCpdModal() {
+  const cpd = complianceData?.cpd || {};
+  document.getElementById('cpd-year-input').value = cpd.year || new Date().getFullYear();
+  document.getElementById('cpd-required-input').value = cpd.required || 12;
+  document.getElementById('cpd-completed-input').value = cpd.completed || 0;
+  document.getElementById('cpd-modal-overlay').style.display = 'flex';
+}
+function closeCpdModal() { document.getElementById('cpd-modal-overlay').style.display = 'none'; }
+
+async function saveCpd() {
+  const cpd = {
+    year: Number(document.getElementById('cpd-year-input').value),
+    required: Number(document.getElementById('cpd-required-input').value),
+    completed: Number(document.getElementById('cpd-completed-input').value),
+  };
+  const res = await api('PUT', '/api/admin/compliance', { cpd });
+  if (res.ok) { const d = await res.json(); complianceData = d.data; renderCompliance(); closeCpdModal(); }
+  else { alert('Save failed.'); }
+}
+
+// ── Shortlist ─────────────────────────────────────────────────────────────────
+async function loadShortlist() {
+  const res = await api('GET', '/api/admin/shortlist');
+  if (res.ok) { shortlistItems = await res.json(); renderShortlist(); }
+}
+
+function setSlFilter(f, btn) {
+  slFilter = f;
+  document.querySelectorAll('.sl-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderShortlist();
+}
+
+function renderShortlist() {
+  const grid = document.getElementById('sl-grid');
+  if (!grid) return;
+  const items = slFilter === 'all' ? shortlistItems : shortlistItems.filter(i => i.status === slFilter);
+  if (!items.length) {
+    grid.innerHTML = `<p style="font-size:14px;color:rgba(247,243,237,0.25);padding:4px 0;">${slFilter === 'all' ? 'No properties on the shortlist yet.' : 'No properties with this status.'}</p>`;
+    return;
+  }
+  const typeLabels = { house:'House', unit:'Unit', townhouse:'Townhouse', duplex:'Duplex', land:'Land' };
+  const statusLabels = { to_review:'To review', shortlisted:'Shortlisted', passed:'Passed' };
+  grid.innerHTML = items.map(item => {
+    const specs = [item.bedrooms && `${item.bedrooms} bed`, item.bathrooms && `${item.bathrooms} bath`, item.carspaces && `${item.carspaces} car`, item.landSize && `${item.landSize}m²`].filter(Boolean).join(' · ');
+    const agentLine = item.source === 'agent' && item.agentName
+      ? `<div class="sl-card-agent">From: <strong>${esc(item.agentName)}</strong>${item.agentAgency ? ` — ${esc(item.agentAgency)}` : ''}${item.agentPhone ? `<br>${esc(item.agentPhone)}` : ''}</div>`
+      : item.source === 'own' ? `<div class="sl-card-agent" style="color:rgba(247,243,237,0.22);">Own research</div>` : '';
+    const nextStatus = item.status === 'to_review' ? 'shortlisted' : item.status === 'shortlisted' ? 'passed' : null;
+    const nextLabel  = item.status === 'to_review' ? 'Shortlist ✓' : item.status === 'shortlisted' ? 'Pass' : null;
+    return `<div class="sl-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px;">
+        <div class="sl-card-address">${esc(item.address)}</div>
+        <span class="sl-status sl-s-${item.status}">${statusLabels[item.status] || item.status}</span>
+      </div>
+      ${item.suburb ? `<div class="sl-card-sub">${esc(item.suburb)}${item.state ? ' ' + esc(item.state) : ''} · ${esc(typeLabels[item.propertyType] || item.propertyType)}</div>` : ''}
+      ${item.price ? `<div class="sl-card-price">${esc(item.price)}</div>` : ''}
+      ${specs ? `<div class="sl-card-specs">${esc(specs)}</div>` : ''}
+      ${item.notes ? `<div style="font-size:12px;color:rgba(247,243,237,0.35);margin-top:4px;line-height:1.5;">${esc(item.notes)}</div>` : ''}
+      ${agentLine}
+      <div class="sl-card-actions">
+        <button onclick="openSlModal('${item.id}')" class="btn-sm" style="font-size:12px;">Edit</button>
+        ${nextStatus ? `<button onclick="updateSlStatus('${item.id}','${nextStatus}')" class="btn-sm" style="font-size:12px;">${nextLabel}</button>` : ''}
+        ${item.status === 'passed' ? `<button onclick="updateSlStatus('${item.id}','to_review')" class="btn-sm" style="font-size:12px;color:rgba(247,243,237,0.4);">Restore</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openSlModal(itemId) {
+  slEditId = itemId || null;
+  const item = itemId ? shortlistItems.find(i => i.id === itemId) : null;
+  document.getElementById('sl-modal-title').textContent = item ? 'Edit property' : 'Add property';
+  document.getElementById('sl-address').value = item ? item.address : '';
+  document.getElementById('sl-suburb').value = item ? item.suburb : '';
+  document.getElementById('sl-state').value = item ? (item.state || 'VIC') : 'VIC';
+  document.getElementById('sl-price').value = item ? item.price : '';
+  document.getElementById('sl-type').value = item ? item.propertyType : 'house';
+  document.getElementById('sl-beds').value = item ? item.bedrooms : '';
+  document.getElementById('sl-baths').value = item ? item.bathrooms : '';
+  document.getElementById('sl-cars').value = item ? item.carspaces : '';
+  document.getElementById('sl-land').value = item ? item.landSize : '';
+  document.getElementById('sl-source').value = item ? item.source : 'own';
+  document.getElementById('sl-agent-name').value = item ? (item.agentName || '') : '';
+  document.getElementById('sl-agent-agency').value = item ? (item.agentAgency || '') : '';
+  document.getElementById('sl-agent-phone').value = item ? (item.agentPhone || '') : '';
+  document.getElementById('sl-agent-email').value = item ? (item.agentEmail || '') : '';
+  document.getElementById('sl-notes').value = item ? item.notes : '';
+  document.getElementById('sl-delete-btn').style.display = item ? 'block' : 'none';
+  updateSlSourceFields();
+  document.getElementById('sl-modal-overlay').style.display = 'flex';
+}
+function closeSlModal() { document.getElementById('sl-modal-overlay').style.display = 'none'; slEditId = null; }
+
+function updateSlSourceFields() {
+  const v = document.getElementById('sl-source').value;
+  document.getElementById('sl-agent-fields').style.display = v === 'agent' ? 'block' : 'none';
+}
+
+async function saveSlItem() {
+  const btn = document.getElementById('sl-save-btn');
+  const addr = document.getElementById('sl-address').value.trim();
+  if (!addr) { alert('Address is required.'); return; }
+  btn.disabled = true; btn.textContent = 'Saving…';
+  const body = {
+    address: addr,
+    suburb: document.getElementById('sl-suburb').value.trim(),
+    state: document.getElementById('sl-state').value,
+    price: document.getElementById('sl-price').value.trim(),
+    propertyType: document.getElementById('sl-type').value,
+    bedrooms: document.getElementById('sl-beds').value.trim(),
+    bathrooms: document.getElementById('sl-baths').value.trim(),
+    carspaces: document.getElementById('sl-cars').value.trim(),
+    landSize: document.getElementById('sl-land').value.trim(),
+    source: document.getElementById('sl-source').value,
+    agentName: document.getElementById('sl-agent-name').value.trim(),
+    agentAgency: document.getElementById('sl-agent-agency').value.trim(),
+    agentPhone: document.getElementById('sl-agent-phone').value.trim(),
+    agentEmail: document.getElementById('sl-agent-email').value.trim(),
+    notes: document.getElementById('sl-notes').value.trim(),
+  };
+  let res;
+  if (slEditId) { res = await api('PUT', '/api/admin/shortlist', { id: slEditId, ...body }); }
+  else { res = await api('POST', '/api/admin/shortlist', body); }
+  if (res.ok) {
+    shortlistItems = await api('GET', '/api/admin/shortlist').then(r => r.json());
+    renderShortlist(); closeSlModal();
+  } else { alert('Save failed.'); }
+  btn.disabled = false; btn.textContent = 'Save';
+}
+
+async function updateSlStatus(id, status) {
+  const res = await api('PUT', '/api/admin/shortlist', { id, status });
+  if (res.ok) { const item = shortlistItems.find(i => i.id === id); if (item) item.status = status; renderShortlist(); }
+  else { alert('Update failed.'); }
+}
+
+async function deleteSlItem() {
+  if (!slEditId || !confirm('Remove this property from the shortlist?')) return;
+  const res = await api('DELETE', `/api/admin/shortlist?id=${slEditId}`);
+  if (res.ok) { shortlistItems = shortlistItems.filter(i => i.id !== slEditId); renderShortlist(); closeSlModal(); }
+  else { alert('Delete failed.'); }
 }
 
 let _agentLinkCache = null;

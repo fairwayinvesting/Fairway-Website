@@ -28,8 +28,20 @@ export default async (req) => {
     if (!client || !client.active) {
       return new Response(JSON.stringify({ error: 'Account not found' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
+
+    // Look up upcoming settlement date for this client
+    let settlementDate = null;
+    try {
+      const msStore = getStore('fairway-milestones');
+      const milestones = (await msStore.get(client.id, { type: 'json' })) || [];
+      const upcoming = milestones
+        .filter(m => m.type === 'settlement' && !m.completed && m.date)
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+      if (upcoming.length) settlementDate = upcoming[0].date;
+    } catch {}
+
     return new Response(
-      JSON.stringify({ name: client.name, email: client.email, markets: client.markets || [], pipelineStage: client.pipelineStage || null }),
+      JSON.stringify({ name: client.name, email: client.email, markets: client.markets || [], pipelineStage: client.pipelineStage || null, settlementDate }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch {
