@@ -1237,7 +1237,7 @@ function showSection(id, btn) {
   document.getElementById('sec-' + id).classList.add('active');
   if (btn) btn.classList.add('active');
   if (id === 'briefs') renderBriefs();
-  sessionStorage.setItem('fw_admin_section', id);
+  localStorage.setItem('fw_admin_section', id);
 }
 
 function renderDashboard() {
@@ -1295,8 +1295,8 @@ async function completeLogin(pw) {
   adminPassword = pw;
   sessionStorage.setItem('fw_admin_pw', pw);
   document.getElementById('gate').classList.add('hidden');
-  const lastSection = sessionStorage.getItem('fw_admin_section') || 'dashboard';
-  const navBtn = document.querySelector(`.snav-item[onclick*="'${lastSection}'"]`) || document.querySelector('.snav-item');
+  const lastSection = localStorage.getItem('fw_admin_section') || 'dashboard';
+  const navBtn = Array.from(document.querySelectorAll('.snav-item')).find(b => (b.getAttribute('onclick') || '').includes(`'${lastSection}'`)) || document.querySelector('.snav-item');
   showSection(lastSection, navBtn);
   renderPartnerList();
   loadClients();
