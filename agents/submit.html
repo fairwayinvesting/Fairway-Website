@@ -117,6 +117,7 @@
       </div>
       <h1 style="font-size:26px;margin-bottom:10px;">Submission received</h1>
       <p style="color:rgba(247,243,237,0.45);font-size:15px;line-height:1.65;">Thanks — Luke will review the details and be in touch if he needs anything further.</p>
+      <button class="submit-btn" onclick="resetForm()" style="margin-top:28px;max-width:280px;">Submit another property</button>
     </div>
 
     <!-- Form -->
@@ -434,6 +435,36 @@
         errEl.textContent = e.message || 'Something went wrong. Please try again.';
         errEl.style.display = 'block';
       }
+    }
+
+    function resetForm() {
+      // Clear property fields only — agent details stay pre-filled
+      ['f-address','f-suburb','f-price','f-rent','f-beds','f-baths','f-cars','f-land','f-desc','f-issues','f-assessment'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('f-state').value = 'VIC';
+      document.getElementById('f-type').value = 'house';
+
+      // Reset features and videos to one blank row each
+      document.getElementById('feature-list').innerHTML = '';
+      document.getElementById('video-list').innerHTML = '';
+      addFeature();
+      addVideo();
+
+      // Reset photos
+      uploadedImages = [];
+      document.getElementById('photo-grid').innerHTML = '';
+
+      // Reset submit button
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = false;
+      btn.textContent = 'Submit property';
+
+      // Reset error
+      document.getElementById('form-error').style.display = 'none';
+
+      show('form-state');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     init();
