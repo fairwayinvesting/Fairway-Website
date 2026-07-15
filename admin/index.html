@@ -129,9 +129,14 @@
     .urg-badge{display:inline-flex;align-items:center;font-size:10px;font-weight:600;letter-spacing:0.06em;border-radius:100px;padding:4px 11px;white-space:nowrap;min-width:68px;justify-content:center;}
 
     /* Milestone grouped rows (dashboard + inline panel) */
-    .ms-group{margin-bottom:22px;}
-    .ms-group-head{font-size:11.5px;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.45);margin-bottom:10px;font-weight:500;}
-    .ms-group-rows{background:#22201d;border:1px solid rgba(247,243,237,0.1);border-radius:12px;overflow:hidden;}
+    .ms-group{margin-bottom:8px;}
+    .ms-group-head{display:flex;align-items:center;gap:10px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.1);border-radius:12px;padding:12px 14px;cursor:pointer;transition:background .15s;user-select:none;}
+    .ms-group-head:hover{background:rgba(247,243,237,0.07);}
+    .ms-group-head.open{border-radius:12px 12px 0 0;border-bottom-color:transparent;}
+    .ms-group-chevron{font-size:10px;color:rgba(247,243,237,0.28);transition:transform .25s;flex-shrink:0;line-height:1;}
+    .ms-group-name{font-size:13px;font-weight:500;color:rgba(247,243,237,0.8);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .ms-group-count{font-size:10.5px;background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.1);color:rgba(247,243,237,0.35);border-radius:100px;padding:2px 9px;white-space:nowrap;flex-shrink:0;}
+    .ms-group-rows{background:#22201d;border:1px solid rgba(247,243,237,0.1);border-top:none;border-radius:0 0 12px 12px;overflow:hidden;}
     .ms-row-item{display:flex;align-items:center;gap:14px;padding:13px 16px;border-bottom:1px solid rgba(247,243,237,0.07);}
     .ms-row-item:last-child{border-bottom:none;}
     .ms-row-label{flex:1;font-size:14px;color:#f7f3ed;font-weight:300;}
@@ -145,6 +150,8 @@
       .ms-row-label{order:2;width:calc(100% - 30px - 14px);flex:none;}
       .ms-row-date{display:none;}
       .ms-row-label-date{font-size:11px;color:rgba(247,243,237,0.4);display:block;margin-top:2px;}
+      .ms-group-head{gap:8px;padding:10px 12px;}
+      .ms-group-count{display:none;}
     }
 
     /* Client milestone panel (inline in card) */
@@ -1845,6 +1852,21 @@ function urgencyLabel(days) {
   return `${days} days`;
 }
 
+function toggleMsGroup(headEl) {
+  const rows = headEl.nextElementSibling;
+  const chevron = headEl.querySelector('.ms-group-chevron');
+  const isOpen = headEl.classList.contains('open');
+  if (isOpen) {
+    headEl.classList.remove('open');
+    rows.style.display = 'none';
+    if (chevron) chevron.style.transform = '';
+  } else {
+    headEl.classList.add('open');
+    rows.style.display = 'block';
+    if (chevron) chevron.style.transform = 'rotate(180deg)';
+  }
+}
+
 function formatDate(dateStr) {
   const d = new Date(dateStr + 'T00:00:00');
   return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -1910,12 +1932,26 @@ function renderMilestonesDashboard() {
           <button class="ms-del-btn" onclick="deleteMilestoneConfirm('${m.id}','${m.clientId}')" title="Delete">×</button>
         </div>`;
       }).join('');
+
+      // Header summary: most urgent item drives the urgency chip
+      const firstItem = group.items[0];
+      const firstDays = daysFromToday(firstItem.date);
+      const firstUrg = urgencyClass(firstDays);
+      const chipText = `${esc(firstItem.label)} · ${urgencyLabel(firstDays)}`;
+      const hasOverdue = group.items.some(m => daysFromToday(m.date) < 0);
+      const openClass = hasOverdue ? ' open' : '';
+      const rowsDisplay = hasOverdue ? 'block' : 'none';
+      const chevronRot = hasOverdue ? 'transform:rotate(180deg)' : '';
+
       return `<div class="ms-group">
-        <div class="ms-group-head" style="display:flex;align-items:center;justify-content:space-between;">
-          <span>Active — ${esc(group.clientName)}</span>
-          <button onclick="openShareModal('${group.clientId}')" style="background:none;border:1px solid rgba(189,122,112,0.3);color:#bd7a70;font-family:'Outfit',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;border-radius:6px;padding:4px 11px;cursor:pointer;white-space:nowrap;">Share</button>
+        <div class="ms-group-head${openClass}" onclick="toggleMsGroup(this)">
+          <span class="ms-group-chevron" style="${chevronRot}">▾</span>
+          <span class="ms-group-name">${esc(group.clientName)}</span>
+          <span class="${firstUrg}" style="display:inline-flex;flex-shrink:0;"><span class="urg-badge" style="min-width:auto;font-size:10px;">${chipText}</span></span>
+          <span class="ms-group-count">${group.items.length} date${group.items.length !== 1 ? 's' : ''}</span>
+          <button onclick="event.stopPropagation();openShareModal('${group.clientId}')" style="background:none;border:1px solid rgba(189,122,112,0.3);color:#bd7a70;font-family:'Outfit',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;border-radius:6px;padding:4px 11px;cursor:pointer;white-space:nowrap;flex-shrink:0;">Share</button>
         </div>
-        <div class="ms-group-rows">${rows}</div>
+        <div class="ms-group-rows" style="display:${rowsDisplay}">${rows}</div>
       </div>`;
     }).join('');
   }
