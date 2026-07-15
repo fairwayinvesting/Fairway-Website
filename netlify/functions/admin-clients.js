@@ -119,8 +119,8 @@ export default async (req) => {
   const clients = (await store.get('all', { type: 'json' })) || [];
 
   if (req.method === 'GET') {
-    return json(clients.map(({ id, name, email, markets, active, createdAt, setupToken }) =>
-      ({ id, name, email, markets, active, createdAt, hasSetupToken: !!setupToken })
+    return json(clients.map(({ id, name, email, markets, active, createdAt, setupToken, pipelineStage, pipelineStageUpdatedAt }) =>
+      ({ id, name, email, markets, active, createdAt, hasSetupToken: !!setupToken, pipelineStage: pipelineStage || null, pipelineStageUpdatedAt: pipelineStageUpdatedAt || null })
     ));
   }
 
