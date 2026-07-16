@@ -92,15 +92,43 @@
       .jstep{min-width:64px;}
     }
 
+    /* Portfolio mode */
+    .portfolio-wrap{padding:0 44px 40px;max-width:1060px;margin:0 auto;}
+    .portfolio-heading{font-family:'Fraunces',serif;font-size:22px;font-weight:400;color:#f7f3ed;margin-bottom:18px;}
+    .prop-card{background:#22201d;border:1px solid rgba(247,243,237,0.09);border-radius:18px;padding:24px 28px;margin-bottom:16px;}
+    .prop-card-header{margin-bottom:16px;}
+    .prop-card-address{font-family:'Fraunces',serif;font-size:20px;font-weight:400;color:#f7f3ed;line-height:1.2;margin-bottom:4px;}
+    .prop-card-sub{font-size:13px;color:rgba(247,243,237,0.35);}
+    .prop-equity{background:rgba(109,191,123,0.07);border:1px solid rgba(109,191,123,0.18);border-radius:12px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px;}
+    .prop-equity.neg{background:rgba(240,128,128,0.07);border-color:rgba(240,128,128,0.18);}
+    .prop-equity-label{font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:3px;}
+    .prop-equity-value{font-family:'Fraunces',serif;font-size:26px;color:#6dbf7b;line-height:1;}
+    .prop-equity.neg .prop-equity-value{color:#f08080;}
+    .prop-equity-sub{font-size:12px;color:rgba(247,243,237,0.3);}
+    .prop-fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:18px;}
+    .prop-field label{display:block;font-size:10px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:3px;}
+    .prop-field .pfv{font-size:14px;color:#f7f3ed;}
+    .prop-section-label{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);padding-top:14px;border-top:1px solid rgba(247,243,237,0.06);margin-bottom:12px;}
+    .prop-edit-btn{font-family:'Outfit',sans-serif;font-size:12.5px;font-weight:400;color:#bd7a70;background:none;border:1px solid rgba(189,122,112,0.25);border-radius:100px;padding:6px 14px;cursor:pointer;transition:all .15s;}
+    .prop-edit-btn:hover{background:rgba(189,122,112,0.08);}
+    .prop-edit-form{background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.09);border-radius:12px;padding:16px 18px;margin-top:14px;display:none;}
+    .prop-edit-form.open{display:block;}
+    .prop-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+    .prop-edit-grid .field label{font-size:11px;color:rgba(247,243,237,0.4);}
+    .prop-edit-grid .field input,.prop-edit-grid .field select{width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:8px;padding:9px 12px;font-size:13px;font-family:'Outfit',sans-serif;font-weight:300;color:#f7f3ed;outline:none;}
+    .prop-edit-grid .field input:focus,.prop-edit-grid .field select:focus{border-color:rgba(189,122,112,0.5);}
+
     @media(max-width:800px){
       nav,footer{padding-left:20px;padding-right:20px;}
-      .hero,.grid-wrap,.empty,.loading,.actions-wrap{padding-left:20px;padding-right:20px;}
+      .hero,.grid-wrap,.empty,.loading,.actions-wrap,.portfolio-wrap,.journey-wrap,.settlement-wrap{padding-left:20px;padding-right:20px;}
       .grid{grid-template-columns:1fr 1fr;}
       h1{font-size:30px;}
     }
     @media(max-width:520px){
       .grid{grid-template-columns:1fr;}
       .user-name{display:none;}
+      .prop-fields{grid-template-columns:1fr 1fr;}
+      .prop-equity{flex-direction:column;align-items:flex-start;gap:8px;}
     }
   </style>
 </head>
@@ -149,6 +177,12 @@
   <div class="grid-wrap" id="reports-section" style="display:none">
     <p class="section-label">Area research</p>
     <div id="content"></div>
+  </div>
+
+  <!-- MY PORTFOLIO (shown for completed/re-engaged clients with purchases) -->
+  <div class="portfolio-wrap" id="portfolio-section" style="display:none">
+    <p class="section-label">My portfolio</p>
+    <div id="portfolio-content"></div>
   </div>
 
   <footer>
@@ -364,6 +398,122 @@
       content.innerHTML = `<div class="grid">${cards}</div>`;
     }
 
+    const LOAN_TYPE_LABELS = { variable:'Variable P&I', fixed:'Fixed P&I', 'io-variable':'Variable IO', 'io-fixed':'Fixed IO', split:'Split' };
+
+    function fmtMoney(v) {
+      const n = parseFloat(String(v || '').replace(/[^0-9.]/g,''));
+      return isNaN(n) ? '—' : '$' + n.toLocaleString();
+    }
+
+    function renderPortfolio(purchases) {
+      const sec = document.getElementById('portfolio-section');
+      const content = document.getElementById('portfolio-content');
+      if (!purchases || !purchases.length) return;
+      sec.style.display = 'block';
+      content.innerHTML = purchases.map(p => {
+        const currVal = parseFloat(String(p.currentValue || '').replace(/[^0-9.]/g,'')) || 0;
+        const loan    = parseFloat(String(p.loanAmount  || '').replace(/[^0-9.]/g,'')) || 0;
+        const equity  = currVal - loan;
+        const hasEquity = currVal > 0 && loan > 0;
+        const lvr = currVal > 0 ? Math.round(loan / currVal * 100) : 0;
+
+        return `<div class="prop-card" id="prop-card-${p.id}">
+          <div class="prop-card-header">
+            <div class="prop-card-address">${esc(p.address)}</div>
+            <div class="prop-card-sub">${[p.suburb, p.state].filter(Boolean).map(esc).join(', ')}${p.propertyType ? ' &nbsp;·&nbsp; ' + esc(p.propertyType.charAt(0).toUpperCase() + p.propertyType.slice(1)) : ''}</div>
+          </div>
+
+          ${hasEquity ? `<div class="prop-equity${equity < 0 ? ' neg' : ''}">
+            <div>
+              <div class="prop-equity-label">Estimated equity</div>
+              <div class="prop-equity-value">$${Math.abs(equity).toLocaleString()}</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="prop-equity-sub">${fmtMoney(p.currentValue)} current value</div>
+              <div class="prop-equity-sub">${lvr}% LVR &nbsp;·&nbsp; ${fmtMoney(p.loanAmount)} loan</div>
+            </div>
+          </div>` : ''}
+
+          <div class="prop-fields">
+            <div class="prop-field"><label>Purchase price</label><div class="pfv">${fmtMoney(p.purchasePrice)}</div></div>
+            <div class="prop-field"><label>Current value</label><div class="pfv">${fmtMoney(p.currentValue)}</div></div>
+            <div class="prop-field"><label>Interest rate</label><div class="pfv">${esc(p.interestRate || '—')}</div></div>
+            <div class="prop-field"><label>Loan type</label><div class="pfv">${LOAN_TYPE_LABELS[p.loanType] || p.loanType || '—'}</div></div>
+            <div class="prop-field"><label>Loan term</label><div class="pfv">${p.loanTerm ? esc(p.loanTerm) + ' years' : '—'}</div></div>
+            <div class="prop-field"><label>Lender</label><div class="pfv">${esc(p.lender || '—')}</div></div>
+          </div>
+
+          ${p.pmName ? `<div class="prop-section-label">Property management</div>
+          <div class="prop-fields" style="margin-bottom:18px;">
+            <div class="prop-field"><label>Manager</label><div class="pfv">${esc(p.pmName)}</div></div>
+            <div class="prop-field"><label>Agency</label><div class="pfv">${esc(p.pmAgency || '—')}</div></div>
+            <div class="prop-field"><label>Phone</label><div class="pfv">${p.pmPhone ? `<a href="tel:${esc(p.pmPhone)}" style="color:#bd7a70;">${esc(p.pmPhone)}</a>` : '—'}</div></div>
+            <div class="prop-field"><label>Email</label><div class="pfv">${p.pmEmail ? `<a href="mailto:${esc(p.pmEmail)}" style="color:#bd7a70;">${esc(p.pmEmail)}</a>` : '—'}</div></div>
+            <div class="prop-field"><label>Weekly rent</label><div class="pfv">${esc(p.weeklyRent || '—')}</div></div>
+            <div class="prop-field"><label>Management fee</label><div class="pfv">${esc(p.managementFee || '—')}</div></div>
+          </div>` : ''}
+
+          ${p.brokerName ? `<div class="prop-section-label">Broker</div>
+          <div class="prop-fields" style="margin-bottom:18px;">
+            <div class="prop-field"><label>Name</label><div class="pfv">${esc(p.brokerName)}</div></div>
+            <div class="prop-field"><label>Company</label><div class="pfv">${esc(p.brokerCompany || '—')}</div></div>
+            <div class="prop-field"><label>Phone</label><div class="pfv">${p.brokerPhone ? `<a href="tel:${esc(p.brokerPhone)}" style="color:#bd7a70;">${esc(p.brokerPhone)}</a>` : '—'}</div></div>
+            <div class="prop-field"><label>Email</label><div class="pfv">${p.brokerEmail ? `<a href="mailto:${esc(p.brokerEmail)}" style="color:#bd7a70;">${esc(p.brokerEmail)}</a>` : '—'}</div></div>
+          </div>` : ''}
+
+          <button class="prop-edit-btn" onclick="togglePropEdit('${p.id}')">Update loan details</button>
+          <div class="prop-edit-form" id="prop-edit-${p.id}">
+            <p style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:14px;">Update your loan details</p>
+            <div class="prop-edit-grid">
+              <div class="field"><label>Loan amount</label><input type="text" id="pe-loan-${p.id}" value="${esc(p.loanAmount || '')}" placeholder="$520,000"></div>
+              <div class="field"><label>Interest rate</label><input type="text" id="pe-rate-${p.id}" value="${esc(p.interestRate || '')}" placeholder="6.14%"></div>
+              <div class="field"><label>Loan term (years)</label><input type="text" id="pe-term-${p.id}" value="${esc(p.loanTerm || '')}" placeholder="30"></div>
+              <div class="field"><label>Loan type</label>
+                <select id="pe-type-${p.id}">
+                  <option value="variable" ${p.loanType==='variable'?'selected':''}>Variable P&amp;I</option>
+                  <option value="fixed" ${p.loanType==='fixed'?'selected':''}>Fixed P&amp;I</option>
+                  <option value="io-variable" ${p.loanType==='io-variable'?'selected':''}>Variable IO</option>
+                  <option value="io-fixed" ${p.loanType==='io-fixed'?'selected':''}>Fixed IO</option>
+                  <option value="split" ${p.loanType==='split'?'selected':''}>Split</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button onclick="savePropEdit('${p.id}')" style="font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;background:#bd7a70;color:#f7f3ed;border:none;border-radius:100px;padding:9px 20px;cursor:pointer;">Save</button>
+              <button onclick="togglePropEdit('${p.id}')" style="font-family:'Outfit',sans-serif;font-size:13px;background:none;border:1px solid rgba(247,243,237,0.12);color:rgba(247,243,237,0.5);border-radius:100px;padding:9px 16px;cursor:pointer;">Cancel</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function togglePropEdit(id) {
+      const form = document.getElementById('prop-edit-' + id);
+      form.classList.toggle('open');
+    }
+
+    async function savePropEdit(id) {
+      const body = {
+        id,
+        loanAmount:   document.getElementById('pe-loan-' + id).value.trim(),
+        interestRate: document.getElementById('pe-rate-' + id).value.trim(),
+        loanTerm:     document.getElementById('pe-term-' + id).value.trim(),
+        loanType:     document.getElementById('pe-type-' + id).value,
+      };
+      try {
+        const res = await fetch('/api/client/properties', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        if (res.ok) {
+          // Re-fetch and re-render portfolio
+          const pr = await fetch('/api/client/properties');
+          if (pr.ok) { renderPortfolio(await pr.json()); }
+        } else { alert('Save failed. Please try again.'); }
+      } catch { alert('Network error. Please try again.'); }
+    }
+
     async function init() {
       let me;
       try {
@@ -372,36 +522,50 @@
         me = await res.json();
       } catch { location.href = '/clients/'; return; }
 
+      const isCompleted = me.status === 'completed';
+      const hasPortfolio = (me.purchaseCount || 0) > 0;
+
       document.getElementById('user-name').textContent = me.name;
       document.getElementById('welcome-heading').textContent = `Welcome back, ${me.name.split(' ')[0]}.`;
-      renderSettlement(me.settlementDate);
-      renderJourney(me.pipelineStage);
 
-      // Fetch questionnaire, brief and presentations in parallel
-      let qCompleted = false;
-      let briefPublished = false;
-      let presentations = [];
-      try {
-        const [qr, br, pr] = await Promise.all([
-          fetch('/api/submit-questionnaire'),
-          fetch('/api/brief'),
-          fetch('/api/presentations'),
-        ]);
-        if (qr.ok) { const qd = await qr.json(); qCompleted = qd.completed === true; }
-        if (br.ok) { const bd = await br.json(); briefPublished = bd.published === true; }
-        if (pr.ok) {
-          const pd = await pr.json();
-          presentations = pd.presentations || [];
-          console.log('[portal] presentations response:', pd);
-        } else {
-          console.error('[portal] /api/presentations returned', pr.status);
-        }
-      } catch (e) { console.error('[portal] fetch error', e); }
+      if (isCompleted) {
+        // Portfolio mode: hide active journey elements
+        document.getElementById('q-section').style.display = 'none';
+        document.getElementById('brief-section').style.display = 'none';
+        document.getElementById('reports-section').style.display = 'none';
+        document.getElementById('journey-section').style.display = 'none';
+        document.getElementById('settlement-section').style.display = 'none';
+        document.getElementById('presentations-section').style.display = 'none';
+      } else {
+        // Active journey mode
+        renderSettlement(me.settlementDate);
+        renderJourney(me.pipelineStage);
 
-      renderQSection(qCompleted);
-      renderBriefSection(qCompleted, briefPublished);
-      renderPresentations(presentations);
-      renderReports(me.markets);
+        let qCompleted = false, briefPublished = false, presentations = [];
+        try {
+          const [qr, br, pr] = await Promise.all([
+            fetch('/api/submit-questionnaire'),
+            fetch('/api/brief'),
+            fetch('/api/presentations'),
+          ]);
+          if (qr.ok) { const qd = await qr.json(); qCompleted = qd.completed === true; }
+          if (br.ok) { const bd = await br.json(); briefPublished = bd.published === true; }
+          if (pr.ok) { const pd = await pr.json(); presentations = pd.presentations || []; }
+        } catch (e) { console.error('[portal] fetch error', e); }
+
+        renderQSection(qCompleted);
+        renderBriefSection(qCompleted, briefPublished);
+        renderPresentations(presentations);
+        renderReports(me.markets);
+      }
+
+      // Show portfolio for completed clients and re-engaged clients with past purchases
+      if (hasPortfolio) {
+        try {
+          const pr = await fetch('/api/client/properties');
+          if (pr.ok) { renderPortfolio(await pr.json()); }
+        } catch { /* non-critical */ }
+      }
     }
 
     document.getElementById('logout-btn').addEventListener('click', async function() {
