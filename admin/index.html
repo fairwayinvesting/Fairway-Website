@@ -3480,8 +3480,8 @@ function openReactivateModal(clientId) {
     `<strong style="color:#f7f3ed;">${esc(client.name)}</strong> will be reactivated as engagement #${eng}. Their pipeline will reset to Onboarding and they'll reappear in the active Clients and Pipeline views. All previous purchase history is preserved.`;
   const marketChecks = document.getElementById('react-markets-check');
   marketChecks.innerHTML = MARKETS.map(m => {
-    const checked = (client.markets || []).includes(m.id) ? 'checked' : '';
-    return `<label style="display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(247,243,237,0.6);cursor:pointer;"><input type="checkbox" value="${m.id}" ${checked} style="accent-color:#bd7a70;"> ${esc(m.name)}</label>`;
+    const checked = (client.markets || []).includes(m.key) ? 'checked' : '';
+    return `<label style="display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(247,243,237,0.6);cursor:pointer;"><input type="checkbox" value="${m.key}" ${checked} style="accent-color:#bd7a70;"> ${esc(m.name)}</label>`;
   }).join('');
   document.getElementById('react-modal-overlay').style.display = 'flex';
 }
