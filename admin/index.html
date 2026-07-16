@@ -498,6 +498,73 @@
       .brief-budget-row input{width:100%;}
       .brief-q-summary{flex-wrap:nowrap;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch;}
     }
+    /* ── CRM ──────────────────────────────────────────────── */
+    .crm-filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;}
+    .crm-filter-btn{font-size:12px;font-weight:400;color:rgba(247,243,237,0.4);background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.09);border-radius:100px;padding:6px 14px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .15s;}
+    .crm-filter-btn.active{background:rgba(189,122,112,0.12);border-color:rgba(189,122,112,0.3);color:#f7f3ed;}
+    .crm-status{font-size:10px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;border-radius:100px;padding:3px 9px;flex-shrink:0;}
+    .crm-s-active{background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.25);color:#6dbf7b;}
+    .crm-s-completed{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);color:rgba(247,243,237,0.35);}
+    .crm-row{display:flex;align-items:center;gap:14px;padding:14px 16px;background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:12px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;}
+    .crm-row:hover{border-color:rgba(247,243,237,0.16);}
+    .crm-avatar{width:36px;height:36px;border-radius:50%;background:rgba(189,122,112,0.15);border:1px solid rgba(189,122,112,0.25);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:14px;color:#bd7a70;flex-shrink:0;}
+    .crm-name{font-size:14px;font-weight:400;color:#f7f3ed;line-height:1.2;}
+    .crm-email{font-size:12px;color:rgba(247,243,237,0.35);}
+    .crm-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-left:auto;}
+    .crm-eng{font-size:11px;color:rgba(247,243,237,0.3);white-space:nowrap;}
+    .crm-prop-count{font-size:11px;background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.1);border-radius:100px;padding:2px 8px;color:rgba(247,243,237,0.4);}
+
+    /* ── Client Profile Panel ────────────────────────────── */
+    .profile-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;display:none;}
+    .profile-overlay.open{display:block;}
+    .profile-panel{position:fixed;top:0;right:0;width:min(680px,100vw);height:100vh;background:#1c1a17;border-left:1px solid rgba(247,243,237,0.09);z-index:501;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease;}
+    .profile-panel.open{transform:translateX(0);}
+    .profile-panel-header{padding:20px 24px;border-bottom:1px solid rgba(247,243,237,0.08);display:flex;align-items:flex-start;gap:14px;flex-shrink:0;}
+    .profile-panel-title{flex:1;min-width:0;}
+    .profile-panel-name{font-family:'Fraunces',serif;font-size:22px;font-weight:400;color:#f7f3ed;margin-bottom:3px;}
+    .profile-panel-email{font-size:13px;color:rgba(247,243,237,0.4);}
+    .profile-close{background:none;border:none;cursor:pointer;color:rgba(247,243,237,0.4);padding:4px;line-height:1;transition:color .15s;}
+    .profile-close:hover{color:#f7f3ed;}
+    .profile-actions{display:flex;gap:8px;align-items:center;padding:14px 24px;border-bottom:1px solid rgba(247,243,237,0.07);flex-shrink:0;flex-wrap:wrap;}
+    .profile-tabs{display:flex;gap:0;border-bottom:1px solid rgba(247,243,237,0.08);flex-shrink:0;}
+    .profile-tab{font-family:'Outfit',sans-serif;font-size:13px;color:rgba(247,243,237,0.4);padding:12px 20px;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
+    .profile-tab.active{color:#f7f3ed;border-bottom-color:#bd7a70;}
+    .profile-body{flex:1;overflow-y:auto;padding:24px;}
+    .profile-section{margin-bottom:28px;}
+    .profile-section-title{font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(247,243,237,0.06);}
+    .profile-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;}
+    .profile-field label{display:block;font-size:11px;font-weight:500;color:rgba(247,243,237,0.3);margin-bottom:3px;letter-spacing:0.04em;}
+    .profile-field .pf-val{font-size:13.5px;color:#f7f3ed;line-height:1.5;}
+    .profile-field.full{grid-column:1/-1;}
+    .pf-empty{color:rgba(247,243,237,0.2)!important;font-style:italic;}
+
+    /* ── Purchase Cards ──────────────────────────────────── */
+    .purchase-card{background:#22201d;border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:18px 20px;margin-bottom:12px;}
+    .purchase-card-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;}
+    .purchase-address{font-family:'Fraunces',serif;font-size:16px;font-weight:400;color:#f7f3ed;flex:1;line-height:1.3;}
+    .purchase-eng-badge{font-size:10px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;background:rgba(189,122,112,0.1);border:1px solid rgba(189,122,112,0.25);color:#bd7a70;border-radius:100px;padding:3px 9px;flex-shrink:0;}
+    .purchase-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;margin-bottom:14px;}
+    .purchase-field label{display:block;font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:2px;}
+    .purchase-field .pv{font-size:13px;color:#f7f3ed;}
+    .purchase-field.full{grid-column:1/-1;}
+    .equity-block{background:rgba(109,191,123,0.07);border:1px solid rgba(109,191,123,0.18);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;}
+    .equity-block.negative{background:rgba(240,128,128,0.07);border-color:rgba(240,128,128,0.18);}
+    .equity-label{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.35);}
+    .equity-value{font-family:'Fraunces',serif;font-size:20px;color:#6dbf7b;}
+    .equity-block.negative .equity-value{color:#f08080;}
+    .equity-sub{font-size:11px;color:rgba(247,243,237,0.3);}
+    .purchase-sub-head{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin:14px 0 8px;padding-top:12px;border-top:1px solid rgba(247,243,237,0.06);}
+    .purchase-card-actions{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(247,243,237,0.06);}
+
+    /* ── Purchase Modal ──────────────────────────────────── */
+    .purch-section-head{font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin:22px 0 14px;padding-top:18px;border-top:1px solid rgba(247,243,237,0.07);}
+    .purch-section-head:first-of-type{margin-top:4px;padding-top:0;border-top:none;}
+    .purch-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .purch-grid .field.full{grid-column:1/-1;}
+
+    /* ── Reactivate Modal ────────────────────────────────── */
+    .react-info{background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.09);border-radius:10px;padding:14px 16px;font-size:13px;color:rgba(247,243,237,0.6);line-height:1.6;margin-bottom:18px;}
+
   </style>
 </head>
 <body>
@@ -552,6 +619,10 @@
       <button class="snav-item" onclick="showSection('clients',this)">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         Clients
+      </button>
+      <button class="snav-item" onclick="showSection('crm',this)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3" width="13" height="10" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="12.5" cy="12.5" r="2.5" fill="#1c1a17" stroke="currentColor" stroke-width="1.3"/><path d="M11.75 12.5h1.5M12.5 11.75v1.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+        CRM
       </button>
       <button class="snav-item" onclick="showSection('pipeline',this)">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="5" width="3.5" height="9" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="6.25" y="2" width="3.5" height="12" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="11" y="7" width="3.5" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
@@ -638,6 +709,17 @@
       <div id="clients-grid" class="client-cards-list">
         <div style="grid-column:1/-1;text-align:center;padding:48px;color:rgba(247,243,237,0.25);font-size:14px;">Loading…</div>
       </div>
+    </div>
+
+    <!-- CRM -->
+    <div id="sec-crm" class="admin-section">
+      <div class="sec-header"><h1>CRM</h1></div>
+      <div class="crm-filter-bar">
+        <button class="crm-filter-btn active" onclick="setCrmFilter('all',this)">All</button>
+        <button class="crm-filter-btn" onclick="setCrmFilter('active',this)">Active</button>
+        <button class="crm-filter-btn" onclick="setCrmFilter('completed',this)">Completed</button>
+      </div>
+      <div id="crm-list"></div>
     </div>
 
     <!-- Pipeline -->
@@ -858,6 +940,114 @@
 
   </div><!-- end admin-main -->
 </div><!-- end admin-shell -->
+
+<!-- ── Client Profile Panel ───────────────────────────────────────── -->
+<div class="profile-overlay" id="profile-overlay" onclick="closeClientProfile()"></div>
+<div class="profile-panel" id="profile-panel">
+  <div class="profile-panel-header">
+    <div class="profile-panel-title">
+      <div class="profile-panel-name" id="pp-name"></div>
+      <div class="profile-panel-email" id="pp-email"></div>
+    </div>
+    <span id="pp-status-badge" class="crm-status" style="margin-top:4px;"></span>
+    <button class="profile-close" onclick="closeClientProfile()">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="profile-actions" id="pp-actions"></div>
+  <div class="profile-tabs">
+    <button class="profile-tab active" onclick="switchProfileTab('profile',this)">Profile</button>
+    <button class="profile-tab" onclick="switchProfileTab('properties',this)">Properties</button>
+    <button class="profile-tab" onclick="switchProfileTab('engagement',this)">Engagement</button>
+  </div>
+  <div class="profile-body" id="profile-body">
+    <div style="text-align:center;padding:40px;color:rgba(247,243,237,0.2);font-size:13px;">Loading…</div>
+  </div>
+</div>
+
+<!-- ── Purchase Modal ─────────────────────────────────────────────── -->
+<div id="purch-modal-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:700;display:none;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto;" onclick="if(event.target===this)closePurchaseModal()">
+  <div style="background:#1c1a17;border:1px solid rgba(247,243,237,0.1);border-radius:18px;padding:32px;max-width:600px;width:100%;margin:auto;">
+    <h2 id="purch-modal-title" style="font-family:'Fraunces',serif;font-size:22px;font-weight:400;margin:0 0 24px;">Log property purchase</h2>
+
+    <p class="purch-section-head">Property details</p>
+    <div class="purch-grid">
+      <div class="field full"><label>Street address <span style="color:#e07070;">*</span></label><input type="text" id="purch-address" placeholder="14 Burke Street"></div>
+      <div class="field"><label>Suburb</label><input type="text" id="purch-suburb" placeholder="Geelong"></div>
+      <div class="field"><label>State</label>
+        <select id="purch-state"><option value="VIC">VIC</option><option value="NSW">NSW</option><option value="QLD">QLD</option><option value="SA">SA</option><option value="WA">WA</option><option value="TAS">TAS</option><option value="ACT">ACT</option><option value="NT">NT</option></select>
+      </div>
+      <div class="field"><label>Property type</label>
+        <select id="purch-type"><option value="house">House</option><option value="unit">Unit</option><option value="townhouse">Townhouse</option><option value="duplex">Duplex</option><option value="land">Land</option></select>
+      </div>
+      <div class="field"><label>Purchase price</label><input type="text" id="purch-price" placeholder="$650,000"></div>
+      <div class="field"><label>Purchase date</label><input type="date" id="purch-purchase-date"></div>
+      <div class="field"><label>Settlement date</label><input type="date" id="purch-settlement-date"></div>
+    </div>
+
+    <p class="purch-section-head">Finance</p>
+    <div class="purch-grid">
+      <div class="field"><label>Current value</label><input type="text" id="purch-current-value" placeholder="$650,000"></div>
+      <div class="field"><label>Loan amount</label><input type="text" id="purch-loan-amount" placeholder="$520,000"></div>
+      <div class="field"><label>Interest rate</label><input type="text" id="purch-interest-rate" placeholder="6.14%"></div>
+      <div class="field"><label>Loan term (years)</label><input type="text" id="purch-loan-term" placeholder="30"></div>
+      <div class="field"><label>Loan type</label>
+        <select id="purch-loan-type">
+          <option value="variable">Variable P&amp;I</option>
+          <option value="fixed">Fixed P&amp;I</option>
+          <option value="io-variable">Variable IO</option>
+          <option value="io-fixed">Fixed IO</option>
+          <option value="split">Split</option>
+        </select>
+      </div>
+      <div class="field"><label>Lender</label><input type="text" id="purch-lender" placeholder="CBA, ANZ, Macquarie…"></div>
+    </div>
+
+    <p class="purch-section-head">Broker</p>
+    <div class="purch-grid">
+      <div class="field"><label>Broker name</label><input type="text" id="purch-broker-name"></div>
+      <div class="field"><label>Company</label><input type="text" id="purch-broker-company"></div>
+      <div class="field"><label>Phone</label><input type="tel" id="purch-broker-phone"></div>
+      <div class="field"><label>Email</label><input type="email" id="purch-broker-email"></div>
+    </div>
+
+    <p class="purch-section-head">Property management</p>
+    <div class="purch-grid">
+      <div class="field"><label>Property manager</label><input type="text" id="purch-pm-name"></div>
+      <div class="field"><label>Agency</label><input type="text" id="purch-pm-agency"></div>
+      <div class="field"><label>PM phone</label><input type="tel" id="purch-pm-phone"></div>
+      <div class="field"><label>PM email</label><input type="email" id="purch-pm-email"></div>
+      <div class="field"><label>Management fee</label><input type="text" id="purch-pm-fee" placeholder="7.5%"></div>
+      <div class="field"><label>Lease start</label><input type="date" id="purch-lease-start"></div>
+      <div class="field"><label>Weekly rent</label><input type="text" id="purch-rent" placeholder="$480/wk"></div>
+    </div>
+
+    <p class="purch-section-head">Notes</p>
+    <div class="field"><textarea id="purch-notes" rows="3" style="resize:vertical;width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:14px;padding:11px 14px;" placeholder="Any additional notes about this property…"></textarea></div>
+
+    <div style="display:flex;gap:10px;margin-top:24px;align-items:center;">
+      <button class="btn-primary" onclick="savePurchase()" id="purch-save-btn" style="font-size:13px;padding:11px 24px;">Save</button>
+      <button class="btn-secondary" onclick="closePurchaseModal()" style="font-size:13px;padding:11px 18px;">Cancel</button>
+      <button id="purch-delete-btn" onclick="deletePurchase()" style="margin-left:auto;background:none;border:none;font-family:'Outfit',sans-serif;font-size:13px;color:rgba(240,128,128,0.65);cursor:pointer;display:none;">Delete record</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Reactivate Modal ───────────────────────────────────────────── -->
+<div id="react-modal-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:700;display:none;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)closeReactivateModal()">
+  <div style="background:#1c1a17;border:1px solid rgba(247,243,237,0.1);border-radius:18px;padding:32px;max-width:480px;width:100%;">
+    <h2 style="font-family:'Fraunces',serif;font-size:22px;font-weight:400;margin:0 0 16px;">Start new engagement</h2>
+    <div class="react-info" id="react-info"></div>
+    <div class="field" style="margin-bottom:16px;">
+      <label>Target markets for this engagement</label>
+      <div id="react-markets-check" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:24px;">
+      <button class="btn-primary" onclick="saveReactivation()" id="react-save-btn" style="font-size:13px;padding:11px 24px;">Reactivate client</button>
+      <button class="btn-secondary" onclick="closeReactivateModal()" style="font-size:13px;padding:11px 18px;">Cancel</button>
+    </div>
+  </div>
+</div>
 
 </div><!-- end admin-ui -->
 
@@ -1441,6 +1631,12 @@ let shortlistItems = [];
 let slFilter = 'all';
 let slEditId = null;
 let compEditId = null;
+let crmFilter = 'all';
+let crmProfileClientId = null;
+let crmProfileTab = 'profile';
+let crmPurchases = [];
+let purchaseEditId = null;
+let crmQuestionnaire = null;
 
 // ── Section nav ───────────────────────────────────────────────────────────────
 function showSection(id, btn) {
@@ -1451,6 +1647,7 @@ function showSection(id, btn) {
   if (id === 'briefs') renderBriefs();
   if (id === 'shortlist') loadShortlist();
   if (id === 'settings') loadCompliance();
+  if (id === 'crm') renderCRM();
   localStorage.setItem('fw_admin_section', id);
 }
 
@@ -2816,6 +3013,500 @@ async function loadPresentations() {
   presentations = await res.json();
   renderPresentations();
   renderDashboard();
+}
+
+// ── CRM ───────────────────────────────────────────────────────────────────────
+function setCrmFilter(f, btn) {
+  crmFilter = f;
+  document.querySelectorAll('.crm-filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderCRM();
+}
+
+function renderCRM() {
+  const el = document.getElementById('crm-list');
+  if (!el) return;
+  const list = crmFilter === 'all' ? clients
+    : clients.filter(c => (c.status || 'active') === crmFilter);
+  if (!list.length) {
+    el.innerHTML = `<p style="font-size:14px;color:rgba(247,243,237,0.25);padding:4px 0;">No clients${crmFilter !== 'all' ? ' with this status' : ''} yet.</p>`;
+    return;
+  }
+  el.innerHTML = list.map(c => {
+    const status = c.status || 'active';
+    const eng = c.engagementNumber || 1;
+    const initials = (c.name || '?').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+    return `<div class="crm-row" onclick="openClientProfile('${c.id}')">
+      <div class="crm-avatar">${esc(initials)}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="crm-name">${esc(c.name)}</div>
+        <div class="crm-email">${esc(c.email)}</div>
+      </div>
+      <div class="crm-meta">
+        ${eng > 1 ? `<span class="crm-eng">Engagement #${eng}</span>` : ''}
+        <span class="crm-status crm-s-${status}">${status === 'active' ? 'Active' : 'Completed'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function openClientProfile(clientId) {
+  crmProfileClientId = clientId;
+  crmProfileTab = 'profile';
+  crmPurchases = [];
+  crmQuestionnaire = null;
+
+  const client = clients.find(c => c.id === clientId);
+  if (!client) return;
+
+  document.getElementById('pp-name').textContent = client.name;
+  document.getElementById('pp-email').textContent = client.email;
+  const statusBadge = document.getElementById('pp-status-badge');
+  const status = client.status || 'active';
+  statusBadge.textContent = status === 'active' ? 'Active' : 'Completed';
+  statusBadge.className = `crm-status crm-s-${status}`;
+
+  const actionsEl = document.getElementById('pp-actions');
+  if (status === 'active') {
+    actionsEl.innerHTML = `
+      <button class="btn-secondary" onclick="markClientCompleted('${clientId}')" style="font-size:12px;padding:8px 16px;">Mark completed</button>
+      <button class="btn-secondary" onclick="openPurchaseModal()" style="font-size:12px;padding:8px 16px;">+ Log property</button>`;
+  } else {
+    actionsEl.innerHTML = `
+      <button class="btn-primary" onclick="openReactivateModal('${clientId}')" style="font-size:12px;padding:8px 16px;">Start new engagement</button>
+      <button class="btn-secondary" onclick="openPurchaseModal()" style="font-size:12px;padding:8px 16px;">+ Log property</button>`;
+  }
+
+  // Reset tabs
+  document.querySelectorAll('.profile-tab').forEach((t,i) => t.classList.toggle('active', i === 0));
+
+  document.getElementById('profile-overlay').classList.add('open');
+  document.getElementById('profile-panel').classList.add('open');
+
+  // Load data in parallel then render
+  document.getElementById('profile-body').innerHTML = '<div style="text-align:center;padding:40px;color:rgba(247,243,237,0.2);font-size:13px;">Loading…</div>';
+  const [qRes, pRes] = await Promise.all([
+    api('GET', `/api/admin/questionnaire?clientId=${clientId}`),
+    api('GET', `/api/admin/purchases?clientId=${clientId}`),
+  ]);
+  if (qRes.ok) crmQuestionnaire = await qRes.json();
+  if (pRes.ok) crmPurchases = await pRes.json();
+  renderProfileTab();
+}
+
+function closeClientProfile() {
+  document.getElementById('profile-overlay').classList.remove('open');
+  document.getElementById('profile-panel').classList.remove('open');
+  crmProfileClientId = null;
+}
+
+function switchProfileTab(tab, btn) {
+  crmProfileTab = tab;
+  document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (tab === 'profile') renderProfileTab();
+  else if (tab === 'properties') renderPropertiesTab();
+  else if (tab === 'engagement') renderEngagementTab();
+}
+
+function pfVal(v) {
+  if (!v || v === 'No' || v === '') return `<span class="pf-empty">—</span>`;
+  return esc(v);
+}
+
+function renderProfileTab() {
+  const el = document.getElementById('profile-body');
+  const q = crmQuestionnaire;
+  const client = clients.find(c => c.id === crmProfileClientId);
+  if (!q) {
+    el.innerHTML = `<div class="profile-section">
+      <div class="profile-section-title">Personal details</div>
+      <div class="profile-fields">
+        <div class="profile-field"><label>Name</label><div class="pf-val">${pfVal(client?.name)}</div></div>
+        <div class="profile-field"><label>Email</label><div class="pf-val">${pfVal(client?.email)}</div></div>
+      </div>
+      <p style="margin-top:20px;font-size:13px;color:rgba(247,243,237,0.3);">No questionnaire submitted yet.</p>
+    </div>`;
+    return;
+  }
+
+  const hasCoInvestor = q.coInvestor === 'Yes';
+  const entityType = q.entityType || 'Individual';
+  const hasBroker = q.hasBroker === 'Yes';
+  const hasAccountant = q.hasAccountant === 'Yes';
+  const hasPpor = q.ownPpor === 'Yes';
+  const hasProps = q.ownProperties === 'Yes';
+
+  el.innerHTML = `
+    <div class="profile-section">
+      <div class="profile-section-title">Personal details</div>
+      <div class="profile-fields">
+        <div class="profile-field"><label>Full name</label><div class="pf-val">${pfVal([q.firstName, q.middleName, q.lastName].filter(Boolean).join(' '))}</div></div>
+        <div class="profile-field"><label>Date of birth</label><div class="pf-val">${pfVal(q.dob)}</div></div>
+        <div class="profile-field"><label>Phone</label><div class="pf-val">${pfVal(q.phone)}</div></div>
+        <div class="profile-field"><label>Email</label><div class="pf-val">${pfVal(q.email)}</div></div>
+        <div class="profile-field"><label>State</label><div class="pf-val">${pfVal(q.state)}</div></div>
+        <div class="profile-field full"><label>Home address</label><div class="pf-val">${pfVal(q.homeAddress)}</div></div>
+      </div>
+    </div>
+
+    ${hasCoInvestor ? `<div class="profile-section">
+      <div class="profile-section-title">Co-investor</div>
+      <div class="profile-fields">
+        <div class="profile-field"><label>Full name</label><div class="pf-val">${pfVal([q.p2FirstName, q.p2MiddleName, q.p2LastName].filter(Boolean).join(' '))}</div></div>
+        <div class="profile-field"><label>Relationship</label><div class="pf-val">${pfVal(q.p2Relationship)}</div></div>
+        <div class="profile-field"><label>Phone</label><div class="pf-val">${pfVal(q.p2Phone)}</div></div>
+        <div class="profile-field"><label>Email</label><div class="pf-val">${pfVal(q.p2Email)}</div></div>
+      </div>
+    </div>` : ''}
+
+    <div class="profile-section">
+      <div class="profile-section-title">Entity & structure</div>
+      <div class="profile-fields">
+        <div class="profile-field"><label>Entity type</label><div class="pf-val">${pfVal(entityType)}</div></div>
+        ${entityType === 'Company' ? `
+          <div class="profile-field"><label>Company name</label><div class="pf-val">${pfVal(q.companyName)}</div></div>
+          <div class="profile-field"><label>ABN</label><div class="pf-val">${pfVal(q.companyAbn)}</div></div>
+          <div class="profile-field"><label>ACN</label><div class="pf-val">${pfVal(q.companyAcn)}</div></div>` : ''}
+        ${entityType === 'Trust' ? `
+          <div class="profile-field"><label>Trust name</label><div class="pf-val">${pfVal(q.trustName)}</div></div>
+          <div class="profile-field"><label>ABN</label><div class="pf-val">${pfVal(q.trustAbn)}</div></div>
+          <div class="profile-field full"><label>Beneficiaries</label><div class="pf-val">${pfVal(q.trustBeneficiaries)}</div></div>` : ''}
+        ${entityType === 'SMSF' ? `
+          <div class="profile-field"><label>SMSF name</label><div class="pf-val">${pfVal(q.smsfName)}</div></div>
+          <div class="profile-field"><label>ABN</label><div class="pf-val">${pfVal(q.smsfAbn)}</div></div>
+          <div class="profile-field full"><label>Members</label><div class="pf-val">${pfVal(q.smsfMembers)}</div></div>` : ''}
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <div class="profile-section-title">Financial position</div>
+      <div class="profile-fields">
+        <div class="profile-field"><label>Annual salary</label><div class="pf-val">${pfVal(q.annualSalary ? '$' + Number(q.annualSalary).toLocaleString() : '')}</div></div>
+        <div class="profile-field"><label>Cash savings</label><div class="pf-val">${pfVal(q.cashSavings ? '$' + Number(q.cashSavings).toLocaleString() : '')}</div></div>
+        <div class="profile-field"><label>Dependants</label><div class="pf-val">${pfVal(q.dependants)}</div></div>
+        <div class="profile-field"><label>Other debts</label><div class="pf-val">${pfVal(q.otherDebts)}</div></div>
+        <div class="profile-field"><label>Weekly rent paid</label><div class="pf-val">${pfVal(q.weeklyRentPaid ? '$' + q.weeklyRentPaid + '/wk' : '')}</div></div>
+        <div class="profile-field"><label>Funding method</label><div class="pf-val">${pfVal(q.fundingMethod)}</div></div>
+        <div class="profile-field"><label>Max purchase price</label><div class="pf-val">${pfVal(q.maxPurchasePrice ? '$' + Number(q.maxPurchasePrice).toLocaleString() : '')}</div></div>
+        ${hasPpor ? `
+          <div class="profile-field"><label>PPOR state</label><div class="pf-val">${pfVal(q.pporState)}</div></div>
+          <div class="profile-field"><label>PPOR value</label><div class="pf-val">${pfVal(q.pporValue ? '$' + Number(q.pporValue).toLocaleString() : '')}</div></div>
+          <div class="profile-field"><label>PPOR loan balance</label><div class="pf-val">${pfVal(q.pporLoan ? '$' + Number(q.pporLoan).toLocaleString() : '')}</div></div>
+          <div class="profile-field"><label>PPOR rate</label><div class="pf-val">${pfVal(q.pporRate)}</div></div>` : '<div class="profile-field"><label>Own PPOR?</label><div class="pf-val">No</div></div>'}
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <div class="profile-section-title">Goals & risk</div>
+      <div class="profile-fields">
+        <div class="profile-field"><label>Motivation</label><div class="pf-val">${pfVal(q.motivation)}</div></div>
+        <div class="profile-field"><label>Timeframe</label><div class="pf-val">${pfVal(q.timeframe)}</div></div>
+        <div class="profile-field"><label>Risk tolerance</label><div class="pf-val">${pfVal(q.riskTolerance)}</div></div>
+        ${q.statesToAvoid === 'Yes' ? `<div class="profile-field full"><label>States to avoid</label><div class="pf-val">${pfVal(q.statesToAvoidList)}</div></div>` : ''}
+      </div>
+    </div>
+
+    ${hasBroker ? `<div class="profile-section">
+      <div class="profile-section-title">Broker</div>
+      <div class="profile-fields">
+        <div class="profile-field"><label>Name</label><div class="pf-val">${pfVal(q.brokerName)}</div></div>
+        <div class="profile-field"><label>Phone</label><div class="pf-val">${pfVal(q.brokerPhone)}</div></div>
+        <div class="profile-field"><label>Email</label><div class="pf-val">${pfVal(q.brokerEmail)}</div></div>
+        <div class="profile-field"><label>Approved capacity</label><div class="pf-val">${pfVal(q.brokerCapacity ? '$' + Number(q.brokerCapacity).toLocaleString() : '')}</div></div>
+      </div>
+    </div>` : ''}
+
+    ${hasAccountant ? `<div class="profile-section">
+      <div class="profile-section-title">Accountant</div>
+      <div class="profile-fields">
+        <div class="profile-field"><label>Name</label><div class="pf-val">${pfVal(q.accountantName)}</div></div>
+        <div class="profile-field"><label>Phone</label><div class="pf-val">${pfVal(q.accountantPhone)}</div></div>
+        <div class="profile-field full"><label>Email</label><div class="pf-val">${pfVal(q.accountantEmail)}</div></div>
+      </div>
+    </div>` : ''}
+
+    ${hasProps && (q.properties || []).length ? `<div class="profile-section">
+      <div class="profile-section-title">Existing properties (at questionnaire)</div>
+      ${(q.properties || []).map((p, i) => `
+        <div style="background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.07);border-radius:10px;padding:12px 14px;margin-bottom:8px;">
+          <div style="font-size:12px;font-weight:500;color:rgba(247,243,237,0.4);margin-bottom:8px;">Property ${i + 1} — ${esc(p.state || '')} ${esc(p.type || '')}</div>
+          <div class="profile-fields">
+            <div class="profile-field"><label>Valuation</label><div class="pf-val">${pfVal(p.valuation ? '$' + Number(p.valuation).toLocaleString() : '')}</div></div>
+            <div class="profile-field"><label>Loan balance</label><div class="pf-val">${pfVal(p.loanBalance ? '$' + Number(p.loanBalance).toLocaleString() : '')}</div></div>
+            <div class="profile-field"><label>Weekly rent</label><div class="pf-val">${pfVal(p.weeklyRent ? '$' + p.weeklyRent + '/wk' : '')}</div></div>
+            <div class="profile-field"><label>Interest rate</label><div class="pf-val">${pfVal(p.interestRate)}</div></div>
+          </div>
+        </div>`).join('')}
+    </div>` : ''}
+
+    <div style="font-size:11px;color:rgba(247,243,237,0.2);margin-top:12px;">Submitted: ${q.submittedAt ? new Date(q.submittedAt).toLocaleDateString('en-AU', {day:'numeric',month:'long',year:'numeric'}) : '—'}</div>
+  `;
+}
+
+function renderPropertiesTab() {
+  const el = document.getElementById('profile-body');
+  const typeLabels = { house:'House', unit:'Unit', townhouse:'Townhouse', duplex:'Duplex', land:'Land' };
+  const loanLabels = { variable:'Variable P&I', fixed:'Fixed P&I', 'io-variable':'Variable IO', 'io-fixed':'Fixed IO', split:'Split' };
+  if (!crmPurchases.length) {
+    el.innerHTML = `<p style="font-size:13px;color:rgba(247,243,237,0.3);">No properties logged yet.</p>
+      <button class="btn-secondary" onclick="openPurchaseModal()" style="margin-top:12px;font-size:13px;">+ Log first property</button>`;
+    return;
+  }
+  el.innerHTML = crmPurchases.map(p => {
+    const currVal = parseFloat((p.currentValue || '').replace(/[^0-9.]/g,'')) || 0;
+    const loan    = parseFloat((p.loanAmount  || '').replace(/[^0-9.]/g,'')) || 0;
+    const equity  = currVal - loan;
+    const hasEquity = currVal > 0 && loan > 0;
+    const equityPct = currVal > 0 ? Math.round(equity / currVal * 100) : 0;
+    const fmtCurr = v => v ? '$' + Number(v.toString().replace(/[^0-9.]/g,'')).toLocaleString() : '—';
+    return `<div class="purchase-card">
+      <div class="purchase-card-header">
+        <div class="purchase-address">${esc(p.address)}${p.suburb ? `<span style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.45);"> — ${esc(p.suburb)} ${esc(p.state)}</span>` : ''}</div>
+        <span class="purchase-eng-badge">Purchase #${p.engagementNumber || 1}</span>
+      </div>
+
+      ${hasEquity ? `<div class="equity-block${equity < 0 ? ' negative' : ''}">
+        <div><div class="equity-label">Equity position</div><div class="equity-sub">${fmtCurr(p.currentValue)} value · ${fmtCurr(p.loanAmount)} loan</div></div>
+        <div style="text-align:right;"><div class="equity-value">$${Math.abs(equity).toLocaleString()}</div><div class="equity-sub">${equityPct}% LVR${equity < 0 ? ' — underwater' : ''}</div></div>
+      </div>` : ''}
+
+      <div class="purchase-grid">
+        <div class="purchase-field"><label>Type</label><div class="pv">${typeLabels[p.propertyType] || p.propertyType || '—'}</div></div>
+        <div class="purchase-field"><label>Purchase price</label><div class="pv">${fmtCurr(p.purchasePrice)}</div></div>
+        <div class="purchase-field"><label>Current value</label><div class="pv">${fmtCurr(p.currentValue)}</div></div>
+        <div class="purchase-field"><label>Loan amount</label><div class="pv">${fmtCurr(p.loanAmount)}</div></div>
+        <div class="purchase-field"><label>Interest rate</label><div class="pv">${esc(p.interestRate || '—')}</div></div>
+        <div class="purchase-field"><label>Loan type</label><div class="pv">${loanLabels[p.loanType] || p.loanType || '—'}</div></div>
+        <div class="purchase-field"><label>Lender</label><div class="pv">${esc(p.lender || '—')}</div></div>
+        <div class="purchase-field"><label>Loan term</label><div class="pv">${p.loanTerm ? esc(p.loanTerm) + ' years' : '—'}</div></div>
+        <div class="purchase-field"><label>Settlement date</label><div class="pv">${p.settlementDate ? new Date(p.settlementDate + 'T00:00:00').toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '—'}</div></div>
+      </div>
+
+      ${p.brokerName || p.pmName ? `
+        ${p.brokerName ? `<div class="purchase-sub-head">Broker</div>
+        <div class="purchase-grid">
+          <div class="purchase-field"><label>Name</label><div class="pv">${esc(p.brokerName)}</div></div>
+          <div class="purchase-field"><label>Company</label><div class="pv">${esc(p.brokerCompany || '—')}</div></div>
+          <div class="purchase-field"><label>Phone</label><div class="pv">${esc(p.brokerPhone || '—')}</div></div>
+          <div class="purchase-field"><label>Email</label><div class="pv">${esc(p.brokerEmail || '—')}</div></div>
+        </div>` : ''}
+        ${p.pmName ? `<div class="purchase-sub-head">Property management</div>
+        <div class="purchase-grid">
+          <div class="purchase-field"><label>Manager</label><div class="pv">${esc(p.pmName)}</div></div>
+          <div class="purchase-field"><label>Agency</label><div class="pv">${esc(p.pmAgency || '—')}</div></div>
+          <div class="purchase-field"><label>Phone</label><div class="pv">${esc(p.pmPhone || '—')}</div></div>
+          <div class="purchase-field"><label>Email</label><div class="pv">${esc(p.pmEmail || '—')}</div></div>
+          <div class="purchase-field"><label>Fee</label><div class="pv">${esc(p.managementFee || '—')}</div></div>
+          <div class="purchase-field"><label>Weekly rent</label><div class="pv">${esc(p.weeklyRent || '—')}</div></div>
+        </div>` : ''}` : ''}
+
+      ${p.notes ? `<div style="font-size:12.5px;color:rgba(247,243,237,0.35);margin-top:10px;padding-top:10px;border-top:1px solid rgba(247,243,237,0.06);line-height:1.6;">${esc(p.notes)}</div>` : ''}
+
+      <div class="purchase-card-actions">
+        <button class="btn-sm" onclick="openPurchaseModal('${p.id}')" style="font-size:12px;">Edit</button>
+        <button class="btn-sm" onclick="updatePropertyValue('${p.id}')" style="font-size:12px;">Update value</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderEngagementTab() {
+  const el = document.getElementById('profile-body');
+  const client = clients.find(c => c.id === crmProfileClientId);
+  if (!client) return;
+  const STAGE_LABELS = { onboarding:'Onboarding', strategy:'Strategy', searching:'Searching', due_diligence:'Due diligence', under_contract:'Under contract', settled:'Settled' };
+  const marketPills = (client.markets || []).map(m => `<span style="font-size:12px;background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.1);border-radius:100px;padding:4px 12px;color:rgba(247,243,237,0.6);">${esc(m.replace(/-/g,' ').replace(/\b\w/g, l => l.toUpperCase()))}</span>`).join('');
+  const clientMilestones = milestones.filter(m => m.clientId === client.id && !m.completed).slice(0,5);
+
+  el.innerHTML = `
+    <div class="profile-section">
+      <div class="profile-section-title">Current engagement</div>
+      <div class="profile-fields">
+        <div class="profile-field"><label>Status</label><div class="pf-val"><span class="crm-status crm-s-${client.status || 'active'}">${client.status === 'completed' ? 'Completed' : 'Active'}</span></div></div>
+        <div class="profile-field"><label>Engagement #</label><div class="pf-val">${client.engagementNumber || 1}</div></div>
+        <div class="profile-field"><label>Pipeline stage</label><div class="pf-val">${STAGE_LABELS[client.pipelineStage] || '—'}</div></div>
+        <div class="profile-field"><label>Stage updated</label><div class="pf-val">${client.pipelineStageUpdatedAt ? new Date(client.pipelineStageUpdatedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '—'}</div></div>
+        <div class="profile-field"><label>Member since</label><div class="pf-val">${client.createdAt ? new Date(client.createdAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '—'}</div></div>
+        <div class="profile-field"><label>Total properties</label><div class="pf-val">${crmPurchases.length}</div></div>
+      </div>
+    </div>
+
+    ${(client.markets || []).length ? `<div class="profile-section">
+      <div class="profile-section-title">Target markets</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">${marketPills}</div>
+    </div>` : ''}
+
+    ${clientMilestones.length ? `<div class="profile-section">
+      <div class="profile-section-title">Upcoming milestones</div>
+      ${clientMilestones.map(m => {
+        const d = new Date(m.date + 'T00:00:00');
+        const days = Math.round((d - new Date().setHours(0,0,0,0)) / 86400000);
+        const color = days < 0 ? '#f08080' : days <= 7 ? '#e8a87c' : '#6dbf7b';
+        return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(247,243,237,0.05);">
+          <span style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:${color};min-width:60px;">${days < 0 ? 'Overdue' : days === 0 ? 'Today' : days + 'd'}</span>
+          <span style="font-size:13px;color:#f7f3ed;flex:1;">${esc(m.label || m.type)}</span>
+          <span style="font-size:12px;color:rgba(247,243,237,0.3);">${d.toLocaleDateString('en-AU',{day:'numeric',month:'short'})}</span>
+        </div>`;
+      }).join('')}
+    </div>` : ''}
+  `;
+}
+
+async function markClientCompleted(clientId) {
+  if (!confirm('Mark this client as completed? They will move to the Completed tab in CRM. You can reactivate them at any time.')) return;
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, status: 'completed' });
+  if (res.ok) {
+    const c = clients.find(x => x.id === clientId);
+    if (c) c.status = 'completed';
+    renderCRM();
+    closeClientProfile();
+  } else { alert('Failed to update client status.'); }
+}
+
+function openPurchaseModal(purchaseId) {
+  purchaseEditId = purchaseId || null;
+  const p = purchaseId ? crmPurchases.find(x => x.id === purchaseId) : null;
+  document.getElementById('purch-modal-title').textContent = p ? 'Edit property' : 'Log property purchase';
+  document.getElementById('purch-address').value         = p ? p.address : '';
+  document.getElementById('purch-suburb').value          = p ? p.suburb : '';
+  document.getElementById('purch-state').value           = p ? (p.state || 'VIC') : 'VIC';
+  document.getElementById('purch-type').value            = p ? (p.propertyType || 'house') : 'house';
+  document.getElementById('purch-price').value           = p ? p.purchasePrice : '';
+  document.getElementById('purch-purchase-date').value   = p ? p.purchaseDate : '';
+  document.getElementById('purch-settlement-date').value = p ? p.settlementDate : '';
+  document.getElementById('purch-current-value').value   = p ? p.currentValue : '';
+  document.getElementById('purch-loan-amount').value     = p ? p.loanAmount : '';
+  document.getElementById('purch-interest-rate').value   = p ? p.interestRate : '';
+  document.getElementById('purch-loan-term').value       = p ? p.loanTerm : '';
+  document.getElementById('purch-loan-type').value       = p ? (p.loanType || 'variable') : 'variable';
+  document.getElementById('purch-lender').value          = p ? p.lender : '';
+  document.getElementById('purch-broker-name').value     = p ? p.brokerName : '';
+  document.getElementById('purch-broker-company').value  = p ? p.brokerCompany : '';
+  document.getElementById('purch-broker-phone').value    = p ? p.brokerPhone : '';
+  document.getElementById('purch-broker-email').value    = p ? p.brokerEmail : '';
+  document.getElementById('purch-pm-name').value         = p ? p.pmName : '';
+  document.getElementById('purch-pm-agency').value       = p ? p.pmAgency : '';
+  document.getElementById('purch-pm-phone').value        = p ? p.pmPhone : '';
+  document.getElementById('purch-pm-email').value        = p ? p.pmEmail : '';
+  document.getElementById('purch-pm-fee').value          = p ? p.managementFee : '';
+  document.getElementById('purch-lease-start').value     = p ? p.leaseStartDate : '';
+  document.getElementById('purch-rent').value            = p ? p.weeklyRent : '';
+  document.getElementById('purch-notes').value           = p ? p.notes : '';
+  document.getElementById('purch-delete-btn').style.display = p ? 'block' : 'none';
+  document.getElementById('purch-modal-overlay').style.display = 'flex';
+}
+function closePurchaseModal() { document.getElementById('purch-modal-overlay').style.display = 'none'; purchaseEditId = null; }
+
+async function savePurchase() {
+  const btn = document.getElementById('purch-save-btn');
+  const addr = document.getElementById('purch-address').value.trim();
+  if (!addr) { alert('Address is required.'); return; }
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  const client = clients.find(c => c.id === crmProfileClientId);
+  const body = {
+    clientId: crmProfileClientId,
+    clientName: client?.name,
+    engagementNumber: client?.engagementNumber || 1,
+    address:        addr,
+    suburb:         document.getElementById('purch-suburb').value.trim(),
+    state:          document.getElementById('purch-state').value,
+    propertyType:   document.getElementById('purch-type').value,
+    purchasePrice:  document.getElementById('purch-price').value.trim(),
+    purchaseDate:   document.getElementById('purch-purchase-date').value,
+    settlementDate: document.getElementById('purch-settlement-date').value,
+    currentValue:   document.getElementById('purch-current-value').value.trim(),
+    loanAmount:     document.getElementById('purch-loan-amount').value.trim(),
+    interestRate:   document.getElementById('purch-interest-rate').value.trim(),
+    loanTerm:       document.getElementById('purch-loan-term').value.trim(),
+    loanType:       document.getElementById('purch-loan-type').value,
+    lender:         document.getElementById('purch-lender').value.trim(),
+    brokerName:     document.getElementById('purch-broker-name').value.trim(),
+    brokerCompany:  document.getElementById('purch-broker-company').value.trim(),
+    brokerPhone:    document.getElementById('purch-broker-phone').value.trim(),
+    brokerEmail:    document.getElementById('purch-broker-email').value.trim(),
+    pmName:         document.getElementById('purch-pm-name').value.trim(),
+    pmAgency:       document.getElementById('purch-pm-agency').value.trim(),
+    pmPhone:        document.getElementById('purch-pm-phone').value.trim(),
+    pmEmail:        document.getElementById('purch-pm-email').value.trim(),
+    managementFee:  document.getElementById('purch-pm-fee').value.trim(),
+    leaseStartDate: document.getElementById('purch-lease-start').value,
+    weeklyRent:     document.getElementById('purch-rent').value.trim(),
+    notes:          document.getElementById('purch-notes').value.trim(),
+  };
+
+  let res;
+  if (purchaseEditId) { res = await api('PUT', '/api/admin/purchases', { ...body, id: purchaseEditId }); }
+  else { res = await api('POST', '/api/admin/purchases', body); }
+
+  if (res.ok) {
+    const pRes = await api('GET', `/api/admin/purchases?clientId=${crmProfileClientId}`);
+    if (pRes.ok) crmPurchases = await pRes.json();
+    closePurchaseModal();
+    if (crmProfileTab === 'properties') renderPropertiesTab();
+  } else { alert('Save failed. Please try again.'); }
+  btn.disabled = false; btn.textContent = 'Save';
+}
+
+async function deletePurchase() {
+  if (!purchaseEditId || !confirm('Delete this property record?')) return;
+  const res = await api('DELETE', `/api/admin/purchases?clientId=${crmProfileClientId}&id=${purchaseEditId}`);
+  if (res.ok) {
+    crmPurchases = crmPurchases.filter(p => p.id !== purchaseEditId);
+    closePurchaseModal();
+    if (crmProfileTab === 'properties') renderPropertiesTab();
+  } else { alert('Delete failed.'); }
+}
+
+async function updatePropertyValue(purchaseId) {
+  const p = crmPurchases.find(x => x.id === purchaseId);
+  if (!p) return;
+  const val = prompt(`Current value for ${p.address}:`, p.currentValue || '');
+  if (val === null) return;
+  const client = clients.find(c => c.id === crmProfileClientId);
+  const res = await api('PUT', '/api/admin/purchases', { clientId: crmProfileClientId, clientName: client?.name, id: purchaseId, currentValue: val });
+  if (res.ok) {
+    p.currentValue = val;
+    renderPropertiesTab();
+  } else { alert('Update failed.'); }
+}
+
+function openReactivateModal(clientId) {
+  const client = clients.find(c => c.id === clientId);
+  if (!client) return;
+  const eng = (client.engagementNumber || 1) + 1;
+  document.getElementById('react-info').innerHTML =
+    `<strong style="color:#f7f3ed;">${esc(client.name)}</strong> will be reactivated as engagement #${eng}. Their pipeline will reset to Onboarding and they'll reappear in the active Clients and Pipeline views. All previous purchase history is preserved.`;
+  const marketChecks = document.getElementById('react-markets-check');
+  marketChecks.innerHTML = MARKETS.map(m => {
+    const checked = (client.markets || []).includes(m.id) ? 'checked' : '';
+    return `<label style="display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(247,243,237,0.6);cursor:pointer;"><input type="checkbox" value="${m.id}" ${checked} style="accent-color:#bd7a70;"> ${esc(m.name)}</label>`;
+  }).join('');
+  document.getElementById('react-modal-overlay').style.display = 'flex';
+}
+function closeReactivateModal() { document.getElementById('react-modal-overlay').style.display = 'none'; }
+
+async function saveReactivation() {
+  const btn = document.getElementById('react-save-btn');
+  btn.disabled = true; btn.textContent = 'Reactivating…';
+  const markets = Array.from(document.querySelectorAll('#react-markets-check input:checked')).map(i => i.value);
+  const res = await api('PUT', '/api/admin/clients', { id: crmProfileClientId, action: 'reactivate', markets });
+  if (res.ok) {
+    const c = clients.find(x => x.id === crmProfileClientId);
+    if (c) {
+      c.status = 'active';
+      c.engagementNumber = (c.engagementNumber || 1) + 1;
+      c.pipelineStage = 'onboarding';
+      c.markets = markets;
+    }
+    closeReactivateModal();
+    closeClientProfile();
+    renderCRM();
+    renderTable();
+    renderPipeline();
+  } else { alert('Reactivation failed.'); }
+  btn.disabled = false; btn.textContent = 'Reactivate client';
 }
 
 // ── Compliance ────────────────────────────────────────────────────────────────
