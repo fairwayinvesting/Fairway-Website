@@ -119,8 +119,8 @@ export default async (req) => {
   const clients = (await store.get('all', { type: 'json' })) || [];
 
   if (req.method === 'GET') {
-    return json(clients.map(({ id, name, email, markets, active, createdAt, setupToken, pipelineStage, pipelineStageUpdatedAt }) =>
-      ({ id, name, email, markets, active, createdAt, hasSetupToken: !!setupToken, pipelineStage: pipelineStage || null, pipelineStageUpdatedAt: pipelineStageUpdatedAt || null })
+    return json(clients.map(({ id, name, email, markets, active, createdAt, setupToken, pipelineStage, pipelineStageUpdatedAt, status, engagementNumber }) =>
+      ({ id, name, email, markets, active, createdAt, hasSetupToken: !!setupToken, pipelineStage: pipelineStage || null, pipelineStageUpdatedAt: pipelineStageUpdatedAt || null, status: status || 'active', engagementNumber: engagementNumber || 1 })
     ));
   }
 
@@ -171,9 +171,24 @@ export default async (req) => {
 
   if (req.method === 'PUT') {
     const body = await req.json().catch(() => ({}));
-    const { id, name, markets, active, password, action, datesArchived, pipelineStage } = body;
+    const { id, name, markets, active, password, action, datesArchived, pipelineStage, status, engagementNumber } = body;
     const idx = clients.findIndex(c => c.id === id);
     if (idx === -1) return json({ error: 'Client not found' }, 404);
+
+    // Reactivate a completed client for a new engagement
+    if (action === 'reactivate') {
+      const client = clients[idx];
+      const newEngagement = (client.engagementNumber || 1) + 1;
+      client.status = 'active';
+      client.engagementNumber = newEngagement;
+      client.pipelineStage = 'onboarding';
+      client.pipelineStageUpdatedAt = new Date().toISOString();
+      // Apply any updated engagement fields from the re-engagement form
+      if (body.markets !== undefined) client.markets = body.markets;
+      await store.setJSON('all', clients);
+      appendAudit('client_reactivated', `Reactivated ${client.name} <${client.email}> — engagement #${newEngagement}`);
+      return json({ ok: true, engagementNumber: newEngagement });
+    }
 
     if (action === 'notify-markets') {
       const client = clients[idx];
@@ -206,6 +221,14 @@ export default async (req) => {
       client.pipelineStage = pipelineStage;
       client.pipelineStageUpdatedAt = new Date().toISOString();
     }
+    if (status !== undefined) {
+      const prevStatus = client.status || 'active';
+      client.status = status;
+      if (status === 'completed' && prevStatus !== 'completed') {
+        appendAudit('client_completed', `Marked ${client.name} <${client.email}> as completed`);
+      }
+    }
+    if (engagementNumber !== undefined) client.engagementNumber = engagementNumber;
     if (password) {
       const salt = crypto.randomBytes(16).toString('hex');
       client.passwordHash = await pbkdf2Hash(password, salt);
@@ -244,6 +267,7 @@ export default async (req) => {
         getStore('fairway-questionnaires').delete(toDelete.email.toLowerCase().replace(/[^a-z0-9]/g, '-')).catch(() => {}),
         getStore('fairway-briefs').delete(toDelete.id).catch(() => {}),
         getStore('fairway-milestones').delete(toDelete.id).catch(() => {}),
+        getStore('fairway-purchases').delete(toDelete.id).catch(() => {}),
       ]);
       appendAudit('client_deleted', `Deleted client ${toDelete.name} <${toDelete.email}>`);
     }

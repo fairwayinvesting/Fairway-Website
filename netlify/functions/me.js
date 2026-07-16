@@ -29,19 +29,24 @@ export default async (req) => {
       return new Response(JSON.stringify({ error: 'Account not found' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // Look up upcoming settlement date for this client
+    // Look up upcoming settlement date and purchase count in parallel
     let settlementDate = null;
+    let purchaseCount = 0;
     try {
-      const msStore = getStore('fairway-milestones');
-      const milestones = (await msStore.get(client.id, { type: 'json' })) || [];
-      const upcoming = milestones
+      const [msStore, purchasesStore] = [getStore('fairway-milestones'), getStore('fairway-purchases')];
+      const [milestones, purchases] = await Promise.all([
+        msStore.get(client.id, { type: 'json' }).catch(() => []),
+        purchasesStore.get(client.id, { type: 'json' }).catch(() => []),
+      ]);
+      const upcoming = (milestones || [])
         .filter(m => m.type === 'settlement' && !m.completed && m.date)
         .sort((a, b) => new Date(a.date) - new Date(b.date));
       if (upcoming.length) settlementDate = upcoming[0].date;
+      purchaseCount = (purchases || []).length;
     } catch {}
 
     return new Response(
-      JSON.stringify({ name: client.name, email: client.email, markets: client.markets || [], pipelineStage: client.pipelineStage || null, settlementDate }),
+      JSON.stringify({ name: client.name, email: client.email, markets: client.markets || [], pipelineStage: client.pipelineStage || null, settlementDate, status: client.status || 'active', engagementNumber: client.engagementNumber || 1, purchaseCount }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch {
