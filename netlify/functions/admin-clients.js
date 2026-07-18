@@ -106,7 +106,7 @@ export default async (req) => {
   const clients = (await store.get('all', { type: 'json' })) || [];
 
   if (req.method === 'GET') {
-    return json(clients.map(({ id, name, email, markets, active, createdAt, setupToken, pipelineStage, pipelineStageUpdatedAt, status, engagementNumber }) =>
+    return json(clients.filter(c => !c.deleted).map(({ id, name, email, markets, active, createdAt, setupToken, pipelineStage, pipelineStageUpdatedAt, status, engagementNumber }) =>
       ({ id, name, email, markets, active, createdAt, hasSetupToken: !!setupToken, pipelineStage: pipelineStage || null, pipelineStageUpdatedAt: pipelineStageUpdatedAt || null, status: status || 'active', engagementNumber: engagementNumber || 1 })
     ));
   }
@@ -114,7 +114,7 @@ export default async (req) => {
   if (req.method === 'POST') {
     const { name, email, password, markets, sendEmail = true } = await req.json().catch(() => ({}));
     if (!name || !email) return json({ error: 'name and email required' }, 400);
-    if (clients.some(c => c.email.toLowerCase() === email.toLowerCase())) return json({ error: 'Email already exists' }, 409);
+    if (clients.some(c => !c.deleted && c.email.toLowerCase() === email.toLowerCase())) return json({ error: 'Email already exists' }, 409);
 
     const salt = crypto.randomBytes(16).toString('hex');
     const setupToken = crypto.randomBytes(24).toString('hex');
@@ -246,19 +246,22 @@ export default async (req) => {
     const id = new URL(req.url).searchParams.get('id');
     if (!id) return json({ error: 'id required' }, 400);
     const toDelete = clients.find(c => c.id === id);
-    const updated = clients.filter(c => c.id !== id);
-    if (updated.length === clients.length) return json({ error: 'Not found' }, 404);
-    await store.setJSON('all', updated);
-    if (toDelete) {
-      await Promise.all([
-        getStore('fairway-questionnaires').delete(toDelete.email.toLowerCase().replace(/[^a-z0-9]/g, '-')).catch(() => {}),
-        getStore('fairway-briefs').delete(toDelete.id).catch(() => {}),
-        getStore('fairway-milestones').delete(toDelete.id).catch(() => {}),
-        getStore('fairway-purchases').delete(toDelete.id).catch(() => {}),
-        getStore('fairway-client-notes').delete(toDelete.id).catch(() => {}),
-      ]);
-      appendAudit('client_deleted', `Deleted client ${toDelete.name} <${toDelete.email}>`);
-    }
+    if (!toDelete) return json({ error: 'Not found' }, 404);
+    // Soft-delete: keep in the array so the email uniqueness check on re-creation works reliably,
+    // regardless of any Netlify Blobs read consistency window between write and next request.
+    toDelete.deleted = true;
+    toDelete.active = false;
+    toDelete.deletedAt = new Date().toISOString();
+    await store.setJSON('all', clients);
+    // Cascade: clean up all related data stores
+    await Promise.all([
+      getStore('fairway-questionnaires').delete(toDelete.email.toLowerCase().replace(/[^a-z0-9]/g, '-')).catch(() => {}),
+      getStore('fairway-briefs').delete(toDelete.id).catch(() => {}),
+      getStore('fairway-milestones').delete(toDelete.id).catch(() => {}),
+      getStore('fairway-purchases').delete(toDelete.id).catch(() => {}),
+      getStore('fairway-client-notes').delete(toDelete.id).catch(() => {}),
+    ]);
+    appendAudit('client_deleted', `Deleted client ${toDelete.name} <${toDelete.email}>`);
     return json({ ok: true });
   }
 

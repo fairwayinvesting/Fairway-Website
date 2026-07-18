@@ -23,7 +23,7 @@ async function getAllMilestones() {
 async function getActiveClientIds() {
   const store = getStore('fairway-clients');
   const clients = (await store.get('all', { type: 'json' }).catch(() => null)) || [];
-  return new Set(clients.filter(c => (c.status || 'active') !== 'completed').map(c => c.id));
+  return new Set(clients.filter(c => !c.deleted && (c.status || 'active') !== 'completed').map(c => c.id));
 }
 
 // ── Date utilities ────────────────────────────────────────────────────────────
