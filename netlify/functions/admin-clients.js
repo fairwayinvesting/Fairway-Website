@@ -268,6 +268,7 @@ export default async (req) => {
         getStore('fairway-briefs').delete(toDelete.id).catch(() => {}),
         getStore('fairway-milestones').delete(toDelete.id).catch(() => {}),
         getStore('fairway-purchases').delete(toDelete.id).catch(() => {}),
+        getStore('fairway-client-notes').delete(toDelete.id).catch(() => {}),
       ]);
       appendAudit('client_deleted', `Deleted client ${toDelete.name} <${toDelete.email}>`);
     }

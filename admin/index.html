@@ -949,6 +949,7 @@
     <button class="profile-tab active" onclick="switchProfileTab('profile',this)">Profile</button>
     <button class="profile-tab" onclick="switchProfileTab('properties',this)">Properties</button>
     <button class="profile-tab" onclick="switchProfileTab('engagement',this)">Engagement</button>
+    <button class="profile-tab" onclick="switchProfileTab('notes',this)">Notes</button>
   </div>
   <div class="profile-body" id="profile-body">
     <div style="text-align:center;padding:40px;color:rgba(247,243,237,0.2);font-size:13px;">Loading…</div>
@@ -1627,6 +1628,7 @@ let crmProfileTab = 'profile';
 let crmPurchases = [];
 let purchaseEditId = null;
 let crmQuestionnaire = null;
+let crmNotes = [];
 
 // ── Section nav ───────────────────────────────────────────────────────────────
 function showSection(id, btn) {
@@ -1641,7 +1643,7 @@ function showSection(id, btn) {
 }
 
 function renderDashboard() {
-  const activeCount = clients.filter(c => c.active).length;
+  const activeCount = clients.filter(c => c.active && (c.status || 'active') !== 'completed').length;
   document.getElementById('ds-clients').textContent = activeCount || '0';
   document.getElementById('ds-pres').textContent = presentations.length || '0';
 
@@ -1863,7 +1865,7 @@ function renderPipeline() {
   const summary = document.getElementById('pipeline-summary');
   if (!board) return;
 
-  const activeClients = clients.filter(c => c.active);
+  const activeClients = clients.filter(c => c.active && (c.status || 'active') !== 'completed');
   const withStage = activeClients.filter(c => c.pipelineStage).length;
   summary.textContent = `${withStage} of ${activeClients.length} client${activeClients.length !== 1 ? 's' : ''} placed`;
 
@@ -2642,7 +2644,7 @@ function toggleAddDateForm() {
   } else {
     const sel = document.getElementById('ms-add-client');
     sel.innerHTML = '<option value="">Select client…</option>' +
-      clients.filter(c => c.active && !c.datesArchived).map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+      clients.filter(c => c.active && !c.datesArchived && (c.status || 'active') !== 'completed').map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
     _msRows = [{ type: Object.keys(MS_TYPES)[0], date: '', notes: '' }];
     renderMilestoneRows();
     panel.style.display = 'block';
@@ -3059,6 +3061,7 @@ async function openClientProfile(clientId) {
   crmProfileTab = 'profile';
   crmPurchases = [];
   crmQuestionnaire = null;
+  crmNotes = [];
 
   const client = clients.find(c => c.id === clientId);
   if (!client) return;
@@ -3089,12 +3092,14 @@ async function openClientProfile(clientId) {
 
   // Load data in parallel then render
   document.getElementById('profile-body').innerHTML = '<div style="text-align:center;padding:40px;color:rgba(247,243,237,0.2);font-size:13px;">Loading…</div>';
-  const [qRes, pRes] = await Promise.all([
+  const [qRes, pRes, nRes] = await Promise.all([
     api('GET', `/api/admin/questionnaire?clientId=${clientId}`),
     api('GET', `/api/admin/purchases?clientId=${clientId}`),
+    api('GET', `/api/admin/client-notes?clientId=${clientId}`),
   ]);
   if (qRes.ok) crmQuestionnaire = await qRes.json();
   if (pRes.ok) crmPurchases = await pRes.json();
+  if (nRes.ok) crmNotes = await nRes.json();
   renderProfileTab();
 }
 
@@ -3111,6 +3116,7 @@ function switchProfileTab(tab, btn) {
   if (tab === 'profile') renderProfileTab();
   else if (tab === 'properties') renderPropertiesTab();
   else if (tab === 'engagement') renderEngagementTab();
+  else if (tab === 'notes') renderNotesTab();
 }
 
 function pfVal(v) {
@@ -3355,6 +3361,52 @@ function renderEngagementTab() {
       }).join('')}
     </div>` : ''}
   `;
+}
+
+function renderNotesTab() {
+  const el = document.getElementById('profile-body');
+  const fmtDate = ts => {
+    const d = new Date(ts);
+    return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) + ' · ' +
+           d.toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit', hour12: true });
+  };
+  el.innerHTML = `
+    <div style="margin-bottom:20px;">
+      <textarea id="note-input" placeholder="Add a note…" rows="3" style="width:100%;box-sizing:border-box;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:14px;padding:12px 14px;resize:vertical;margin-bottom:10px;"></textarea>
+      <button class="btn-primary" onclick="saveClientNote()" style="font-size:13px;padding:9px 20px;">Save note</button>
+    </div>
+    <div id="notes-list">
+      ${crmNotes.length === 0
+        ? `<p style="font-size:13px;color:rgba(247,243,237,0.3);">No notes yet.</p>`
+        : crmNotes.map(n => `
+          <div style="background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.08);border-radius:10px;padding:14px 16px;margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-size:11px;color:rgba(247,243,237,0.3);letter-spacing:0.03em;">${fmtDate(n.createdAt)}</span>
+              <button onclick="deleteClientNote('${n.id}')" style="background:none;border:none;cursor:pointer;color:rgba(247,243,237,0.25);font-size:16px;line-height:1;padding:0;" title="Delete note">&times;</button>
+            </div>
+            <div style="font-size:14px;color:rgba(247,243,237,0.8);white-space:pre-wrap;line-height:1.6;">${esc(n.text)}</div>
+          </div>`).join('')}
+    </div>`;
+}
+
+async function saveClientNote() {
+  const input = document.getElementById('note-input');
+  const text = (input?.value || '').trim();
+  if (!text) return;
+  const res = await api('POST', `/api/admin/client-notes?clientId=${crmProfileClientId}`, { text });
+  if (!res.ok) return alert('Failed to save note.');
+  const note = await res.json();
+  crmNotes.unshift(note);
+  input.value = '';
+  renderNotesTab();
+}
+
+async function deleteClientNote(noteId) {
+  if (!confirm('Delete this note?')) return;
+  const res = await api('DELETE', `/api/admin/client-notes?clientId=${crmProfileClientId}&noteId=${noteId}`);
+  if (!res.ok) return alert('Failed to delete note.');
+  crmNotes = crmNotes.filter(n => n.id !== noteId);
+  renderNotesTab();
 }
 
 async function markClientCompleted(clientId) {
@@ -4223,7 +4275,7 @@ function openPresModal(id) {
   // Build client picker rows
   const grid = document.getElementById('pres-clients-grid');
   const note = document.getElementById('pres-clients-note');
-  const active = clients.filter(c => c.active);
+  const active = clients.filter(c => c.active && (c.status || 'active') !== 'completed');
   note.style.display = active.length ? 'none' : 'block';
   const presForPicker = id ? presentations.find(x => x.id === id) : null;
   const pickerAssigned = presForPicker ? (presForPicker.assignedClients || []) : [];

@@ -32,10 +32,19 @@ async function getAllPurchases() {
   return arrays.flat();
 }
 
+async function getAllNotes() {
+  const store = getStore('fairway-client-notes');
+  const { blobs } = await store.list().catch(() => ({ blobs: [] }));
+  const entries = await Promise.all(
+    blobs.map(async b => ({ clientId: b.key, notes: await store.get(b.key, { type: 'json' }).catch(() => []) }))
+  );
+  return Object.fromEntries(entries.map(e => [e.clientId, e.notes]));
+}
+
 export default async () => {
   const [
     clients, presentations, milestones, purchases,
-    questionnaires, briefs, compliance, shortlist,
+    questionnaires, briefs, compliance, shortlist, notes,
   ] = await Promise.all([
     getStore('fairway-clients').get('all', { type: 'json' }).catch(() => null),
     getStore('fairway-presentations').get('all', { type: 'json' }).catch(() => null),
@@ -45,6 +54,7 @@ export default async () => {
     listAndFetchAll('fairway-briefs'),
     getStore('fairway-compliance').get('data', { type: 'json' }).catch(() => null),
     getStore('fairway-shortlist').get('all', { type: 'json' }).catch(() => null),
+    getAllNotes(),
   ]);
 
   const timestamp = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
@@ -60,6 +70,7 @@ export default async () => {
     briefs:         briefs         || {},
     compliance:     compliance     || {},
     shortlist:      shortlist      || [],
+    notes:          notes          || {},
   };
 
   await backupStore.setJSON(`daily/${timestamp}`, snapshot);
@@ -76,7 +87,7 @@ export default async () => {
     `clients:${snapshot.clients.length} presentations:${snapshot.presentations.length} ` +
     `milestones:${snapshot.milestones.length} purchases:${snapshot.purchases.length} ` +
     `questionnaires:${Object.keys(snapshot.questionnaires).length} briefs:${Object.keys(snapshot.briefs).length} ` +
-    `shortlist:${snapshot.shortlist.length}. Pruned: ${toDelete.length}`
+    `shortlist:${snapshot.shortlist.length} notes:${Object.keys(snapshot.notes).length}. Pruned: ${toDelete.length}`
   );
 };
 
