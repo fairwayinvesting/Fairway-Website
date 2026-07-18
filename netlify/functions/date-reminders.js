@@ -29,10 +29,12 @@ async function getActiveClientIds() {
 // ── Date utilities ────────────────────────────────────────────────────────────
 
 function daysUntil(dateStr) {
-  // Compare at midnight to avoid time-of-day drift
-  const today = new Date();
-  today.setUTCHours(10, 0, 0, 0); // anchor to 10 AM UTC (~8 PM AEST) for stable comparison
-  const target = new Date(dateStr + 'T00:00:00Z');
+  // Compute days relative to today's date in Sydney time.
+  // The cron fires at 10 PM UTC = 8 AM AEST, so new Date() is still the previous
+  // UTC calendar day — we must derive the Australian date explicitly.
+  const todayAU = new Date().toLocaleDateString('en-CA', { timeZone: 'Australia/Sydney' }); // YYYY-MM-DD
+  const today  = new Date(todayAU  + 'T00:00:00');
+  const target = new Date(dateStr  + 'T00:00:00');
   return Math.round((target - today) / 86400000);
 }
 
