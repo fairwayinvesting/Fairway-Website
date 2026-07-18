@@ -80,14 +80,14 @@ export default async (req) => {
 
   if (req.method === 'POST') {
     if (clientId === '_preview') return json({ ok: true });
-    const idx = presentations.findIndex(p => p.id === found.id);
-    if (idx !== -1) {
-      if (!presentations[idx].views[clientId]) presentations[idx].views[clientId] = { firstViewedAt: null, viewCount: 0 };
-      const v = presentations[idx].views[clientId];
-      if (!v.firstViewedAt) v.firstViewedAt = new Date().toISOString();
-      v.viewCount = (v.viewCount || 0) + 1;
-      await store.setJSON('all', presentations);
-    }
+    // Write only to the per-presentation views store — avoids rewriting the entire presentations array
+    const pvStore = getStore('fairway-presentation-views');
+    const views = (await pvStore.get(found.id, { type: 'json' }).catch(() => null)) || {};
+    if (!views[clientId]) views[clientId] = { firstViewedAt: null, viewCount: 0 };
+    const v = views[clientId];
+    if (!v.firstViewedAt) v.firstViewedAt = new Date().toISOString();
+    v.viewCount = (v.viewCount || 0) + 1;
+    await pvStore.setJSON(found.id, views);
     return json({ ok: true });
   }
 

@@ -41,10 +41,21 @@ async function getAllNotes() {
   return Object.fromEntries(entries.map(e => [e.clientId, e.notes]));
 }
 
+async function getAllPresentationViews() {
+  const store = getStore('fairway-presentation-views');
+  const { blobs } = await store.list().catch(() => ({ blobs: [] }));
+  const entries = await Promise.all(
+    blobs
+      .filter(b => b.key !== '_migrated')
+      .map(async b => ({ presId: b.key, views: await store.get(b.key, { type: 'json' }).catch(() => null) }))
+  );
+  return Object.fromEntries(entries.filter(e => e.views).map(e => [e.presId, e.views]));
+}
+
 export default async () => {
   const [
     clients, presentations, milestones, purchases,
-    questionnaires, briefs, compliance, shortlist, notes, auditLog,
+    questionnaires, briefs, compliance, shortlist, notes, auditLog, presentationViews,
   ] = await Promise.all([
     getStore('fairway-clients').get('all', { type: 'json' }).catch(() => null),
     getStore('fairway-presentations').get('all', { type: 'json' }).catch(() => null),
@@ -56,6 +67,7 @@ export default async () => {
     getStore('fairway-shortlist').get('all', { type: 'json' }).catch(() => null),
     getAllNotes(),
     getStore('fairway-audit-log').get('entries', { type: 'json' }).catch(() => null),
+    getAllPresentationViews(),
   ]);
 
   const timestamp = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
@@ -72,7 +84,8 @@ export default async () => {
     compliance:     compliance     || {},
     shortlist:      shortlist      || [],
     notes:          notes          || {},
-    auditLog:       auditLog       || [],
+    auditLog:           auditLog           || [],
+    presentationViews:  presentationViews  || {},
   };
 
   await backupStore.setJSON(`daily/${timestamp}`, snapshot);
@@ -89,7 +102,8 @@ export default async () => {
     `clients:${snapshot.clients.length} presentations:${snapshot.presentations.length} ` +
     `milestones:${snapshot.milestones.length} purchases:${snapshot.purchases.length} ` +
     `questionnaires:${Object.keys(snapshot.questionnaires).length} briefs:${Object.keys(snapshot.briefs).length} ` +
-    `shortlist:${snapshot.shortlist.length} notes:${Object.keys(snapshot.notes).length} auditLog:${snapshot.auditLog.length}. Pruned: ${toDelete.length}`
+    `shortlist:${snapshot.shortlist.length} notes:${Object.keys(snapshot.notes).length} ` +
+    `auditLog:${snapshot.auditLog.length} presentationViews:${Object.keys(snapshot.presentationViews).length}. Pruned: ${toDelete.length}`
   );
 };
 

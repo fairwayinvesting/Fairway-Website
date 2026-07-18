@@ -85,13 +85,44 @@ function defaultPres(fields) {
     expiresAt: null,
     assignedClients: [],
     revokedClients: [],
-    tokens: {}, views: {}, sentClients: [],
+    tokens: {}, sentClients: [],
     previewToken: null,
     createdAt: new Date().toISOString(),
     ...fields,
   };
 }
 
+// Views are stored separately in fairway-presentation-views keyed by presId.
+// This avoids rewriting the entire presentations array on every client page view.
+const pvStore = () => getStore('fairway-presentation-views');
+
+async function getViews(presId) {
+  return (await pvStore().get(presId, { type: 'json' }).catch(() => null)) || {};
+}
+
+async function setViews(presId, views) {
+  await pvStore().setJSON(presId, views);
+}
+
+// One-time migration: strips views from the 'all' blob and writes them to per-id blobs.
+async function migrateViewsIfNeeded(presentations, presStore) {
+  const done = await pvStore().get('_migrated', { type: 'json' }).catch(() => null);
+  if (done) return;
+  const writes = [];
+  let changed = false;
+  for (const p of presentations) {
+    if (p.views && Object.keys(p.views).length > 0) {
+      writes.push(pvStore().setJSON(p.id, p.views));
+      changed = true;
+    }
+    delete p.views;
+  }
+  await Promise.all([
+    ...writes,
+    changed ? presStore.setJSON('all', presentations) : Promise.resolve(),
+    pvStore().setJSON('_migrated', { at: new Date().toISOString() }),
+  ]);
+}
 
 export default async (req) => {
   if (!checkAdmin(req)) return json({ error: 'Unauthorized' }, 401);
@@ -99,18 +130,32 @@ export default async (req) => {
   const store = getStore('fairway-presentations');
   const presentations = (await store.get('all', { type: 'json' })) || [];
 
-  if (req.method === 'GET') return json(presentations);
+  // Run one-time migration to extract views from 'all' into per-id blobs
+  await migrateViewsIfNeeded(presentations, store);
+
+  if (req.method === 'GET') {
+    // Fetch all view blobs in parallel and merge into each presentation for the admin panel
+    const viewResults = await Promise.all(presentations.map(p => getViews(p.id)));
+    return json(presentations.map((p, i) => ({ ...p, views: viewResults[i] })));
+  }
 
   if (req.method === 'POST') {
     const body = await req.json().catch(() => ({}));
     if (!body.address) return json({ error: 'address required' }, 400);
-    const tokens = {}, views = {};
-    (body.assignedClients || []).forEach(cid => { tokens[cid] = genToken(); views[cid] = { firstViewedAt: null, viewCount: 0 }; });
-    const pres = defaultPres({ ...body, tokens, views, sentClients: [], revokedClients: [] });
+    const tokens = {};
+    const initViews = {};
+    (body.assignedClients || []).forEach(cid => {
+      tokens[cid] = genToken();
+      initViews[cid] = { firstViewedAt: null, viewCount: 0 };
+    });
+    const pres = defaultPres({ ...body, tokens, sentClients: [], revokedClients: [] });
     presentations.push(pres);
-    await store.setJSON('all', presentations);
+    await Promise.all([
+      store.setJSON('all', presentations),
+      Object.keys(initViews).length > 0 ? setViews(pres.id, initViews) : Promise.resolve(),
+    ]);
     appendAudit('presentation_created', `Created presentation "${pres.address}"`);
-    return json({ ok: true, id: pres.id, pres }, 201);
+    return json({ ok: true, id: pres.id, pres: { ...pres, views: initViews } }, 201);
   }
 
   if (req.method === 'PUT') {
@@ -176,6 +221,8 @@ export default async (req) => {
                     'revocationReason','status','expiresAt','revokedClients'];
     fields.forEach(f => { if (body[f] !== undefined) pres[f] = body[f]; });
 
+    let viewsUpdated = false;
+    let presViews = null;
     if (body.assignedClients !== undefined) {
       const prevAssigned = pres.assignedClients || [];
       const prevRevokedSet = new Set(pres.revokedClients || []);
@@ -184,11 +231,13 @@ export default async (req) => {
       // Previously active = assigned but not yet revoked
       const prevActive = prevAssigned.filter(cid => !prevRevokedSet.has(cid));
 
-      // Grant: generate token for newly selected; restore if previously revoked
+      // Grant: generate token for newly selected; initialize their view entry
+      presViews = await getViews(pres.id);
       for (const cid of body.assignedClients) {
         if (!pres.tokens[cid]) {
           pres.tokens[cid] = genToken();
-          pres.views[cid] = { firstViewedAt: null, viewCount: 0 };
+          presViews[cid] = { firstViewedAt: null, viewCount: 0 };
+          viewsUpdated = true;
         }
         pres.revokedClients = (pres.revokedClients || []).filter(id => id !== cid);
       }
@@ -207,12 +256,17 @@ export default async (req) => {
     }
 
     presentations[idx] = pres;
-    await store.setJSON('all', presentations);
+    await Promise.all([
+      store.setJSON('all', presentations),
+      viewsUpdated && presViews ? setViews(pres.id, presViews) : Promise.resolve(),
+    ]);
     const nowRevokedCount = (pres.revokedClients || []).length;
     if (nowRevokedCount > prevRevokedCount) {
       appendAudit('access_revoked', `Revoked access on "${pres.address}" (${nowRevokedCount} client${nowRevokedCount !== 1 ? 's' : ''} total)`);
     }
-    return json({ ok: true, pres });
+    // Merge current views into response so admin panel stays in sync
+    const currentViews = presViews || await getViews(pres.id);
+    return json({ ok: true, pres: { ...pres, views: currentViews } });
   }
 
   if (req.method === 'DELETE') {
@@ -221,7 +275,10 @@ export default async (req) => {
     const toDelete = presentations.find(p => p.id === id);
     const updated = presentations.filter(p => p.id !== id);
     if (updated.length === presentations.length) return json({ error: 'Not found' }, 404);
-    await store.setJSON('all', updated);
+    await Promise.all([
+      store.setJSON('all', updated),
+      pvStore().delete(id).catch(() => {}),
+    ]);
     if (toDelete) appendAudit('presentation_deleted', `Deleted presentation "${toDelete.address}"`);
     return json({ ok: true });
   }
