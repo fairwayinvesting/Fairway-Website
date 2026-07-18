@@ -245,6 +245,10 @@ export default async (req) => {
   if (req.method === 'DELETE') {
     const id = new URL(req.url).searchParams.get('id');
     if (!id) return json({ error: 'id required' }, 400);
+    const { password } = await req.json().catch(() => ({}));
+    if (!password || password !== process.env.ADMIN_PASSWORD) {
+      return json({ error: 'Incorrect password' }, 403);
+    }
     const toDelete = clients.find(c => c.id === id);
     if (!toDelete) return json({ error: 'Not found' }, 404);
     // Soft-delete: keep in the array so the email uniqueness check on re-creation works reliably,

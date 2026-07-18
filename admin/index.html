@@ -1589,6 +1589,23 @@
 </div>
 
 <!-- Milestone edit modal -->
+<div id="del-client-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:900;display:none;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)cancelDeleteClient()">
+  <div style="background:#22201d;border:1px solid rgba(220,80,80,0.25);border-radius:18px;padding:32px;width:100%;max-width:400px;">
+    <h2 style="font-family:'Fraunces',serif;font-size:20px;font-weight:400;margin:0 0 6px;color:#f7f3ed;">Delete client</h2>
+    <p id="del-client-name" style="font-size:13px;color:rgba(247,243,237,0.4);margin:0 0 20px;"></p>
+    <p style="font-size:13.5px;color:rgba(247,243,237,0.55);margin:0 0 20px;line-height:1.5;">This cannot be undone. Enter your admin password to confirm.</p>
+    <div style="margin-bottom:24px;">
+      <label style="font-size:12px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:rgba(247,243,237,0.35);display:block;margin-bottom:8px;">Admin password</label>
+      <input id="del-client-pw" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')confirmDeleteClient()" style="width:100%;box-sizing:border-box;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:10px 14px;font-family:'Outfit',sans-serif;font-size:15px;color:#f7f3ed;">
+      <p id="del-client-err" style="font-size:13px;color:#f08080;margin:8px 0 0;display:none;"></p>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn-secondary" onclick="cancelDeleteClient()">Cancel</button>
+      <button id="del-client-confirm" style="background:#c0392b;color:#fff;border:none;border-radius:100px;padding:10px 22px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;" onclick="confirmDeleteClient()">Delete client</button>
+    </div>
+  </div>
+</div>
+
 <div id="ms-edit-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:800;display:none;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)closeMilestoneEdit()">
   <div style="background:#22201d;border:1px solid rgba(247,243,237,0.1);border-radius:18px;padding:32px;width:100%;max-width:420px;">
     <h2 style="font-family:'Fraunces',serif;font-size:20px;font-weight:400;margin:0 0 6px;color:#f7f3ed;">Edit date</h2>
@@ -2332,13 +2349,46 @@ async function previewClient(clientId) {
   }
 }
 
-async function deleteClient(id, name) {
-  if (!confirm(`Delete ${name}? This cannot be undone.`)) return;
-  const res = await api('DELETE', `/api/admin/clients?id=${encodeURIComponent(id)}`);
-  if (!res.ok) return;
-  clients = clients.filter(c => c.id !== id);
-  renderTable();
-  renderBriefs();
+let _pendingDeleteId = null;
+let _pendingDeleteName = null;
+
+function deleteClient(id, name) {
+  _pendingDeleteId = id;
+  _pendingDeleteName = name;
+  document.getElementById('del-client-name').textContent = name;
+  document.getElementById('del-client-pw').value = '';
+  document.getElementById('del-client-err').style.display = 'none';
+  document.getElementById('del-client-overlay').style.display = 'flex';
+  setTimeout(() => document.getElementById('del-client-pw').focus(), 50);
+}
+
+function cancelDeleteClient() {
+  _pendingDeleteId = null;
+  _pendingDeleteName = null;
+  document.getElementById('del-client-overlay').style.display = 'none';
+}
+
+async function confirmDeleteClient() {
+  const password = document.getElementById('del-client-pw').value;
+  const errEl = document.getElementById('del-client-err');
+  const btn = document.getElementById('del-client-confirm');
+  if (!password) { errEl.textContent = 'Password is required.'; errEl.style.display = 'block'; return; }
+  btn.disabled = true;
+  btn.textContent = 'Deleting…';
+  errEl.style.display = 'none';
+  const res = await api('DELETE', `/api/admin/clients?id=${encodeURIComponent(_pendingDeleteId)}`, { password });
+  if (res.ok) {
+    clients = clients.filter(c => c.id !== _pendingDeleteId);
+    cancelDeleteClient();
+    renderTable();
+    renderBriefs();
+  } else {
+    const data = await res.json().catch(() => ({}));
+    errEl.textContent = data.error || 'Delete failed.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Delete client';
+  }
 }
 
 let _clientMenuOpen = null;
