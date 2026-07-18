@@ -1,6 +1,7 @@
 import { getStore } from '@netlify/blobs';
 import crypto from 'crypto';
 import { Resend } from 'resend';
+import { appendAudit } from './_audit.js';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -94,15 +95,6 @@ async function pbkdf2Hash(password, salt) {
   });
 }
 
-async function appendAudit(action, detail) {
-  try {
-    const store = getStore('fairway-audit-log');
-    const entries = (await store.get('entries', { type: 'json' }).catch(() => null)) || [];
-    entries.unshift({ ts: new Date().toISOString(), action, detail });
-    if (entries.length > 200) entries.length = 200;
-    await store.setJSON('entries', entries);
-  } catch { /* best-effort */ }
-}
 
 function checkAdmin(req) {
   const auth = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '');

@@ -1,6 +1,7 @@
 import { getStore } from '@netlify/blobs';
 import crypto from 'crypto';
 import { Resend } from 'resend';
+import { appendAudit } from './_audit.js';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -37,8 +38,7 @@ export const MILESTONE_LABELS = {
 
 // ── Store helpers ────────────────────────────────────────────────────────────
 
-const msStore  = () => getStore('fairway-milestones');
-const auditStore = () => getStore('fairway-audit-log');
+const msStore = () => getStore('fairway-milestones');
 
 async function getClientMilestones(clientId) {
   return (await msStore().get(clientId, { type: 'json' }).catch(() => null)) || [];
@@ -58,43 +58,6 @@ async function saveClientMilestones(clientId, milestones) {
   }
 }
 
-// ── Audit log (append-only) ───────────────────────────────────────────────────
-// Every milestone change is logged with full before/after state so data can
-// always be reconstructed even if something goes wrong.
-async function audit(action, detail, before = null, after = null) {
-  try {
-    const store = auditStore();
-    const entries = (await store.get('entries', { type: 'json' }).catch(() => null)) || [];
-    entries.unshift({
-      ts: new Date().toISOString(),
-      action,
-      detail,
-      ...(before !== null ? { before } : {}),
-      ...(after  !== null ? { after  } : {}),
-    });
-    if (entries.length > 500) entries.length = 500;
-    await store.setJSON('entries', entries);
-  } catch { /* best-effort — never fail a user action because of audit */ }
-}
-
-// ── One-time migration from legacy 'all' global array ────────────────────────
-async function maybeMigrate() {
-  const legacy = await msStore().get('all', { type: 'json' }).catch(() => null);
-  if (!legacy || !Array.isArray(legacy) || legacy.length === 0) {
-    await msStore().delete('all').catch(() => {});
-    return;
-  }
-  const byClient = {};
-  for (const m of legacy) {
-    if (!m.clientId) continue;
-    (byClient[m.clientId] = byClient[m.clientId] || []).push(m);
-  }
-  await Promise.all(
-    Object.entries(byClient).map(([cid, ms]) => msStore().setJSON(cid, ms))
-  );
-  await msStore().delete('all').catch(() => {});
-  await audit('migration', `Migrated ${legacy.length} milestones from global array to per-client storage`);
-}
 
 // ── Global view ───────────────────────────────────────────────────────────────
 async function getAllMilestones() {
@@ -182,8 +145,6 @@ function buildShareEmail(clientName, milestones, note, recipientName) {
 export default async (req) => {
   if (!checkAdmin(req)) return json({ error: 'Unauthorized' }, 401);
 
-  await maybeMigrate();
-
   // ── GET ────────────────────────────────────────────────────────────────────
   if (req.method === 'GET') {
     const clientId = new URL(req.url).searchParams.get('clientId');
@@ -222,7 +183,7 @@ export default async (req) => {
         return json({ error: 'Email failed to send' }, 500);
       }
 
-      await audit('milestones_shared',
+      await appendAudit('milestones_shared',
         `Shared ${upcoming.length} date(s) for ${clientName} to: ${toList.join(', ')}`);
       return json({ ok: true });
     }
@@ -246,7 +207,7 @@ export default async (req) => {
     };
     clientMilestones.push(milestone);
     await saveClientMilestones(clientId, clientMilestones);
-    await audit('milestone_created',
+    await appendAudit('milestone_created',
       `Added "${milestone.label}" (${milestone.date}) for ${clientName}`,
       null, milestone);
     return json({ ok: true, id: milestone.id }, 201);
@@ -272,7 +233,7 @@ export default async (req) => {
     }
     const after = { ...clientMilestones[idx] };
     await saveClientMilestones(clientId, clientMilestones);
-    await audit(
+    await appendAudit(
       completed ? 'milestone_completed' : 'milestone_updated',
       `"${after.label}" for ${after.clientName}`,
       before, after
@@ -294,7 +255,7 @@ export default async (req) => {
 
     const updated = clientMilestones.filter(m => m.id !== id);
     await saveClientMilestones(clientId, updated);
-    await audit('milestone_deleted',
+    await appendAudit('milestone_deleted',
       `Deleted "${toDelete.label}" (${toDelete.date}) for ${toDelete.clientName}`,
       toDelete, null);
     return json({ ok: true });

@@ -44,7 +44,7 @@ async function getAllNotes() {
 export default async () => {
   const [
     clients, presentations, milestones, purchases,
-    questionnaires, briefs, compliance, shortlist, notes,
+    questionnaires, briefs, compliance, shortlist, notes, auditLog,
   ] = await Promise.all([
     getStore('fairway-clients').get('all', { type: 'json' }).catch(() => null),
     getStore('fairway-presentations').get('all', { type: 'json' }).catch(() => null),
@@ -55,6 +55,7 @@ export default async () => {
     getStore('fairway-compliance').get('data', { type: 'json' }).catch(() => null),
     getStore('fairway-shortlist').get('all', { type: 'json' }).catch(() => null),
     getAllNotes(),
+    getStore('fairway-audit-log').get('entries', { type: 'json' }).catch(() => null),
   ]);
 
   const timestamp = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
@@ -71,6 +72,7 @@ export default async () => {
     compliance:     compliance     || {},
     shortlist:      shortlist      || [],
     notes:          notes          || {},
+    auditLog:       auditLog       || [],
   };
 
   await backupStore.setJSON(`daily/${timestamp}`, snapshot);
@@ -87,7 +89,7 @@ export default async () => {
     `clients:${snapshot.clients.length} presentations:${snapshot.presentations.length} ` +
     `milestones:${snapshot.milestones.length} purchases:${snapshot.purchases.length} ` +
     `questionnaires:${Object.keys(snapshot.questionnaires).length} briefs:${Object.keys(snapshot.briefs).length} ` +
-    `shortlist:${snapshot.shortlist.length} notes:${Object.keys(snapshot.notes).length}. Pruned: ${toDelete.length}`
+    `shortlist:${snapshot.shortlist.length} notes:${Object.keys(snapshot.notes).length} auditLog:${snapshot.auditLog.length}. Pruned: ${toDelete.length}`
   );
 };
 

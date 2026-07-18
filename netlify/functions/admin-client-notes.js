@@ -1,5 +1,6 @@
 import { getStore } from '@netlify/blobs';
 import crypto from 'crypto';
+import { appendAudit } from './_audit.js';
 
 function checkAdmin(req) {
   const auth = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '');
@@ -9,15 +10,6 @@ function checkAdmin(req) {
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 
-async function appendAudit(action, detail) {
-  try {
-    const store = getStore('fairway-audit-log');
-    const entries = (await store.get('entries', { type: 'json' }).catch(() => null)) || [];
-    entries.unshift({ ts: new Date().toISOString(), action, detail });
-    if (entries.length > 200) entries.length = 200;
-    await store.setJSON('entries', entries);
-  } catch { /* best-effort */ }
-}
 
 export default async (req) => {
   if (!checkAdmin(req)) return json({ error: 'Unauthorized' }, 401);

@@ -1,5 +1,6 @@
 import { getStore } from '@netlify/blobs';
 import crypto from 'crypto';
+import { appendAudit } from './_audit.js';
 
 function checkAdmin(req) {
   const auth = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '');
@@ -37,11 +38,14 @@ export default async (req) => {
       agentEmail:  body.agentEmail?.trim()  || '',
       source:      body.source              || 'own',
       notes:       body.notes?.trim()       || '',
+      clientId:    body.clientId            || null,
+      clientName:  body.clientName?.trim()  || '',
       status:      'to_review',
       createdAt:   new Date().toISOString(),
     };
     all.push(item);
     await store.setJSON('all', all);
+    appendAudit('shortlist_added', `Added to shortlist: ${item.address}${item.suburb ? `, ${item.suburb}` : ''}`);
     return json({ ok: true, item }, 201);
   }
 
@@ -53,9 +57,10 @@ export default async (req) => {
     if (idx === -1) return json({ error: 'Not found' }, 404);
     const fields = ['address','suburb','state','price','propertyType','bedrooms','bathrooms',
                     'carspaces','landSize','agentName','agentAgency','agentPhone','agentEmail',
-                    'source','notes','status'];
+                    'source','notes','status','clientId','clientName'];
     fields.forEach(f => { if (body[f] !== undefined) all[idx][f] = body[f]; });
     await store.setJSON('all', all);
+    appendAudit('shortlist_updated', `Updated shortlist item: ${all[idx].address}`);
     return json({ ok: true, item: all[idx] });
   }
 
@@ -64,7 +69,9 @@ export default async (req) => {
     if (!id) return json({ error: 'id required' }, 400);
     const updated = all.filter(i => i.id !== id);
     if (updated.length === all.length) return json({ error: 'Not found' }, 404);
+    const deleted = all.find(i => i.id === id);
     await store.setJSON('all', updated);
+    if (deleted) appendAudit('shortlist_removed', `Removed from shortlist: ${deleted.address}`);
     return json({ ok: true });
   }
 

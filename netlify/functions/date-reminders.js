@@ -20,6 +20,12 @@ async function getAllMilestones() {
   return arrays.flat();
 }
 
+async function getActiveClientIds() {
+  const store = getStore('fairway-clients');
+  const clients = (await store.get('all', { type: 'json' }).catch(() => null)) || [];
+  return new Set(clients.filter(c => (c.status || 'active') !== 'completed').map(c => c.id));
+}
+
 // ── Date utilities ────────────────────────────────────────────────────────────
 
 function daysUntil(dateStr) {
@@ -199,9 +205,9 @@ function buildEmail(dateHeading, overdue, thisWeek, comingUp) {
 // ── Scheduled handler ─────────────────────────────────────────────────────────
 
 export default async () => {
-  const allMilestones = await getAllMilestones();
+  const [allMilestones, activeClientIds] = await Promise.all([getAllMilestones(), getActiveClientIds()]);
   const active = allMilestones
-    .filter(m => !m.completed)
+    .filter(m => !m.completed && activeClientIds.has(m.clientId))
     .map(m => ({ ...m, days: daysUntil(m.date) }));
 
   const overdue   = active.filter(m => m.days < 0)               .sort((a, b) => a.days - b.days);
