@@ -1,10 +1,6 @@
 import { getStore } from '@netlify/blobs';
 import crypto from 'crypto';
-
-function checkAdmin(req) {
-  const auth = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '');
-  return auth === process.env.ADMIN_PASSWORD;
-}
+import { checkAdmin } from './_admin-auth.js';
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });

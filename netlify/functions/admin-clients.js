@@ -2,6 +2,7 @@ import { getStore } from '@netlify/blobs';
 import crypto from 'crypto';
 import { Resend } from 'resend';
 import { appendAudit } from './_audit.js';
+import { checkAdmin } from './_admin-auth.js';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -93,12 +94,6 @@ async function pbkdf2Hash(password, salt) {
       err ? reject(err) : resolve(key.toString('hex'))
     );
   });
-}
-
-
-function checkAdmin(req) {
-  const auth = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '');
-  return auth === process.env.ADMIN_PASSWORD;
 }
 
 const json = (data, status = 200) =>

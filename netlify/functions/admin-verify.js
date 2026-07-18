@@ -16,16 +16,9 @@ const json = (data, status = 200) =>
 
 export default async (req) => {
   const secret = process.env.JWT_SECRET;
-
-  // 1. Check fw_admin session cookie (set by admin-login after password + 2FA)
   const cookie = req.headers.get('cookie') || '';
   const cookieMatch = cookie.match(/fw_admin=([^;]+)/);
   if (cookieMatch && verifyJWT(cookieMatch[1], secret)) return json({ ok: true });
-
-  // 2. Fall back to Bearer token (manual password entry on the overlay)
-  const bearer = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '');
-  if (bearer && bearer === process.env.ADMIN_PASSWORD) return json({ ok: true });
-
   return json({ error: 'Unauthorized' }, 401);
 };
 

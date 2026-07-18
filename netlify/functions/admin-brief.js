@@ -1,13 +1,9 @@
 import { getStore } from '@netlify/blobs';
 import { Resend } from 'resend';
 import { appendAudit } from './_audit.js';
+import { checkAdmin } from './_admin-auth.js';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-
-function checkAdmin(req) {
-  const auth = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '');
-  return auth === process.env.ADMIN_PASSWORD;
-}
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });

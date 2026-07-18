@@ -1,9 +1,6 @@
 // Returns the shareable agent submission URL so the admin UI can copy it to clipboard.
 
-function checkAdmin(req) {
-  const auth = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '');
-  return auth === process.env.ADMIN_PASSWORD;
-}
+import { checkAdmin } from './_admin-auth.js';
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });

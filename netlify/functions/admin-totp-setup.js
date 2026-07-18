@@ -1,9 +1,5 @@
 import crypto from 'crypto';
-
-function checkAdmin(req) {
-  const auth = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '');
-  return auth === process.env.ADMIN_PASSWORD;
-}
+import { checkAdmin } from './_admin-auth.js';
 
 function verifyTOTP(secret, token) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';

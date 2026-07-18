@@ -1,26 +1,9 @@
 import { getStore } from '@netlify/blobs';
-import crypto from 'crypto';
 import { Resend } from 'resend';
 import { appendAudit } from './_audit.js';
+import { checkAdmin } from './_admin-auth.js';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-
-function checkAdmin(req) {
-  const cookie = req.headers.get('cookie') || '';
-  const cookieMatch = cookie.match(/fw_admin=([^;]+)/);
-  if (cookieMatch) {
-    try {
-      const [h, b, sig] = cookieMatch[1].split('.');
-      const expected = crypto.createHmac('sha256', process.env.JWT_SECRET).update(`${h}.${b}`).digest('base64url');
-      if (sig === expected) {
-        const payload = JSON.parse(Buffer.from(b, 'base64url').toString());
-        if (payload.role === 'admin' && payload.exp > Date.now() / 1000) return true;
-      }
-    } catch {}
-  }
-  const auth = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '');
-  return auth === process.env.ADMIN_PASSWORD;
-}
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
