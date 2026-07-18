@@ -180,6 +180,8 @@
     .ms-check-btn:hover{background:rgba(109,191,123,0.3);}
     .ms-del-btn{background:none;border:none;color:rgba(247,243,237,0.18);cursor:pointer;font-size:15px;padding:4px;transition:color .15s;flex-shrink:0;line-height:1;}
     .ms-del-btn:hover{color:rgba(247,243,237,0.5);}
+    .ms-edit-btn{background:none;border:none;color:rgba(247,243,237,0.18);cursor:pointer;font-size:15px;padding:4px;transition:color .15s;flex-shrink:0;line-height:1;}
+    .ms-edit-btn:hover{color:#bd7a70;}
     @media(max-width:640px){
       .ms-row-item{flex-wrap:wrap;gap:10px;padding:12px 13px;}
       .ms-row-label{order:2;width:calc(100% - 30px - 14px);flex:none;}
@@ -876,20 +878,25 @@
       </div>
 
       <div class="settings-block">
-        <h2>Security</h2>
-        <div class="totp-setup">
-          <div id="totp-status-active" style="display:none;">
-            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-              <span style="font-size:14px;color:rgba(247,243,237,0.55);">Two-factor authentication</span>
-              <span style="background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.25);color:#6dbf7b;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;border-radius:100px;padding:3px 10px;white-space:nowrap;">On</span>
-              <button id="totp-reconfig-btn" style="background:none;border:none;font-family:'Outfit',sans-serif;font-size:13px;font-weight:400;color:#bd7a70;cursor:pointer;padding:0;margin-left:2px;">Manage</button>
+        <h2 onclick="toggleSecuritySection(this)" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;">
+          Security
+          <svg id="security-chevron" width="18" height="18" viewBox="0 0 18 18" fill="none" style="transition:transform .2s;flex-shrink:0;opacity:0.5;transform:rotate(-90deg);"><path d="M4.5 6.75L9 11.25L13.5 6.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </h2>
+        <div id="security-body" style="display:none;">
+          <div class="totp-setup">
+            <div id="totp-status-active" style="display:none;">
+              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <span style="font-size:14px;color:rgba(247,243,237,0.55);">Two-factor authentication</span>
+                <span style="background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.25);color:#6dbf7b;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;border-radius:100px;padding:3px 10px;white-space:nowrap;">On</span>
+                <button id="totp-reconfig-btn" style="background:none;border:none;font-family:'Outfit',sans-serif;font-size:13px;font-weight:400;color:#bd7a70;cursor:pointer;padding:0;margin-left:2px;">Manage</button>
+              </div>
             </div>
+            <div id="totp-section">
+              <p style="font-size:13.5px;color:rgba(247,243,237,0.4);margin-bottom:18px;">Two-factor authentication (2FA) adds an extra layer of security to your admin login.</p>
+              <button class="btn-secondary" id="totp-setup-btn">Set up 2FA</button>
+            </div>
+            <div id="totp-panel" style="display:none;margin-top:20px;"></div>
           </div>
-          <div id="totp-section">
-            <p style="font-size:13.5px;color:rgba(247,243,237,0.4);margin-bottom:18px;">Two-factor authentication (2FA) adds an extra layer of security to your admin login.</p>
-            <button class="btn-secondary" id="totp-setup-btn">Set up 2FA</button>
-          </div>
-          <div id="totp-panel" style="display:none;margin-top:20px;"></div>
         </div>
       </div>
 
@@ -1577,6 +1584,26 @@
       <button class="btn-sm btn-notify" id="brief-notify-btn" onclick="notifyBrief()" style="margin-right:auto;display:none">✉ Notify client</button>
       <button class="btn-secondary" id="brief-save-draft" onclick="saveBrief('draft')">Save draft</button>
       <button class="btn-primary" id="brief-publish" onclick="saveBrief('published')">Publish to client</button>
+    </div>
+  </div>
+</div>
+
+<!-- Milestone edit modal -->
+<div id="ms-edit-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:800;display:none;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)closeMilestoneEdit()">
+  <div style="background:#22201d;border:1px solid rgba(247,243,237,0.1);border-radius:18px;padding:32px;width:100%;max-width:420px;">
+    <h2 style="font-family:'Fraunces',serif;font-size:20px;font-weight:400;margin:0 0 6px;color:#f7f3ed;">Edit date</h2>
+    <p id="ms-edit-label" style="font-size:13px;color:rgba(247,243,237,0.35);margin:0 0 24px;"></p>
+    <div style="margin-bottom:16px;">
+      <label style="font-size:12px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:rgba(247,243,237,0.35);display:block;margin-bottom:8px;">Date</label>
+      <input id="ms-edit-date" type="date" style="width:100%;box-sizing:border-box;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:10px 14px;font-family:'Outfit',sans-serif;font-size:15px;color:#f7f3ed;color-scheme:dark;">
+    </div>
+    <div style="margin-bottom:24px;">
+      <label style="font-size:12px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:rgba(247,243,237,0.35);display:block;margin-bottom:8px;">Notes (optional)</label>
+      <input id="ms-edit-notes" type="text" placeholder="Add a note…" style="width:100%;box-sizing:border-box;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:10px 14px;font-family:'Outfit',sans-serif;font-size:15px;color:#f7f3ed;">
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn-secondary" onclick="closeMilestoneEdit()">Cancel</button>
+      <button class="btn-primary" id="ms-edit-save" onclick="saveMilestoneEdit()">Save changes</button>
     </div>
   </div>
 </div>
@@ -2492,6 +2519,7 @@ function renderMilestonesDashboard() {
           </span>
           <span class="ms-row-date">${formatDate(m.date)}</span>
           <button class="ms-check-btn" onclick="completeMilestone('${m.id}','${m.clientId}')" title="Mark done">✓</button>
+          <button class="ms-edit-btn" onclick="openMilestoneEdit('${m.id}')" title="Edit">✎</button>
           <button class="ms-del-btn" onclick="deleteMilestoneConfirm('${m.id}','${m.clientId}')" title="Delete">×</button>
         </div>`;
       }).join('');
@@ -2603,6 +2631,7 @@ function renderClientMilestones(clientId) {
       </span>
       <span class="ms-row-date">${formatDate(m.date)}</span>
       <button class="ms-check-btn" onclick="completeMilestone('${m.id}','${clientId}')" title="Mark done">✓</button>
+      <button class="ms-edit-btn" onclick="openMilestoneEdit('${m.id}')" title="Edit">✎</button>
       <button class="ms-del-btn" onclick="deleteMilestoneConfirm('${m.id}','${clientId}')" title="Delete">×</button>
     </div>`;
   }).join('');
@@ -2738,6 +2767,43 @@ function renderMilestonesArchive() {
     <td class="ms-date">${m.completedAt ? new Date(m.completedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short'}) : '—'}</td>
     <td><div class="actions"><button class="btn-sm btn-delete" onclick="deleteMilestoneConfirm('${m.id}','${m.clientId}')" title="Delete">✕</button></div></td>
   </tr>`).join('');
+}
+
+let _msEditId = null;
+
+function openMilestoneEdit(id) {
+  const m = milestones.find(x => x.id === id);
+  if (!m) return;
+  _msEditId = id;
+  document.getElementById('ms-edit-label').textContent = m.label + (m.clientName ? ' — ' + m.clientName : '');
+  document.getElementById('ms-edit-date').value = m.date || '';
+  document.getElementById('ms-edit-notes').value = m.notes || '';
+  document.getElementById('ms-edit-overlay').style.display = 'flex';
+  document.getElementById('ms-edit-date').focus();
+}
+
+function closeMilestoneEdit() {
+  document.getElementById('ms-edit-overlay').style.display = 'none';
+  _msEditId = null;
+}
+
+async function saveMilestoneEdit() {
+  const m = milestones.find(x => x.id === _msEditId);
+  if (!m) return;
+  const date = document.getElementById('ms-edit-date').value;
+  if (!date) { document.getElementById('ms-edit-date').focus(); return; }
+  const notes = document.getElementById('ms-edit-notes').value.trim();
+  const btn = document.getElementById('ms-edit-save');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  const res = await api('PUT', '/api/admin/milestones', { id: m.id, clientId: m.clientId, date, notes });
+  btn.disabled = false; btn.textContent = 'Save changes';
+  if (!res.ok) { alert('Could not save. Please try again.'); return; }
+  m.date = date;
+  m.notes = notes;
+  closeMilestoneEdit();
+  renderMilestonesDashboard();
+  renderClientMilestones(m.clientId);
+  updateMilestoneBadges();
 }
 
 async function deleteMilestoneConfirm(id, clientId) {
@@ -2959,6 +3025,14 @@ const actionLabels = {
   presentation_deleted: 'Presentation deleted',
   access_revoked: 'Access revoked',
 };
+
+function toggleSecuritySection() {
+  const body = document.getElementById('security-body');
+  const chevron = document.getElementById('security-chevron');
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  chevron.style.transform = open ? 'rotate(0deg)' : 'rotate(-90deg)';
+}
 
 function toggleAuditLog(h2el) {
   const body = document.getElementById('audit-body');

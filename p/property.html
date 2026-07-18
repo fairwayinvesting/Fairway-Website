@@ -104,13 +104,13 @@
     .p-section-img{width:100%;border-radius:12px;display:block;margin-top:16px;border:1px solid rgba(247,243,237,0.07);}
 
     /* Demographics */
-    .p-demo-bars{display:flex;flex-direction:column;gap:12px;margin-bottom:16px;}
-    .p-demo-bar-row{display:flex;align-items:center;gap:12px;}
-    .p-demo-bar-label{font-size:13px;color:rgba(247,243,237,0.55);min-width:120px;flex-shrink:0;white-space:nowrap;}
-    .p-demo-bar-track{flex:1;height:8px;background:rgba(247,243,237,0.07);border-radius:100px;overflow:hidden;}
-    .p-demo-bar-fill{height:100%;border-radius:100px;background:#bd7a70;}
-    .p-demo-bar-pct{font-size:13px;font-weight:500;color:#f7f3ed;width:36px;text-align:right;flex-shrink:0;}
-    @media(max-width:480px){.p-demo-bar-label{min-width:105px;font-size:12px;}}
+    .p-demo-prop-bar{height:10px;border-radius:100px;overflow:hidden;display:flex;margin-bottom:20px;}
+    .p-demo-prop-seg{height:100%;transition:width .3s;}
+    .p-demo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;}
+    .p-demo-cell{background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.08);border-radius:12px;padding:14px 16px;}
+    .p-demo-cell-label{font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:6px;}
+    .p-demo-cell-pct{font-size:22px;font-weight:400;color:#f7f3ed;line-height:1;}
+    @media(max-width:500px){.p-demo-grid{grid-template-columns:1fr 1fr;}.p-demo-cell-pct{font-size:18px;}}
 
     /* Custom section blocks */
     .p-block{margin-bottom:20px;}
@@ -379,17 +379,29 @@ function render(d) {
   // Demographics
   if (d.demographics?.enabled) {
     const dm = d.demographics;
-    html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Area demographics</p><div class="p-demo-bars">`;
-    const bars = [['Owner occupier', dm.ownerOccupier], ['Renter', dm.renter], ['Public housing', dm.publicHousing]].filter(([,v]) => v);
-    bars.forEach(([label, pct]) => {
-      const num = parseFloat(pct) || 0;
-      html += `<div class="p-demo-bar-row">
-        <span class="p-demo-bar-label">${esc(label)}</span>
-        <div class="p-demo-bar-track"><div class="p-demo-bar-fill" style="width:${Math.min(num,100)}%"></div></div>
-        <span class="p-demo-bar-pct">${num}%</span>
-      </div>`;
-    });
-    html += `</div>`;
+    html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Area demographics</p>`;
+    const demoItems = [
+      { label: 'Owner occupier', val: dm.ownerOccupier, color: '#bd7a70' },
+      { label: 'Renter',         val: dm.renter,         color: '#8fa8c8' },
+      { label: 'Public housing', val: dm.publicHousing,  color: 'rgba(247,243,237,0.2)' },
+    ].filter(d => d.val);
+    const total = demoItems.reduce((s, d) => s + (parseFloat(d.val) || 0), 0);
+    if (demoItems.length > 0) {
+      // Proportion bar
+      html += `<div class="p-demo-prop-bar">`;
+      demoItems.forEach(d => {
+        const pct = total > 0 ? ((parseFloat(d.val) || 0) / total * 100).toFixed(1) : 0;
+        html += `<div class="p-demo-prop-seg" style="width:${pct}%;background:${d.color};"></div>`;
+      });
+      html += `</div>`;
+      // 3-col grid
+      html += `<div class="p-demo-grid">`;
+      demoItems.forEach(d => {
+        const num = parseFloat(d.val) || 0;
+        html += `<div class="p-demo-cell"><div class="p-demo-cell-label">${esc(d.label)}</div><div class="p-demo-cell-pct">${num}%</div></div>`;
+      });
+      html += `</div>`;
+    }
     if (dm.notes) html += `<p style="font-size:14px;color:rgba(247,243,237,0.5);line-height:1.7;margin-bottom:10px;">${esc(dm.notes)}</p>`;
     if (dm.imageUrl) html += `<img src="${esc(dm.imageUrl)}" class="p-section-img" alt="Demographics">`;
     html += `</div>`;
