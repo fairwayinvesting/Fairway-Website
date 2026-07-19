@@ -57,6 +57,13 @@
     .dash-row:last-child{border-bottom:none;}
     .dash-row-label{flex:1;min-width:0;font-size:13px;color:rgba(247,243,237,0.7);}
     .dash-row-meta{font-size:12px;color:rgba(247,243,237,0.3);white-space:nowrap;padding-top:1px;}
+    /* Partner list */
+    .partner-row{display:flex;align-items:center;gap:14px;padding:13px 18px;background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:12px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;}
+    .partner-row:hover{border-color:rgba(247,243,237,0.18);}
+    .partner-row-name{font-size:14px;color:#f7f3ed;font-weight:400;min-width:150px;}
+    .partner-row-company{font-size:12.5px;color:rgba(247,243,237,0.4);flex:1;}
+    .partner-row-type{font-size:11.5px;color:rgba(247,243,237,0.3);min-width:130px;}
+    .partner-row-count{font-size:12px;font-weight:500;color:rgba(189,122,112,0.85);min-width:80px;text-align:right;}
     /* Briefs section */
     .brief-row{display:flex;align-items:center;gap:14px;padding:14px 18px;background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:12px;margin-bottom:10px;flex-wrap:wrap;}
     .brief-row-name{font-size:14px;font-weight:400;color:#f7f3ed;flex:1;min-width:120px;}
@@ -652,6 +659,10 @@
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 2h10a1 1 0 011 1v10.5l-5-3-5 3V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
         Shortlist
       </button>
+      <button class="snav-item" onclick="showSection('partners',this)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10.5 10c1.657 0 3 .895 3 2v1h-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.4"/><circle cx="10.5" cy="4" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M2.5 13v-1c0-1.105 1.343-2 3.5-2s3.5.895 3.5 2v1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Partners
+      </button>
       <a class="snav-item" href="/proposal.html" target="_blank" style="text-decoration:none;">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="10" height="13" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 5h5M4.5 8h5M4.5 11h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M12 9l2.5 2.5-2.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Proposal
@@ -701,6 +712,10 @@
           <div class="dash-panel-title">Recent activity</div>
           <div id="dash-activity"><span style="font-size:13px;color:rgba(247,243,237,0.2);">Loading…</span></div>
         </div>
+      </div>
+      <div class="dash-panel" style="margin-top:18px;">
+        <div class="dash-panel-title">Top referrers</div>
+        <div id="dash-referrers"><span style="font-size:13px;color:rgba(247,243,237,0.2);">Loading…</span></div>
       </div>
     </div>
 
@@ -847,6 +862,15 @@
       <div id="sl-grid" class="sl-grid"></div>
     </div>
 
+    <!-- Partners -->
+    <div id="sec-partners" class="admin-section">
+      <div class="sec-header">
+        <h1>Partners</h1>
+        <button class="btn-primary" onclick="openPartnerModal(null)" style="font-size:13px;padding:10px 20px;">+ Add partner</button>
+      </div>
+      <div id="partners-list"><span style="font-size:13px;color:rgba(247,243,237,0.25);">Loading…</span></div>
+    </div>
+
     <!-- Settings -->
     <div id="sec-settings" class="admin-section">
       <div class="sec-header">
@@ -981,6 +1005,22 @@
   <div class="profile-body" id="profile-body">
     <div style="text-align:center;padding:40px;color:rgba(247,243,237,0.2);font-size:13px;">Loading…</div>
   </div>
+</div>
+
+<!-- ── Partner Panel ─────────────────────────────────────────────── -->
+<div class="profile-overlay" id="partner-overlay" onclick="closeCrmPartnerPanel()"></div>
+<div class="profile-panel" id="partner-panel">
+  <div class="profile-panel-header">
+    <div class="profile-panel-title">
+      <div class="profile-panel-name" id="prtnr-name"></div>
+      <div class="profile-panel-email" id="prtnr-sub"></div>
+    </div>
+    <button class="profile-close" onclick="closeCrmPartnerPanel()">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="profile-actions" id="prtnr-actions"></div>
+  <div class="profile-body" id="prtnr-body"></div>
 </div>
 
 <!-- ── Purchase Modal ─────────────────────────────────────────────── -->
@@ -1362,21 +1402,72 @@
       <label>How did they find Fairway?</label>
       <select id="f-referral" style="width:100%;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.11);border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Outfit',sans-serif;font-weight:300;color:#f7f3ed;outline:none;">
         <option value="">— Not recorded —</option>
-        <option value="Personal referral">Personal referral</option>
         <option value="Website / organic">Website / organic</option>
         <option value="Google / SEO">Google / SEO</option>
         <option value="Instagram">Instagram</option>
         <option value="LinkedIn">LinkedIn</option>
         <option value="Podcast / YouTube">Podcast / YouTube</option>
         <option value="Event or seminar">Event or seminar</option>
-        <option value="Partner agent">Partner agent</option>
+        <option value="Partner referral">Partner referral</option>
         <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Referred by</label>
+      <select id="f-referrer-id" style="width:100%;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.11);border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Outfit',sans-serif;font-weight:300;color:#f7f3ed;outline:none;">
+        <option value="">— No referrer —</option>
       </select>
     </div>
     <div class="error-msg" id="modal-error"></div>
     <div class="modal-footer">
       <button class="btn-secondary" id="modal-cancel">Cancel</button>
       <button class="btn-primary" id="modal-save">Save client</button>
+    </div>
+  </div>
+</div>
+
+<!-- Partner add/edit modal -->
+<div id="partner-modal-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:600;display:none;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)closePartnerModal()">
+  <div class="modal">
+    <h2 id="pm-title">Add partner</h2>
+    <input type="hidden" id="pm-id">
+    <div class="field">
+      <label>Full name <span style="color:#e07070;">*</span></label>
+      <input type="text" id="pm-name" placeholder="Jane Smith">
+    </div>
+    <div class="field">
+      <label>Company</label>
+      <input type="text" id="pm-company" placeholder="Smith Advisory">
+    </div>
+    <div class="field">
+      <label>Type</label>
+      <select id="pm-type" style="width:100%;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.11);border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Outfit',sans-serif;font-weight:300;color:#f7f3ed;outline:none;">
+        <option value="">— Select type —</option>
+        <option value="Mortgage broker">Mortgage broker</option>
+        <option value="Accountant">Accountant</option>
+        <option value="Financial planner">Financial planner</option>
+        <option value="Buyer's agent">Buyer's agent</option>
+        <option value="Solicitor / conveyancer">Solicitor / conveyancer</option>
+        <option value="Personal referral">Personal referral</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="pm-email" placeholder="jane@example.com">
+    </div>
+    <div class="field">
+      <label>Phone</label>
+      <input type="text" id="pm-phone" placeholder="0412 345 678">
+    </div>
+    <div class="field">
+      <label>Notes</label>
+      <textarea id="pm-notes" rows="3" placeholder="Any notes about this partner…" style="width:100%;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.11);border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Outfit',sans-serif;font-weight:300;color:#f7f3ed;outline:none;resize:vertical;box-sizing:border-box;"></textarea>
+    </div>
+    <div class="error-msg" id="pm-error"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closePartnerModal()">Cancel</button>
+      <button class="btn-primary" id="pm-save" onclick="savePartner()">Save partner</button>
     </div>
   </div>
 </div>
@@ -1695,6 +1786,192 @@ function renderPartnerList() {
   }).join('');
 }
 
+// ── CRM referral partners ─────────────────────────────────────────────────────
+let crmPartners = [];
+let crmPartnerPanelId = null;
+
+async function loadCrmPartners() {
+  const res = await api('GET', '/api/admin/referral-partners');
+  if (res.ok) crmPartners = await res.json();
+  renderPartnersSection();
+  populatePartnerDropdown();
+}
+
+function populatePartnerDropdown() {
+  const sel = document.getElementById('f-referrer-id');
+  if (!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— No referrer —</option>' +
+    crmPartners.map(p => `<option value="${p.id}">${esc(p.name)}${p.company ? ` (${esc(p.company)})` : ''}</option>`).join('');
+  if (cur) sel.value = cur;
+}
+
+function renderPartnersSection() {
+  const el = document.getElementById('partners-list');
+  if (!el) return;
+  if (!crmPartners.length) {
+    el.innerHTML = '<p style="font-size:14px;color:rgba(247,243,237,0.25);padding:8px 0;">No partners added yet. Add a partner to start tracking referrals.</p>';
+    renderTopReferrers();
+    return;
+  }
+  const referralCounts = {};
+  clients.forEach(c => { if (c.referrerId) referralCounts[c.referrerId] = (referralCounts[c.referrerId] || 0) + 1; });
+  const sorted = [...crmPartners].sort((a,b) => (referralCounts[b.id]||0) - (referralCounts[a.id]||0));
+  el.innerHTML = sorted.map(p => {
+    const count = referralCounts[p.id] || 0;
+    return `<div class="partner-row" onclick="openCrmPartnerPanel('${p.id}')">
+      <div class="partner-row-name">${esc(p.name)}</div>
+      <div class="partner-row-company">${esc(p.company || '—')}</div>
+      <div class="partner-row-type">${esc(p.type || '—')}</div>
+      <div class="partner-row-count">${count} referral${count !== 1 ? 's' : ''}</div>
+    </div>`;
+  }).join('');
+  renderTopReferrers();
+}
+
+function renderTopReferrers() {
+  const el = document.getElementById('dash-referrers');
+  if (!el) return;
+  const referralCounts = {};
+  clients.forEach(c => { if (c.referrerId) referralCounts[c.referrerId] = (referralCounts[c.referrerId] || 0) + 1; });
+  const top = crmPartners
+    .map(p => ({ ...p, count: referralCounts[p.id] || 0 }))
+    .filter(p => p.count > 0)
+    .sort((a,b) => b.count - a.count)
+    .slice(0, 5);
+  if (!top.length) {
+    el.innerHTML = '<p style="font-size:13px;color:rgba(247,243,237,0.25);padding:4px 0;">No referrals recorded yet.</p>';
+    return;
+  }
+  el.innerHTML = top.map(p => `<div class="dash-row">
+    <div class="dash-row-label" style="cursor:pointer;" onclick="showSection('partners',Array.from(document.querySelectorAll('.snav-item')).find(b=>(b.getAttribute('onclick')||'').includes(\"'partners'\")));openCrmPartnerPanel('${p.id}')">${esc(p.name)}<span style="display:block;font-size:11.5px;color:rgba(247,243,237,0.3);">${esc(p.type || p.company || '')}</span></div>
+    <div class="dash-row-meta">${p.count} referral${p.count !== 1 ? 's' : ''}</div>
+  </div>`).join('');
+}
+
+function openPartnerModal(id) {
+  document.getElementById('pm-id').value = id || '';
+  document.getElementById('pm-title').textContent = id ? 'Edit partner' : 'Add partner';
+  document.getElementById('pm-error').classList.remove('visible');
+  document.getElementById('pm-save').disabled = false;
+  document.getElementById('pm-save').textContent = 'Save partner';
+  if (id) {
+    const p = crmPartners.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('pm-name').value = p.name || '';
+    document.getElementById('pm-company').value = p.company || '';
+    document.getElementById('pm-type').value = p.type || '';
+    document.getElementById('pm-email').value = p.email || '';
+    document.getElementById('pm-phone').value = p.phone || '';
+    document.getElementById('pm-notes').value = p.notes || '';
+  } else {
+    ['pm-name','pm-company','pm-email','pm-phone','pm-notes'].forEach(id => { document.getElementById(id).value = ''; });
+    document.getElementById('pm-type').value = '';
+  }
+  document.getElementById('partner-modal-overlay').style.display = 'flex';
+}
+
+function closePartnerModal() {
+  document.getElementById('partner-modal-overlay').style.display = 'none';
+}
+
+async function savePartner() {
+  const btn = document.getElementById('pm-save');
+  const errEl = document.getElementById('pm-error');
+  errEl.classList.remove('visible');
+  const id = document.getElementById('pm-id').value;
+  const name = document.getElementById('pm-name').value.trim();
+  if (!name) { errEl.textContent = 'Name is required.'; errEl.classList.add('visible'); return; }
+  btn.disabled = true; btn.textContent = 'Saving…';
+  const body = {
+    ...(id ? { id } : {}),
+    name,
+    company: document.getElementById('pm-company').value.trim() || null,
+    type: document.getElementById('pm-type').value || null,
+    email: document.getElementById('pm-email').value.trim() || null,
+    phone: document.getElementById('pm-phone').value.trim() || null,
+    notes: document.getElementById('pm-notes').value.trim() || null,
+  };
+  const res = await api(id ? 'PUT' : 'POST', '/api/admin/referral-partners', body);
+  if (res.ok) {
+    const data = await res.json();
+    if (id) {
+      const idx = crmPartners.findIndex(p => p.id === id);
+      if (idx !== -1) crmPartners[idx] = data;
+    } else {
+      crmPartners.push(data);
+    }
+    closePartnerModal();
+    renderPartnersSection();
+    populatePartnerDropdown();
+    if (crmPartnerPanelId === id) renderCrmPartnerPanel();
+  } else {
+    const d = await res.json().catch(() => ({}));
+    errEl.textContent = d.error || 'Save failed.';
+    errEl.classList.add('visible');
+    btn.disabled = false; btn.textContent = 'Save partner';
+  }
+}
+
+async function deletePartner(id) {
+  if (!confirm('Remove this partner? Clients linked to them will lose their referrer association.')) return;
+  const res = await api('DELETE', `/api/admin/referral-partners?id=${id}`);
+  if (res.ok) {
+    crmPartners = crmPartners.filter(p => p.id !== id);
+    closeCrmPartnerPanel();
+    renderPartnersSection();
+    populatePartnerDropdown();
+  }
+}
+
+function openCrmPartnerPanel(id) {
+  crmPartnerPanelId = id;
+  const p = crmPartners.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('prtnr-name').textContent = p.name;
+  document.getElementById('prtnr-sub').textContent = [p.type, p.company].filter(Boolean).join(' · ') || 'Partner';
+  document.getElementById('prtnr-actions').innerHTML = `
+    <button class="btn-secondary" onclick="openPartnerModal('${id}')" style="font-size:12px;padding:7px 14px;">Edit</button>
+    <button class="btn-secondary" onclick="deletePartner('${id}')" style="font-size:12px;padding:7px 14px;color:#f08080;border-color:rgba(240,128,128,0.2);">Delete</button>`;
+  renderCrmPartnerPanel();
+  document.getElementById('partner-overlay').classList.add('open');
+  document.getElementById('partner-panel').classList.add('open');
+}
+
+function closeCrmPartnerPanel() {
+  document.getElementById('partner-overlay').classList.remove('open');
+  document.getElementById('partner-panel').classList.remove('open');
+  crmPartnerPanelId = null;
+}
+
+function renderCrmPartnerPanel() {
+  const el = document.getElementById('prtnr-body');
+  const p = crmPartners.find(x => x.id === crmPartnerPanelId);
+  if (!p || !el) return;
+  const referred = clients.filter(c => c.referrerId === p.id);
+  const pf = (label, val) => val ? `<div class="profile-field"><label>${label}</label><div class="pf-val">${esc(val)}</div></div>` : '';
+  el.innerHTML = `
+    <div class="profile-section">
+      <div class="profile-section-title">Details</div>
+      <div class="profile-fields">
+        ${pf('Type', p.type)}
+        ${pf('Company', p.company)}
+        ${pf('Email', p.email)}
+        ${pf('Phone', p.phone)}
+      </div>
+      ${p.notes ? `<div style="margin-top:16px;font-size:13px;color:rgba(247,243,237,0.55);line-height:1.65;">${esc(p.notes)}</div>` : ''}
+    </div>
+    <div class="profile-section">
+      <div class="profile-section-title">Referred clients (${referred.length})</div>
+      ${referred.length ? referred.map(c => `
+        <div class="dash-row" style="cursor:pointer;" onclick="closeCrmPartnerPanel();openClientProfile('${c.id}')">
+          <div class="dash-row-label">${esc(c.name)}<span style="display:block;font-size:11.5px;color:rgba(247,243,237,0.3);">${esc(c.email)}</span></div>
+          <div class="dash-row-meta">${c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '—'}</div>
+        </div>`).join('') : '<p style="font-size:13px;color:rgba(247,243,237,0.25);padding:4px 0;">No clients referred yet.</p>'}
+    </div>
+  `;
+}
+
 // Auth is handled entirely by the fw_admin HttpOnly cookie set by admin-login.
 let clients = [];
 let milestones = [];
@@ -1721,6 +1998,7 @@ function showSection(id, btn) {
   if (btn) btn.classList.add('active');
   if (id === 'briefs') renderBriefs();
   if (id === 'shortlist') loadShortlist();
+  if (id === 'partners') renderPartnersSection();
   if (id === 'settings') loadCompliance();
   localStorage.setItem('fw_admin_section', id);
 }
@@ -1737,6 +2015,7 @@ function renderDashboard() {
     return { ...m, _d: d };
   }).filter(m => m._d >= now && m._d <= in14).sort((a,b) => a._d - b._d);
   document.getElementById('ds-dates').textContent = upcoming.length || '0';
+  renderTopReferrers();
 
   const datesEl = document.getElementById('dash-dates');
   if (!upcoming.length) {
@@ -1785,6 +2064,7 @@ async function completeLogin() {
   loadTotpStatus();
   loadCompliance();
   loadShortlist();
+  loadCrmPartners();
 }
 
 document.getElementById('gate-btn').addEventListener('click', async function() {
@@ -2043,6 +2323,8 @@ function openAdd() {
   document.getElementById('f-send-email').checked = true;
   document.getElementById('send-email-field').style.display = 'block';
   document.getElementById('f-referral').value = '';
+  document.getElementById('f-referrer-id').value = '';
+  populatePartnerDropdown();
   document.getElementById('modal-error').classList.remove('visible');
   buildMarketsGrid([]);
   document.getElementById('modal-overlay').classList.add('open');
@@ -2063,6 +2345,8 @@ function openEdit(id) {
   document.getElementById('active-label').textContent = c.active ? 'Active' : 'Inactive';
   document.getElementById('send-email-field').style.display = 'none';
   document.getElementById('f-referral').value = c.referralSource || '';
+  populatePartnerDropdown();
+  document.getElementById('f-referrer-id').value = c.referrerId || '';
   document.getElementById('modal-error').classList.remove('visible');
   buildMarketsGrid(c.markets || []);
   document.getElementById('modal-overlay').classList.add('open');
@@ -2095,9 +2379,10 @@ document.getElementById('modal-save').addEventListener('click', async function()
 
   const sendEmail = !id && document.getElementById('f-send-email').checked;
   const referralSource = document.getElementById('f-referral').value || null;
+  const referrerId = document.getElementById('f-referrer-id').value || null;
   const body = id
-    ? { id, name, markets, active, referralSource, ...(password ? { password } : {}) }
-    : { name, email, password, markets, sendEmail, referralSource };
+    ? { id, name, markets, active, referralSource, referrerId, ...(password ? { password } : {}) }
+    : { name, email, password, markets, sendEmail, referralSource, referrerId };
 
   const res = await api(id ? 'PUT' : 'POST', '/api/admin/clients', body);
   const data = await res.json();
@@ -2105,9 +2390,9 @@ document.getElementById('modal-save').addEventListener('click', async function()
   if (res.ok) {
     if (id) {
       const idx = clients.findIndex(c => c.id === id);
-      if (idx !== -1) { clients[idx].name = name; clients[idx].markets = markets; clients[idx].active = active; }
+      if (idx !== -1) { clients[idx].name = name; clients[idx].markets = markets; clients[idx].active = active; clients[idx].referralSource = referralSource; clients[idx].referrerId = referrerId; }
     } else {
-      clients.push({ id: data.id, name, email: email.toLowerCase().trim(), markets, active: true, createdAt: new Date().toISOString(), referralSource: referralSource || null });
+      clients.push({ id: data.id, name, email: email.toLowerCase().trim(), markets, active: true, createdAt: new Date().toISOString(), referralSource: referralSource || null, referrerId: referrerId || null });
     }
     renderTable();
     closeModal();
@@ -3643,7 +3928,8 @@ function renderEngagementTab() {
         <div class="profile-field"><label>Stage updated</label><div class="pf-val">${client.pipelineStageUpdatedAt ? new Date(client.pipelineStageUpdatedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '—'}</div></div>
         <div class="profile-field"><label>Member since</label><div class="pf-val">${client.createdAt ? new Date(client.createdAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '—'}</div></div>
         <div class="profile-field"><label>Total properties</label><div class="pf-val">${crmPurchases.length}</div></div>
-        <div class="profile-field"><label>Referral source</label><div class="pf-val">${client.referralSource || '<span class="pf-empty">—</span>'}</div></div>
+        <div class="profile-field"><label>Discovery channel</label><div class="pf-val">${client.referralSource || '<span class="pf-empty">—</span>'}</div></div>
+        ${(()=>{ const p = crmPartners.find(x => x.id === client.referrerId); return p ? `<div class="profile-field"><label>Referred by</label><div class="pf-val" style="cursor:pointer;color:#bd7a70;" onclick="closeCrmPartnerPanel();closeClientProfile();setTimeout(()=>openCrmPartnerPanel('${p.id}'),50)">${esc(p.name)}</div></div>` : ''; })()}
       </div>
     </div>
 

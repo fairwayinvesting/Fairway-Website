@@ -106,13 +106,13 @@ export default async (req) => {
   const clients = (await store.get('all', { type: 'json' })) || [];
 
   if (req.method === 'GET') {
-    return json(clients.filter(c => !c.deleted).map(({ id, name, email, markets, active, createdAt, setupToken, pipelineStage, pipelineStageUpdatedAt, status, engagementNumber }) =>
-      ({ id, name, email, markets, active, createdAt, hasSetupToken: !!setupToken, pipelineStage: pipelineStage || null, pipelineStageUpdatedAt: pipelineStageUpdatedAt || null, status: status || 'active', engagementNumber: engagementNumber || 1 })
+    return json(clients.filter(c => !c.deleted).map(({ id, name, email, markets, active, createdAt, setupToken, pipelineStage, pipelineStageUpdatedAt, status, engagementNumber, referralSource, referrerId }) =>
+      ({ id, name, email, markets, active, createdAt, hasSetupToken: !!setupToken, pipelineStage: pipelineStage || null, pipelineStageUpdatedAt: pipelineStageUpdatedAt || null, status: status || 'active', engagementNumber: engagementNumber || 1, referralSource: referralSource || null, referrerId: referrerId || null })
     ));
   }
 
   if (req.method === 'POST') {
-    const { name, email, password, markets, sendEmail = true } = await req.json().catch(() => ({}));
+    const { name, email, password, markets, sendEmail = true, referralSource, referrerId } = await req.json().catch(() => ({}));
     if (!name || !email) return json({ error: 'name and email required' }, 400);
 
     const emailNorm = email.toLowerCase().trim();
@@ -144,6 +144,8 @@ export default async (req) => {
       markets: Array.isArray(markets) ? markets : [],
       active: true,
       createdAt: new Date().toISOString(),
+      referralSource: referralSource || null,
+      referrerId: referrerId || null,
       setupToken,
       setupTokenExpiry,
     };
@@ -170,7 +172,7 @@ export default async (req) => {
 
   if (req.method === 'PUT') {
     const body = await req.json().catch(() => ({}));
-    const { id, name, markets, active, password, action, datesArchived, pipelineStage, status, engagementNumber } = body;
+    const { id, name, markets, active, password, action, datesArchived, pipelineStage, status, engagementNumber, referralSource, referrerId } = body;
     const idx = clients.findIndex(c => c.id === id);
     if (idx === -1) return json({ error: 'Client not found' }, 404);
 
@@ -228,6 +230,8 @@ export default async (req) => {
       }
     }
     if (engagementNumber !== undefined) client.engagementNumber = engagementNumber;
+    if (referralSource !== undefined) client.referralSource = referralSource;
+    if (referrerId !== undefined) client.referrerId = referrerId;
     if (password) {
       const salt = crypto.randomBytes(16).toString('hex');
       client.passwordHash = await pbkdf2Hash(password, salt);
