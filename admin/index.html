@@ -541,6 +541,9 @@
     .profile-field label{display:block;font-size:11px;font-weight:500;color:rgba(247,243,237,0.3);margin-bottom:3px;letter-spacing:0.04em;}
     .profile-field .pf-val{font-size:13.5px;color:#f7f3ed;line-height:1.5;}
     .profile-field.full{grid-column:1/-1;}
+    .pf-edit-input{width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:7px;padding:6px 9px;font-size:13px;font-family:'Outfit',sans-serif;font-weight:300;color:#f7f3ed;outline:none;box-sizing:border-box;}
+    .pf-edit-input:focus{border-color:rgba(189,122,112,0.5);}
+    .pf-edit-actions{display:flex;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid rgba(247,243,237,0.07);}
     .pf-empty{color:rgba(247,243,237,0.2)!important;font-style:italic;}
 
     /* ── Purchase Cards ──────────────────────────────────── */
@@ -1689,6 +1692,7 @@ let compEditId = null;
 let crmFilter = 'all';
 let crmProfileClientId = null;
 let crmProfileTab = 'profile';
+let crmProfileEditing = false;
 let crmPurchases = [];
 let purchaseEditId = null;
 let crmQuestionnaire = null;
@@ -3288,9 +3292,11 @@ function closeClientProfile() {
   document.getElementById('profile-overlay').classList.remove('open');
   document.getElementById('profile-panel').classList.remove('open');
   crmProfileClientId = null;
+  crmProfileEditing = false;
 }
 
 function switchProfileTab(tab, btn) {
+  crmProfileEditing = false;
   crmProfileTab = tab;
   document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
   if (btn) btn.classList.add('active');
@@ -3320,6 +3326,7 @@ function renderProfileTab() {
     </div>`;
     return;
   }
+  if (crmProfileEditing) { renderProfileEditTab(el, q); return; }
 
   const hasCoInvestor = q.coInvestor === 'Yes';
   const entityType = q.entityType || 'Individual';
@@ -3329,6 +3336,9 @@ function renderProfileTab() {
   const hasProps = q.ownProperties === 'Yes';
 
   el.innerHTML = `
+    <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+      <button class="btn-secondary" onclick="crmProfileEditing=true;renderProfileTab();" style="font-size:12px;padding:7px 14px;">Edit profile</button>
+    </div>
     <div class="profile-section">
       <div class="profile-section-title">Personal details</div>
       <div class="profile-fields">
@@ -3433,6 +3443,101 @@ function renderProfileTab() {
 
     <div style="font-size:11px;color:rgba(247,243,237,0.2);margin-top:12px;">Submitted: ${q.submittedAt ? new Date(q.submittedAt).toLocaleDateString('en-AU', {day:'numeric',month:'long',year:'numeric'}) : '—'}</div>
   `;
+}
+
+function renderProfileEditTab(el, q) {
+  const f = (key, label, val, full) => `
+    <div class="profile-field${full?' full':''}">
+      <label>${label}</label>
+      <input class="pf-edit-input" data-key="${key}" value="${esc(String(val||''))}">
+    </div>`;
+  const hasCoInvestor = q.coInvestor === 'Yes';
+  const entityType = q.entityType || 'Individual';
+  const hasBroker = q.hasBroker === 'Yes';
+  const hasAccountant = q.hasAccountant === 'Yes';
+  const hasProps = q.ownProperties === 'Yes';
+
+  el.innerHTML = `
+    <div class="profile-section">
+      <div class="profile-section-title">Personal details</div>
+      <div class="profile-fields">
+        ${f('firstName','First name',q.firstName)} ${f('middleName','Middle name',q.middleName)}
+        ${f('lastName','Last name',q.lastName)} ${f('dob','Date of birth',q.dob)}
+        ${f('phone','Phone',q.phone)} ${f('email','Email',q.email)}
+        ${f('state','State',q.state)} ${f('homeAddress','Home address',q.homeAddress,true)}
+      </div>
+    </div>
+    ${hasCoInvestor ? `<div class="profile-section">
+      <div class="profile-section-title">Co-investor</div>
+      <div class="profile-fields">
+        ${f('p2FirstName','First name',q.p2FirstName)} ${f('p2LastName','Last name',q.p2LastName)}
+        ${f('p2Relationship','Relationship',q.p2Relationship)} ${f('p2Phone','Phone',q.p2Phone)}
+        ${f('p2Email','Email',q.p2Email,true)}
+      </div>
+    </div>` : ''}
+    ${entityType!=='Individual'?`<div class="profile-section">
+      <div class="profile-section-title">Entity & structure</div>
+      <div class="profile-fields">
+        ${entityType==='Company'?`${f('companyName','Company name',q.companyName)}${f('companyAbn','ABN',q.companyAbn)}${f('companyAcn','ACN',q.companyAcn)}`:''}
+        ${entityType==='Trust'?`${f('trustName','Trust name',q.trustName)}${f('trustAbn','ABN',q.trustAbn)}${f('trustBeneficiaries','Beneficiaries',q.trustBeneficiaries,true)}`:''}
+        ${entityType==='SMSF'?`${f('smsfName','SMSF name',q.smsfName)}${f('smsfAbn','ABN',q.smsfAbn)}${f('smsfMembers','Members',q.smsfMembers,true)}`:''}
+      </div>
+    </div>`:''}
+    <div class="profile-section">
+      <div class="profile-section-title">Financial position</div>
+      <div class="profile-fields">
+        ${f('annualSalary','Annual salary',q.annualSalary)} ${f('cashSavings','Cash savings',q.cashSavings)}
+        ${f('dependants','Dependants',q.dependants)} ${f('otherDebts','Other debts',q.otherDebts)}
+        ${f('weeklyRentPaid','Weekly rent paid',q.weeklyRentPaid)} ${f('fundingMethod','Funding method',q.fundingMethod)}
+        ${f('maxPurchasePrice','Max purchase price',q.maxPurchasePrice)}
+        ${q.ownPpor==='Yes'?`${f('pporState','PPOR state',q.pporState)}${f('pporValue','PPOR value',q.pporValue)}${f('pporLoan','PPOR loan balance',q.pporLoan)}${f('pporRate','PPOR rate',q.pporRate)}`:''}
+      </div>
+    </div>
+    <div class="profile-section">
+      <div class="profile-section-title">Goals & risk</div>
+      <div class="profile-fields">
+        ${f('motivation','Motivation',q.motivation)} ${f('timeframe','Timeframe',q.timeframe)}
+        ${f('riskTolerance','Risk tolerance',q.riskTolerance)}
+        ${f('statesToAvoidList','States to avoid',q.statesToAvoidList)}
+      </div>
+    </div>
+    ${hasBroker?`<div class="profile-section">
+      <div class="profile-section-title">Broker</div>
+      <div class="profile-fields">
+        ${f('brokerName','Name',q.brokerName)} ${f('brokerPhone','Phone',q.brokerPhone)}
+        ${f('brokerEmail','Email',q.brokerEmail)} ${f('brokerCapacity','Approved capacity',q.brokerCapacity)}
+      </div>
+    </div>`:''}
+    ${hasAccountant?`<div class="profile-section">
+      <div class="profile-section-title">Accountant</div>
+      <div class="profile-fields">
+        ${f('accountantName','Name',q.accountantName)} ${f('accountantPhone','Phone',q.accountantPhone)}
+        ${f('accountantEmail','Email',q.accountantEmail,true)}
+      </div>
+    </div>`:''}
+    <div class="pf-edit-actions">
+      <button class="btn-primary" onclick="saveProfileEdits()" style="font-size:13px;">Save changes</button>
+      <button class="btn-secondary" onclick="crmProfileEditing=false;renderProfileTab();" style="font-size:13px;">Cancel</button>
+    </div>
+  `;
+}
+
+async function saveProfileEdits() {
+  const btn = document.querySelector('.pf-edit-actions .btn-primary');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  const updated = { ...crmQuestionnaire };
+  document.querySelectorAll('.pf-edit-input[data-key]').forEach(inp => {
+    updated[inp.dataset.key] = inp.value.trim();
+  });
+  const res = await api('PUT', `/api/admin/questionnaire?clientId=${crmProfileClientId}`, updated);
+  if (res.ok) {
+    crmQuestionnaire = updated;
+    crmProfileEditing = false;
+    renderProfileTab();
+  } else {
+    btn.disabled = false; btn.textContent = 'Save changes';
+    alert('Failed to save — please try again.');
+  }
 }
 
 function renderPropertiesTab() {

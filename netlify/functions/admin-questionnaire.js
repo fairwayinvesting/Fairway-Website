@@ -21,6 +21,14 @@ export default async (req) => {
   if (!client) return json({ error: 'Client not found' }, 404);
 
   const qStore = getStore('fairway-questionnaires');
+
+  if (req.method === 'PUT') {
+    let body;
+    try { body = await req.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
+    await qStore.setJSON(blobKey(client.email), { ...body, updatedAt: new Date().toISOString() });
+    return json({ ok: true });
+  }
+
   const data = await qStore.get(blobKey(client.email), { type: 'json' }).catch(() => null);
   if (!data) return json(null);
   return json(data);
@@ -28,5 +36,5 @@ export default async (req) => {
 
 export const config = {
   path: '/api/admin/questionnaire',
-  method: ['GET'],
+  method: ['GET', 'PUT'],
 };
