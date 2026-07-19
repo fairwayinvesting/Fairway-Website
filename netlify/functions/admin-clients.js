@@ -243,12 +243,33 @@ export default async (req) => {
   }
 
   if (req.method === 'DELETE') {
-    const id = new URL(req.url).searchParams.get('id');
-    if (!id) return json({ error: 'id required' }, 400);
+    const url = new URL(req.url);
+    const id    = url.searchParams.get('id');
+    const purgeEmail = url.searchParams.get('email');
     const { password } = await req.json().catch(() => ({}));
     if (!password || password !== process.env.ADMIN_PASSWORD) {
       return json({ error: 'Incorrect password' }, 403);
     }
+
+    // Force-purge: hard-remove ALL entries with a given email (maintenance escape-hatch for stuck records)
+    if (!id && purgeEmail) {
+      const norm = purgeEmail.toLowerCase().trim();
+      const toRemove = clients.filter(c => c.email?.toLowerCase() === norm);
+      if (!toRemove.length) return json({ error: 'No entries found for that email' }, 404);
+      const kept = clients.filter(c => c.email?.toLowerCase() !== norm);
+      await store.setJSON('all', kept);
+      await Promise.all(toRemove.flatMap(c => [
+        getStore('fairway-questionnaires').delete(c.email.toLowerCase().replace(/[^a-z0-9]/g, '-')).catch(() => {}),
+        getStore('fairway-briefs').delete(c.id).catch(() => {}),
+        getStore('fairway-milestones').delete(c.id).catch(() => {}),
+        getStore('fairway-purchases').delete(c.id).catch(() => {}),
+        getStore('fairway-client-notes').delete(c.id).catch(() => {}),
+      ]));
+      appendAudit('client_purged', `Force-purged ${toRemove.length} stuck entr${toRemove.length !== 1 ? 'ies' : 'y'} for ${norm}`);
+      return json({ ok: true, purged: toRemove.length });
+    }
+
+    if (!id) return json({ error: 'id required' }, 400);
     const toDelete = clients.find(c => c.id === id);
     if (!toDelete) return json({ error: 'Not found' }, 404);
     // Soft-delete: keep in the array so the email uniqueness check on re-creation works reliably,

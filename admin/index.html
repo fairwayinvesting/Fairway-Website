@@ -2082,8 +2082,26 @@ document.getElementById('modal-save').addEventListener('click', async function()
     renderTable();
     closeModal();
   } else {
-    errEl.textContent = data.error || 'Save failed.';
-    errEl.classList.add('visible');
+    if (!id && res.status === 409 && data.error === 'Email already exists') {
+      errEl.innerHTML = `Email already exists. <a href="#" id="purge-retry-link" style="color:#B5715A;text-decoration:underline;">Purge stuck record and retry?</a>`;
+      errEl.classList.add('visible');
+      document.getElementById('purge-retry-link').onclick = async (e) => {
+        e.preventDefault();
+        const pw = prompt('Enter admin password to purge the stuck record:');
+        if (!pw) return;
+        const purgeRes = await api('DELETE', `/api/admin/clients?email=${encodeURIComponent(email)}`, { password: pw });
+        if (purgeRes.ok) {
+          errEl.textContent = 'Stuck record purged — retrying…';
+          document.getElementById('modal-save').click();
+        } else {
+          const pd = await purgeRes.json().catch(() => ({}));
+          errEl.textContent = 'Purge failed: ' + (pd.error || 'unknown error');
+        }
+      };
+    } else {
+      errEl.textContent = data.error || 'Save failed.';
+      errEl.classList.add('visible');
+    }
   }
   this.disabled = false;
   this.textContent = 'Save client';
