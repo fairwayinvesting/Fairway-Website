@@ -40,10 +40,10 @@ At ~$643k median, Bendigo houses trade at a significant discount to both Melbour
 
 ## lukesTake.primaryThesis
 
-Bendigo is a city that often gets overlooked because it doesn't have the single dramatic catalyst — a fast rail announcement or a defence base. But what it does have is something arguably more durable: a diversified, stable employment base, a fully functional urban environment, and a yield profile that I find genuinely compelling for investors focused on income.
+Bendigo is a city that often gets overlooked because it doesn't have a single dramatic catalyst like a fast rail announcement or a defence base. But what it does have is something arguably more durable: a diversified, stable employment base, a fully functional urban environment, and genuine income-generation potential for investors with a long hold horizon.
 
 ---
 
 ## lukesTake.secondaryThesis
 
-The selectivity here is around property type and location within the city. Not all of Bendigo tells the same story — what I focus on is the established inner ring, close to healthcare and education employment, where rental demand is structural rather than cyclical. That's where the strongest long-term hold case exists.
+The selectivity here is around property type and location within the city. Not all of Bendigo tells the same story. What I focus on is the established inner ring, close to healthcare and education employment, where rental demand is structural rather than cyclical. That's where the strongest long-term hold case exists.
