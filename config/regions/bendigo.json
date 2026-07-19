@@ -1,0 +1,53 @@
+{
+  "slug": "bendigo",
+  "displayName": "Bendigo",
+  "state": "VIC",
+  "heroTagline": "Established regional city · 150km northwest of Melbourne CBD · Victoria’s fourth-largest city",
+
+  "geography": {
+    "lgas": ["Greater Bendigo"],
+    "postcodes": ["3550","3551","3552","3554","3555","3556","3557","3558"],
+    "suburbs": [
+      "Bendigo","Kangaroo Flat","Golden Square","Strathfieldsaye","Eaglehawk",
+      "Long Gully","California Gully","Epsom","Quarry Hill","Flora Hill",
+      "White Hills","Kennington","Spring Gully","Maiden Gully"
+    ]
+  },
+
+  "map": { "lat": -36.7570, "lng": 144.2794, "zoom": 11 },
+
+  "content": "content/bendigo.json",
+
+  "fetch": {
+    "preferLgaLevel": true,
+    "restrictedTrailingMonths": 12,
+    "restrictedSeriesMax": 4,
+    "maxRowsPerRefresh": 200
+  },
+
+  "overrides": {
+    "_note": "Set any field to a non-null value to pin it. Pinned values render identically to fetched values but are flagged in every ledger summary with a [PINNED] marker so they are not forgotten. Set to null to use fetched data.",
+    "houseMedian": null,
+    "unitMedian": null,
+    "vacancyPct": null,
+    "daysOnMarket": null,
+    "clearanceRatePct": null,
+    "propertiesListed": null,
+    "houseRentWeeklyLow": null,
+    "houseRentWeeklyHigh": null,
+    "unitRentWeeklyLow": null,
+    "unitRentWeeklyHigh": null,
+    "houseYieldLow": null,
+    "houseYieldHigh": null,
+    "unitYieldLow": null,
+    "unitYieldHigh": null,
+    "population": null,
+    "populationGrowthPct": null,
+    "medianAge": null,
+    "ownerOccupierPct": null,
+    "growth": {
+      "houses": { "yr1Pct": null, "yr3Pct": null, "yr5Pct": null, "yr10Pct": null },
+      "units":  { "yr1Pct": null, "yr3Pct": null, "yr5Pct": null, "yr10Pct": null }
+    }
+  }
+}

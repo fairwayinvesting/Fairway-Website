@@ -7,7 +7,7 @@ const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 
 export default async (req) => {
-  if (!checkAdmin(req)) return json({ error: 'Unauthorized' }, 401);
+  if (!(await checkAdmin(req))) return json({ error: 'Unauthorized' }, 401);
 
   const store = getStore('fairway-shortlist');
   const all = (await store.get('all', { type: 'json' }).catch(() => null)) || [];

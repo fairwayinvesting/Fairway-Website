@@ -121,7 +121,7 @@ async function migrateViewsIfNeeded(presentations, presStore) {
 }
 
 export default async (req) => {
-  if (!checkAdmin(req)) return json({ error: 'Unauthorized' }, 401);
+  if (!(await checkAdmin(req))) return json({ error: 'Unauthorized' }, 401);
 
   const store = getStore('fairway-presentations');
   const presentations = (await store.get('all', { type: 'json' })) || [];

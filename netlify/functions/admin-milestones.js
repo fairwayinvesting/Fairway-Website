@@ -126,7 +126,7 @@ function buildShareEmail(clientName, milestones, note, recipientName) {
 // ── Handler ───────────────────────────────────────────────────────────────────
 
 export default async (req) => {
-  if (!checkAdmin(req)) return json({ error: 'Unauthorized' }, 401);
+  if (!(await checkAdmin(req))) return json({ error: 'Unauthorized' }, 401);
 
   // ── GET ────────────────────────────────────────────────────────────────────
   if (req.method === 'GET') {

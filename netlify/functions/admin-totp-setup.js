@@ -27,7 +27,7 @@ const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
 
 export default async (req) => {
-  if (!checkAdmin(req)) return json({ error: 'Unauthorized' }, 401);
+  if (!(await checkAdmin(req))) return json({ error: 'Unauthorized' }, 401);
 
   const configured = !!process.env.TOTP_SECRET;
 

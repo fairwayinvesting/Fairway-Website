@@ -1,0 +1,330 @@
+{
+  "_schema": "htag-endpoints/v1",
+  "_note": "Whitelist of all known HtAG MCP tools. Tools not listed here MAY NOT be called. tierConfirmed:false → ledger budgets at Restricted ($0.222/row) regardless of tier field. Caps are monthly row limits per endpoint from the HtAG developer portal.",
+
+  "tierRates": {
+    "Reference":  0.0020,
+    "Standard":   0.0310,
+    "Enhanced":   0.0750,
+    "Premium":    0.1210,
+    "Restricted": 0.2220
+  },
+
+  "tools": {
+
+    "lookup_lgas": {
+      "tier": "Reference", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": true, "v1Use": "resolve LGA name to code before any market call"
+    },
+    "lookup_localities": {
+      "tier": "Reference", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": true, "v1Use": "resolve suburb/locality names"
+    },
+    "concordance_lga_code_to_lga": {
+      "tier": "Reference", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": true, "v1Use": "reverse-lookup LGA code"
+    },
+    "concordance_lga_to_localities": {
+      "tier": "Reference", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": true, "v1Use": "enumerate suburbs within an LGA"
+    },
+    "concordance_locality_to_lga": {
+      "tier": "Reference", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": true, "v1Use": "confirm suburb is within expected LGA"
+    },
+    "concordance_locality_to_sa2": {
+      "tier": "Reference", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": true, "v1Use": "SA2 mapping for ABS concordance"
+    },
+    "concordance_postcode_to_locality": {
+      "tier": "Reference", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": true, "v1Use": "postcode to suburb mapping"
+    },
+    "concordance_sa2_to_locality": {
+      "tier": "Reference", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": true, "v1Use": "SA2 to locality reverse mapping"
+    },
+    "concordance_sal_to_locality": {
+      "tier": "Reference", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": true, "v1Use": "SAL to locality mapping"
+    },
+    "enumerate_address_keys": {
+      "tier": "Reference", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": true, "v1Use": "discover valid parameter keys before querying"
+    },
+    "standardise_addresses": {
+      "tier": "Reference", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": true, "v1Use": "normalise LGA/locality name strings before lookup"
+    },
+
+    "get_census_medians": {
+      "tier": "Standard", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": true,
+      "v1Use": "median age, owner-occupier rate (Demographics — tier unconfirmed; flag to Luke if first call bills above Standard)"
+    },
+
+    "get_cash_rate": {
+      "tier": "Standard", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": true, "v1Use": "current RBA cash rate (Economics — tier unconfirmed)"
+    },
+    "get_cash_rate_series": {
+      "tier": "Standard", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": false, "v1Use": "not used in v1 renders"
+    },
+    "get_cpi_latest": {
+      "tier": "Standard", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": true, "v1Use": "CPI reference for real return context (Economics — tier unconfirmed)"
+    },
+    "get_cpi_series": {
+      "tier": "Standard", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": false, "v1Use": "not used in v1 renders"
+    },
+    "get_cpi_factor": {
+      "tier": "Standard", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": false, "v1Use": "not used in v1 renders"
+    },
+    "get_cpi_adjusted_value": {
+      "tier": "Standard", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": false, "v1Use": "not used in v1 renders"
+    },
+
+    "get_market_summary": {
+      "tier": "Standard", "tierConfirmed": true, "costPerRow": 0.0310,
+      "monthlyCap": 100000,
+      "enabled": true, "v1Use": "hero stats and prices section: current house/unit median, headline yield. Was Enhanced — portal confirms Standard (cheaper)"
+    },
+    "get_market_fundamentals": {
+      "tier": "Enhanced", "tierConfirmed": true, "costPerRow": 0.0750,
+      "monthlyCap": 10000,
+      "enabled": true, "v1Use": "supplementary market metrics if summary is insufficient"
+    },
+    "get_market_growth_annualised": {
+      "tier": "Enhanced", "tierConfirmed": true, "costPerRow": 0.0750,
+      "monthlyCap": 10000,
+      "enabled": true, "v1Use": "historical performance: 1/3/5/10yr annualised growth, houses & units"
+    },
+    "get_market_growth_cumulative": {
+      "tier": "Enhanced", "tierConfirmed": true, "costPerRow": 0.0750,
+      "monthlyCap": 10000,
+      "enabled": false, "v1Use": "not used in v1; annualised figures preferred"
+    },
+    "get_market_supply": {
+      "tier": "Enhanced", "tierConfirmed": true, "costPerRow": 0.0750,
+      "monthlyCap": 10000,
+      "enabled": false, "v1Use": "raw supply series — was Restricted (cheaper now). Stays disabled: trends tools cover required signals"
+    },
+    "get_market_demand": {
+      "tier": "Enhanced", "tierConfirmed": true, "costPerRow": 0.0750,
+      "monthlyCap": 10000,
+      "enabled": false, "v1Use": "raw demand series — was Restricted (cheaper now). Stays disabled: trends tools cover required signals"
+    },
+    "get_market_supply_ls": {
+      "tier": "Premium", "tierConfirmed": true, "costPerRow": 0.1210,
+      "enabled": false, "v1Use": "DISABLED — was Restricted, confirmed Premium"
+    },
+    "get_market_supply_ss": {
+      "tier": "Premium", "tierConfirmed": true, "costPerRow": 0.1210,
+      "enabled": false, "v1Use": "DISABLED — was Restricted, confirmed Premium"
+    },
+    "get_market_demand_ls": {
+      "tier": "Premium", "tierConfirmed": true, "costPerRow": 0.1210,
+      "enabled": false, "v1Use": "DISABLED — was Restricted, confirmed Premium"
+    },
+    "get_market_demand_ss": {
+      "tier": "Premium", "tierConfirmed": true, "costPerRow": 0.1210,
+      "enabled": false, "v1Use": "DISABLED — was Restricted, confirmed Premium"
+    },
+    "get_market_scores": {
+      "tier": "Premium", "tierConfirmed": true, "costPerRow": 0.1210,
+      "enabled": false, "v1Use": "DISABLED v1 — internal analysis only, never surface on page"
+    },
+    "get_market_cycle": {
+      "tier": "Premium", "tierConfirmed": true, "costPerRow": 0.1210,
+      "enabled": false, "v1Use": "DISABLED v1 — GRC/GPD/GSP cycle metrics stay internal"
+    },
+    "get_market_risk": {
+      "tier": "Premium", "tierConfirmed": true, "costPerRow": 0.1210,
+      "enabled": false, "v1Use": "DISABLED v1"
+    },
+    "query_markets": {
+      "tier": "Premium", "tierConfirmed": true, "costPerRow": 0.1210,
+      "enabled": false, "v1Use": "DISABLED — was Enhanced, confirmed Premium. Do not enable."
+    },
+    "rank_markets": {
+      "tier": "Premium", "tierConfirmed": true, "costPerRow": 0.1210,
+      "enabled": false, "v1Use": "DISABLED v1 — RCS scores must not appear on client pages"
+    },
+
+    "get_market_trends_price": {
+      "tier": "Standard", "tierConfirmed": true, "costPerRow": 0.0310,
+      "monthlyCap": 100000,
+      "enabled": true, "v1Use": "house/unit median price series for chart — trailing 24 months max",
+      "params": { "maxMonths": 24 }
+    },
+    "get_market_trends_rent": {
+      "tier": "Standard", "tierConfirmed": true, "costPerRow": 0.0310,
+      "monthlyCap": 100000,
+      "enabled": true, "v1Use": "median weekly rent series — trailing 24 months max",
+      "params": { "maxMonths": 24 }
+    },
+    "get_market_trends_yield": {
+      "tier": "Standard", "tierConfirmed": true, "costPerRow": 0.0310,
+      "monthlyCap": 100000,
+      "enabled": true, "v1Use": "gross yield series — trailing 24 months, derive display range from min/max",
+      "params": { "maxMonths": 24 }
+    },
+    "get_market_trends_demand_profile": {
+      "tier": "Enhanced", "tierConfirmed": true, "costPerRow": 0.0750,
+      "monthlyCap": 100000,
+      "enabled": true, "v1Use": "demand profile series — feeds badge thresholds (rental demand, buyer competition). Cheaper than feared; was ambiguous, now confirmed Enhanced."
+    },
+    "get_market_trends_growth_rates": {
+      "tier": "Enhanced", "tierConfirmed": true, "costPerRow": 0.0750,
+      "monthlyCap": 100000,
+      "enabled": false, "v1Use": "covered by get_market_growth_annualised; enable only if that endpoint is insufficient"
+    },
+    "get_market_trends_years_to_own": {
+      "tier": "Enhanced", "tierConfirmed": true, "costPerRow": 0.0750,
+      "monthlyCap": 1000000,
+      "enabled": false, "v1Use": "not displayed in v1 template — was Premium, confirmed Enhanced (cheaper). Revisit for v2."
+    },
+
+    "get_market_trends_vacancy": {
+      "tier": "Restricted", "tierConfirmed": true, "costPerRow": 0.2220,
+      "monthlyCap": 10000,
+      "enabled": true,
+      "v1Use": "ONE call per region per refresh. Latest month used for hero strip and supply/demand stat. Full 12-month array used for vacancy chart. Never called twice.",
+      "params": { "maxMonths": 12 },
+      "deduplicationKey": "vacancy_series"
+    },
+    "get_market_trends_days_on_market": {
+      "tier": "Restricted", "tierConfirmed": true, "costPerRow": 0.2220,
+      "monthlyCap": 10000,
+      "enabled": true, "v1Use": "avg days on market — supply & demand stat, latest month",
+      "params": { "maxMonths": 12 }
+    },
+    "get_market_trends_clearance_rate": {
+      "tier": "Restricted", "tierConfirmed": true, "costPerRow": 0.2220,
+      "monthlyCap": 10000,
+      "enabled": true, "v1Use": "auction clearance rate — supply & demand stat, latest month",
+      "params": { "maxMonths": 12 }
+    },
+    "get_market_trends_inventory": {
+      "tier": "Restricted", "tierConfirmed": true, "costPerRow": 0.2220,
+      "monthlyCap": 10000,
+      "enabled": true, "v1Use": "total properties listed — supply & demand stat and stock badge",
+      "params": { "maxMonths": 12 }
+    },
+    "get_market_trends_hold_period": {
+      "tier": "Restricted", "tierConfirmed": true, "costPerRow": 0.2220,
+      "monthlyCap": 10000,
+      "enabled": false, "v1Use": "DISABLED — was Enhanced, confirmed Restricted. Not displayed in any v1 report section."
+    },
+    "get_market_trends_stock_on_market": {
+      "tier": "Restricted", "tierConfirmed": true, "costPerRow": 0.2220,
+      "monthlyCap": 10000,
+      "enabled": false, "v1Use": "Restricted confirmed. Stays disabled — get_market_trends_inventory covers the listings signal."
+    },
+    "get_market_trends_building_approvals": {
+      "tier": "Restricted", "tierConfirmed": true, "costPerRow": 0.2220,
+      "monthlyCap": 10000,
+      "enabled": false, "v1Use": "DISABLED — ABS Data API provides building approvals by LGA for free. Do not call this endpoint."
+    },
+    "get_market_trends_search_index": {
+      "tier": "Restricted", "tierConfirmed": true, "costPerRow": 0.2220,
+      "monthlyCap": 10000,
+      "enabled": false, "v1Use": "DISABLED — was Premium, confirmed Restricted. Not displayed in v1 template."
+    },
+
+    "get_business_activity": {
+      "tier": "Enhanced", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": false, "v1Use": "not displayed in v1 template (Economics — tier unconfirmed)"
+    },
+    "get_healthcare_clusters": {
+      "tier": "Enhanced", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": false, "v1Use": "not used in v1"
+    },
+
+    "get_property_estimates": {
+      "tier": "Premium", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": false, "v1Use": "property-level, not used for region reports"
+    },
+    "get_property_due_diligence": {
+      "tier": "Premium", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": false, "v1Use": "property-level, not used for region reports"
+    },
+    "get_property_history": {
+      "tier": "Standard", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": false, "v1Use": "property-level, not used in v1"
+    },
+    "get_property_summary": {
+      "tier": "Enhanced", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": false, "v1Use": "property-level, not used in v1"
+    },
+    "get_property_market": {
+      "tier": "Enhanced", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": false, "v1Use": "property-level, not used in v1"
+    },
+    "post_property_structural_adjustment": {
+      "tier": "Premium", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": false, "v1Use": "property-level, not used in v1"
+    },
+    "search_sold_properties": {
+      "tier": "Standard", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": false, "v1Use": "per-row expensive at scale; not used in v1"
+    },
+    "search_rented_properties": {
+      "tier": "Standard", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": false, "v1Use": "per-row expensive at scale; not used in v1"
+    },
+
+    "get_address_demographics": {
+      "tier": "Standard", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": false, "v1Use": "address-level; use get_census_medians for LGA-level instead"
+    },
+    "get_address_environment": {
+      "tier": "Standard", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": false, "v1Use": "not used in v1"
+    },
+    "get_address_features": {
+      "tier": "Standard", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": false, "v1Use": "not used in v1"
+    },
+    "get_address_schools": {
+      "tier": "Standard", "tierConfirmed": false,
+      "ledgerBudgetTier": "Restricted", "ledgerBudgetCostPerRow": 0.2220,
+      "enabled": false, "v1Use": "not used in v1"
+    }
+  }
+}

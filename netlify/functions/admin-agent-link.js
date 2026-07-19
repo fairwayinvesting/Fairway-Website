@@ -6,7 +6,7 @@ const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
 
 export default async (req) => {
-  if (!checkAdmin(req)) return json({ error: 'Unauthorized' }, 401);
+  if (!(await checkAdmin(req))) return json({ error: 'Unauthorized' }, 401);
   const key = process.env.AGENT_SUBMIT_KEY;
   if (!key) return json({ error: 'AGENT_SUBMIT_KEY env var not set' }, 500);
   return json({ url: `https://fairwayinvesting.com.au/agents/submit.html?k=${key}` });

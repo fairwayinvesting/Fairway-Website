@@ -87,8 +87,9 @@ export default async (req) => {
   // Success — clear rate limit and issue session
   await clearRateLimit(store, ip);
 
+  const now = Math.floor(Date.now() / 1000);
   const token = signJWT(
-    { role: 'admin', exp: Math.floor(Date.now() / 1000) + 86400 * 30 },
+    { role: 'admin', iat: now, exp: now + 86400 * 30 },
     process.env.JWT_SECRET
   );
 

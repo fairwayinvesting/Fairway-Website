@@ -1,0 +1,86 @@
+{
+  "_schema": "region-content/v1",
+  "_note": "Structured editorial data for the Geelong report. Edit this file directly — no code changes needed. Prose sections live in content/geelong.md. This file covers distance cards, infrastructure projects, profile tags, risks, and Luke's take metadata.",
+
+  "location": {
+    "distanceCards": [
+      { "value": "75km",  "label": "Melbourne CBD" },
+      { "value": "~1hr",  "label": "By V/Line train" },
+      { "value": "65km",  "label": "Melbourne Airport" },
+      { "value": "#2",    "label": "Largest city in VIC" }
+    ]
+  },
+
+  "infrastructure": {
+    "totalBillionAUD": 8.98,
+    "totalDisplay": "$8.98B",
+    "projects": [
+      {
+        "name": "Geelong Fast Rail",
+        "value": "$2B+",
+        "status": "approved",
+        "description": "Reduces Melbourne–Geelong travel time to under 30 minutes. State Government committed. Transformational for property values along the corridor."
+      },
+      {
+        "name": "Armstrong Creek Growth Corridor",
+        "value": "$1.8B",
+        "status": "active",
+        "description": "Master-planned precinct delivering 50,000 new residents, retail, schools, and employment across 6,400 ha south of Geelong."
+      },
+      {
+        "name": "NDIA National HQ",
+        "value": "$500M+",
+        "status": "active",
+        "description": "The National Disability Insurance Agency established its national headquarters in Geelong — bringing 1,600 high-quality government jobs to the region permanently."
+      },
+      {
+        "name": "Geelong Convention & Exhibition Centre",
+        "value": "$200M",
+        "status": "approved",
+        "description": "Waterfront expansion positioning Geelong as a major events and business destination. Drives hospitality employment and tourism spend."
+      }
+    ]
+  },
+
+  "investmentCase": {
+    "indicativePriceRange": {
+      "houses": "$650k–$900k+",
+      "units":  "$440k–$620k+"
+    },
+    "profileTags": [
+      "Income-producing from settlement",
+      "Buy, hold & benefit from infrastructure",
+      "Strong tenant demand, low vacancy",
+      "Capital city proximity without capital city pricing",
+      "Long-term capital growth compounding",
+      "Established inner-ring pockets with genuine scarcity"
+    ]
+  },
+
+  "risks": [
+    {
+      "title": "Fast Rail timeline uncertainty",
+      "description": "The Geelong Fast Rail remains a State Government commitment without a confirmed completion date. Political changes could delay or alter scope. The growth case holds without it, but the Fast Rail is a significant upside catalyst — not a guarantee.",
+      "color": "#bd7a70"
+    },
+    {
+      "title": "Interest rate sensitivity",
+      "description": "Like most regional markets, Geelong buyers are more rate-sensitive than inner-city markets. A sustained rate environment above 5.5% could soften demand from owner-occupiers, slowing price growth in the short term.",
+      "color": "#cf9b92"
+    },
+    {
+      "title": "Armstrong Creek supply",
+      "description": "The Armstrong Creek growth corridor is adding significant new housing stock. This can suppress rental yields and price growth in the outer-ring new-build segments. Established inner-ring properties are largely insulated from this supply pressure.",
+      "color": "rgba(189,122,112,0.5)"
+    }
+  ],
+
+  "lukesTake": {
+    "convictionScore": 78,
+    "triggers": [
+      "Fast Rail funding confirmed or timeline firmed",
+      "Interest rates sustained below 4.5%",
+      "NDIS employment ramp fully deployed"
+    ]
+  }
+}

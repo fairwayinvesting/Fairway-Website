@@ -9,7 +9,7 @@ function blobKey(email) {
 }
 
 export default async (req) => {
-  if (!checkAdmin(req)) return json({ error: 'Unauthorized' }, 401);
+  if (!(await checkAdmin(req))) return json({ error: 'Unauthorized' }, 401);
 
   const clientId = new URL(req.url).searchParams.get('clientId');
   if (!clientId) return json({ error: 'clientId required' }, 400);

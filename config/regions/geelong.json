@@ -1,0 +1,53 @@
+{
+  "slug": "geelong",
+  "displayName": "Geelong",
+  "state": "VIC",
+  "heroTagline": "Infrastructure-led growth market · 75km southwest of Melbourne CBD · Victoria’s second-largest city",
+
+  "geography": {
+    "lgas": ["Greater Geelong"],
+    "postcodes": ["3214","3215","3216","3217","3218","3219","3220","3221","3228"],
+    "suburbs": [
+      "Geelong","Geelong West","Geelong East","Newtown","South Geelong",
+      "North Geelong","Norlane","Corio","Belmont","Highton",
+      "Waurn Ponds","Grovedale","Hamlyn Heights","Manifold Heights","Herne Hill"
+    ]
+  },
+
+  "map": { "lat": -38.1499, "lng": 144.3617, "zoom": 11 },
+
+  "content": "content/geelong.json",
+
+  "fetch": {
+    "preferLgaLevel": true,
+    "restrictedTrailingMonths": 12,
+    "restrictedSeriesMax": 4,
+    "maxRowsPerRefresh": 200
+  },
+
+  "overrides": {
+    "_note": "Set any field to a non-null value to pin it. Pinned values render identically to fetched values but are flagged in every ledger summary with a [PINNED] marker so they are not forgotten. Set to null to use fetched data.",
+    "houseMedian": null,
+    "unitMedian": null,
+    "vacancyPct": null,
+    "daysOnMarket": null,
+    "clearanceRatePct": null,
+    "propertiesListed": null,
+    "houseRentWeeklyLow": null,
+    "houseRentWeeklyHigh": null,
+    "unitRentWeeklyLow": null,
+    "unitRentWeeklyHigh": null,
+    "houseYieldLow": null,
+    "houseYieldHigh": null,
+    "unitYieldLow": null,
+    "unitYieldHigh": null,
+    "population": null,
+    "populationGrowthPct": null,
+    "medianAge": null,
+    "ownerOccupierPct": null,
+    "growth": {
+      "houses": { "yr1Pct": null, "yr3Pct": null, "yr5Pct": null, "yr10Pct": null },
+      "units":  { "yr1Pct": null, "yr3Pct": null, "yr5Pct": null, "yr10Pct": null }
+    }
+  }
+}

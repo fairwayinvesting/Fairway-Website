@@ -57,7 +57,7 @@ function buildBriefEmail(name) {
 }
 
 export default async (req) => {
-  if (!checkAdmin(req)) return json({ error: 'Unauthorized' }, 401);
+  if (!(await checkAdmin(req))) return json({ error: 'Unauthorized' }, 401);
 
   const briefStore = getStore('fairway-briefs');
   const clientStore = getStore('fairway-clients');

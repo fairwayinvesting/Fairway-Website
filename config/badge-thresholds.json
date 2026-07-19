@@ -1,0 +1,59 @@
+{
+  "_schema": "badge-thresholds/v1",
+  "_note": "Thresholds used by the renderer to derive qualitative badge labels from fetched numeric values. Edit here to tune — no code changes needed. All percentage values are absolute (not relative).",
+
+  "rentalDemand": {
+    "_logic": "vacancy rate → rental demand badge. Lower vacancy = higher demand.",
+    "_source": "get_market_trends_vacancy (latest month)",
+    "veryHigh": { "vacancyPctBelow": 1.5,  "label": "Very High" },
+    "high":     { "vacancyPctBelow": 2.5,  "label": "High" },
+    "moderate": { "vacancyPctBelow": 4.0,  "label": "Moderate" },
+    "low":      { "vacancyPctAtOrAbove": 4.0, "label": "Low" }
+  },
+
+  "buyerCompetition": {
+    "_logic": "avg days on market → buyer competition badge. Fewer days = stronger competition.",
+    "_source": "get_market_trends_days_on_market (latest month)",
+    "veryStrong": { "domBelow": 20,  "label": "Very Strong" },
+    "strong":     { "domBelow": 35,  "label": "Strong" },
+    "balanced":   { "domBelow": 60,  "label": "Balanced" },
+    "soft":       { "domAtOrAbove": 60, "label": "Soft" }
+  },
+
+  "auctionMarket": {
+    "_logic": "clearance rate → auction market heat badge.",
+    "_source": "get_market_trends_clearance_rate (latest month)",
+    "hot":      { "clearanceRatePctAbove": 75, "label": "Hot" },
+    "warm":     { "clearanceRatePctAbove": 60, "label": "Warm" },
+    "balanced": { "clearanceRatePctAbove": 50, "label": "Balanced" },
+    "soft":     { "clearanceRatePctBelow": 50, "label": "Soft" }
+  },
+
+  "stockOnMarket": {
+    "_logic": "total listings vs trailing-12-month average for the same LGA → stock badge. Compares current month against own history, not a fixed threshold.",
+    "_source": "get_market_trends_inventory (12-month series)",
+    "veryLow":   { "pctBelowAvg": 30, "label": "Very Low" },
+    "low":       { "pctBelowAvg": 15, "label": "Low" },
+    "average":   { "pctFromAvgWithin": 15, "label": "Average" },
+    "elevated":  { "pctAboveAvg": 15, "label": "Elevated" },
+    "high":      { "pctAboveAvg": 30, "label": "High" }
+  },
+
+  "populationGrowthMomentum": {
+    "_logic": "annual population growth rate → momentum badge.",
+    "_source": "ABS Regional Population API",
+    "strong":   { "annualGrowthPctAbove": 2.0, "label": "Strong" },
+    "moderate": { "annualGrowthPctAbove": 1.0, "label": "Moderate" },
+    "slow":     { "annualGrowthPctAbove": 0.5, "label": "Slow" },
+    "flat":     { "annualGrowthPctBelow": 0.5, "label": "Flat" }
+  },
+
+  "infrastructurePipeline": {
+    "_logic": "total committed infrastructure $B → pipeline badge. Fixed thresholds; update when new projects are confirmed.",
+    "_source": "content/{slug}.json infrastructure.totalBillionAUD (Luke-entered)",
+    "veryHigh": { "totalBillionAUDAbove": 5.0, "label": "Very High" },
+    "high":     { "totalBillionAUDAbove": 1.5, "label": "High" },
+    "moderate": { "totalBillionAUDAbove": 0.5, "label": "Moderate" },
+    "low":      { "totalBillionAUDBelow": 0.5, "label": "Low" }
+  }
+}

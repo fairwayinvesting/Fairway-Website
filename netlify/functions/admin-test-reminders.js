@@ -149,7 +149,7 @@ function buildEmail(dateHeading, overdue, thisWeek, comingUp, isTest) {
 }
 
 export default async (req) => {
-  if (!checkAdmin(req)) return json({ error: 'Unauthorized' }, 401);
+  if (!(await checkAdmin(req))) return json({ error: 'Unauthorized' }, 401);
 
   const allMilestones = await getAllMilestones();
   const active = allMilestones

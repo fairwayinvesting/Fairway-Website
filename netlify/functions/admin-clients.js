@@ -100,7 +100,7 @@ const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 
 export default async (req) => {
-  if (!checkAdmin(req)) return json({ error: 'Unauthorized' }, 401);
+  if (!(await checkAdmin(req))) return json({ error: 'Unauthorized' }, 401);
 
   const store = getStore('fairway-clients');
   const clients = (await store.get('all', { type: 'json' })) || [];
@@ -114,7 +114,6 @@ export default async (req) => {
   if (req.method === 'POST') {
     const { name, email, password, markets, sendEmail = true } = await req.json().catch(() => ({}));
     if (!name || !email) return json({ error: 'name and email required' }, 400);
-    if (clients.some(c => !c.deleted && c.email.toLowerCase() === email.toLowerCase())) return json({ error: 'Email already exists' }, 409);
 
     const salt = crypto.randomBytes(16).toString('hex');
     const setupToken = crypto.randomBytes(24).toString('hex');

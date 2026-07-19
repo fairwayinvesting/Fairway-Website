@@ -897,6 +897,15 @@
             </div>
             <div id="totp-panel" style="display:none;margin-top:20px;"></div>
           </div>
+          <div style="margin-top:28px;padding-top:24px;border-top:1px solid rgba(247,243,237,0.07);">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+              <div>
+                <p style="font-size:14px;color:rgba(247,243,237,0.75);margin:0 0 3px;">Sign out of all devices</p>
+                <p style="font-size:12.5px;color:rgba(247,243,237,0.35);margin:0;">Invalidates all active admin sessions immediately, including on other browsers or devices.</p>
+              </div>
+              <button id="logout-all-btn" onclick="logoutAllDevices()" style="background:rgba(220,80,80,0.1);border:1px solid rgba(220,80,80,0.25);color:#e07070;border-radius:100px;padding:9px 20px;font-family:'Outfit',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;white-space:nowrap;">Sign out all devices</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -2082,26 +2091,8 @@ document.getElementById('modal-save').addEventListener('click', async function()
     renderTable();
     closeModal();
   } else {
-    if (!id && res.status === 409 && data.error === 'Email already exists') {
-      errEl.innerHTML = `Email already exists. <a href="#" id="purge-retry-link" style="color:#B5715A;text-decoration:underline;">Purge stuck record and retry?</a>`;
-      errEl.classList.add('visible');
-      document.getElementById('purge-retry-link').onclick = async (e) => {
-        e.preventDefault();
-        const pw = prompt('Enter admin password to purge the stuck record:');
-        if (!pw) return;
-        const purgeRes = await api('DELETE', `/api/admin/clients?email=${encodeURIComponent(email)}`, { password: pw });
-        if (purgeRes.ok) {
-          errEl.textContent = 'Stuck record purged — retrying…';
-          document.getElementById('modal-save').click();
-        } else {
-          const pd = await purgeRes.json().catch(() => ({}));
-          errEl.textContent = 'Purge failed: ' + (pd.error || 'unknown error');
-        }
-      };
-    } else {
-      errEl.textContent = data.error || 'Save failed.';
-      errEl.classList.add('visible');
-    }
+    errEl.textContent = data.error || 'Save failed.';
+    errEl.classList.add('visible');
   }
   this.disabled = false;
   this.textContent = 'Save client';
@@ -3093,6 +3084,21 @@ const actionLabels = {
   presentation_deleted: 'Presentation deleted',
   access_revoked: 'Access revoked',
 };
+
+async function logoutAllDevices() {
+  const btn = document.getElementById('logout-all-btn');
+  btn.disabled = true;
+  btn.textContent = 'Signing out…';
+  const res = await fetch('/api/admin-logout', { method: 'POST' });
+  if (res.ok) {
+    document.getElementById('admin-ui').style.display = 'none';
+    document.getElementById('gate').classList.add('show');
+  } else {
+    btn.disabled = false;
+    btn.textContent = 'Sign out all devices';
+    alert('Logout failed — please try again.');
+  }
+}
 
 function toggleSecuritySection() {
   const body = document.getElementById('security-body');

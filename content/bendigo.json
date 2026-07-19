@@ -1,0 +1,80 @@
+{
+  "_schema": "region-content/v1",
+  "_note": "Structured editorial data for the Bendigo report. Edit this file directly — no code changes needed. Prose sections live in content/bendigo.md. This file covers distance cards, infrastructure projects, profile tags, risks, and Luke's take metadata.",
+
+  "location": {
+    "distanceCards": [
+      { "value": "150km",  "label": "Melbourne CBD" },
+      { "value": "~2hr",   "label": "V/Line (Bendigo line)" },
+      { "value": "160km",  "label": "Melbourne Airport" },
+      { "value": "#4",     "label": "Largest city in VIC" }
+    ]
+  },
+
+  "infrastructure": {
+    "totalBillionAUD": 2.6,
+    "totalDisplay": "$2.6B+",
+    "projects": [
+      {
+        "name": "Bendigo Hospital Redevelopment",
+        "value": "$630M",
+        "status": "active",
+        "description": "The largest health infrastructure investment in Bendigo's history, delivering new surgical, emergency and inpatient facilities. Permanently expands the region's healthcare employment base and attracts skilled health professionals."
+      },
+      {
+        "name": "La Trobe University Campus Expansion",
+        "value": "$200M+",
+        "status": "active",
+        "description": "Ongoing investment in research and teaching facilities across the Bendigo campus, growing the student population and supporting the knowledge economy transition of the regional workforce."
+      },
+      {
+        "name": "Regional Rail Revival — Bendigo Line",
+        "value": "$200M+",
+        "status": "approved",
+        "description": "Victorian Government investment in regional rail uplift statewide, including improved service frequency and infrastructure upgrades on the Bendigo line — directly supporting Melbourne connectivity."
+      }
+    ]
+  },
+
+  "investmentCase": {
+    "indicativePriceRange": {
+      "houses": "$400k–$580k+",
+      "units":  "$260k–$360k+"
+    },
+    "profileTags": [
+      "High gross yield relative to entry price",
+      "Established city infrastructure and amenity",
+      "Healthcare and education employment anchors",
+      "Buy, hold and benefit from rail connectivity",
+      "Long-term capital growth compounding",
+      "Strong rental demand, stable tenant base"
+    ]
+  },
+
+  "risks": [
+    {
+      "title": "Economic concentration risk",
+      "description": "Healthcare and education are the dominant employers. A reduction in Federal or State funding to these sectors could soften local employment and rental demand, though both institutions have long-term infrastructure commitments that provide significant forward visibility.",
+      "color": "#bd7a70"
+    },
+    {
+      "title": "Melbourne commute viability",
+      "description": "At approximately 2 hours, the Bendigo–Melbourne commute is at the outer limit for daily travel. Any shift toward mandatory return-to-office could reduce lifestyle migrant demand, though local tenant demand is largely employment-driven rather than commuter-driven.",
+      "color": "#cf9b92"
+    },
+    {
+      "title": "Price ceiling relative to Melbourne",
+      "description": "Bendigo's price growth is partly constrained by local income levels. Unlike markets with direct Melbourne pricing arbitrage, growth here is driven by local wage growth and serviceability rather than capital city proximity repricing.",
+      "color": "rgba(189,122,112,0.5)"
+    }
+  ],
+
+  "lukesTake": {
+    "convictionScore": 70,
+    "triggers": [
+      "Hospital redevelopment employment ramp complete",
+      "Rail service frequency improvements delivered",
+      "Sustained rental vacancy below 1.5%"
+    ]
+  }
+}

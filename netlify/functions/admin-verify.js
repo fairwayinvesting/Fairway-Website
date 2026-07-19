@@ -1,24 +1,10 @@
-import crypto from 'crypto';
-
-function verifyJWT(token, secret) {
-  try {
-    const [h, b, sig] = token.split('.');
-    const expected = crypto.createHmac('sha256', secret).update(`${h}.${b}`).digest('base64url');
-    if (sig !== expected) return false;
-    const payload = JSON.parse(Buffer.from(b, 'base64url').toString());
-    if (payload.exp && payload.exp < Date.now() / 1000) return false;
-    return payload.role === 'admin';
-  } catch { return false; }
-}
+import { checkAdmin } from './_admin-auth.js';
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
 
 export default async (req) => {
-  const secret = process.env.JWT_SECRET;
-  const cookie = req.headers.get('cookie') || '';
-  const cookieMatch = cookie.match(/fw_admin=([^;]+)/);
-  if (cookieMatch && verifyJWT(cookieMatch[1], secret)) return json({ ok: true });
+  if (await checkAdmin(req)) return json({ ok: true });
   return json({ error: 'Unauthorized' }, 401);
 };
 

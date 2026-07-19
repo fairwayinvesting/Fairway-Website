@@ -7,7 +7,7 @@ const json = (data, status = 200) =>
 
 export default async (req) => {
   if (req.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
-  if (!checkAdmin(req)) return json({ error: 'Unauthorized' }, 401);
+  if (!(await checkAdmin(req))) return json({ error: 'Unauthorized' }, 401);
 
   const { clientId } = await req.json().catch(() => ({}));
   if (!clientId) return json({ error: 'clientId required' }, 400);

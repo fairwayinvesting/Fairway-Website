@@ -8,7 +8,7 @@ const json = (data, status = 200) =>
 
 
 export default async (req) => {
-  if (!checkAdmin(req)) return json({ error: 'Unauthorized' }, 401);
+  if (!(await checkAdmin(req))) return json({ error: 'Unauthorized' }, 401);
 
   const url = new URL(req.url);
   const clientId = url.searchParams.get('clientId');
