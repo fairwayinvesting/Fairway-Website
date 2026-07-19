@@ -29,7 +29,7 @@ function buildPropertyEmail(clientName, address, suburb, price, propertyType, be
     </p>
     <p style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#B5715A;margin:0 0 16px;">Property presentation</p>
     <h1 class="eh1" style="font-family:Georgia,'Times New Roman',serif;font-size:30px;font-weight:400;color:#FAF6F1;margin:0 0 16px;line-height:1.25;">${firstName}, I've found one I want you to see.</h1>
-    <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 32px;line-height:1.65;">I've put together a full analysis on this property. Inside you'll find my assessment, the cashflow numbers, comparable sales, and a risk profile &mdash; everything you need to form a view before we talk.</p>
+    <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 32px;line-height:1.65;">I've put together my analysis on this property for you to review. Take a look when you get a chance &mdash; I'd like to walk you through it before we decide on next steps.</p>
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:rgba(250,246,241,0.05);border:1px solid rgba(250,246,241,0.1);border-radius:14px;margin:0 0 32px;">
       <tr><td class="eprop" style="padding:24px 28px 20px;">
         <p style="font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#B5715A;margin:0 0 12px;">The property</p>
@@ -184,10 +184,12 @@ export default async (req) => {
         // First send — only clients who haven't received it yet
         toSend = pres.assignedClients.filter(cid => !pres.sentClients.includes(cid) && !(pres.revokedClients||[]).includes(cid));
       }
+      let tokensDirty = false;
       let sent = 0;
       for (const cid of toSend) {
         const client = allClients.find(c => c.id === cid);
-        if (!client || !pres.tokens[cid]) continue;
+        if (!client) continue;
+        if (!pres.tokens[cid]) { pres.tokens[cid] = genToken(); tokensDirty = true; }
         const link = `https://fairwayinvesting.com.au/p/property.html?t=${pres.tokens[cid]}`;
         try {
           await resend.emails.send({
@@ -202,7 +204,7 @@ export default async (req) => {
         } catch (err) { console.error('Send failed:', err?.message || err); }
       }
       presentations[idx] = pres;
-      await store.setJSON('all', presentations);
+      if (tokensDirty || sent > 0) await store.setJSON('all', presentations);
       if (sent > 0) appendAudit('presentation_sent', `Sent "${pres.address}" to ${sent} client${sent !== 1 ? 's' : ''}`);
       return json({ ok: true, sent });
     }
