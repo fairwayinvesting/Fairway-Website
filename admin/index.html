@@ -5183,21 +5183,32 @@ async function savePresentation() {
 async function notifyPresentation(id) {
   const p = presentations.find(x => x.id === id);
   if (!p) return;
-  const revoked = p.revokedClients || [];
-  const targets = (p.assignedClients || []).filter(cid => !revoked.includes(cid));
-  if (!targets.length) return;
-  const names = targets.map(cid => { const c = clients.find(x => x.id === cid); return c ? c.name : cid; });
-  if (!confirm(`Notify ${names.join(', ')} about "${p.address}"?`)) return;
+  const revoked = new Set(p.revokedClients || []);
+  const sent = new Set(p.sentClients || []);
+  const unrevoked = (p.assignedClients || []).filter(cid => !revoked.has(cid));
+  if (!unrevoked.length) return;
+
+  const unsent = unrevoked.filter(cid => !sent.has(cid));
+  const isResend = unsent.length === 0;
+  const toNotify = isResend ? unrevoked : unsent;
+  const action = isResend ? 'notify' : 'send';
+
+  const names = toNotify.map(cid => { const c = clients.find(x => x.id === cid); return c ? c.name : cid; });
+  const msg = isResend
+    ? `Re-send "${p.address}" to ${names.join(', ')}?\n\nThey've already received this presentation.`
+    : `Send "${p.address}" to ${names.join(', ')}?`;
+  if (!confirm(msg)) return;
+
   const btns = [...document.querySelectorAll(`button[onclick="notifyPresentation('${id}')"]`)];
   btns.forEach(b => { b.textContent = 'Sending…'; b.disabled = true; });
-  const res = await api('PUT', '/api/admin/presentations', { id, action: 'notify' });
+  const res = await api('PUT', '/api/admin/presentations', { id, action });
   const data = await res.json();
-  btns.forEach(b => { b.textContent = '✉ Notify'; b.disabled = false; });
+  btns.forEach(b => { b.textContent = isResend ? '✉ Re-notify' : '✉ Notify'; b.disabled = false; });
   if (res.ok) {
-    targets.forEach(cid => { if (!p.sentClients.includes(cid)) p.sentClients.push(cid); });
+    toNotify.forEach(cid => { if (!p.sentClients.includes(cid)) p.sentClients.push(cid); });
     renderPresentations();
-    alert(`Notified ${data.sent} client${data.sent !== 1 ? 's' : ''}.`);
-  } else alert('Notification failed. Please try again.');
+    alert(`Sent to ${data.sent} client${data.sent !== 1 ? 's' : ''}.`);
+  } else alert('Send failed. Please try again.');
 }
 
 async function notifyPresentationFromModal() {
