@@ -1358,6 +1358,21 @@
       </div>
       <p class="field-note">Turn off if this client doesn't need portal access yet.</p>
     </div>
+    <div class="field">
+      <label>How did they find Fairway?</label>
+      <select id="f-referral" style="width:100%;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.11);border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Outfit',sans-serif;font-weight:300;color:#f7f3ed;outline:none;">
+        <option value="">— Not recorded —</option>
+        <option value="Personal referral">Personal referral</option>
+        <option value="Website / organic">Website / organic</option>
+        <option value="Google / SEO">Google / SEO</option>
+        <option value="Instagram">Instagram</option>
+        <option value="LinkedIn">LinkedIn</option>
+        <option value="Podcast / YouTube">Podcast / YouTube</option>
+        <option value="Event or seminar">Event or seminar</option>
+        <option value="Partner agent">Partner agent</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
     <div class="error-msg" id="modal-error"></div>
     <div class="modal-footer">
       <button class="btn-secondary" id="modal-cancel">Cancel</button>
@@ -2027,6 +2042,7 @@ function openAdd() {
   document.getElementById('active-label').textContent = 'Active';
   document.getElementById('f-send-email').checked = true;
   document.getElementById('send-email-field').style.display = 'block';
+  document.getElementById('f-referral').value = '';
   document.getElementById('modal-error').classList.remove('visible');
   buildMarketsGrid([]);
   document.getElementById('modal-overlay').classList.add('open');
@@ -2046,6 +2062,7 @@ function openEdit(id) {
   document.getElementById('f-active').checked = c.active;
   document.getElementById('active-label').textContent = c.active ? 'Active' : 'Inactive';
   document.getElementById('send-email-field').style.display = 'none';
+  document.getElementById('f-referral').value = c.referralSource || '';
   document.getElementById('modal-error').classList.remove('visible');
   buildMarketsGrid(c.markets || []);
   document.getElementById('modal-overlay').classList.add('open');
@@ -2077,9 +2094,10 @@ document.getElementById('modal-save').addEventListener('click', async function()
   this.innerHTML = '<span class="spinner"></span>Saving…';
 
   const sendEmail = !id && document.getElementById('f-send-email').checked;
+  const referralSource = document.getElementById('f-referral').value || null;
   const body = id
-    ? { id, name, markets, active, ...(password ? { password } : {}) }
-    : { name, email, password, markets, sendEmail };
+    ? { id, name, markets, active, referralSource, ...(password ? { password } : {}) }
+    : { name, email, password, markets, sendEmail, referralSource };
 
   const res = await api(id ? 'PUT' : 'POST', '/api/admin/clients', body);
   const data = await res.json();
@@ -2089,7 +2107,7 @@ document.getElementById('modal-save').addEventListener('click', async function()
       const idx = clients.findIndex(c => c.id === id);
       if (idx !== -1) { clients[idx].name = name; clients[idx].markets = markets; clients[idx].active = active; }
     } else {
-      clients.push({ id: data.id, name, email: email.toLowerCase().trim(), markets, active: true, createdAt: new Date().toISOString() });
+      clients.push({ id: data.id, name, email: email.toLowerCase().trim(), markets, active: true, createdAt: new Date().toISOString(), referralSource: referralSource || null });
     }
     renderTable();
     closeModal();
@@ -3625,6 +3643,7 @@ function renderEngagementTab() {
         <div class="profile-field"><label>Stage updated</label><div class="pf-val">${client.pipelineStageUpdatedAt ? new Date(client.pipelineStageUpdatedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '—'}</div></div>
         <div class="profile-field"><label>Member since</label><div class="pf-val">${client.createdAt ? new Date(client.createdAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '—'}</div></div>
         <div class="profile-field"><label>Total properties</label><div class="pf-val">${crmPurchases.length}</div></div>
+        <div class="profile-field"><label>Referral source</label><div class="pf-val">${client.referralSource || '<span class="pf-empty">—</span>'}</div></div>
       </div>
     </div>
 
