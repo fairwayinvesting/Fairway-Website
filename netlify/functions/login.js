@@ -67,7 +67,12 @@ export default async (req) => {
 
   const clientStore = getStore('fairway-clients');
   const clients = (await clientStore.get('all', { type: 'json' })) || [];
-  const client = clients.find(c => c.email.toLowerCase() === email.toLowerCase().trim() && c.active);
+  // Use the most recently created active non-deleted entry for this email.
+  // Array order = creation order, so the last match is always the newest.
+  // This ensures a freshly recreated test client is never shadowed by a zombie entry.
+  const emailNorm = email.toLowerCase().trim();
+  const matches = clients.filter(c => !c.deleted && c.active && c.email.toLowerCase() === emailNorm);
+  const client = matches.length ? matches[matches.length - 1] : null;
 
   // Always run hash to prevent timing-based user enumeration
   const salt = client ? client.passwordSalt : crypto.randomBytes(16).toString('hex');

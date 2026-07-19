@@ -115,6 +115,19 @@ export default async (req) => {
     const { name, email, password, markets, sendEmail = true } = await req.json().catch(() => ({}));
     if (!name || !email) return json({ error: 'name and email required' }, 400);
 
+    const emailNorm = email.toLowerCase().trim();
+
+    // Block if an active non-deleted client already exists with this email
+    if (clients.some(c => !c.deleted && c.active && c.email?.toLowerCase() === emailNorm)) {
+      return json({ error: 'A client with this email is already active.' }, 409);
+    }
+
+    // Soft-delete any stale/zombie entries with this email so they cannot shadow the new
+    // entry at login. This handles cases where a previous hard-delete didn't persist in Blobs.
+    clients
+      .filter(c => c.email?.toLowerCase() === emailNorm)
+      .forEach(e => { e.deleted = true; e.active = false; if (!e.deletedAt) e.deletedAt = new Date().toISOString(); });
+
     const salt = crypto.randomBytes(16).toString('hex');
     const setupToken = crypto.randomBytes(24).toString('hex');
     const setupTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -125,7 +138,7 @@ export default async (req) => {
     const client = {
       id: crypto.randomUUID(),
       name: name.trim(),
-      email: email.toLowerCase().trim(),
+      email: emailNorm,
       passwordHash: await pbkdf2Hash(effectivePassword, salt),
       passwordSalt: salt,
       markets: Array.isArray(markets) ? markets : [],

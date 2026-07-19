@@ -52,10 +52,13 @@ export default async (req) => {
 
   const store = getStore('fairway-clients');
   const clients = (await store.get('all', { type: 'json' })) || [];
-  const idx = clients.findIndex(c => c.email?.toLowerCase() === email.toLowerCase());
+  // Use the most recently created active non-deleted entry (last in array = newest).
+  const emailNorm = email.toLowerCase();
+  const idx = clients.reduce((best, c, i) =>
+    (!c.deleted && c.active && c.email?.toLowerCase() === emailNorm) ? i : best, -1);
 
   // Always return ok to avoid user enumeration
-  if (idx === -1 || !clients[idx].active) return json({ ok: true });
+  if (idx === -1) return json({ ok: true });
 
   const token = crypto.randomBytes(32).toString('hex');
   const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
