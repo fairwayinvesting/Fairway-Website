@@ -2750,6 +2750,7 @@ function showClientMenu(id, name) {
   const items = [
     { label: 'Edit client', action: `openEdit('${id}');closeClientMenu()` },
     { label: 'View portal', action: `previewClient('${id}');closeClientMenu()` },
+    { label: 'Resend setup link', action: `resendSetupLink('${id}','${name}');closeClientMenu()` },
     { label: 'Delete', action: `deleteClient('${id}','${name}');closeClientMenu()`, danger: true },
   ];
   menu.innerHTML = items.map(i => `<button onclick="${i.action}" style="display:block;width:100%;text-align:left;background:none;border:none;font-family:'Outfit',sans-serif;font-size:13.5px;font-weight:400;color:${i.danger ? '#f08080' : 'rgba(247,243,237,0.75)'};padding:8px 12px;border-radius:7px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='rgba(247,243,237,0.07)'" onmouseout="this.style.background='none'">${i.label}</button>`).join('');
@@ -2765,6 +2766,17 @@ function closeClientMenu() {
   if (m) m.remove();
   _clientMenuOpen = null;
   document.removeEventListener('click', closeClientMenu);
+}
+
+async function resendSetupLink(id, name) {
+  if (!confirm(`Resend a new setup/password link to ${name}? This will invalidate any existing setup link they have.`)) return;
+  const res = await api('PUT', '/api/admin/clients', { id, action: 'resend-setup' });
+  if (res.ok) {
+    alert(`Setup link sent to ${name}. They'll receive an email with a fresh link to set their password.`);
+  } else {
+    const d = await res.json().catch(() => ({}));
+    alert('Failed to send: ' + (d.error || 'Unknown error'));
+  }
 }
 
 function renderReports() {

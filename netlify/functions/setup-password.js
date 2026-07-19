@@ -26,7 +26,9 @@ export default async (req) => {
 
   const store = getStore('fairway-clients');
   const clients = (await store.get('all', { type: 'json' })) || [];
-  const idx = clients.findIndex(c => c.setupToken === token);
+  // Must match an active, non-deleted entry — prevents stale deleted entries from
+  // intercepting a token lookup and causing the password to be set on the wrong record.
+  const idx = clients.findIndex(c => !c.deleted && c.active && c.setupToken === token);
 
   if (idx === -1) return json({ error: 'Invalid or already used setup link.' }, 400);
 

@@ -191,6 +191,29 @@ export default async (req) => {
       return json({ ok: true, engagementNumber: newEngagement });
     }
 
+    if (action === 'resend-setup') {
+      const client = clients[idx];
+      const setupToken = crypto.randomBytes(24).toString('hex');
+      const setupTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      client.setupToken = setupToken;
+      client.setupTokenExpiry = setupTokenExpiry;
+      await store.setJSON('all', clients);
+      try {
+        await resend.emails.send({
+          from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
+          to: [client.email],
+          reply_to: 'luke@fairwayinvesting.com.au',
+          subject: 'Set up your Fairway portal access',
+          html: buildWelcomeEmail(client.name, client.email, setupToken),
+        });
+      } catch (err) {
+        console.error('Resend setup email failed:', err?.message || err);
+        return json({ error: 'Email failed to send' }, 500);
+      }
+      appendAudit('setup_resent', `Resent setup link to ${client.name} <${client.email}>`);
+      return json({ ok: true });
+    }
+
     if (action === 'notify-markets') {
       const client = clients[idx];
       try {
