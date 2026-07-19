@@ -260,6 +260,12 @@
     .brief-check-item:nth-last-child(-n+2){border-bottom:none}
     .brief-check-item input[type=checkbox]{width:15px;height:15px;accent-color:#bd7a70;cursor:pointer;flex-shrink:0;margin-top:2px}
     .brief-check-item label{font-size:13px;color:rgba(247,243,237,0.6);cursor:pointer;line-height:1.4}
+    .brief-check-item--inline{align-items:center;flex-wrap:nowrap}
+    .brief-check-item--inline input[type=checkbox]{margin-top:0}
+    .brief-check-item--inline label{white-space:nowrap}
+    .brief-inline-num{width:42px;padding:2px 5px;background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.12);border-radius:6px;font-size:12px;font-family:'Outfit',sans-serif;color:#f7f3ed;text-align:center;outline:none;flex-shrink:0}
+    .brief-inline-num:focus{border-color:rgba(189,122,112,0.5)}
+    .brief-inline-sfx{font-size:11px;color:rgba(247,243,237,0.3);white-space:nowrap;flex-shrink:0}
     .brief-custom-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px 5px 12px;border:1.5px solid rgba(189,122,112,0.45);border-radius:100px;background:rgba(189,122,112,0.08);font-size:12.5px;color:rgba(247,243,237,0.8)}
     .brief-custom-chip button{background:none;border:none;color:rgba(247,243,237,0.35);cursor:pointer;font-size:15px;line-height:1;padding:0;margin:0}
     .brief-add-row{display:flex;gap:8px;margin-top:10px}
@@ -495,6 +501,7 @@
       .brief-check-grid{grid-template-columns:1fr;}
       .brief-check-item:nth-last-child(-n+2){border-bottom:1px solid rgba(247,243,237,0.04);}
       .brief-check-item:last-child{border-bottom:none;}
+      .brief-check-item--inline{flex-wrap:wrap;}
       .brief-budget-row{flex-direction:column;gap:8px;}
       .brief-budget-row span{display:none;}
       .brief-budget-row input{width:100%;}
@@ -1529,12 +1536,10 @@
         <label>Property criteria</label>
         <div class="brief-check-grid">
           <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-3bed" value="Minimum 3 bedrooms, 1 bathroom"><label for="bc-3bed">Min 3 bedrooms, 1 bathroom</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-yield4" value="Rental yield 4% or greater"><label for="bc-yield4">Rental yield 4% or greater</label></div>
+          <div class="brief-check-item brief-check-item--inline"><input type="checkbox" class="brief-criteria-check" id="bc-yield" value="" onchange="if(this.checked)document.getElementById('bc-yield-val').focus()"><label for="bc-yield">Min rental yield</label><input type="text" id="bc-yield-val" class="brief-inline-num" placeholder="4%" maxlength="5" oninput="syncBriefYield()"><span class="brief-inline-sfx">or greater</span></div>
           <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-4bed" value="Minimum 4 bedrooms, 2 bathrooms"><label for="bc-4bed">Min 4 bedrooms, 2 bathrooms</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-yield5" value="Rental yield 5% or greater"><label for="bc-yield5">Rental yield 5% or greater</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-land400" value="Land size greater than 400sqm"><label for="bc-land400">Land size greater than 400sqm</label></div>
           <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-cosmetic" value="Cosmetic uplift potential"><label for="bc-cosmetic">Cosmetic uplift potential</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-land550" value="Land size greater than 550sqm"><label for="bc-land550">Land size greater than 550sqm</label></div>
+          <div class="brief-check-item brief-check-item--inline"><input type="checkbox" class="brief-criteria-check" id="bc-land" value="" onchange="if(this.checked)document.getElementById('bc-land-val').focus()"><label for="bc-land">Min land size</label><input type="text" id="bc-land-val" class="brief-inline-num" placeholder="400" maxlength="5" oninput="syncBriefLand()"><span class="brief-inline-sfx">sqm+</span></div>
           <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-subdiv" value="Subdivision potential"><label for="bc-subdiv">Subdivision potential</label></div>
           <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-regular" value="Regular shaped block"><label for="bc-regular">Regular shaped block</label></div>
           <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-dualocc" value="Dual occupancy potential"><label for="bc-dualocc">Dual occupancy potential</label></div>
@@ -1901,11 +1906,9 @@ function marketName(key) {
 // ── Pipeline kanban ───────────────────────────────────────────────────────────
 const PIPELINE_STAGES = [
   { key: 'onboarding',     label: 'Onboarding' },
-  { key: 'strategy',       label: 'Strategy' },
   { key: 'searching',      label: 'Searching' },
-  { key: 'due_diligence',  label: 'Due Diligence' },
   { key: 'under_contract', label: 'Under Contract' },
-  { key: 'settled',        label: 'Settled' },
+  { key: 'settlement',     label: 'Settlement' },
 ];
 
 function stageSinceDays(updatedAt) {
@@ -2113,6 +2116,19 @@ async function notifyMarkets(id, name) {
 }
 
 // ── Brief builder ─────────────────────────────────────────────────────────────
+function syncBriefYield() {
+  const cb = document.getElementById('bc-yield');
+  const v  = document.getElementById('bc-yield-val').value.trim().replace('%', '');
+  cb.value = v ? `Rental yield ${v}% or greater` : '';
+  if (v) cb.checked = true;
+}
+function syncBriefLand() {
+  const cb = document.getElementById('bc-land');
+  const v  = document.getElementById('bc-land-val').value.trim().replace(/[^0-9]/g, '');
+  cb.value = v ? `Land size greater than ${v}sqm` : '';
+  if (v) cb.checked = true;
+}
+
 let _briefClientId = null;
 let _customMarkets = [];
 let _customCriteria = [];
@@ -2172,7 +2188,9 @@ async function openBrief(clientId, clientName) {
   document.getElementById('brief-criteria-input').value = '';
   document.getElementById('brief-exclusion-input').value = '';
   document.getElementById('brief-status-badge').style.display = 'none';
-  document.querySelectorAll('.brief-type-check,.brief-criteria-check,.brief-exclusion-check').forEach(c => c.checked = false);
+  document.getElementById('bc-yield-val').value = '';
+  document.getElementById('bc-land-val').value = '';
+  document.querySelectorAll('.brief-type-check,.brief-criteria-check,.brief-exclusion-check').forEach(c => { c.checked = false; if (c.id === 'bc-yield' || c.id === 'bc-land') c.value = ''; });
 
   // Build market checkboxes from MARKETS array
   const grid = document.getElementById('brief-market-grid');
@@ -2228,6 +2246,20 @@ async function openBrief(clientId, clientName) {
       });
 
       (brief.propertyCriteria || []).forEach(val => {
+        const yieldMatch = val.match(/^Rental yield (.+?)% or greater$/);
+        if (yieldMatch) {
+          document.getElementById('bc-yield-val').value = yieldMatch[1];
+          syncBriefYield();
+          document.getElementById('bc-yield').checked = true;
+          return;
+        }
+        const landMatch = val.match(/^Land size greater than (\d+)sqm$/);
+        if (landMatch) {
+          document.getElementById('bc-land-val').value = landMatch[1];
+          syncBriefLand();
+          document.getElementById('bc-land').checked = true;
+          return;
+        }
         const cb = document.querySelector(`.brief-criteria-check[value="${val.replace(/"/g, '\\"')}"]`);
         if (cb) cb.checked = true;
       });
@@ -2284,7 +2316,7 @@ async function saveBrief(status) {
 
   const targetMarkets   = [...document.querySelectorAll('.brief-market-check:checked')].map(c => c.value);
   const propertyTypes   = [...document.querySelectorAll('.brief-type-check:checked')].map(c => c.value);
-  const propertyCriteria     = [...document.querySelectorAll('.brief-criteria-check:checked')].map(c => c.value);
+  const propertyCriteria     = [...document.querySelectorAll('.brief-criteria-check:checked')].map(c => c.value).filter(v => v);
   const excludedCharacteristics = [...document.querySelectorAll('.brief-exclusion-check:checked')].map(c => c.value);
 
   const payload = {
@@ -3478,7 +3510,7 @@ function renderEngagementTab() {
   const el = document.getElementById('profile-body');
   const client = clients.find(c => c.id === crmProfileClientId);
   if (!client) return;
-  const STAGE_LABELS = { onboarding:'Onboarding', strategy:'Strategy', searching:'Searching', due_diligence:'Due diligence', under_contract:'Under contract', settled:'Settled' };
+  const STAGE_LABELS = { onboarding:'Onboarding', searching:'Searching', under_contract:'Under contract', settlement:'Settlement' };
   const marketPills = (client.markets || []).map(m => `<span style="font-size:12px;background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.1);border-radius:100px;padding:4px 12px;color:rgba(247,243,237,0.6);">${esc(m.replace(/-/g,' ').replace(/\b\w/g, l => l.toUpperCase()))}</span>`).join('');
   const clientMilestones = milestones.filter(m => m.clientId === client.id && !m.completed).slice(0,5);
 

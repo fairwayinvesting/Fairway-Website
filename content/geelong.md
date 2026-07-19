@@ -40,7 +40,7 @@ At ~$760k median, Greater Geelong offers a meaningful affordability discount to 
 
 ## lukesTake.primaryThesis
 
-Geelong is where I would point a client who wants a real city, not a bet on a mining town or a coastal lifestyle story. The economic base is genuinely diverse — health, education, advanced manufacturing, defence — and the population growth is structural, not speculative. The catalysts here are not hypothetical; they are already underway and already funded.
+Geelong is where I would point a client who wants a real city, not a bet on a mining town or a coastal lifestyle story. The economic base is genuinely diverse across health, education, advanced manufacturing and defence, and the population growth is structural, not speculative. The catalysts here are not hypothetical; they are already underway and already funded.
 
 ---
 
