@@ -9,6 +9,13 @@ async function pbkdf2Hash(password, salt) {
   });
 }
 
+function signJWT(payload, secret) {
+  const h = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+  const b = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const sig = crypto.createHmac('sha256', secret).update(`${h}.${b}`).digest('base64url');
+  return `${h}.${b}.${sig}`;
+}
+
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
 
@@ -44,7 +51,24 @@ export default async (req) => {
   delete clients[idx].setupTokenExpiry;
 
   await store.setJSON('all', clients);
-  return json({ ok: true });
+
+  // Auto-login: issue a session cookie so the client lands in the portal directly
+  const updatedClient = clients[idx];
+  const sessionToken = signJWT({
+    sub: updatedClient.id,
+    name: updatedClient.name,
+    email: updatedClient.email,
+    markets: updatedClient.markets || [],
+    exp: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
+  }, process.env.JWT_SECRET);
+
+  return new Response(JSON.stringify({ ok: true }), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+      'Set-Cookie': `fw_session=${sessionToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${30 * 24 * 60 * 60}`,
+    },
+  });
 };
 
 export const config = { path: '/api/setup-password', method: ['POST'] };

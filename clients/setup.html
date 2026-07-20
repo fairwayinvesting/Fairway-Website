@@ -70,7 +70,7 @@
           </button>
         </div>
       </div>
-      <button class="btn" type="submit" id="btn">Set password &amp; sign in</button>
+      <button class="btn" type="submit" id="btn">Set password &amp; continue</button>
       <div class="error" id="error"></div>
       <div class="success" id="success"></div>
     </form>
@@ -136,20 +136,20 @@
           });
           const data = await res.json();
           if (res.ok) {
-            successEl.textContent = 'Password set! Redirecting you to sign in…';
+            successEl.textContent = 'Password set! Taking you to your portal…';
             successEl.classList.add('visible');
-            setTimeout(() => { location.href = '/clients/'; }, 1500);
+            setTimeout(() => { location.href = '/clients/portal.html'; }, 1200);
           } else {
             errEl.textContent = data.error || 'Something went wrong. Please try again.';
             errEl.classList.add('visible');
             btn.disabled = false;
-            btn.textContent = 'Set password & sign in';
+            btn.textContent = 'Set password & continue';
           }
         } catch {
           errEl.textContent = 'Connection error. Please try again.';
           errEl.classList.add('visible');
           btn.disabled = false;
-          btn.textContent = 'Set password & sign in';
+          btn.textContent = 'Set password & continue';
         }
       });
     })();

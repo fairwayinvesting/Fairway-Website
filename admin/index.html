@@ -2519,7 +2519,7 @@ async function openBrief(clientId, clientName) {
       if (questionnaire.timeframe) pills.push(questionnaire.timeframe);
       if (questionnaire.fundingMethod) pills.push(questionnaire.fundingMethod);
       if (questionnaire.coInvestor === 'Yes' && questionnaire.p2FirstName) pills.push('Co-investor: ' + questionnaire.p2FirstName + ' ' + (questionnaire.p2LastName || ''));
-      if (questionnaire.maxPurchasePrice) pills.push('Budget: $' + Number(questionnaire.maxPurchasePrice).toLocaleString('en-AU'));
+      if (questionnaire.maxPurchasePrice) pills.push('Budget: ' + pfMoney(questionnaire.maxPurchasePrice));
       qEl.innerHTML = pills.map(p => `<span class="brief-q-pill">${p}</span>`).join('');
     }
 
@@ -3626,6 +3626,12 @@ function pfVal(v) {
   return esc(v);
 }
 
+function pfMoney(v) {
+  if (!v && v !== 0) return '';
+  const n = parseFloat(String(v).replace(/[$,\s]/g, ''));
+  return isNaN(n) ? String(v) : '$' + n.toLocaleString('en-AU');
+}
+
 function renderProfileTab() {
   const el = document.getElementById('profile-body');
   const q = crmQuestionnaire;
@@ -3698,17 +3704,17 @@ function renderProfileTab() {
     <div class="profile-section">
       <div class="profile-section-title">Financial position</div>
       <div class="profile-fields">
-        <div class="profile-field"><label>Annual salary</label><div class="pf-val">${pfVal(q.annualSalary ? '$' + Number(q.annualSalary).toLocaleString() : '')}</div></div>
-        <div class="profile-field"><label>Cash savings</label><div class="pf-val">${pfVal(q.cashSavings ? '$' + Number(q.cashSavings).toLocaleString() : '')}</div></div>
+        <div class="profile-field"><label>Annual salary</label><div class="pf-val">${pfVal(pfMoney(q.annualSalary))}</div></div>
+        <div class="profile-field"><label>Cash savings</label><div class="pf-val">${pfVal(pfMoney(q.cashSavings))}</div></div>
         <div class="profile-field"><label>Dependants</label><div class="pf-val">${pfVal(q.dependants)}</div></div>
         <div class="profile-field"><label>Other debts</label><div class="pf-val">${pfVal(q.otherDebts)}</div></div>
         <div class="profile-field"><label>Weekly rent paid</label><div class="pf-val">${pfVal(q.weeklyRentPaid ? '$' + q.weeklyRentPaid + '/wk' : '')}</div></div>
         <div class="profile-field"><label>Funding method</label><div class="pf-val">${pfVal(q.fundingMethod)}</div></div>
-        <div class="profile-field"><label>Max purchase price</label><div class="pf-val">${pfVal(q.maxPurchasePrice ? '$' + Number(q.maxPurchasePrice).toLocaleString() : '')}</div></div>
+        <div class="profile-field"><label>Max purchase price</label><div class="pf-val">${pfVal(pfMoney(q.maxPurchasePrice))}</div></div>
         ${hasPpor ? `
           <div class="profile-field"><label>PPOR state</label><div class="pf-val">${pfVal(q.pporState)}</div></div>
-          <div class="profile-field"><label>PPOR value</label><div class="pf-val">${pfVal(q.pporValue ? '$' + Number(q.pporValue).toLocaleString() : '')}</div></div>
-          <div class="profile-field"><label>PPOR loan balance</label><div class="pf-val">${pfVal(q.pporLoan ? '$' + Number(q.pporLoan).toLocaleString() : '')}</div></div>
+          <div class="profile-field"><label>PPOR value</label><div class="pf-val">${pfVal(pfMoney(q.pporValue))}</div></div>
+          <div class="profile-field"><label>PPOR loan balance</label><div class="pf-val">${pfVal(pfMoney(q.pporLoan))}</div></div>
           <div class="profile-field"><label>PPOR rate</label><div class="pf-val">${pfVal(q.pporRate)}</div></div>` : '<div class="profile-field"><label>Own PPOR?</label><div class="pf-val">No</div></div>'}
       </div>
     </div>
@@ -3729,7 +3735,7 @@ function renderProfileTab() {
         <div class="profile-field"><label>Name</label><div class="pf-val">${pfVal(q.brokerName)}</div></div>
         <div class="profile-field"><label>Phone</label><div class="pf-val">${pfVal(q.brokerPhone)}</div></div>
         <div class="profile-field"><label>Email</label><div class="pf-val">${pfVal(q.brokerEmail)}</div></div>
-        <div class="profile-field"><label>Approved capacity</label><div class="pf-val">${pfVal(q.brokerCapacity ? '$' + Number(q.brokerCapacity).toLocaleString() : '')}</div></div>
+        <div class="profile-field"><label>Approved capacity</label><div class="pf-val">${pfVal(pfMoney(q.brokerCapacity))}</div></div>
       </div>
     </div>` : ''}
 
@@ -3748,8 +3754,8 @@ function renderProfileTab() {
         <div style="background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.07);border-radius:10px;padding:12px 14px;margin-bottom:8px;">
           <div style="font-size:12px;font-weight:500;color:rgba(247,243,237,0.4);margin-bottom:8px;">Property ${i + 1} — ${esc(p.state || '')} ${esc(p.type || '')}</div>
           <div class="profile-fields">
-            <div class="profile-field"><label>Valuation</label><div class="pf-val">${pfVal(p.valuation ? '$' + Number(p.valuation).toLocaleString() : '')}</div></div>
-            <div class="profile-field"><label>Loan balance</label><div class="pf-val">${pfVal(p.loanBalance ? '$' + Number(p.loanBalance).toLocaleString() : '')}</div></div>
+            <div class="profile-field"><label>Valuation</label><div class="pf-val">${pfVal(pfMoney(p.valuation))}</div></div>
+            <div class="profile-field"><label>Loan balance</label><div class="pf-val">${pfVal(pfMoney(p.loanBalance))}</div></div>
             <div class="profile-field"><label>Weekly rent</label><div class="pf-val">${pfVal(p.weeklyRent ? '$' + p.weeklyRent + '/wk' : '')}</div></div>
             <div class="profile-field"><label>Interest rate</label><div class="pf-val">${pfVal(p.interestRate)}</div></div>
           </div>

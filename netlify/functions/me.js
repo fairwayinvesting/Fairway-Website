@@ -25,7 +25,7 @@ export default async (req) => {
     const store = getStore('fairway-clients');
     const clients = (await store.get('all', { type: 'json' })) || [];
     const client = clients.find(c => c.id === payload.sub);
-    if (!client || !client.active) {
+    if (!client || !client.active || client.deleted) {
       return new Response(JSON.stringify({ error: 'Account not found' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
 
