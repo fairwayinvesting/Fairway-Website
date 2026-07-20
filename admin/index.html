@@ -552,6 +552,15 @@
     .pf-edit-input:focus{border-color:rgba(189,122,112,0.5);}
     .pf-edit-actions{display:flex;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid rgba(247,243,237,0.07);}
     .pf-empty{color:rgba(247,243,237,0.2)!important;font-style:italic;}
+    .cf-row{display:grid;grid-template-columns:1fr 1fr auto auto;gap:8px;align-items:center;margin-bottom:6px;}
+    .cf-row input{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:7px;padding:6px 9px;font-size:13px;font-family:'Outfit',sans-serif;font-weight:300;color:#f7f3ed;outline:none;width:100%;box-sizing:border-box;}
+    .cf-row input:focus{border-color:rgba(189,122,112,0.5);}
+    .cf-row input::placeholder{color:rgba(247,243,237,0.2);}
+    .cf-icon-btn{background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0;}
+    .cf-icon-btn:hover{background:rgba(247,243,237,0.07);}
+    .cf-icon-btn svg{display:block;}
+    .cf-add-btn{display:flex;align-items:center;gap:6px;background:none;border:1px dashed rgba(247,243,237,0.15);border-radius:8px;padding:7px 13px;font-size:12.5px;font-family:'Outfit',sans-serif;color:rgba(247,243,237,0.35);cursor:pointer;margin-top:8px;transition:all .15s;width:100%;}
+    .cf-add-btn:hover{border-color:rgba(247,243,237,0.3);color:rgba(247,243,237,0.6);}
 
     /* ── Purchase Cards ──────────────────────────────────── */
     .purchase-card{background:#22201d;border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:18px 20px;margin-bottom:12px;}
@@ -3644,7 +3653,16 @@ function renderProfileTab() {
         <div class="profile-field"><label>Email</label><div class="pf-val">${pfVal(client?.email)}</div></div>
       </div>
       <p style="margin-top:20px;font-size:13px;color:rgba(247,243,237,0.3);">No questionnaire submitted yet.</p>
+    </div>
+    <div class="profile-section" id="custom-fields-section">
+      <div class="profile-section-title">Custom fields</div>
+      <div id="cf-list"></div>
+      <button class="cf-add-btn" onclick="cfAddRow()">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Add field
+      </button>
     </div>`;
+    renderCustomFields();
     return;
   }
   if (crmProfileEditing) { renderProfileEditTab(el, q); return; }
@@ -3763,7 +3781,76 @@ function renderProfileTab() {
     </div>` : ''}
 
     <div style="font-size:11px;color:rgba(247,243,237,0.2);margin-top:12px;">Submitted: ${q.submittedAt ? new Date(q.submittedAt).toLocaleDateString('en-AU', {day:'numeric',month:'long',year:'numeric'}) : '—'}</div>
+
+    <div class="profile-section" style="margin-top:28px;" id="custom-fields-section">
+      <div class="profile-section-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Custom fields</span>
+      </div>
+      <div id="cf-list"></div>
+      <button class="cf-add-btn" onclick="cfAddRow()">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Add field
+      </button>
+    </div>
   `;
+  renderCustomFields();
+}
+
+function renderCustomFields() {
+  const el = document.getElementById('cf-list');
+  if (!el) return;
+  const client = clients.find(c => c.id === crmProfileClientId);
+  const fields = (client?.customFields || []);
+  if (!fields.length) { el.innerHTML = ''; return; }
+  el.innerHTML = fields.map((f, i) => `
+    <div class="cf-row" id="cf-row-${i}">
+      <input class="cf-label-inp" data-i="${i}" value="${esc(f.label)}" placeholder="Label" oninput="cfChange(${i})">
+      <input class="cf-value-inp" data-i="${i}" value="${esc(f.value)}" placeholder="Value" oninput="cfChange(${i})">
+      <button class="cf-icon-btn" onclick="cfSaveRow(${i})" title="Save" id="cf-save-${i}" style="opacity:0;pointer-events:none;">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2.5 7.5l3.5 3.5 6.5-6.5" stroke="#8ec98e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="cf-icon-btn" onclick="cfDeleteRow(${i})" title="Delete">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 2l9 9M11 2l-9 9" stroke="rgba(247,243,237,0.3)" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>`).join('');
+}
+
+function cfChange(i) {
+  const btn = document.getElementById(`cf-save-${i}`);
+  if (btn) { btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; }
+}
+
+function cfAddRow() {
+  const client = clients.find(c => c.id === crmProfileClientId);
+  if (!client) return;
+  if (!client.customFields) client.customFields = [];
+  client.customFields.push({ label: '', value: '' });
+  renderCustomFields();
+  const rows = document.querySelectorAll('.cf-label-inp');
+  if (rows.length) rows[rows.length - 1].focus();
+  cfChange(client.customFields.length - 1);
+}
+
+async function cfSaveRow(i) {
+  const client = clients.find(c => c.id === crmProfileClientId);
+  if (!client) return;
+  const label = document.querySelector(`.cf-label-inp[data-i="${i}"]`)?.value.trim() || '';
+  const value = document.querySelector(`.cf-value-inp[data-i="${i}"]`)?.value.trim() || '';
+  if (!label && !value) { cfDeleteRow(i); return; }
+  client.customFields[i] = { label, value };
+  const res = await api('PUT', '/api/admin/clients', { id: client.id, customFields: client.customFields });
+  if (res.ok) {
+    const btn = document.getElementById(`cf-save-${i}`);
+    if (btn) { btn.style.opacity = '0'; btn.style.pointerEvents = 'none'; }
+  }
+}
+
+async function cfDeleteRow(i) {
+  const client = clients.find(c => c.id === crmProfileClientId);
+  if (!client) return;
+  client.customFields.splice(i, 1);
+  await api('PUT', '/api/admin/clients', { id: client.id, customFields: client.customFields });
+  renderCustomFields();
 }
 
 function renderProfileEditTab(el, q) {

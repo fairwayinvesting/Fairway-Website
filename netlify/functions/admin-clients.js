@@ -172,7 +172,7 @@ export default async (req) => {
 
   if (req.method === 'PUT') {
     const body = await req.json().catch(() => ({}));
-    const { id, name, markets, active, password, action, datesArchived, pipelineStage, status, engagementNumber, referralSource, referrerId } = body;
+    const { id, name, markets, active, password, action, datesArchived, pipelineStage, status, engagementNumber, referralSource, referrerId, customFields } = body;
     const idx = clients.findIndex(c => c.id === id);
     if (idx === -1) return json({ error: 'Client not found' }, 404);
 
@@ -255,6 +255,7 @@ export default async (req) => {
     if (engagementNumber !== undefined) client.engagementNumber = engagementNumber;
     if (referralSource !== undefined) client.referralSource = referralSource;
     if (referrerId !== undefined) client.referrerId = referrerId;
+    if (customFields !== undefined) client.customFields = customFields;
     if (password) {
       const salt = crypto.randomBytes(16).toString('hex');
       client.passwordHash = await pbkdf2Hash(password, salt);
