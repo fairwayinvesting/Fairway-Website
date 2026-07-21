@@ -260,6 +260,22 @@ export default async (req) => {
       return json({ ok: true, acquisition: acq });
     }
 
+    if (action === 'delete-acquisition') {
+      const { acqId } = body;
+      const client = clients[idx];
+      if (!client.acquisitions?.length) return json({ error: 'No acquisitions found' }, 404);
+      const acqToDelete = client.acquisitions.find(a => a.id === acqId);
+      if (!acqToDelete) return json({ error: 'Acquisition not found' }, 404);
+      if (client.acquisitions.length === 1) return json({ error: 'Cannot delete the only acquisition' }, 400);
+      client.acquisitions = client.acquisitions.filter(a => a.id !== acqId);
+      // Mirror latest active acquisition's stage to client-level pipeline stage
+      const latestActive = [...client.acquisitions].reverse().find(a => a.status === 'active');
+      if (latestActive) { client.pipelineStage = latestActive.pipelineStage; client.pipelineStageUpdatedAt = latestActive.pipelineStageUpdatedAt || new Date().toISOString(); }
+      await store.setJSON('all', clients);
+      appendAudit('acquisition_deleted', `Deleted ${acqToDelete.label} for ${client.name} <${client.email}>`);
+      return json({ ok: true, acquisitions: client.acquisitions });
+    }
+
     if (action === 'send-acq-questionnaire') {
       const { acqId } = body;
       const client = clients[idx];

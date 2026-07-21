@@ -4384,6 +4384,7 @@ function renderEngagementTab() {
         <div class="acq-actions">
           <button class="btn-sm" onclick="openBrief('${client.id}','${esc(client.name)}',${isFirst?'null':`'${acq.id}'`})">Open brief</button>
           ${acq.status!=='settled'?`<button class="btn-sm" onclick="markAcqSettled('${client.id}','${acq.id}')">Mark settled</button>`:''}
+          ${acqs.length > 1 ? `<button class="btn-sm" style="color:#e07070;border-color:rgba(224,112,112,0.25);" onclick="deleteAcquisition('${client.id}','${acq.id}','${esc(acq.label)}')">Delete</button>` : ''}
         </div>
       </div>
     </div>`;
@@ -4455,10 +4456,20 @@ function toggleAcqAccordion(acqId) {
 async function addAcquisition(clientId) {
   const res = await api('PUT', '/api/admin/clients', { id: clientId, action: 'add-acquisition' });
   if (!res.ok) return alert('Failed to add acquisition.');
-  const data = await res.json();
-  const c = clients.find(x => x.id === clientId);
-  if (c) c.acquisitions = data.acquisitions;
-  renderEngagementTab();
+  // Reload all clients to guarantee local state matches server (avoids Blobs eventual-consistency races)
+  await loadClients();
+  if (crmProfileClientId === clientId) renderEngagementTab();
+}
+
+async function deleteAcquisition(clientId, acqId, label) {
+  if (!confirm(`Delete "${label}"? This cannot be undone.`)) return;
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, action: 'delete-acquisition', acqId });
+  if (!res.ok) {
+    const d = await res.json().catch(() => ({}));
+    return alert(d.error || 'Failed to delete acquisition.');
+  }
+  await loadClients();
+  if (crmProfileClientId === clientId) renderEngagementTab();
 }
 
 async function updateAcqStage(clientId, acqId, stage) {
