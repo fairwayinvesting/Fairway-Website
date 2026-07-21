@@ -2212,9 +2212,14 @@ function renderTable() {
                 </div>`).join('')}
               </div>`;
             }
-            return `<select onchange="moveClientStage('${c.id}', this.value, this)" style="margin-top:5px;${stageSelectStyle(!!c.pipelineStage)}">
-              <option value="" ${!c.pipelineStage ? 'selected' : ''}>No stage</option>
-              ${PIPELINE_STAGES.map(s => `<option value="${s.key}" ${c.pipelineStage === s.key ? 'selected' : ''}>${s.label}</option>`).join('')}
+            const singleAcq = activeAcqs[0] || null;
+            const stageVal = singleAcq ? singleAcq.pipelineStage : c.pipelineStage;
+            const handler = singleAcq
+              ? `moveKanbanCard('${c.id}','${singleAcq.id}',this.value,this)`
+              : `moveClientStage('${c.id}',this.value,this)`;
+            return `<select onchange="${handler}" style="margin-top:5px;${stageSelectStyle(!!stageVal)}">
+              <option value="" ${!stageVal ? 'selected' : ''}>No stage</option>
+              ${PIPELINE_STAGES.map(s => `<option value="${s.key}" ${stageVal === s.key ? 'selected' : ''}>${s.label}</option>`).join('')}
             </select>`;
           })()}
         </div>
@@ -2390,6 +2395,7 @@ async function moveClientStage(clientId, newStage, selectEl) {
     selectEl.disabled = false;
     renderTable();
     renderPipeline();
+    if (crmProfileClientId === clientId && crmProfileTab === 'engagement') renderEngagementTab();
   } catch {
     selectEl.disabled = false;
     selectEl.value = '';
@@ -2413,6 +2419,7 @@ async function moveKanbanCard(clientId, acqId, newStage, selectEl) {
     selectEl.disabled = false;
     renderPipeline();
     renderTable();
+    if (crmProfileClientId === clientId && crmProfileTab === 'engagement') renderEngagementTab();
   } catch {
     selectEl.disabled = false;
     selectEl.value = '';
