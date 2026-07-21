@@ -137,6 +137,7 @@ export default async () => {
   // For each active client, load their questionnaire
   const qStore = getStore('fairway-questionnaires');
   const items = [];
+  const seen = new Set(); // deduplicate by name:dob in case of duplicate client records
 
   await Promise.all(active.map(async (client) => {
     let q = null;
@@ -150,10 +151,11 @@ export default async () => {
       const days = daysUntilBirthday(q.dob, today);
       if (days !== null && days >= 0 && days <= 3) {
         const name = [q.firstName || client.name.split(' ')[0], q.lastName || ''].join(' ').trim();
-        items.push({
-          days,
-          line: `${dayLabel(days)} — *${name}* (client) — ${fmtDob(q.dob)}`,
-        });
+        const key = `${name}:${q.dob}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          items.push({ days, line: `${dayLabel(days)} — *${name}* (client) — ${fmtDob(q.dob)}` });
+        }
       }
     }
 
@@ -162,12 +164,13 @@ export default async () => {
       const days = daysUntilBirthday(q.p2Dob, today);
       if (days !== null && days >= 0 && days <= 3) {
         const partnerName = [q.p2FirstName, q.p2LastName].filter(Boolean).join(' ') || 'Partner';
-        const clientFirst = q.firstName || client.name.split(' ')[0];
-        const relationship = q.p2Relationship || 'partner';
-        items.push({
-          days,
-          line: `${dayLabel(days)} — *${partnerName}* (${relationship.toLowerCase()} of ${clientFirst}) — ${fmtDob(q.p2Dob)}`,
-        });
+        const key = `${partnerName}:${q.p2Dob}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          const clientFirst = q.firstName || client.name.split(' ')[0];
+          const relationship = q.p2Relationship || 'partner';
+          items.push({ days, line: `${dayLabel(days)} — *${partnerName}* (${relationship.toLowerCase()} of ${clientFirst}) — ${fmtDob(q.p2Dob)}` });
+        }
       }
     }
   }));
