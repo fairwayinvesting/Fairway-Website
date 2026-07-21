@@ -78,7 +78,8 @@
     .journey-bar{display:flex;align-items:flex-start;gap:0;}
     .jstep{display:flex;flex-direction:column;align-items:center;flex:1;min-width:0;position:relative;}
     .jstep:not(:last-child)::after{content:'';position:absolute;top:10px;left:calc(50% + 12px);right:calc(-50% + 12px);height:1.5px;background:rgba(247,243,237,0.1);}
-    .jstep.done:not(:last-child)::after,.jstep.active:not(:last-child)::after{background:rgba(189,122,112,0.35);}
+    .jstep.done:not(:last-child)::after,.jstep.active:not(:last-child)::after,.jstep.pending:not(:last-child)::after{background:rgba(189,122,112,0.35);}
+    .jstep.pending .jstep-dot{background:transparent;border-color:#bd7a70;border-width:2px;}
     .jstep-dot{width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(247,243,237,0.15);background:transparent;flex-shrink:0;margin-bottom:8px;transition:all .2s;position:relative;z-index:1;}
     .jstep.done .jstep-dot{background:#bd7a70;border-color:#bd7a70;}
     .jstep.done .jstep-dot::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:600;}
@@ -129,6 +130,21 @@
       .prop-fields{grid-template-columns:1fr 1fr;}
       .prop-equity{flex-direction:column;align-items:flex-start;gap:8px;}
     }
+
+    /* Multi-acquisition panels */
+    .acq-panel{background:#22201d;border:1px solid rgba(247,243,237,0.09);border-radius:20px;margin-bottom:20px;overflow:hidden;transition:border-color .2s;}
+    .acq-panel-head{padding:24px 28px;cursor:pointer;display:flex;align-items:center;gap:16px;transition:background .15s;}
+    .acq-panel-head:hover{background:rgba(247,243,237,0.02);}
+    .acq-panel-number{font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#bd7a70;margin-bottom:4px;}
+    .acq-panel-label{font-family:'Fraunces',serif;font-size:22px;font-weight:400;color:#f7f3ed;line-height:1.2;}
+    .acq-panel-stage{font-size:13px;color:rgba(247,243,237,0.35);margin-top:2px;}
+    .acq-panel-chevron{margin-left:auto;color:rgba(247,243,237,0.25);transition:transform .2s;flex-shrink:0;}
+    .acq-panel.open .acq-panel-chevron{transform:rotate(180deg);}
+    .acq-panel-body{display:none;border-top:1px solid rgba(247,243,237,0.07);}
+    .acq-panel.open .acq-panel-body{display:block;}
+    .acq-section{padding:24px 28px;border-bottom:1px solid rgba(247,243,237,0.06);}
+    .acq-section:last-child{border-bottom:none;}
+    .acq-section-label{font-size:10.5px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(247,243,237,0.28);margin-bottom:14px;}
   </style>
 </head>
 <body>
@@ -211,6 +227,7 @@
       { key: 'onboarding',     label: 'Onboarding' },
       { key: 'searching',      label: 'Searching' },
       { key: 'under_contract', label: 'Under contract' },
+      { key: 'exchanged',      label: 'Exchanged' },
       { key: 'settlement',     label: 'Settlement' },
     ];
 
@@ -244,14 +261,31 @@
       wrap.style.display = 'block';
     }
 
-    function renderJourney(stage) {
+    function renderJourney(stage, settlementDate) {
       if (!stage) return;
       const wrap = document.getElementById('journey-section');
       const bar  = document.getElementById('journey-bar');
       const idx  = JOURNEY_STAGES.findIndex(s => s.key === stage);
       if (idx === -1) return;
+
+      // Settlement is "pending" (line filled but node not done) until the date passes
+      const settleDate = settlementDate ? new Date(settlementDate + 'T00:00:00') : null;
+      const today = new Date(); today.setHours(0,0,0,0);
+      const settlePast = settleDate ? settleDate <= today : false;
+
       bar.innerHTML = JOURNEY_STAGES.map((s, i) => {
-        const cls = i < idx ? 'done' : i === idx ? 'active' : '';
+        let cls;
+        if (i < idx) {
+          cls = 'done';
+        } else if (i === idx) {
+          if (s.key === 'settlement' && !settlePast) {
+            cls = 'active pending';
+          } else {
+            cls = 'active';
+          }
+        } else {
+          cls = '';
+        }
         return `<div class="jstep ${cls}">
           <div class="jstep-dot"></div>
           <div class="jstep-label">${s.label}</div>
@@ -511,6 +545,131 @@
       } catch { alert('Network error. Please try again.'); }
     }
 
+    const ACQ_STAGE_LABELS = { onboarding:'Onboarding', searching:'Searching', under_contract:'Under contract', exchanged:'Exchanged', settlement:'Settlement' };
+
+    function renderMultiAcquisition(acquisitions, me) {
+      // Hide single-acquisition sections
+      document.getElementById('q-section').style.display = 'none';
+      document.getElementById('brief-section').style.display = 'none';
+      document.getElementById('reports-section').style.display = 'none';
+      document.getElementById('journey-section').style.display = 'none';
+      document.getElementById('settlement-section').style.display = 'none';
+      document.getElementById('presentations-section').style.display = 'none';
+
+      // Insert acquisitions container after the hero
+      const hero = document.querySelector('.hero');
+      let container = document.getElementById('multi-acq-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'multi-acq-container';
+        container.style.cssText = 'padding:0 44px 40px;max-width:1060px;margin:0 auto;';
+        hero.insertAdjacentElement('afterend', container);
+      }
+
+      container.innerHTML = acquisitions.map((acq, i) => {
+        const stageLabel = ACQ_STAGE_LABELS[acq.pipelineStage] || 'Getting started';
+        const isSettled = acq.status === 'settled';
+        const today = new Date(); today.setHours(0,0,0,0);
+        const settleDate = acq.settlementDate ? new Date(acq.settlementDate + 'T00:00:00') : null;
+        const settlePast = settleDate ? settleDate <= today : false;
+        const days = settleDate && !settlePast ? Math.round((settleDate - today) / 86400000) : null;
+
+        const stages = ['onboarding','searching','under_contract','exchanged','settlement'];
+        const stageIdx = stages.indexOf(acq.pipelineStage);
+        const journeyHTML = acq.pipelineStage ? `
+          <div class="acq-section">
+            <p class="acq-section-label">Journey</p>
+            <div class="journey-bar" style="margin-bottom:0;">
+              ${stages.map((sk, si) => {
+                let cls;
+                if (si < stageIdx) cls = 'done';
+                else if (si === stageIdx) cls = (sk === 'settlement' && !settlePast) ? 'active pending' : 'active';
+                else cls = '';
+                return `<div class="jstep ${cls}"><div class="jstep-dot"></div><div class="jstep-label">${ACQ_STAGE_LABELS[sk]}</div></div>`;
+              }).join('')}
+            </div>
+            ${days !== null ? `<div class="settlement-card" style="margin-top:18px;padding:16px 20px;">
+              <div class="settlement-days${days <= 14 ? ' urgent' : ''}" style="font-size:38px;">${days}</div>
+              <div class="settlement-text">
+                <p class="settlement-eyebrow">Settlement countdown</p>
+                <p class="settlement-label">${days} day${days !== 1 ? 's' : ''} to settlement</p>
+                <p class="settlement-date">${settleDate.toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'})}</p>
+              </div>
+            </div>` : ''}
+          </div>` : '';
+
+        const qSection = `<div class="acq-section">
+          <p class="acq-section-label">Questionnaire</p>
+          ${acq.questionnaireSubmitted
+            ? `<p style="font-size:13.5px;color:rgba(247,243,237,0.55);">Complete &#10003;</p>`
+            : `<a href="/clients/questionnaire.html${acq.number > 1 ? '?acq=' + acq.id : ''}" class="action-btn" style="display:inline-flex;">Complete questionnaire &rarr;</a>`}
+        </div>`;
+
+        const briefSection = acq.briefPublished ? `<div class="acq-section">
+          <p class="acq-section-label">Buying brief</p>
+          <a href="/clients/brief.html${acq.number > 1 ? '?acq=' + acq.id : ''}" class="action-btn" style="display:inline-flex;">View buying brief &rarr;</a>
+        </div>` : '';
+
+        const reportsSection = acq.markets && acq.markets.length > 0 ? `<div class="acq-section">
+          <p class="acq-section-label">Area research</p>
+          <div class="grid">${acq.markets.map(key => {
+            const meta = MARKET_META[key] || { name: key, state: '' };
+            return `<a href="/reports/${key}.html" class="card" style="padding:20px;">
+              <p class="card-state">${esc(meta.state)} &nbsp;&middot;&nbsp; Area report</p>
+              <p class="card-name" style="font-size:18px;">${esc(meta.name)}</p>
+              <span class="card-btn">View &rarr;</span>
+            </a>`;
+          }).join('')}</div>
+        </div>` : '';
+
+        return `<div class="acq-panel${i === 0 ? ' open' : ''}" id="acq-panel-${acq.id}">
+          <div class="acq-panel-head" onclick="toggleAcqPanel('${acq.id}')">
+            <div>
+              <p class="acq-panel-number">${esc(acq.label)}</p>
+              <p class="acq-panel-label">${isSettled ? 'Settled' : 'In progress'}</p>
+              <p class="acq-panel-stage">${stageLabel}${days !== null ? ` &nbsp;&middot;&nbsp; ${days} days to settlement` : ''}</p>
+            </div>
+            <svg class="acq-panel-chevron" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="acq-panel-body">
+            ${journeyHTML}
+            ${qSection}
+            ${briefSection}
+            ${reportsSection}
+          </div>
+        </div>`;
+      }).join('');
+
+      // Also load presentations per acquisition
+      fetch('/api/presentations').then(r => r.ok ? r.json() : {presentations:[]}).then(({ presentations: pres }) => {
+        if (!pres || !pres.length) return;
+        acquisitions.forEach(acq => {
+          const acqPres = pres.filter(p => p.acquisitionId === acq.id || (!p.acquisitionId && acq.number === 1));
+          if (!acqPres.length) return;
+          const panel = document.getElementById('acq-panel-' + acq.id);
+          if (!panel) return;
+          const body = panel.querySelector('.acq-panel-body');
+          const typeLabels = { house:'House', unit:'Unit', townhouse:'Townhouse', duplex:'Duplex', land:'Land' };
+          const presHTML = `<div class="acq-section">
+            <p class="acq-section-label">Property presentations</p>
+            <div class="grid">${acqPres.map(p => {
+              return `<a href="/p/property.html?t=${encodeURIComponent(p.token)}" class="card" style="padding:20px;">
+                <p class="card-state">${esc(typeLabels[p.propertyType]||'Property')}</p>
+                <p class="card-name" style="font-size:18px;">${esc(p.address)}</p>
+                <span class="card-btn">View &rarr;</span>
+              </a>`;
+            }).join('')}</div>
+          </div>`;
+          body.insertAdjacentHTML('beforeend', presHTML);
+        });
+      }).catch(() => {});
+    }
+
+    function toggleAcqPanel(acqId) {
+      const panel = document.getElementById('acq-panel-' + acqId);
+      if (panel) panel.classList.toggle('open');
+    }
+
     async function init() {
       let me;
       try {
@@ -518,6 +677,16 @@
         if (!res.ok) { location.href = '/clients/'; return; }
         me = await res.json();
       } catch { location.href = '/clients/'; return; }
+
+      // Check for multiple acquisitions
+      let multiAcqData = null;
+      try {
+        const acqRes = await fetch('/api/client/acquisitions');
+        if (acqRes.ok) {
+          const d = await acqRes.json();
+          if (d.multiAcquisition && d.acquisitions && d.acquisitions.length > 1) multiAcqData = d;
+        }
+      } catch {}
 
       const isCompleted = me.status === 'completed';
       const hasPortfolio = (me.purchaseCount || 0) > 0;
@@ -535,8 +704,19 @@
         document.getElementById('presentations-section').style.display = 'none';
       } else {
         // Active journey mode
+        if (multiAcqData) {
+          renderMultiAcquisition(multiAcqData.acquisitions, me);
+          // Show portfolio if applicable
+          if (hasPortfolio) {
+            try {
+              const pr = await fetch('/api/client/properties');
+              if (pr.ok) { renderPortfolio(await pr.json()); }
+            } catch {}
+          }
+          return;
+        }
         renderSettlement(me.settlementDate);
-        renderJourney(me.pipelineStage);
+        renderJourney(me.pipelineStage, me.settlementDate);
 
         let qCompleted = false, briefPublished = false, presentations = [];
         try {

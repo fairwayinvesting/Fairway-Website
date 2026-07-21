@@ -131,7 +131,11 @@ export default async (req) => {
   // ── GET ────────────────────────────────────────────────────────────────────
   if (req.method === 'GET') {
     const clientId = new URL(req.url).searchParams.get('clientId');
-    if (clientId) return json(await getClientMilestones(clientId));
+    if (clientId) {
+      const acqId = new URL(req.url).searchParams.get('acqId');
+      const key = acqId ? `${clientId}:${acqId}` : clientId;
+      return json(await getClientMilestones(key));
+    }
     return json(await getAllMilestones());
   }
 
@@ -140,13 +144,15 @@ export default async (req) => {
     const body = await req.json().catch(() => ({}));
     const { clientId, action } = body;
     if (!clientId) return json({ error: 'clientId required' }, 400);
+    const acqId = body.acqId || null;
+    const msKey = acqId ? `${clientId}:${acqId}` : clientId;
 
     // Share action — email upcoming dates to specified recipients
     if (action === 'share') {
       const { recipients, note, clientName } = body;
       if (!recipients?.length) return json({ error: 'recipients required' }, 400);
 
-      const clientMilestones = await getClientMilestones(clientId);
+      const clientMilestones = await getClientMilestones(msKey);
       const upcoming = clientMilestones.filter(m => !m.completed);
       if (!upcoming.length) return json({ error: 'No upcoming dates to share' }, 400);
 
@@ -175,7 +181,7 @@ export default async (req) => {
     const { clientName, type, label, date, notes } = body;
     if (!type || !date) return json({ error: 'type and date required' }, 400);
 
-    const clientMilestones = await getClientMilestones(clientId);
+    const clientMilestones = await getClientMilestones(msKey);
     const milestone = {
       id: crypto.randomUUID(),
       clientId,
@@ -189,7 +195,7 @@ export default async (req) => {
       createdAt: new Date().toISOString(),
     };
     clientMilestones.push(milestone);
-    await saveClientMilestones(clientId, clientMilestones);
+    await saveClientMilestones(msKey, clientMilestones);
     await appendAudit('milestone_created',
       `Added "${milestone.label}" (${milestone.date}) for ${clientName}`,
       null, milestone);
@@ -198,11 +204,12 @@ export default async (req) => {
 
   // ── PUT ────────────────────────────────────────────────────────────────────
   if (req.method === 'PUT') {
-    const { id, clientId, date, notes, label, completed } = await req.json().catch(() => ({}));
+    const { id, clientId, date, notes, label, completed, acqId } = await req.json().catch(() => ({}));
     if (!id)       return json({ error: 'id required' }, 400);
     if (!clientId) return json({ error: 'clientId required' }, 400);
+    const msKey = acqId ? `${clientId}:${acqId}` : clientId;
 
-    const clientMilestones = await getClientMilestones(clientId);
+    const clientMilestones = await getClientMilestones(msKey);
     const idx = clientMilestones.findIndex(m => m.id === id);
     if (idx === -1) return json({ error: 'Not found' }, 404);
 
@@ -215,7 +222,7 @@ export default async (req) => {
       clientMilestones[idx].completedAt = completed ? new Date().toISOString() : null;
     }
     const after = { ...clientMilestones[idx] };
-    await saveClientMilestones(clientId, clientMilestones);
+    await saveClientMilestones(msKey, clientMilestones);
     await appendAudit(
       completed ? 'milestone_completed' : 'milestone_updated',
       `"${after.label}" for ${after.clientName}`,
@@ -231,13 +238,15 @@ export default async (req) => {
     const clientId = url.searchParams.get('clientId');
     if (!id)       return json({ error: 'id required' }, 400);
     if (!clientId) return json({ error: 'clientId required' }, 400);
+    const acqId = url.searchParams.get('acqId');
+    const msKey = acqId ? `${clientId}:${acqId}` : clientId;
 
-    const clientMilestones = await getClientMilestones(clientId);
+    const clientMilestones = await getClientMilestones(msKey);
     const toDelete = clientMilestones.find(m => m.id === id);
     if (!toDelete) return json({ error: 'Not found' }, 404);
 
     const updated = clientMilestones.filter(m => m.id !== id);
-    await saveClientMilestones(clientId, updated);
+    await saveClientMilestones(msKey, updated);
     await appendAudit('milestone_deleted',
       `Deleted "${toDelete.label}" (${toDelete.date}) for ${toDelete.clientName}`,
       toDelete, null);

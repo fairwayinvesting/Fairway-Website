@@ -23,8 +23,10 @@ export default async (req) => {
   const payload = verifyJWT(match[1], process.env.JWT_SECRET);
   if (!payload) return json({ error: 'Session expired' }, 401);
 
+  const acqId = new URL(req.url).searchParams.get('acq');
+  const storeKey = acqId ? `${payload.sub}:${acqId}` : payload.sub;
   const store = getStore('fairway-briefs');
-  const brief = await store.get(payload.sub, { type: 'json' }).catch(() => null);
+  const brief = await store.get(storeKey, { type: 'json' }).catch(() => null);
 
   if (!brief || brief.status !== 'published') return json({ published: false });
 

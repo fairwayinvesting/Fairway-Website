@@ -82,6 +82,7 @@ function defaultPres(fields) {
     assignedClients: [],
     revokedClients: [],
     tokens: {}, sentClients: [],
+    clientAcquisitions: {},
     previewToken: null,
     createdAt: new Date().toISOString(),
     ...fields,
@@ -216,7 +217,7 @@ export default async (req) => {
                     'propertyType','propertyDescription','summary','highlights','knownIssues','agentSubmission','images','videos','cashflow',
                     'riskProfile','demographics','customSections',
                     'comparableSales','comparableRentals',
-                    'revocationReason','status','expiresAt','revokedClients'];
+                    'revocationReason','status','expiresAt','revokedClients','clientAcquisitions'];
     fields.forEach(f => { if (body[f] !== undefined) pres[f] = body[f]; });
 
     let viewsUpdated = false;

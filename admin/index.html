@@ -552,6 +552,31 @@
     .pf-edit-input:focus{border-color:rgba(189,122,112,0.5);}
     .pf-edit-actions{display:flex;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid rgba(247,243,237,0.07);}
     .pf-empty{color:rgba(247,243,237,0.2)!important;font-style:italic;}
+
+    /* ── Acquisition accordion ───────────────────────────── */
+    .acq-accordion{margin-bottom:8px;border:1px solid rgba(247,243,237,0.09);border-radius:12px;overflow:hidden;}
+    .acq-accordion-head{display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;background:rgba(247,243,237,0.03);user-select:none;transition:background .15s;}
+    .acq-accordion-head:hover{background:rgba(247,243,237,0.05);}
+    .acq-accordion-chevron{font-size:10px;color:rgba(247,243,237,0.3);transition:transform .2s;flex-shrink:0;}
+    .acq-accordion.open .acq-accordion-chevron{transform:rotate(90deg);}
+    .acq-accordion-label{font-size:13.5px;font-weight:400;color:#f7f3ed;flex:1;}
+    .acq-accordion-stage{font-size:11.5px;color:rgba(247,243,237,0.35);}
+    .acq-accordion-status{font-size:10.5px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;padding:3px 9px;border-radius:100px;background:rgba(109,191,123,0.12);border:1px solid rgba(109,191,123,0.25);color:#6dbf7b;}
+    .acq-accordion-status.settled{background:rgba(247,243,237,0.05);border-color:rgba(247,243,237,0.12);color:rgba(247,243,237,0.35);}
+    .acq-accordion-body{padding:16px;border-top:1px solid rgba(247,243,237,0.07);display:none;}
+    .acq-accordion.open .acq-accordion-body{display:block;}
+    .acq-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+    .acq-row label{font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.35);min-width:80px;}
+    .acq-row select,.acq-row-select{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:8px;padding:7px 10px;font-size:13px;font-family:'Outfit',sans-serif;color:#f7f3ed;outline:none;cursor:pointer;}
+    .acq-row select:focus,.acq-row-select:focus{border-color:rgba(189,122,112,0.5);}
+    .acq-mkt-chips{display:flex;flex-wrap:wrap;gap:6px;}
+    .acq-mkt-chip{font-size:12px;padding:4px 10px;background:rgba(189,122,112,0.1);border:1px solid rgba(189,122,112,0.2);border-radius:100px;color:rgba(247,243,237,0.7);}
+    .acq-actions{display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(247,243,237,0.06);}
+    .acq-badge{font-size:11px;color:rgba(109,191,123,0.85);background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.2);border-radius:100px;padding:3px 9px;}
+    .acq-badge.pending{color:rgba(247,243,237,0.35);background:rgba(247,243,237,0.04);border-color:rgba(247,243,237,0.1);}
+    .acq-add-btn{display:flex;align-items:center;gap:6px;width:100%;border:1px dashed rgba(247,243,237,0.15);border-radius:10px;padding:10px 14px;background:none;font-family:'Outfit',sans-serif;font-size:13px;color:rgba(247,243,237,0.35);cursor:pointer;transition:all .15s;margin-top:10px;}
+    .acq-add-btn:hover{border-color:rgba(247,243,237,0.3);color:rgba(247,243,237,0.6);}
+
     .cf-row{display:grid;grid-template-columns:1fr 1fr auto auto;gap:8px;align-items:center;margin-bottom:6px;}
     .cf-row input{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:7px;padding:6px 9px;font-size:13px;font-family:'Outfit',sans-serif;font-weight:300;color:#f7f3ed;outline:none;width:100%;box-sizing:border-box;}
     .cf-row input:focus{border-color:rgba(189,122,112,0.5);}
@@ -2212,6 +2237,7 @@ const PIPELINE_STAGES = [
   { key: 'onboarding',     label: 'Onboarding' },
   { key: 'searching',      label: 'Searching' },
   { key: 'under_contract', label: 'Under Contract' },
+  { key: 'exchanged',      label: 'Exchanged' },
   { key: 'settlement',     label: 'Settlement' },
 ];
 
@@ -2442,6 +2468,7 @@ function syncBriefLand() {
 }
 
 let _briefClientId = null;
+let _briefAcqId = null;
 let _customMarkets = [];
 let _customCriteria = [];
 let _customExclusions = [];
@@ -2480,8 +2507,9 @@ function addCustomExclusion() {
 }
 function removeCustomExclusion(i) { _customExclusions.splice(i,1); renderCustomExclusions(); }
 
-async function openBrief(clientId, clientName) {
+async function openBrief(clientId, clientName, acqId = null) {
   _briefClientId = clientId;
+  _briefAcqId = acqId;
   _customMarkets = [];
   _customCriteria = [];
   _customExclusions = [];
@@ -2516,7 +2544,7 @@ async function openBrief(clientId, clientName) {
 
   // Load existing brief + questionnaire
   try {
-    const res = await api('GET', `/api/admin/brief?clientId=${encodeURIComponent(clientId)}`);
+    const res = await api('GET', `/api/admin/brief?clientId=${encodeURIComponent(clientId)}${acqId ? '&acqId=' + encodeURIComponent(acqId) : ''}`);
     if (!res.ok) return;
     const { brief, questionnaire } = await res.json();
 
@@ -2598,6 +2626,7 @@ async function openBrief(clientId, clientName) {
 function closeBrief() {
   document.getElementById('brief-overlay').classList.remove('open');
   _briefClientId = null;
+  _briefAcqId = null;
 }
 
 async function notifyBrief() {
@@ -2605,7 +2634,7 @@ async function notifyBrief() {
   const btn = document.getElementById('brief-notify-btn');
   btn.disabled = true;
   btn.textContent = 'Sending…';
-  const res = await api('POST', '/api/admin/brief', { clientId: _briefClientId, action: 'notify' });
+  const res = await api('POST', '/api/admin/brief', { clientId: _briefClientId, acqId: _briefAcqId, action: 'notify' });
   if (res.ok) {
     btn.textContent = '✓ Sent';
     setTimeout(() => { btn.disabled = false; btn.textContent = '✉ Notify client'; }, 3000);
@@ -2633,6 +2662,7 @@ async function saveBrief(status) {
 
   const payload = {
     clientId: _briefClientId,
+    acqId: _briefAcqId,
     strategyNotes: document.getElementById('brief-strategy').value.trim(),
     targetMarkets,
     customMarkets: _customMarkets.slice(),
@@ -3511,6 +3541,7 @@ async function loadAuditLog() {
 
 // ── Presentations ─────────────────────────────────────────────────────────────
 let _presImages = [], _presVideos = [], _presSections = [], _presSales = [], _presRentals = [], _presRiskItems = [], _uploadTarget = null;
+let _pcpAcquisitions = {}; // { [clientId]: acqId }
 
 async function loadPresentations() {
   const res = await api('GET', '/api/admin/presentations');
@@ -4019,9 +4050,54 @@ function renderEngagementTab() {
   const el = document.getElementById('profile-body');
   const client = clients.find(c => c.id === crmProfileClientId);
   if (!client) return;
-  const STAGE_LABELS = { onboarding:'Onboarding', searching:'Searching', under_contract:'Under contract', settlement:'Settlement' };
-  const marketPills = (client.markets || []).map(m => `<span style="font-size:12px;background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.1);border-radius:100px;padding:4px 12px;color:rgba(247,243,237,0.6);">${esc(m.replace(/-/g,' ').replace(/\b\w/g, l => l.toUpperCase()))}</span>`).join('');
+  const STAGE_LABELS = { onboarding:'Onboarding', searching:'Searching', under_contract:'Under contract', exchanged:'Exchanged', settlement:'Settlement' };
   const clientMilestones = milestones.filter(m => m.clientId === client.id && !m.completed).slice(0,5);
+  const acqs = client.acquisitions || [];
+  const hasMultiAcq = acqs.length > 1;
+
+  // Acquisition accordion HTML
+  function acqAccordion(acq, expanded) {
+    const stageLabel = STAGE_LABELS[acq.pipelineStage] || (acq.pipelineStage ? acq.pipelineStage : 'No stage');
+    const isFirst = acq.number === 1;
+    const mktChips = (acq.markets || []).map(m => `<span class="acq-mkt-chip">${esc(m.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase()))}</span>`).join('') || '<span style="font-size:12px;color:rgba(247,243,237,0.25);">None assigned</span>';
+    const qBadge = acq.questionnaireSubmitted
+      ? `<span class="acq-badge">Questionnaire complete</span>`
+      : `<span class="acq-badge pending">No questionnaire</span>`;
+    return `<div class="acq-accordion${expanded?' open':''}" id="acq-acc-${acq.id}">
+      <div class="acq-accordion-head" onclick="toggleAcqAccordion('${acq.id}')">
+        <span class="acq-accordion-chevron">&#9658;</span>
+        <span class="acq-accordion-label">${esc(acq.label)}</span>
+        <span class="acq-accordion-stage">${stageLabel}</span>
+        <span class="acq-accordion-status${acq.status==='settled'?' settled':''}">${acq.status==='settled'?'Settled':'Active'}</span>
+      </div>
+      <div class="acq-accordion-body">
+        <div class="acq-row">
+          <label>Pipeline</label>
+          <select class="acq-row-select" onchange="updateAcqStage('${client.id}','${acq.id}',this.value)">
+            <option value="" ${!acq.pipelineStage?'selected':''}>&#8212; No stage &#8212;</option>
+            ${PIPELINE_STAGES.map(s=>`<option value="${s.key}" ${acq.pipelineStage===s.key?'selected':''}>${s.label}</option>`).join('')}
+          </select>
+        </div>
+        <div class="acq-row" style="align-items:flex-start;">
+          <label style="margin-top:4px;">Markets</label>
+          <div style="flex:1;">
+            <div class="acq-mkt-chips">${mktChips}</div>
+            <button class="btn-sm" style="margin-top:8px;font-size:11px;" onclick="openAcqMarketsEditor('${client.id}','${acq.id}')">Edit markets</button>
+          </div>
+        </div>
+        <div class="acq-row">
+          <label>Questionnaire</label>
+          <div style="display:flex;align-items:center;gap:8px;">${qBadge}
+            <button class="btn-sm" style="font-size:11px;" onclick="sendAcqQuestionnaire('${client.id}','${acq.id}')">Send link</button>
+          </div>
+        </div>
+        <div class="acq-actions">
+          <button class="btn-sm" onclick="openBrief('${client.id}','${esc(client.name)}',${isFirst?'null':`'${acq.id}'`})">Open brief</button>
+          ${acq.status!=='settled'?`<button class="btn-sm" onclick="markAcqSettled('${client.id}','${acq.id}')">Mark settled</button>`:''}
+        </div>
+      </div>
+    </div>`;
+  }
 
   el.innerHTML = `
     <div class="profile-section">
@@ -4029,8 +4105,6 @@ function renderEngagementTab() {
       <div class="profile-fields">
         <div class="profile-field"><label>Status</label><div class="pf-val"><span class="crm-status crm-s-${client.status || 'active'}">${client.status === 'completed' ? 'Completed' : 'Active'}</span></div></div>
         <div class="profile-field"><label>Engagement #</label><div class="pf-val">${client.engagementNumber || 1}</div></div>
-        <div class="profile-field"><label>Pipeline stage</label><div class="pf-val">${STAGE_LABELS[client.pipelineStage] || '—'}</div></div>
-        <div class="profile-field"><label>Stage updated</label><div class="pf-val">${client.pipelineStageUpdatedAt ? new Date(client.pipelineStageUpdatedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '—'}</div></div>
         <div class="profile-field"><label>Member since</label><div class="pf-val">${client.createdAt ? new Date(client.createdAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '—'}</div></div>
         <div class="profile-field"><label>Total properties</label><div class="pf-val">${crmPurchases.length}</div></div>
         <div class="profile-field"><label>Discovery channel</label><div class="pf-val">${client.referralSource || '<span class="pf-empty">—</span>'}</div></div>
@@ -4038,10 +4112,33 @@ function renderEngagementTab() {
       </div>
     </div>
 
-    ${(client.markets || []).length ? `<div class="profile-section">
-      <div class="profile-section-title">Target markets</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;">${marketPills}</div>
-    </div>` : ''}
+    ${hasMultiAcq ? `
+    <div class="profile-section">
+      <div class="profile-section-title">Acquisitions</div>
+      ${acqs.map((acq, i) => acqAccordion(acq, i === acqs.length - 1)).join('')}
+      <button class="acq-add-btn" onclick="addAcquisition('${client.id}')">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Add acquisition
+      </button>
+    </div>` : `
+    <div class="profile-section">
+      <div class="profile-section-title">Pipeline</div>
+      <div class="profile-fields">
+        <div class="profile-field"><label>Stage</label><div class="pf-val">${STAGE_LABELS[client.pipelineStage] || '—'}</div></div>
+        <div class="profile-field"><label>Updated</label><div class="pf-val">${client.pipelineStageUpdatedAt ? new Date(client.pipelineStageUpdatedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '—'}</div></div>
+      </div>
+      ${acqs.length === 1 ? `
+      <div style="margin-top:10px;">
+        ${acqAccordion(acqs[0], true)}
+      </div>` : `
+      <div style="margin-top:10px;" class="profile-fields">
+        <div class="profile-field"><label>Markets</label><div class="pf-val">${(client.markets||[]).map(m=>`<span style="font-size:12px;background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.1);border-radius:100px;padding:3px 10px;margin:0 4px 4px 0;display:inline-block;">${esc(m.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase()))}</span>`).join('') || '<span class="pf-empty">—</span>'}</div></div>
+      </div>`}
+      <button class="acq-add-btn" onclick="addAcquisition('${client.id}')">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Add acquisition
+      </button>
+    </div>`}
 
     ${clientMilestones.length ? `<div class="profile-section">
       <div class="profile-section-title">Upcoming milestones</div>
@@ -4057,6 +4154,77 @@ function renderEngagementTab() {
       }).join('')}
     </div>` : ''}
   `;
+}
+
+function toggleAcqAccordion(acqId) {
+  const el = document.getElementById('acq-acc-' + acqId);
+  if (el) el.classList.toggle('open');
+}
+
+async function addAcquisition(clientId) {
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, action: 'add-acquisition' });
+  if (!res.ok) return alert('Failed to add acquisition.');
+  const data = await res.json();
+  const c = clients.find(x => x.id === clientId);
+  if (c) c.acquisitions = data.acquisitions;
+  renderEngagementTab();
+}
+
+async function updateAcqStage(clientId, acqId, stage) {
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, action: 'update-acquisition', acqId, pipelineStage: stage });
+  if (!res.ok) return alert('Failed to update stage.');
+  const data = await res.json();
+  const c = clients.find(x => x.id === clientId);
+  if (c?.acquisitions) {
+    const acq = c.acquisitions.find(a => a.id === acqId);
+    if (acq) { acq.pipelineStage = data.acquisition.pipelineStage; acq.pipelineStageUpdatedAt = data.acquisition.pipelineStageUpdatedAt; }
+    // Mirror to client.pipelineStage for kanban
+    c.pipelineStage = stage;
+    c.pipelineStageUpdatedAt = new Date().toISOString();
+  }
+  renderPipeline();
+}
+
+async function markAcqSettled(clientId, acqId) {
+  if (!confirm('Mark this acquisition as settled?')) return;
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, action: 'update-acquisition', acqId, status: 'settled' });
+  if (!res.ok) return alert('Failed to update.');
+  const data = await res.json();
+  const c = clients.find(x => x.id === clientId);
+  if (c?.acquisitions) {
+    const acq = c.acquisitions.find(a => a.id === acqId);
+    if (acq) acq.status = 'settled';
+  }
+  renderEngagementTab();
+}
+
+function openAcqMarketsEditor(clientId, acqId) {
+  const c = clients.find(x => x.id === clientId);
+  const acq = (c?.acquisitions || []).find(a => a.id === acqId);
+  if (!acq) return;
+  const current = acq.markets || [];
+  // Simple prompt approach for now
+  const input = prompt('Enter market keys (comma-separated):\ne.g. geelong,bendigo,dubbo\n\nCurrent: ' + (current.join(', ') || 'none'), current.join(', '));
+  if (input === null) return;
+  const markets = input.split(',').map(s => s.trim()).filter(Boolean);
+  api('PUT', '/api/admin/clients', { id: clientId, action: 'update-acquisition', acqId, markets }).then(async res => {
+    if (!res.ok) return alert('Failed to update markets.');
+    if (c?.acquisitions) {
+      const a = c.acquisitions.find(x => x.id === acqId);
+      if (a) a.markets = markets;
+    }
+    renderEngagementTab();
+  });
+}
+
+async function sendAcqQuestionnaire(clientId, acqId) {
+  const c = clients.find(x => x.id === clientId);
+  const acq = (c?.acquisitions || []).find(a => a.id === acqId);
+  if (!acq) return;
+  if (!confirm(`Send questionnaire link for "${acq.label}" to ${c.name}?`)) return;
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, action: 'send-acq-questionnaire', acqId });
+  if (res.ok) { alert('Questionnaire link sent.'); }
+  else { const d = await res.json(); alert('Failed: ' + (d.error || 'unknown error')); }
 }
 
 function renderNotesTab() {
@@ -4843,6 +5011,10 @@ function pcpInitials(name) {
   return parts.length >= 2 ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase() : name.slice(0,2).toUpperCase();
 }
 
+function setPcpAcq(clientId, acqId) {
+  _pcpAcquisitions[clientId] = acqId;
+}
+
 function toggleClientPick(el) {
   const isNowSelected = el.classList.toggle('selected');
   const avatar = el.querySelector('.pcp-avatar');
@@ -5003,6 +5175,7 @@ function openPresModal(id) {
   const pickerRevoked = presForPicker ? (presForPicker.revokedClients || []) : [];
   const pickerSent = presForPicker ? (presForPicker.sentClients || []) : [];
   const pickerViews = presForPicker ? (presForPicker.views || {}) : {};
+  _pcpAcquisitions = presForPicker ? { ...(presForPicker.clientAcquisitions || {}) } : {};
   grid.innerHTML = active.map(c => {
     const isAssigned = pickerAssigned.includes(c.id) && !pickerRevoked.includes(c.id);
     const vd = pickerViews[c.id];
@@ -5020,9 +5193,15 @@ function openPresModal(id) {
     const avatarBg = isAssigned ? '#bd7a70' : 'rgba(247,243,237,0.1)';
     const avatarColor = isAssigned ? '#22201d' : 'rgba(247,243,237,0.55)';
     const tickInner = isAssigned ? '<svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '';
-    return `<div class="pcp-row${isAssigned ? ' selected' : ''}" data-cid="${c.id}" onclick="toggleClientPick(this)">
+    const acqSelector = c.acquisitions && c.acquisitions.length > 1 ? `<div class="pcp-acq-select" onclick="event.stopPropagation()">
+      <select data-cid="${c.id}" onchange="setPcpAcq('${c.id}',this.value)" style="background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.1);border-radius:6px;padding:3px 8px;font-size:11.5px;font-family:'Outfit',sans-serif;color:rgba(247,243,237,0.5);">
+        ${c.acquisitions.map(a=>`<option value="${a.id}" ${((_pcpAcquisitions)[c.id]===a.id)?'selected':''}>${esc(a.label)}</option>`).join('')}
+      </select>
+    </div>` : '';
+    return `<div class="pcp-row${isAssigned ? ' selected' : ''}" data-cid="${c.id}" data-acqs='${JSON.stringify((c.acquisitions||[]).map(a=>({id:a.id,label:a.label})))}' onclick="toggleClientPick(this)">
       <div class="pcp-avatar" style="background:${avatarBg};color:${avatarColor};">${pcpInitials(c.name)}</div>
       <div class="pcp-info"><div class="pcp-name">${esc(c.name)}</div><div class="pcp-email">${esc(c.email)}</div></div>
+      ${acqSelector}
       ${pill}
       <div class="pcp-tick">${tickInner}</div>
     </div>`;
@@ -5260,6 +5439,7 @@ async function savePresentation() {
     customSections: _presSections,
     status: document.getElementById('pres-status').value,
     assignedClients: Array.from(document.querySelectorAll('.pcp-row.selected')).map(el => el.dataset.cid),
+    clientAcquisitions: _pcpAcquisitions,
     revocationReason: document.getElementById('pres-revocation-reason').value.trim(),
   };
   syncComparables('sales'); syncComparables('rentals');

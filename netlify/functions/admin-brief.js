@@ -65,15 +65,19 @@ export default async (req) => {
 
   if (req.method === 'GET') {
     const clientId = new URL(req.url).searchParams.get('clientId');
+    const acqId = new URL(req.url).searchParams.get('acqId');
     if (!clientId) return json({ error: 'clientId required' }, 400);
 
     const allClients = (await clientStore.get('all', { type: 'json' }).catch(() => null)) || [];
     const client = allClients.find(c => c.id === clientId);
     if (!client) return json({ error: 'Client not found' }, 404);
 
+    const briefKey = acqId ? `${clientId}:${acqId}` : clientId;
+    const qStoreKey = acqId ? `${clientId}:${acqId}` : qKey(client.email);
+
     const [brief, questionnaire] = await Promise.all([
-      briefStore.get(clientId, { type: 'json' }).catch(() => null),
-      qStore.get(qKey(client.email), { type: 'json' }).catch(() => null),
+      briefStore.get(briefKey, { type: 'json' }).catch(() => null),
+      qStore.get(qStoreKey, { type: 'json' }).catch(() => null),
     ]);
 
     return json({ brief, questionnaire, client: { id: client.id, name: client.name, email: client.email } });
@@ -81,13 +85,16 @@ export default async (req) => {
 
   if (req.method === 'POST') {
     const body = await req.json().catch(() => ({}));
-    const { clientId, action, strategyNotes, targetMarkets, customMarkets, budgetMin, budgetMax,
+    const { clientId, action, acqId, strategyNotes, targetMarkets, customMarkets, budgetMin, budgetMax,
             propertyTypes, propertyCriteria, customCriteria, excludedCharacteristics, customExclusions, status } = body;
     if (!clientId) return json({ error: 'clientId required' }, 400);
 
     const allClients = (await clientStore.get('all', { type: 'json' }).catch(() => null)) || [];
     const client = allClients.find(c => c.id === clientId);
     if (!client) return json({ error: 'Client not found' }, 404);
+
+    const briefKey = acqId ? `${clientId}:${acqId}` : clientId;
+    const qStoreKey = acqId ? `${clientId}:${acqId}` : qKey(client.email);
 
     // ── Notify action ─────────────────────────────────────────────────────────
     if (action === 'notify') {
@@ -108,10 +115,10 @@ export default async (req) => {
     }
 
     // ── Save / publish ────────────────────────────────────────────────────────
-    const q = await qStore.get(qKey(client.email), { type: 'json' }).catch(() => null);
+    const q = await qStore.get(qStoreKey, { type: 'json' }).catch(() => null);
     const entity = entityDisplay(q);
 
-    const existing = await briefStore.get(clientId, { type: 'json' }).catch(() => null);
+    const existing = await briefStore.get(briefKey, { type: 'json' }).catch(() => null);
     const now = new Date().toISOString();
     const newStatus = status || existing?.status || 'draft';
 
@@ -142,7 +149,7 @@ export default async (req) => {
       publishedAt: newStatus === 'published' && !existing?.publishedAt ? now : (existing?.publishedAt ?? null),
     };
 
-    await briefStore.setJSON(clientId, brief);
+    await briefStore.setJSON(briefKey, brief);
 
     if (newStatus === 'published' && existing?.status !== 'published') {
       await appendAudit('brief_published', `Published buying brief for ${client.name} <${client.email}>`);

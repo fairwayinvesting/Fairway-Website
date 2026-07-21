@@ -157,6 +157,20 @@ export default async (req) => {
 
   // GET — return existing submission if any
   if (req.method === 'GET') {
+    const acqId = new URL(req.url).searchParams.get('acq');
+    if (acqId) {
+      // Return questionnaire for this acquisition (or prefill from original if not submitted)
+      try {
+        const store = getStore('fairway-questionnaires');
+        const key = `${payload.sub}:${acqId}`;
+        const existing = await store.get(key, { type: 'json' });
+        if (existing) return json({ completed: true, data: existing });
+        // Not submitted yet — return prefill from original questionnaire
+        const original = await store.get(blobKey(payload.email), { type: 'json' }).catch(() => null);
+        return json({ completed: false, prefill: original });
+      } catch {}
+      return json({ completed: false });
+    }
     try {
       const store = getStore('fairway-questionnaires');
       const existing = await store.get(blobKey(payload.email), { type: 'json' });
@@ -167,9 +181,29 @@ export default async (req) => {
 
   const body = await req.json().catch(() => null);
   if (!body) return json({ error: 'Invalid request' }, 400);
+  const { acqId, ...rest } = body; // acqId optional
+
+  if (acqId) {
+    // Store under acquisition-specific key
+    try {
+      const qStore = getStore('fairway-questionnaires');
+      await qStore.setJSON(`${payload.sub}:${acqId}`, { ...rest, submittedAt: new Date().toISOString(), clientEmail: payload.email, clientName: payload.name });
+    } catch (err) { console.error('Blobs save failed:', err?.message || err); }
+    // Mark acquisition as submitted on client record
+    try {
+      const clientStore = getStore('fairway-clients');
+      const clients = (await clientStore.get('all', { type: 'json' })) || [];
+      const client = clients.find(c => c.id === payload.sub);
+      if (client?.acquisitions) {
+        const acq = client.acquisitions.find(a => a.id === acqId);
+        if (acq) { acq.questionnaireSubmitted = true; await clientStore.setJSON('all', clients); }
+      }
+    } catch {}
+    return json({ ok: true });
+  }
 
   const submission = {
-    ...body,
+    ...rest,
     submittedAt: new Date().toISOString(),
     clientEmail: payload.email,
     clientName: payload.name,

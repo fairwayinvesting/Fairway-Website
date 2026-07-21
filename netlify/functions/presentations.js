@@ -50,6 +50,7 @@ export default async (req) => {
       bathrooms: p.bathrooms || '',
       status: p.status || '',
       token: (p.tokens || {})[clientId] || null,
+      acquisitionId: (p.clientAcquisitions || {})[clientId] || null,
     }))
     .filter(p => p.token);
 

@@ -55,6 +55,38 @@ function buildWelcomeEmail(name, email, setupToken) {
 </body></html>`;
 }
 
+function buildRefreshQuestionnaireEmail(name, email, acqLabel, link) {
+  const firstName = name.split(' ')[0];
+  return `<!DOCTYPE html><html lang="en" style="background:#181614;"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Questionnaire — Fairway</title>
+<style>@media only screen and (max-width:600px){.ew{padding:32px 22px!important;border-radius:14px!important;}.eh1{font-size:26px!important;}}</style>
+</head>
+<body style="margin:0;padding:0;background:#181614;font-family:Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#181614"><tr><td align="center" style="padding:40px 16px;background:#181614;">
+<table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;">
+  <tr><td class="ew" style="background:#1C1815;border-radius:20px;border:1px solid rgba(181,113,90,0.2);padding:44px 48px;">
+    <p style="margin:0 0 36px;padding-bottom:32px;border-bottom:1px solid rgba(250,246,241,0.08);text-align:center;">
+      <img src="https://fairwayinvesting.com.au/logo-icon.png" width="28" height="28" alt="" style="display:inline-block;border:0;vertical-align:middle;margin-right:10px;">
+      <img src="https://fairwayinvesting.com.au/logo-word.png" width="160" height="24" alt="Fairway Investing" style="display:inline-block;border:0;vertical-align:middle;max-width:160px;">
+    </p>
+    <p style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#B5715A;margin:0 0 16px;">${acqLabel}</p>
+    <h1 class="eh1" style="font-family:Georgia,'Times New Roman',serif;font-size:32px;font-weight:400;color:#FAF6F1;margin:0 0 12px;line-height:1.2;">Ready to get started on your next property, ${firstName}?</h1>
+    <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 32px;line-height:1.65;">I've prepared a short questionnaire for your next acquisition. To save you time, I've pre-filled your personal details and entity information from our first engagement — just review what's there and update anything that's changed, then fill in your goals and budget for this next purchase.</p>
+    <table cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="border-radius:100px;background:#B5715A;">
+        <a href="${link}" style="display:inline-block;font-size:15px;font-weight:500;color:#FAF6F1;text-decoration:none;padding:15px 34px;">Start questionnaire &rarr;</a>
+      </td>
+    </tr></table>
+    <p style="font-size:13px;color:rgba(250,246,241,0.3);margin:24px 0 0;line-height:1.6;">Any questions, reply to this email or call 0416 184 333.</p>
+  </td></tr>
+  <tr><td style="padding:24px 0 0;text-align:center;">
+    <p style="font-size:12px;color:rgba(250,246,241,0.25);margin:0;line-height:1.7;">Fairway Investing &middot; Suite 211, Level 2/5 Alexander Street, Crows Nest NSW 2065<br>
+    <a href="mailto:info@fairwayinvesting.com.au" style="color:#B5715A;text-decoration:none;">info@fairwayinvesting.com.au</a> &middot; 0416 184 333</p>
+  </td></tr>
+</table>
+</td></tr></table>
+</body></html>`;
+}
+
 function buildMarketsEmail(name) {
   const firstName = name.split(' ')[0];
   const portalLink = 'https://fairwayinvesting.com.au/clients/portal.html';
@@ -106,8 +138,8 @@ export default async (req) => {
   const clients = (await store.get('all', { type: 'json' })) || [];
 
   if (req.method === 'GET') {
-    return json(clients.filter(c => !c.deleted).map(({ id, name, email, markets, active, createdAt, setupToken, pipelineStage, pipelineStageUpdatedAt, status, engagementNumber, referralSource, referrerId }) =>
-      ({ id, name, email, markets, active, createdAt, hasSetupToken: !!setupToken, pipelineStage: pipelineStage || null, pipelineStageUpdatedAt: pipelineStageUpdatedAt || null, status: status || 'active', engagementNumber: engagementNumber || 1, referralSource: referralSource || null, referrerId: referrerId || null })
+    return json(clients.filter(c => !c.deleted).map(({ id, name, email, markets, active, createdAt, setupToken, pipelineStage, pipelineStageUpdatedAt, status, engagementNumber, referralSource, referrerId, acquisitions, customFields }) =>
+      ({ id, name, email, markets, active, createdAt, hasSetupToken: !!setupToken, pipelineStage: pipelineStage || null, pipelineStageUpdatedAt: pipelineStageUpdatedAt || null, status: status || 'active', engagementNumber: engagementNumber || 1, referralSource: referralSource || null, referrerId: referrerId || null, acquisitions: acquisitions || [], customFields: customFields || [] })
     ));
   }
 
@@ -175,6 +207,83 @@ export default async (req) => {
     const { id, name, markets, active, password, action, datesArchived, pipelineStage, status, engagementNumber, referralSource, referrerId, customFields } = body;
     const idx = clients.findIndex(c => c.id === id);
     if (idx === -1) return json({ error: 'Client not found' }, 404);
+
+    if (action === 'add-acquisition') {
+      const client = clients[idx];
+      // Auto-seed acquisitions array if first time
+      if (!client.acquisitions || client.acquisitions.length === 0) {
+        client.acquisitions = [{
+          id: crypto.randomUUID(),
+          number: 1,
+          label: 'Acquisition 1',
+          pipelineStage: client.pipelineStage || null,
+          markets: client.markets || [],
+          status: 'active',
+          questionnaireSubmitted: false,
+          createdAt: client.createdAt || new Date().toISOString(),
+        }];
+      }
+      const number = client.acquisitions.length + 1;
+      const newAcq = {
+        id: crypto.randomUUID(),
+        number,
+        label: `Acquisition ${number}`,
+        pipelineStage: 'onboarding',
+        markets: [],
+        status: 'active',
+        questionnaireSubmitted: false,
+        createdAt: new Date().toISOString(),
+      };
+      client.acquisitions.push(newAcq);
+      await store.setJSON('all', clients);
+      appendAudit('acquisition_added', `Added ${newAcq.label} for ${client.name} <${client.email}>`);
+      return json({ ok: true, acquisition: newAcq, acquisitions: client.acquisitions });
+    }
+
+    if (action === 'update-acquisition') {
+      const { acqId, pipelineStage: acqStage, markets: acqMarkets, status: acqStatus, label: acqLabel } = body;
+      const client = clients[idx];
+      if (!client.acquisitions) return json({ error: 'No acquisitions' }, 404);
+      const acqIdx = client.acquisitions.findIndex(a => a.id === acqId);
+      if (acqIdx === -1) return json({ error: 'Acquisition not found' }, 404);
+      const acq = client.acquisitions[acqIdx];
+      if (acqStage !== undefined) { acq.pipelineStage = acqStage; acq.pipelineStageUpdatedAt = new Date().toISOString(); }
+      if (acqMarkets !== undefined) acq.markets = acqMarkets;
+      if (acqStatus !== undefined) acq.status = acqStatus;
+      if (acqLabel !== undefined) acq.label = acqLabel;
+      client.acquisitions[acqIdx] = acq;
+      // Mirror latest active acquisition's stage to client.pipelineStage for kanban
+      const latestActive = [...client.acquisitions].reverse().find(a => a.status === 'active');
+      if (latestActive) { client.pipelineStage = latestActive.pipelineStage; client.pipelineStageUpdatedAt = latestActive.pipelineStageUpdatedAt || new Date().toISOString(); }
+      await store.setJSON('all', clients);
+      appendAudit('acquisition_updated', `Updated ${acq.label} for ${client.name} <${client.email}>`);
+      return json({ ok: true, acquisition: acq });
+    }
+
+    if (action === 'send-acq-questionnaire') {
+      const { acqId } = body;
+      const client = clients[idx];
+      const acq = (client.acquisitions || []).find(a => a.id === acqId);
+      if (!acq) return json({ error: 'Acquisition not found' }, 404);
+      const isFirst = acq.number === 1;
+      const link = isFirst
+        ? `https://fairwayinvesting.com.au/clients/questionnaire.html`
+        : `https://fairwayinvesting.com.au/clients/questionnaire.html?acq=${acqId}`;
+      try {
+        await resend.emails.send({
+          from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
+          to: [client.email],
+          reply_to: 'luke@fairwayinvesting.com.au',
+          subject: isFirst ? 'Complete your onboarding questionnaire — Fairway' : `Questionnaire for your next property — Fairway`,
+          html: isFirst ? buildWelcomeEmail(client.name, client.email, client.setupToken || '') : buildRefreshQuestionnaireEmail(client.name, client.email, acq.label, link),
+        });
+      } catch (err) {
+        console.error('Questionnaire email failed:', err?.message || err);
+        return json({ error: 'Email failed to send' }, 500);
+      }
+      appendAudit('acq_questionnaire_sent', `Sent questionnaire for ${acq.label} to ${client.name} <${client.email}>`);
+      return json({ ok: true });
+    }
 
     // Reactivate a completed client for a new engagement
     if (action === 'reactivate') {
