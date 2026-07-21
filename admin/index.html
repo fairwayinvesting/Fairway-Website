@@ -1825,8 +1825,18 @@ let crmPartners = [];
 let crmPartnerPanelId = null;
 
 async function loadCrmPartners() {
-  const res = await api('GET', '/api/admin/referral-partners');
-  if (res.ok) crmPartners = await res.json();
+  try {
+    const res = await api('GET', '/api/admin/referral-partners');
+    if (res.ok) {
+      crmPartners = await res.json();
+    } else {
+      console.error('loadCrmPartners: API returned', res.status);
+    }
+  } catch (err) {
+    console.error('loadCrmPartners failed:', err);
+    const el = document.getElementById('partners-list');
+    if (el) el.innerHTML = '<p style="color:#e07070;font-size:13px;padding:8px 0;">Failed to load partners. Please refresh the page.</p>';
+  }
   renderPartnersSection();
   populatePartnerDropdown();
 }
@@ -1926,22 +1936,28 @@ async function savePartner() {
     phone: document.getElementById('pm-phone').value.trim() || null,
     notes: document.getElementById('pm-notes').value.trim() || null,
   };
-  const res = await api(id ? 'PUT' : 'POST', '/api/admin/referral-partners', body);
-  if (res.ok) {
-    const data = await res.json();
-    if (id) {
-      const idx = crmPartners.findIndex(p => p.id === id);
-      if (idx !== -1) crmPartners[idx] = data;
+  try {
+    const res = await api(id ? 'PUT' : 'POST', '/api/admin/referral-partners', body);
+    if (res.ok) {
+      const data = await res.json();
+      if (id) {
+        const idx = crmPartners.findIndex(p => p.id === id);
+        if (idx !== -1) crmPartners[idx] = data;
+      } else {
+        crmPartners.push(data);
+      }
+      closePartnerModal();
+      renderPartnersSection();
+      populatePartnerDropdown();
+      if (crmPartnerPanelId === id) renderCrmPartnerPanel();
     } else {
-      crmPartners.push(data);
+      const d = await res.json().catch(() => ({}));
+      errEl.textContent = d.error || 'Save failed. Please try again.';
+      errEl.classList.add('visible');
+      btn.disabled = false; btn.textContent = 'Save partner';
     }
-    closePartnerModal();
-    renderPartnersSection();
-    populatePartnerDropdown();
-    if (crmPartnerPanelId === id) renderCrmPartnerPanel();
-  } else {
-    const d = await res.json().catch(() => ({}));
-    errEl.textContent = d.error || 'Save failed.';
+  } catch (err) {
+    errEl.textContent = 'Connection error — partner not saved. Please try again.';
     errEl.classList.add('visible');
     btn.disabled = false; btn.textContent = 'Save partner';
   }
@@ -1949,12 +1965,18 @@ async function savePartner() {
 
 async function deletePartner(id) {
   if (!confirm('Remove this partner? Clients linked to them will lose their referrer association.')) return;
-  const res = await api('DELETE', `/api/admin/referral-partners?id=${id}`);
-  if (res.ok) {
-    crmPartners = crmPartners.filter(p => p.id !== id);
-    closeCrmPartnerPanel();
-    renderPartnersSection();
-    populatePartnerDropdown();
+  try {
+    const res = await api('DELETE', `/api/admin/referral-partners?id=${id}`);
+    if (res.ok) {
+      crmPartners = crmPartners.filter(p => p.id !== id);
+      closeCrmPartnerPanel();
+      renderPartnersSection();
+      populatePartnerDropdown();
+    } else {
+      alert('Failed to delete partner. Please try again.');
+    }
+  } catch (err) {
+    alert('Connection error — partner not deleted. Please try again.');
   }
 }
 
