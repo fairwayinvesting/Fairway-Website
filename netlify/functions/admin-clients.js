@@ -70,7 +70,7 @@ function buildRefreshQuestionnaireEmail(name, email, acqLabel, link) {
     </p>
     <p style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#B5715A;margin:0 0 16px;">${acqLabel}</p>
     <h1 class="eh1" style="font-family:Georgia,'Times New Roman',serif;font-size:32px;font-weight:400;color:#FAF6F1;margin:0 0 12px;line-height:1.2;">Ready to get started on your next property, ${firstName}?</h1>
-    <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 32px;line-height:1.65;">I've prepared a short questionnaire for your next acquisition. To save you time, I've pre-filled your personal details and entity information from our first engagement — just review what's there and update anything that's changed, then fill in your goals and budget for this next purchase.</p>
+    <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 32px;line-height:1.65;">I've prepared a short questionnaire for your next acquisition. To save you time, I've pre-filled your personal details from our first engagement — just review what's there and update anything that's changed. You'll also need to confirm your purchasing entity for this property, as that may differ from before.</p>
     <table cellpadding="0" cellspacing="0" border="0"><tr>
       <td style="border-radius:100px;background:#B5715A;">
         <a href="${link}" style="display:inline-block;font-size:15px;font-weight:500;color:#FAF6F1;text-decoration:none;padding:15px 34px;">Start questionnaire &rarr;</a>

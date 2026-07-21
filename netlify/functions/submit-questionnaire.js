@@ -165,9 +165,16 @@ export default async (req) => {
         const key = `${payload.sub}:${acqId}`;
         const existing = await store.get(key, { type: 'json' });
         if (existing) return json({ completed: true, data: existing });
-        // Not submitted yet — return prefill from original questionnaire
+        // Not submitted yet — prefill personal details only (not entity, which may change)
         const original = await store.get(blobKey(payload.email), { type: 'json' }).catch(() => null);
-        return json({ completed: false, prefill: original });
+        if (original) {
+          const { entityType, companyName, companyPersonnel, companyAbn, companyAcn, companyTfn,
+                  trustName, trustBeneficiaries, trustAddress, trustAbn, trustTfn,
+                  smsfName, smsfAbn, smsfTfn, smsfTrustee,
+                  ...personal } = original;
+          return json({ completed: false, prefill: personal });
+        }
+        return json({ completed: false });
       } catch {}
       return json({ completed: false });
     }

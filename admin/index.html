@@ -2251,26 +2251,77 @@ function stageSinceDays(updatedAt) {
   return `${weeks} week${weeks !== 1 ? 's' : ''} in stage`;
 }
 
+function searchDurationLabel(createdAt) {
+  if (!createdAt) return null;
+  const days = Math.floor((Date.now() - new Date(createdAt)) / 86400000);
+  if (days === 0) return 'Active today';
+  if (days === 1) return '1 day active';
+  if (days < 7)   return `${days} days active`;
+  if (days < 30)  { const w = Math.floor(days / 7); return `${w} week${w !== 1 ? 's' : ''} active`; }
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months} month${months !== 1 ? 's' : ''} active`;
+  const years = Math.floor(days / 365);
+  const rem = months - years * 12;
+  return rem > 0 ? `${years}y ${rem}m active` : `${years} year${years !== 1 ? 's' : ''} active`;
+}
+
+// Build flat list of kanban cards — one per active acquisition for multi-acq clients,
+// one per client for everyone else.
+function buildKanbanCards(activeClients) {
+  const cards = [];
+  for (const c of activeClients) {
+    const acqs = c.acquisitions || [];
+    const activeAcqs = acqs.filter(a => a.status !== 'settled' && a.pipelineStage);
+    if (activeAcqs.length > 1) {
+      for (const acq of activeAcqs) {
+        cards.push({
+          clientId: c.id,
+          acqId: acq.id,
+          displayName: `${c.name} — ${acq.label}`,
+          pipelineStage: acq.pipelineStage,
+          pipelineStageUpdatedAt: acq.pipelineStageUpdatedAt,
+          createdAt: c.createdAt,
+          isMultiAcq: true,
+        });
+      }
+    } else {
+      // Single acquisition or no acquisitions — use client-level stage
+      const stage = (activeAcqs.length === 1 ? activeAcqs[0].pipelineStage : null) || c.pipelineStage;
+      const updatedAt = (activeAcqs.length === 1 ? activeAcqs[0].pipelineStageUpdatedAt : null) || c.pipelineStageUpdatedAt;
+      const acqId = activeAcqs.length === 1 ? activeAcqs[0].id : null;
+      if (!stage) continue;
+      cards.push({
+        clientId: c.id,
+        acqId,
+        displayName: c.name,
+        pipelineStage: stage,
+        pipelineStageUpdatedAt: updatedAt,
+        createdAt: c.createdAt,
+        isMultiAcq: false,
+      });
+    }
+  }
+  return cards;
+}
+
 function renderPipeline() {
   const board = document.getElementById('kb-board');
   const summary = document.getElementById('pipeline-summary');
   if (!board) return;
 
   const activeClients = clients.filter(c => c.active && (c.status || 'active') !== 'completed');
-  const withStage = activeClients.filter(c => c.pipelineStage).length;
-  summary.textContent = `${withStage} of ${activeClients.length} client${activeClients.length !== 1 ? 's' : ''} placed`;
-
-  const stageOptions = PIPELINE_STAGES.map(s =>
-    `<option value="${s.key}">${s.label}</option>`
-  ).join('');
+  const allCards = buildKanbanCards(activeClients);
+  const placedClientIds = new Set(allCards.map(card => card.clientId));
+  summary.textContent = `${placedClientIds.size} of ${activeClients.length} client${activeClients.length !== 1 ? 's' : ''} placed`;
 
   board.innerHTML = PIPELINE_STAGES.map(stage => {
-    const stageClients = activeClients.filter(c => c.pipelineStage === stage.key);
-    const cardHTML = stageClients.length === 0
+    const stageCards = allCards.filter(card => card.pipelineStage === stage.key);
+    const cardHTML = stageCards.length === 0
       ? `<div class="kb-empty">No clients</div>`
-      : stageClients.map(c => {
-          const since = stageSinceDays(c.pipelineStageUpdatedAt);
-          const clientMs = milestones.filter(m => m.clientId === c.id && !m.completed)
+      : stageCards.map(card => {
+          const since = stageSinceDays(card.pipelineStageUpdatedAt);
+          const duration = searchDurationLabel(card.createdAt);
+          const clientMs = milestones.filter(m => m.clientId === card.clientId && !m.completed)
             .sort((a, b) => new Date(a.date) - new Date(b.date));
           let dateChip = '';
           if (clientMs.length) {
@@ -2279,15 +2330,21 @@ function renderPipeline() {
             const urg = urgencyClass(days);
             dateChip = `<div class="kb-card-date"><span class="${urg}" style="display:inline-flex;"><span class="urg-badge" style="min-width:auto;font-size:10px;">${esc(next.label)} · ${urgencyLabel(days)}</span></span></div>`;
           }
-          const selectHTML = `<select class="kb-move" onchange="moveClientStage('${c.id}', this.value, this)" title="Move to stage">
+          const moveHandler = card.acqId
+            ? `moveKanbanCard('${card.clientId}','${card.acqId}',this.value,this)`
+            : `moveClientStage('${card.clientId}',this.value,this)`;
+          const selectHTML = `<select class="kb-move" onchange="${moveHandler}" title="Move to stage">
             <option value="">Move to…</option>
             ${PIPELINE_STAGES.filter(s => s.key !== stage.key).map(s =>
               `<option value="${s.key}">${s.label}</option>`
             ).join('')}
           </select>`;
-          return `<div class="kb-card">
-            <div class="kb-card-name">${esc(c.name)}</div>
-            ${since ? `<div class="kb-card-since">${since}</div>` : ''}
+          return `<div class="kb-card" onclick="openClientProfile('${card.clientId}')">
+            <div class="kb-card-name">${esc(card.displayName)}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              ${since ? `<div class="kb-card-since">${since}</div>` : ''}
+              ${duration ? `<div class="kb-card-since" style="color:rgba(247,243,237,0.2);">${duration}</div>` : ''}
+            </div>
             ${dateChip}
             ${selectHTML}
           </div>`;
@@ -2296,7 +2353,7 @@ function renderPipeline() {
     return `<div class="kb-col">
       <div class="kb-col-head">
         <span class="kb-col-title">${stage.label}</span>
-        <span class="kb-col-count">${stageClients.length}</span>
+        <span class="kb-col-count">${stageCards.length}</span>
       </div>
       ${cardHTML}
     </div>`;
@@ -2316,6 +2373,28 @@ async function moveClientStage(clientId, newStage, selectEl) {
     }
     selectEl.disabled = false;
     renderTable();
+    renderPipeline();
+  } catch {
+    selectEl.disabled = false;
+    selectEl.value = '';
+    alert('Failed to update stage. Please try again.');
+  }
+}
+
+async function moveKanbanCard(clientId, acqId, newStage, selectEl) {
+  if (!newStage) return;
+  selectEl.disabled = true;
+  try {
+    const res = await api('PUT', '/api/admin/clients', { id: clientId, action: 'update-acquisition', acqId, pipelineStage: newStage });
+    if (!res.ok) throw new Error('Save failed');
+    const c = clients.find(x => x.id === clientId);
+    if (c?.acquisitions) {
+      const acq = c.acquisitions.find(a => a.id === acqId);
+      if (acq) { acq.pipelineStage = newStage; acq.pipelineStageUpdatedAt = new Date().toISOString(); }
+      const latestActive = [...c.acquisitions].reverse().find(a => a.status !== 'settled');
+      if (latestActive) { c.pipelineStage = latestActive.pipelineStage; c.pipelineStageUpdatedAt = new Date().toISOString(); }
+    }
+    selectEl.disabled = false;
     renderPipeline();
   } catch {
     selectEl.disabled = false;
@@ -4107,6 +4186,7 @@ function renderEngagementTab() {
         <div class="profile-field"><label>Status</label><div class="pf-val"><span class="crm-status crm-s-${client.status || 'active'}">${client.status === 'completed' ? 'Completed' : 'Active'}</span></div></div>
         <div class="profile-field"><label>Engagement #</label><div class="pf-val">${client.engagementNumber || 1}</div></div>
         <div class="profile-field"><label>Member since</label><div class="pf-val">${client.createdAt ? new Date(client.createdAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '—'}</div></div>
+        <div class="profile-field"><label>Search active</label><div class="pf-val">${searchDurationLabel(client.createdAt) || '—'}</div></div>
         <div class="profile-field"><label>Total properties</label><div class="pf-val">${crmPurchases.length}</div></div>
         <div class="profile-field"><label>Discovery channel</label><div class="pf-val">${client.referralSource || '<span class="pf-empty">—</span>'}</div></div>
         ${(()=>{ const p = crmPartners.find(x => x.id === client.referrerId); return p ? `<div class="profile-field"><label>Referred by</label><div class="pf-val" style="cursor:pointer;color:#bd7a70;" onclick="closeCrmPartnerPanel();closeClientProfile();setTimeout(()=>openCrmPartnerPanel('${p.id}'),50)">${esc(p.name)}</div></div>` : ''; })()}
