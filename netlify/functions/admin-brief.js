@@ -23,9 +23,9 @@ function qKey(email) {
 }
 
 
-function buildBriefEmail(name) {
+function buildBriefEmail(name, acqId = null) {
   const firstName = name.split(' ')[0];
-  const portalLink = 'https://fairwayinvesting.com.au/clients/brief.html';
+  const portalLink = 'https://fairwayinvesting.com.au/clients/brief.html' + (acqId ? `?acq=${encodeURIComponent(acqId)}` : '');
   return `<!DOCTYPE html><html lang="en" style="background:#181614;"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your Buying Brief is ready — Fairway</title>
 <style>@media only screen and (max-width:600px){.ew{padding:32px 22px!important;border-radius:14px!important;}.eh1{font-size:26px!important;}}</style>
 </head>
@@ -104,7 +104,7 @@ export default async (req) => {
           to: [client.email],
           reply_to: 'luke@fairwayinvesting.com.au',
           subject: 'Your Buying Brief is ready — Fairway',
-          html: buildBriefEmail(client.name),
+          html: buildBriefEmail(client.name, acqId),
         });
       } catch (err) {
         console.error('Brief email failed:', err?.message || err);
@@ -153,6 +153,15 @@ export default async (req) => {
 
     if (newStatus === 'published' && existing?.status !== 'published') {
       await appendAudit('brief_published', `Published buying brief for ${client.name} <${client.email}>`);
+      // Auto-notify client on first publish
+      resend.emails.send({
+        from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
+        to: [client.email],
+        reply_to: 'luke@fairwayinvesting.com.au',
+        subject: 'Your Buying Brief is ready — Fairway',
+        html: buildBriefEmail(client.name, acqId),
+      }).then(() => appendAudit('brief_notified', `Auto-sent buying brief email to ${client.name} <${client.email}>`))
+        .catch(err => console.error('Brief auto-email failed:', err?.message || err));
     } else if (newStatus === 'draft') {
       await appendAudit('brief_draft_saved', `Saved draft brief for ${client.name} <${client.email}>`);
     } else if (newStatus === 'published') {

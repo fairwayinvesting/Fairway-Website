@@ -55,7 +55,7 @@ async function getAllPresentationViews() {
 export default async () => {
   const [
     clients, presentations, milestones, purchases,
-    questionnaires, briefs, compliance, shortlist, notes, auditLog, presentationViews,
+    questionnaires, briefs, compliance, shortlist, notes, auditLog, presentationViews, referralPartners,
   ] = await Promise.all([
     getStore('fairway-clients').get('all', { type: 'json' }).catch(() => null),
     getStore('fairway-presentations').get('all', { type: 'json' }).catch(() => null),
@@ -68,6 +68,7 @@ export default async () => {
     getAllNotes(),
     getStore('fairway-audit-log').get('entries', { type: 'json' }).catch(() => null),
     getAllPresentationViews(),
+    getStore('fairway-referral-partners').get('all', { type: 'json' }).catch(() => null),
   ]);
 
   const timestamp = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
@@ -75,20 +76,38 @@ export default async () => {
 
   const snapshot = {
     createdAt: new Date().toISOString(),
-    clients:        clients        || [],
-    presentations:  presentations  || [],
-    milestones:     milestones     || [],
-    purchases:      purchases      || [],
-    questionnaires: questionnaires || {},
-    briefs:         briefs         || {},
-    compliance:     compliance     || {},
-    shortlist:      shortlist      || [],
-    notes:          notes          || {},
-    auditLog:           auditLog           || [],
-    presentationViews:  presentationViews  || {},
+    clients:           clients           || [],
+    presentations:     presentations     || [],
+    milestones:        milestones        || [],
+    purchases:         purchases         || [],
+    questionnaires:    questionnaires    || {},
+    briefs:            briefs            || {},
+    compliance:        compliance        || {},
+    shortlist:         shortlist         || [],
+    notes:             notes             || {},
+    auditLog:          auditLog          || [],
+    presentationViews: presentationViews || {},
+    referralPartners:  referralPartners  || [],
   };
 
   await backupStore.setJSON(`daily/${timestamp}`, snapshot);
+
+  // Verify the write landed correctly
+  const verify = await backupStore.get(`daily/${timestamp}`, { type: 'json' }).catch(() => null);
+  const writeOk = verify?.createdAt && Array.isArray(verify.clients);
+  if (!writeOk) {
+    const msg = `⚠️ *Backup verification FAILED* for ${timestamp} — data may not have been written to Blobs correctly.`;
+    console.error(msg);
+    const slackUrl = process.env.SLACK_WEBHOOK_URL;
+    if (slackUrl) {
+      await fetch(slackUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: msg }),
+      }).catch(() => {});
+    }
+    return;
+  }
 
   const index = await backupStore.get('index', { type: 'json' }).catch(() => null) || { dates: [] };
   index.dates = [...new Set([...index.dates, timestamp])].sort().reverse();
@@ -103,7 +122,8 @@ export default async () => {
     `milestones:${snapshot.milestones.length} purchases:${snapshot.purchases.length} ` +
     `questionnaires:${Object.keys(snapshot.questionnaires).length} briefs:${Object.keys(snapshot.briefs).length} ` +
     `shortlist:${snapshot.shortlist.length} notes:${Object.keys(snapshot.notes).length} ` +
-    `auditLog:${snapshot.auditLog.length} presentationViews:${Object.keys(snapshot.presentationViews).length}. Pruned: ${toDelete.length}`
+    `auditLog:${snapshot.auditLog.length} presentationViews:${Object.keys(snapshot.presentationViews).length} ` +
+    `referralPartners:${snapshot.referralPartners.length}. Pruned: ${toDelete.length}`
   );
 };
 

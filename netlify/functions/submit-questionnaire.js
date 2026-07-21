@@ -224,6 +224,19 @@ export default async (req) => {
     console.error('Blobs save failed:', err?.message || err);
   }
 
+  // Mark acquisitions[0].questionnaireSubmitted on the client record
+  try {
+    const clientStore = getStore('fairway-clients');
+    const allClients = (await clientStore.get('all', { type: 'json' })) || [];
+    const client = allClients.find(c => c.id === payload.sub);
+    if (client?.acquisitions?.length > 0 && !client.acquisitions[0].questionnaireSubmitted) {
+      client.acquisitions[0].questionnaireSubmitted = true;
+      await clientStore.setJSON('all', allClients);
+    }
+  } catch (err) {
+    console.error('Failed to mark questionnaire submitted on client record:', err?.message || err);
+  }
+
   // Notify Luke that the questionnaire was submitted
   try {
     await resend.emails.send({
@@ -234,6 +247,16 @@ export default async (req) => {
     });
   } catch (err) {
     console.error('Questionnaire notify email failed:', err?.message || err);
+  }
+
+  // Slack notification
+  const slackUrl = process.env.SLACK_QUESTIONNAIRE_WEBHOOK_URL;
+  if (slackUrl) {
+    fetch(slackUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: `📋 *${submission.clientName}* submitted their questionnaire — review in the admin portal.` }),
+    }).catch(err => console.error('Questionnaire Slack notify failed:', err?.message || err));
   }
 
   // Fan-out: Google Sheets via Apps Script web app

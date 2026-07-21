@@ -2,7 +2,7 @@ import { getStore } from '@netlify/blobs';
 
 const AUDIT_CAP = 500;
 
-export async function appendAudit(action, detail, before = null, after = null) {
+export async function appendAudit(action, detail, before = null, after = null, actor = null) {
   try {
     const store = getStore('fairway-audit-log');
     const entries = (await store.get('entries', { type: 'json' }).catch(() => null)) || [];
@@ -10,6 +10,7 @@ export async function appendAudit(action, detail, before = null, after = null) {
       ts: new Date().toISOString(),
       action,
       detail,
+      ...(actor !== null ? { actor } : {}),
       ...(before !== null ? { before } : {}),
       ...(after  !== null ? { after  } : {}),
     });

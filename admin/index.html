@@ -464,6 +464,9 @@
     .kb-move{margin-top:10px;width:100%;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.09);border-radius:7px;color:rgba(247,243,237,0.45);font-family:'Outfit',sans-serif;font-size:11.5px;padding:6px 8px;cursor:pointer;transition:background .15s,border-color .15s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(247,243,237,0.3)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px;}
     .kb-move:hover{background:rgba(247,243,237,0.08);border-color:rgba(247,243,237,0.15);}
     .kb-move:focus{outline:none;border-color:rgba(189,122,112,0.5);}
+    .kb-card{cursor:grab;}
+    .kb-card.dragging{opacity:0.35;cursor:grabbing;}
+    .kb-col.drag-over{outline:1px dashed rgba(181,113,90,0.45);background:rgba(181,113,90,0.04);border-radius:10px;}
 
     @media(max-width:900px){
       .dash-stats{grid-template-columns:1fr 1fr;}
@@ -742,7 +745,7 @@
         </div>
         <div class="dash-stat">
           <div class="dash-stat-label">Markets tracked</div>
-          <div class="dash-stat-value">13</div>
+          <div class="dash-stat-value" id="ds-markets">—</div>
         </div>
       </div>
       <div class="dash-cols">
@@ -778,6 +781,11 @@
       </div>
       <div id="clients-grid" class="client-cards-list">
         <div style="text-align:center;padding:48px;color:rgba(247,243,237,0.25);font-size:14px;">Loading…</div>
+      </div>
+      <div id="clients-pagination" style="display:none;margin-top:18px;display:flex;align-items:center;justify-content:center;gap:12px;">
+        <button onclick="clientPageNav(-1)" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);color:rgba(247,243,237,0.6);font-family:'Outfit',sans-serif;font-size:13px;padding:7px 18px;border-radius:8px;cursor:pointer;">← Prev</button>
+        <span id="clients-page-label" style="font-size:13px;color:rgba(247,243,237,0.35);"></span>
+        <button onclick="clientPageNav(1)" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);color:rgba(247,243,237,0.6);font-family:'Outfit',sans-serif;font-size:13px;padding:7px 18px;border-radius:8px;cursor:pointer;">Next →</button>
       </div>
       <div id="completed-list" style="display:none;"></div>
     </div>
@@ -866,6 +874,9 @@
           <button class="btn-primary" id="ms-add-submit" onclick="saveMilestoneBatch()">Save dates</button>
           <button class="btn-secondary" onclick="toggleAddDateForm()">Cancel</button>
         </div>
+      </div>
+      <div style="margin-bottom:14px;">
+        <input type="text" id="ms-client-filter" placeholder="Filter by client…" oninput="renderMilestonesDashboard()" style="width:100%;max-width:280px;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:100px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:13px;padding:8px 16px;outline:none;transition:border-color .15s;" onfocus="this.style.borderColor='rgba(189,122,112,0.5)'" onblur="this.style.borderColor='rgba(247,243,237,0.1)'">
       </div>
       <p id="ms-empty" style="display:none;font-size:14px;color:rgba(247,243,237,0.25);padding:32px 0;text-align:center;">No upcoming dates — use the + Add date button above to get started.</p>
       <div id="ms-groups"></div>
@@ -2059,6 +2070,8 @@ let slEditId = null;
 let compEditId = null;
 let crmFilter = 'all';
 let clientSearchQuery = '';
+let clientPage = 0;
+const CLIENT_PAGE_SIZE = 25;
 let briefSearchQuery = '';
 let crmProfileClientId = null;
 let crmProfileTab = 'profile';
@@ -2085,6 +2098,7 @@ function renderDashboard() {
   const activeCount = clients.filter(c => c.active && (c.status || 'active') !== 'completed').length;
   document.getElementById('ds-clients').textContent = activeCount || '0';
   document.getElementById('ds-pres').textContent = presentations.length || '0';
+  document.getElementById('ds-markets').textContent = MARKETS.length;
 
   const now = new Date(); now.setHours(0,0,0,0);
   const in14 = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
@@ -2233,8 +2247,16 @@ async function loadClients() {
   if (presentations.length) renderPresentations();
 }
 
+function clientPageNav(dir) {
+  clientPage = Math.max(0, clientPage + dir);
+  renderTable();
+  document.getElementById('sec-clients').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 function renderTable() {
   const grid = document.getElementById('clients-grid');
+  const pagWrap = document.getElementById('clients-pagination');
+  const pagLabel = document.getElementById('clients-page-label');
   const q = clientSearchQuery.toLowerCase().trim();
   const filtered = clients.filter(c => {
     if ((c.status || 'active') === 'completed') return false;
@@ -2243,9 +2265,30 @@ function renderTable() {
   });
   if (q && !filtered.length) {
     grid.innerHTML = `<div class="admin-search-no-results">No clients match "${esc(q)}"</div>`;
+    if (pagWrap) pagWrap.style.display = 'none';
     return;
   }
-  grid.innerHTML = filtered.map(c => {
+
+  // Pagination: only when not searching
+  const paginated = q ? filtered : filtered;
+  const totalPages = q ? 1 : Math.max(1, Math.ceil(filtered.length / CLIENT_PAGE_SIZE));
+  if (clientPage >= totalPages) clientPage = totalPages - 1;
+  const pageSlice = q ? filtered : filtered.slice(clientPage * CLIENT_PAGE_SIZE, (clientPage + 1) * CLIENT_PAGE_SIZE);
+
+  if (pagWrap) {
+    if (!q && totalPages > 1) {
+      pagWrap.style.display = 'flex';
+      if (pagLabel) pagLabel.textContent = `${clientPage + 1} of ${totalPages}`;
+      // Disable prev/next buttons appropriately
+      const [prevBtn, nextBtn] = pagWrap.querySelectorAll('button');
+      if (prevBtn) prevBtn.disabled = clientPage === 0;
+      if (nextBtn) nextBtn.disabled = clientPage >= totalPages - 1;
+    } else {
+      pagWrap.style.display = 'none';
+    }
+  }
+
+  grid.innerHTML = pageSlice.map(c => {
     const msCount = milestones.filter(m => m.clientId === c.id && !m.completed).length;
     const markets = c.markets?.length
       ? c.markets.map(m => `<span class="pill">${esc(marketName(m))}</span>`).join('')
@@ -2349,12 +2392,14 @@ function searchDurationLabel(createdAt) {
 
 function setClientSearch(val) {
   clientSearchQuery = val;
+  clientPage = 0;
   const clear = document.getElementById('client-search-clear');
   if (clear) clear.classList.toggle('visible', val.length > 0);
   renderTable();
 }
 function clearClientSearch() {
   clientSearchQuery = '';
+  clientPage = 0;
   const input = document.getElementById('client-search-input');
   const clear = document.getElementById('client-search-clear');
   if (input) input.value = '';
@@ -2450,7 +2495,7 @@ function renderPipeline() {
               `<option value="${s.key}">${s.label}</option>`
             ).join('')}
           </select>`;
-          return `<div class="kb-card" onclick="openClientProfile('${card.clientId}')">
+          return `<div class="kb-card" draggable="true" data-client-id="${card.clientId}" data-acq-id="${card.acqId || ''}" data-stage="${stage.key}" ondragstart="kbDragStart(event)" ondragend="kbDragEnd(event)" onclick="openClientProfile('${card.clientId}')">
             <div class="kb-card-name">${esc(card.displayName)}</div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
               ${since ? `<div class="kb-card-since">${since}</div>` : ''}
@@ -2461,7 +2506,7 @@ function renderPipeline() {
           </div>`;
         }).join('');
 
-    return `<div class="kb-col">
+    return `<div class="kb-col" data-stage="${stage.key}" ondragover="kbDragOver(event)" ondragleave="kbDragLeave(event)" ondrop="kbDrop(event)">
       <div class="kb-col-head">
         <span class="kb-col-title">${stage.label}</span>
         <span class="kb-col-count">${stageCards.length}</span>
@@ -2469,6 +2514,48 @@ function renderPipeline() {
       ${cardHTML}
     </div>`;
   }).join('');
+}
+
+let _kbDragClientId = null, _kbDragAcqId = null, _kbDragStage = null;
+
+function kbDragStart(e) {
+  const card = e.currentTarget;
+  _kbDragClientId = card.dataset.clientId;
+  _kbDragAcqId = card.dataset.acqId || null;
+  _kbDragStage = card.dataset.stage;
+  card.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function kbDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.kb-col.drag-over').forEach(c => c.classList.remove('drag-over'));
+}
+
+function kbDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  e.currentTarget.classList.add('drag-over');
+}
+
+function kbDragLeave(e) {
+  if (!e.currentTarget.contains(e.relatedTarget)) {
+    e.currentTarget.classList.remove('drag-over');
+  }
+}
+
+async function kbDrop(e) {
+  e.preventDefault();
+  const col = e.currentTarget;
+  col.classList.remove('drag-over');
+  const newStage = col.dataset.stage;
+  if (!_kbDragClientId || !newStage || newStage === _kbDragStage) return;
+  const fakeEl = { disabled: false, value: '' };
+  if (_kbDragAcqId) {
+    await moveKanbanCard(_kbDragClientId, _kbDragAcqId, newStage, fakeEl);
+  } else {
+    await moveClientStage(_kbDragClientId, newStage, fakeEl);
+  }
 }
 
 async function moveClientStage(clientId, newStage, selectEl) {
@@ -3147,7 +3234,13 @@ function renderMilestonesDashboard() {
       seen.get(m.clientId).push(m);
     });
 
-    groupsEl.innerHTML = byClient.map(group => {
+    const msFilterVal = (document.getElementById('ms-client-filter')?.value || '').toLowerCase().trim();
+    const filteredByClient = msFilterVal ? byClient.filter(g => g.clientName.toLowerCase().includes(msFilterVal)) : byClient;
+
+    if (!filteredByClient.length) {
+      groupsEl.innerHTML = `<p style="font-size:14px;color:rgba(247,243,237,0.25);padding:24px 0;">No clients match that filter.</p>`;
+    } else {
+    groupsEl.innerHTML = filteredByClient.map(group => {
       const rows = group.items.map(m => {
         const days = daysFromToday(m.date);
         const urg = urgencyClass(days);
@@ -3184,6 +3277,7 @@ function renderMilestonesDashboard() {
         <div class="ms-group-rows" style="display:${rowsDisplay}">${rows}</div>
       </div>`;
     }).join('');
+    } // end filteredByClient.length check
   }
 
   // Archive-ready: non-archived clients who have milestones and all are done

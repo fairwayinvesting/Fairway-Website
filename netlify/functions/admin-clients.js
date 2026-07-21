@@ -345,6 +345,7 @@ export default async (req) => {
     const prevName = client.name;
     const prevMarkets = (client.markets || []).slice().sort().join(',');
     const prevActive = client.active;
+    const prevStage = client.pipelineStage;
 
     if (name !== undefined) client.name = name.trim();
     if (markets !== undefined) client.markets = markets;
@@ -387,6 +388,21 @@ export default async (req) => {
     }
     if (password) {
       appendAudit('client_password_reset', `Reset password for ${client.name} <${client.email}>`);
+    }
+    if (pipelineStage !== undefined && pipelineStage !== prevStage) {
+      appendAudit('stage_changed', `${client.name} <${client.email}> moved from ${prevStage || 'none'} → ${pipelineStage}`);
+      const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+      if (webhookUrl) {
+        const stageLabels = { onboarding:'Onboarding', searching:'Searching', under_contract:'Under Contract', exchanged:'Unconditional', settlement:'Settled' };
+        const stageEmoji = { onboarding:'📋', searching:'🔍', under_contract:'📝', exchanged:'✅', settlement:'🏠' };
+        const fromLabel = stageLabels[prevStage] || prevStage || 'None';
+        const toLabel = stageLabels[pipelineStage] || pipelineStage;
+        fetch(webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: `${stageEmoji[pipelineStage] || '➡️'} *${client.name}* moved to *${toLabel}* (from ${fromLabel})` }),
+        }).catch(err => console.error('Stage change Slack notify failed:', err?.message || err));
+      }
     }
     return json({ ok: true });
   }

@@ -20,6 +20,36 @@ export const MILESTONE_LABELS = {
   custom:        'Custom',
 };
 
+// ── Settlement email ──────────────────────────────────────────────────────────
+
+function buildSettlementEmail(name) {
+  const firstName = name.split(' ')[0];
+  return `<!DOCTYPE html><html lang="en" style="background:#181614;"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Congratulations on your settlement — Fairway</title>
+<style>@media only screen and (max-width:600px){.ew{padding:32px 22px!important;border-radius:14px!important;}.eh1{font-size:26px!important;}}</style>
+</head>
+<body style="margin:0;padding:0;background:#181614;font-family:Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#181614"><tr><td align="center" style="padding:40px 16px;background:#181614;">
+<table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;">
+  <tr><td class="ew" style="background:#1C1815;border-radius:20px;border:1px solid rgba(181,113,90,0.2);padding:44px 48px;">
+    <p style="margin:0 0 36px;padding-bottom:32px;border-bottom:1px solid rgba(250,246,241,0.08);text-align:center;">
+      <img src="https://fairwayinvesting.com.au/logo-icon.png" width="28" height="28" alt="" style="display:inline-block;border:0;vertical-align:middle;margin-right:10px;">
+      <img src="https://fairwayinvesting.com.au/logo-word.png" width="160" height="24" alt="Fairway Investing" style="display:inline-block;border:0;vertical-align:middle;max-width:160px;">
+    </p>
+    <p style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#B5715A;margin:0 0 16px;">Settlement Complete</p>
+    <h1 class="eh1" style="font-family:Georgia,'Times New Roman',serif;font-size:36px;font-weight:400;color:#FAF6F1;margin:0 0 16px;line-height:1.15;">Congratulations, ${firstName}!</h1>
+    <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 32px;line-height:1.65;">Settlement is complete — you are now the proud owner of an investment property. This is a significant milestone and I couldn't be more pleased for you. The hard work paid off.</p>
+    <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 0;line-height:1.65;">I'll be in touch in the coming days to walk through next steps, including tenancy management and keeping an eye on your asset over time. In the meantime, enjoy the moment — you've earned it.</p>
+    <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:28px 0 0;line-height:1.65;">Luke</p>
+  </td></tr>
+  <tr><td style="padding:24px 0 0;text-align:center;">
+    <p style="font-size:12px;color:rgba(250,246,241,0.25);margin:0;line-height:1.7;">Fairway Investing &middot; Suite 211, Level 2/5 Alexander Street, Crows Nest NSW 2065<br>
+    <a href="mailto:info@fairwayinvesting.com.au" style="color:#B5715A;text-decoration:none;">info@fairwayinvesting.com.au</a> &middot; 0416 184 333</p>
+  </td></tr>
+</table>
+</td></tr></table>
+</body></html>`;
+}
+
 // ── Store helpers ────────────────────────────────────────────────────────────
 
 const msStore = () => getStore('fairway-milestones');
@@ -229,6 +259,23 @@ export default async (req) => {
       `"${after.label}" for ${after.clientName}`,
       before, after
     );
+
+    // Send congratulations email when the settlement milestone is checked off
+    if (completed === true && after.type === 'settlement' && !before.completed) {
+      const clientStore = getStore('fairway-clients');
+      clientStore.get('all', { type: 'json' }).then(allClients => {
+        const client = (allClients || []).find(c => c.id === clientId);
+        if (!client?.email) return;
+        resend.emails.send({
+          from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
+          to: [client.email],
+          reply_to: 'luke@fairwayinvesting.com.au',
+          subject: `Congratulations on your settlement, ${client.name.split(' ')[0]}! — Fairway`,
+          html: buildSettlementEmail(client.name),
+        }).catch(err => console.error('Settlement congratulations email failed:', err?.message || err));
+      }).catch(err => console.error('Could not load clients for settlement email:', err?.message || err));
+    }
+
     return json({ ok: true });
   }
 

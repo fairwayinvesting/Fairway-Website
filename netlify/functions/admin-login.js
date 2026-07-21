@@ -64,13 +64,24 @@ export default async (req) => {
 
   const { password, code } = await req.json().catch(() => ({}));
 
-  if (!password || password !== process.env.ADMIN_PASSWORD) {
+  // Identify which admin is logging in (primary or secondary)
+  let actor = null;
+  if (password && password === process.env.ADMIN_PASSWORD) {
+    actor = 'primary';
+  } else if (password && process.env.ADMIN_PASSWORD_2 && password === process.env.ADMIN_PASSWORD_2) {
+    actor = 'secondary';
+  }
+
+  if (!actor) {
     await recordFailure(store, ip, rl.data, rl.now);
     return json({ error: 'Unauthorized' }, 401);
   }
 
-  // TOTP is mandatory — if TOTP_SECRET is not configured the admin login is disabled
-  const totpSecret = process.env.TOTP_SECRET;
+  // Each actor has their own TOTP secret (secondary falls back to primary secret if not set)
+  const totpSecret = actor === 'secondary'
+    ? (process.env.TOTP_SECRET_2 || process.env.TOTP_SECRET)
+    : process.env.TOTP_SECRET;
+
   if (!totpSecret) {
     return json({ error: 'Admin 2FA is not configured. Set TOTP_SECRET in Netlify environment variables.' }, 503);
   }
@@ -89,7 +100,7 @@ export default async (req) => {
 
   const now = Math.floor(Date.now() / 1000);
   const token = signJWT(
-    { role: 'admin', iat: now, exp: now + 86400 * 30 },
+    { role: 'admin', actor, iat: now, exp: now + 86400 * 30 },
     process.env.JWT_SECRET
   );
 

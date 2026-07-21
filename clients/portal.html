@@ -176,6 +176,9 @@
     <div class="journey-bar" id="journey-bar"></div>
   </div>
 
+  <!-- STAGE STATUS BANNER (populated by JS, shown for searching/under_contract/exchanged) -->
+  <div class="actions-wrap" id="status-section" style="display:none"></div>
+
   <!-- QUESTIONNAIRE CARD (populated by JS) -->
   <div class="actions-wrap" id="q-section"></div>
 
@@ -327,6 +330,47 @@
             <span class="action-btn">Start questionnaire &rarr;</span>
           </a>`;
       }
+    }
+
+    function renderStatusBanner(stage, qCompleted) {
+      const sec = document.getElementById('status-section');
+      if (!sec || !qCompleted) return;
+      const msgs = {
+        searching: {
+          label: 'Currently searching',
+          title: 'Luke is searching the market for you',
+          sub: 'We\'ll email you as soon as we find a property that matches your brief.',
+          icon: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="5.5" stroke="#bd7a70" stroke-width="1.5"/><path d="M13 13l3 3" stroke="#bd7a70" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+        },
+        under_contract: {
+          label: 'Under contract',
+          title: 'You\'re under contract — due diligence underway',
+          sub: 'Luke is overseeing inspections, valuations, and finance. You\'ll hear from us at each key step.',
+          icon: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10h12M13 6l4 4-4 4" stroke="#bd7a70" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+        },
+        exchanged: {
+          label: 'Unconditional',
+          title: 'Your purchase is confirmed — settlement is next',
+          sub: 'Contracts are exchanged and your purchase is unconditional. Settlement is the final step.',
+          icon: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 11l4 4 8-8" stroke="#bd7a70" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+        },
+      };
+      const msg = msgs[stage];
+      if (!msg) return;
+      sec.style.display = 'block';
+      sec.innerHTML = `
+        <div class="action-card" style="border-color:rgba(247,243,237,0.09);cursor:default;">
+          <div class="action-card-left">
+            <div class="action-icon" style="background:rgba(247,243,237,0.04);border-color:rgba(247,243,237,0.1);">
+              ${msg.icon}
+            </div>
+            <div class="action-card-text">
+              <p class="ac-label">${msg.label}</p>
+              <p class="ac-title" style="font-size:16px;">${msg.title}</p>
+              <p class="ac-sub">${msg.sub}</p>
+            </div>
+          </div>
+        </div>`;
     }
 
     function renderBriefSection(qCompleted, briefPublished) {
@@ -568,11 +612,14 @@
 
       container.innerHTML = acquisitions.map((acq, i) => {
         const stageLabel = ACQ_STAGE_LABELS[acq.pipelineStage] || 'Getting started';
-        const isSettled = acq.status === 'settled';
         const today = new Date(); today.setHours(0,0,0,0);
         const settleDate = acq.settlementDate ? new Date(acq.settlementDate + 'T00:00:00') : null;
         const settlePast = settleDate ? settleDate <= today : false;
         const days = settleDate && !settlePast ? Math.round((settleDate - today) / 86400000) : null;
+        const isSettled = acq.status === 'settled' || (acq.pipelineStage === 'settlement' && settlePast);
+        const panelLabel = isSettled ? 'Settled'
+          : acq.pipelineStage === 'settlement' ? 'Settling soon'
+          : 'In progress';
 
         const stages = ['onboarding','searching','under_contract','exchanged','settlement'];
         const stageIdx = stages.indexOf(acq.pipelineStage);
@@ -626,7 +673,7 @@
           <div class="acq-panel-head" onclick="toggleAcqPanel('${acq.id}')">
             <div>
               <p class="acq-panel-number">${esc(acq.label)}</p>
-              <p class="acq-panel-label">${isSettled ? 'Settled' : 'In progress'}</p>
+              <p class="acq-panel-label">${panelLabel}</p>
               <p class="acq-panel-stage">${stageLabel}${days !== null ? ` &nbsp;&middot;&nbsp; ${days} days to settlement` : ''}</p>
             </div>
             <svg class="acq-panel-chevron" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -731,6 +778,7 @@
         } catch (e) { console.error('[portal] fetch error', e); }
 
         renderQSection(qCompleted);
+        renderStatusBanner(me.pipelineStage, qCompleted);
         renderBriefSection(qCompleted, briefPublished);
         renderPresentations(presentations);
         renderReports(me.markets);
