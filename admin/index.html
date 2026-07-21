@@ -6368,9 +6368,12 @@ async function confirmDeleteProspect() {
     errEl.style.display = 'block';
     return;
   }
+  const deletedId = _pendingDeleteProspectId;
   cancelDeleteProspect();
   closeProspectPanel();
-  await loadProspects();
+  prospects = prospects.filter(p => p.id !== deletedId);
+  renderProspects();
+  loadProspects();
 }
 </script>
 </body>
