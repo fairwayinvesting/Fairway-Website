@@ -798,9 +798,10 @@
 </footer>
 
 <script>
+const URL_ACQ_ID = new URLSearchParams(location.search).get('acq') || null;
 const TOTAL_STEPS = 8;
 const MAX_PROPS = 7;
-const LS_KEY = 'fw_q_draft';
+const LS_KEY = URL_ACQ_ID ? 'fw_q_draft_' + URL_ACQ_ID : 'fw_q_draft';
 let currentStep = 1;
 let propCount = 0;
 let propSeq = 0;
@@ -818,9 +819,12 @@ async function init() {
     if (emailEl && userData.email && !emailEl.value) emailEl.value = userData.email;
   } catch { window.location = '/clients/'; return; }
 
-  // Check for existing submission
+  // Check for existing submission (acquisition-specific if ?acq= is in URL)
   try {
-    const qr = await fetch('/api/submit-questionnaire');
+    const qUrl = URL_ACQ_ID
+      ? `/api/submit-questionnaire?acq=${encodeURIComponent(URL_ACQ_ID)}`
+      : '/api/submit-questionnaire';
+    const qr = await fetch(qUrl);
     if (qr.ok) {
       const qdata = await qr.json();
       if (qdata.completed && qdata.data) {
@@ -838,6 +842,10 @@ async function init() {
           document.getElementById('btn-next').textContent = 'Save changes';
         }
         return;
+      }
+      // For 2nd+ acquisitions: pre-fill personal details from original submission
+      if (URL_ACQ_ID && qdata.prefill) {
+        populateForm(qdata.prefill, false);
       }
     }
   } catch {}
@@ -1218,6 +1226,7 @@ function loadProgress() {
 // ── SUBMIT ────────────────────────────────────────────────────────────────
 async function submitForm() {
   const data = collectData();
+  if (URL_ACQ_ID) data.acqId = URL_ACQ_ID;
   document.getElementById('q-main').style.display = 'none';
   document.getElementById('q-submitting').style.display = 'block';
   try {
