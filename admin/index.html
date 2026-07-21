@@ -6243,6 +6243,11 @@ function renderProspectPanel(p) {
         ${ag.customRefundClause ? `<div>Refund: ${esc(ag.customRefundClause).slice(0,80)}…</div>` : ''}
         ${ag.customClauses ? `<div style="margin-top:4px;">Special: ${esc(ag.customClauses).slice(0,80)}…</div>` : ''}
       </div>` : ''}
+      ${agStatus === 'sent' && ag.signToken ? `<div style="background:rgba(181,113,90,0.06);border:1px solid rgba(181,113,90,0.18);border-radius:8px;padding:12px 14px;margin-bottom:10px;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#B5715A;margin-bottom:6px;">Signing link</div>
+        <div id="signing-link-text" style="font-size:10.5px;color:rgba(247,243,237,0.35);word-break:break-all;margin-bottom:8px;line-height:1.5;">https://fairwayinvesting.com.au/agreements/sign.html?token=${ag.signToken}</div>
+        <button onclick="copySigningLink('${ag.signToken}')" id="copy-signing-btn" style="font-size:12px;background:rgba(181,113,90,0.15);border:1px solid rgba(181,113,90,0.3);color:#B5715A;border-radius:6px;padding:5px 12px;cursor:pointer;">Copy link</button>
+      </div>` : ''}
     </div>
 
     ${p.payments ? `<div style="margin-bottom:20px;">
@@ -6276,6 +6281,15 @@ async function sendAgreement(prospectId, action) {
   }
   await loadProspects();
   openProspectPanel(prospectId);
+}
+
+async function copySigningLink(token) {
+  const url = `https://fairwayinvesting.com.au/agreements/sign.html?token=${token}`;
+  try {
+    await navigator.clipboard.writeText(url);
+    const btn = document.getElementById('copy-signing-btn');
+    if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy link'; }, 2000); }
+  } catch { alert('Could not copy — link:\n' + url); }
 }
 
 async function markPaymentReceived(prospectId, paymentType) {
