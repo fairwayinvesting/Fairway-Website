@@ -227,8 +227,8 @@
       { key: 'onboarding',     label: 'Onboarding' },
       { key: 'searching',      label: 'Searching' },
       { key: 'under_contract', label: 'Under contract' },
-      { key: 'exchanged',      label: 'Exchanged' },
-      { key: 'settlement',     label: 'Settlement' },
+      { key: 'exchanged',      label: 'Unconditional' },
+      { key: 'settlement',     label: 'Settled' },
     ];
 
     function renderSettlement(dateStr) {
@@ -545,7 +545,7 @@
       } catch { alert('Network error. Please try again.'); }
     }
 
-    const ACQ_STAGE_LABELS = { onboarding:'Onboarding', searching:'Searching', under_contract:'Under contract', exchanged:'Exchanged', settlement:'Settlement' };
+    const ACQ_STAGE_LABELS = { onboarding:'Onboarding', searching:'Searching', under_contract:'Under contract', exchanged:'Unconditional', settlement:'Settled' };
 
     function renderMultiAcquisition(acquisitions, me) {
       // Hide single-acquisition sections

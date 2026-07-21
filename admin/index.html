@@ -2258,8 +2258,8 @@ const PIPELINE_STAGES = [
   { key: 'onboarding',     label: 'Onboarding' },
   { key: 'searching',      label: 'Searching' },
   { key: 'under_contract', label: 'Under Contract' },
-  { key: 'exchanged',      label: 'Exchanged' },
-  { key: 'settlement',     label: 'Settlement' },
+  { key: 'exchanged',      label: 'Unconditional' },
+  { key: 'settlement',     label: 'Settled' },
 ];
 
 function stageSinceDays(updatedAt) {
@@ -4154,7 +4154,7 @@ function renderEngagementTab() {
   const el = document.getElementById('profile-body');
   const client = clients.find(c => c.id === crmProfileClientId);
   if (!client) return;
-  const STAGE_LABELS = { onboarding:'Onboarding', searching:'Searching', under_contract:'Under contract', exchanged:'Exchanged', settlement:'Settlement' };
+  const STAGE_LABELS = { onboarding:'Onboarding', searching:'Searching', under_contract:'Under contract', exchanged:'Unconditional', settlement:'Settled' };
   const clientMilestones = milestones.filter(m => m.clientId === client.id && !m.completed).slice(0,5);
   const acqs = client.acquisitions || [];
   const hasMultiAcq = acqs.length > 1;
