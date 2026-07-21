@@ -13,8 +13,9 @@ export const MILESTONE_LABELS = {
   building_pest: 'Building & Pest',
   bp_inspection: 'B&P Inspection Date',
   contracts:     'Contracts Exchanged',
-  cooling_off:   'Cooling Off End',
-  settlement:    'Settlement',
+  cooling_off:              'Cooling Off End',
+  pre_settlement_inspection: 'Pre-Settlement Inspection',
+  settlement:               'Settlement',
   preapproval:   'Pre-Approval Expiry',
   custom:        'Custom',
 };
