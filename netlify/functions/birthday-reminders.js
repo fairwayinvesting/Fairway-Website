@@ -148,7 +148,7 @@ export default async () => {
     // Client birthday
     if (q.dob) {
       const days = daysUntilBirthday(q.dob, today);
-      if (days !== null && days >= 0 && days <= 7) {
+      if (days !== null && days >= 0 && days <= 3) {
         const name = [q.firstName || client.name.split(' ')[0], q.lastName || ''].join(' ').trim();
         items.push({
           days,
@@ -160,7 +160,7 @@ export default async () => {
     // Partner birthday
     if (q.coInvestor === 'Yes' && q.p2Dob) {
       const days = daysUntilBirthday(q.p2Dob, today);
-      if (days !== null && days >= 0 && days <= 7) {
+      if (days !== null && days >= 0 && days <= 3) {
         const partnerName = [q.p2FirstName, q.p2LastName].filter(Boolean).join(' ') || 'Partner';
         const clientFirst = q.firstName || client.name.split(' ')[0];
         const relationship = q.p2Relationship || 'partner';
