@@ -84,8 +84,7 @@ async function sendSlack(webhookUrl, items, dateHeading, isTest) {
 }
 
 export default async (req) => {
-  const authErr = checkAdmin(req);
-  if (authErr) return authErr;
+  if (!(await checkAdmin(req))) return json({ error: 'Unauthorized' }, 401);
 
   const slackUrl = process.env.SLACK_BIRTHDAY_WEBHOOK_URL;
   if (!slackUrl) return json({ error: 'SLACK_BIRTHDAY_WEBHOOK_URL not set in environment variables' }, 500);
