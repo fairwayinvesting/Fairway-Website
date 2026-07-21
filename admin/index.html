@@ -2244,6 +2244,7 @@ async function loadClients() {
   renderBriefs();
   renderReports();
   renderDashboard();
+  renderPartnersSection();
   if (presentations.length) renderPresentations();
 }
 
@@ -2710,6 +2711,7 @@ document.getElementById('modal-save').addEventListener('click', async function()
       clients.push({ id: data.id, name, email: email.toLowerCase().trim(), markets, active: true, createdAt: new Date().toISOString(), referralSource: referralSource || null, referrerId: referrerId || null });
     }
     renderTable();
+    renderPartnersSection();
     closeModal();
   } else {
     errEl.textContent = data.error || 'Save failed.';
