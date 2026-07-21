@@ -511,9 +511,17 @@
       .brief-q-summary{flex-wrap:nowrap;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch;}
     }
     /* ── CRM ──────────────────────────────────────────────── */
-    .crm-filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;}
+    .crm-filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;align-items:center;}
     .crm-filter-btn{font-size:12px;font-weight:400;color:rgba(247,243,237,0.4);background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.09);border-radius:100px;padding:6px 14px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .15s;}
     .crm-filter-btn.active{background:rgba(189,122,112,0.12);border-color:rgba(189,122,112,0.3);color:#f7f3ed;}
+    .admin-search-wrap{position:relative;margin-left:auto;}
+    .admin-search-input{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:6px 30px 6px 32px;font-size:12.5px;font-family:'Outfit',sans-serif;color:#f7f3ed;outline:none;width:200px;transition:border-color .2s,width .2s;}
+    .admin-search-input:focus{border-color:rgba(189,122,112,0.4);width:240px;}
+    .admin-search-input::placeholder{color:rgba(247,243,237,0.22);}
+    .admin-search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:rgba(247,243,237,0.25);pointer-events:none;}
+    .admin-search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(247,243,237,0.3);cursor:pointer;font-size:14px;line-height:1;padding:2px;display:none;}
+    .admin-search-clear.visible{display:block;}
+    .admin-search-no-results{font-size:13px;color:rgba(247,243,237,0.25);padding:32px 0;text-align:center;}
     .crm-status{font-size:10px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;border-radius:100px;padding:3px 9px;flex-shrink:0;}
     .crm-s-active{background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.25);color:#6dbf7b;}
     .crm-s-completed{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);color:rgba(247,243,237,0.35);}
@@ -762,6 +770,11 @@
       <div class="crm-filter-bar" style="margin-bottom:20px;">
         <button class="crm-filter-btn active" id="cf-active" onclick="setCrmFilter('active',this)">Active</button>
         <button class="crm-filter-btn" id="cf-completed" onclick="setCrmFilter('completed',this)">Completed</button>
+        <div class="admin-search-wrap">
+          <svg class="admin-search-icon" width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input class="admin-search-input" id="client-search-input" type="text" placeholder="Search clients…" oninput="setClientSearch(this.value)">
+          <button class="admin-search-clear" id="client-search-clear" onclick="clearClientSearch()" title="Clear">×</button>
+        </div>
       </div>
       <div id="clients-grid" class="client-cards-list">
         <div style="text-align:center;padding:48px;color:rgba(247,243,237,0.25);font-size:14px;">Loading…</div>
@@ -782,6 +795,13 @@
     <div id="sec-briefs" class="admin-section">
       <div class="sec-header">
         <h1>Buying Briefs</h1>
+      </div>
+      <div class="crm-filter-bar" style="margin-bottom:20px;">
+        <div class="admin-search-wrap" style="margin-left:0;">
+          <svg class="admin-search-icon" width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input class="admin-search-input" id="brief-search-input" type="text" placeholder="Search briefs…" oninput="setBriefSearch(this.value)">
+          <button class="admin-search-clear" id="brief-search-clear" onclick="clearBriefSearch()" title="Clear">×</button>
+        </div>
       </div>
       <div id="briefs-list"><span style="font-size:14px;color:rgba(247,243,237,0.25);">Loading…</span></div>
     </div>
@@ -2038,6 +2058,8 @@ let slFilter = 'all';
 let slEditId = null;
 let compEditId = null;
 let crmFilter = 'all';
+let clientSearchQuery = '';
+let briefSearchQuery = '';
 let crmProfileClientId = null;
 let crmProfileTab = 'profile';
 let crmProfileEditing = false;
@@ -2093,7 +2115,14 @@ function renderDashboard() {
 function renderBriefs() {
   const el = document.getElementById('briefs-list');
   if (!clients.length) { el.innerHTML = '<p style="font-size:14px;color:rgba(247,243,237,0.25);">No clients yet.</p>'; return; }
-  const sorted = [...clients].sort((a,b) => a.name.localeCompare(b.name));
+  const q = briefSearchQuery.toLowerCase().trim();
+  const sorted = [...clients]
+    .filter(c => !q || c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q))
+    .sort((a,b) => a.name.localeCompare(b.name));
+  if (q && !sorted.length) {
+    el.innerHTML = `<div class="admin-search-no-results">No clients match "${esc(q)}"</div>`;
+    return;
+  }
   el.innerHTML = sorted.map(c => `
     <div class="brief-row">
       <span class="status-dot ${c.active ? 'status-active' : 'status-inactive'}"></span>
@@ -2206,7 +2235,17 @@ async function loadClients() {
 
 function renderTable() {
   const grid = document.getElementById('clients-grid');
-  grid.innerHTML = clients.filter(c => (c.status || 'active') !== 'completed').map(c => {
+  const q = clientSearchQuery.toLowerCase().trim();
+  const filtered = clients.filter(c => {
+    if ((c.status || 'active') === 'completed') return false;
+    if (!q) return true;
+    return c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q);
+  });
+  if (q && !filtered.length) {
+    grid.innerHTML = `<div class="admin-search-no-results">No clients match "${esc(q)}"</div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(c => {
     const msCount = milestones.filter(m => m.clientId === c.id && !m.completed).length;
     const markets = c.markets?.length
       ? c.markets.map(m => `<span class="pill">${esc(marketName(m))}</span>`).join('')
@@ -2306,6 +2345,35 @@ function searchDurationLabel(createdAt) {
   const years = Math.floor(days / 365);
   const rem = months - years * 12;
   return rem > 0 ? `${years}y ${rem}m active` : `${years} year${years !== 1 ? 's' : ''} active`;
+}
+
+function setClientSearch(val) {
+  clientSearchQuery = val;
+  const clear = document.getElementById('client-search-clear');
+  if (clear) clear.classList.toggle('visible', val.length > 0);
+  renderTable();
+}
+function clearClientSearch() {
+  clientSearchQuery = '';
+  const input = document.getElementById('client-search-input');
+  const clear = document.getElementById('client-search-clear');
+  if (input) input.value = '';
+  if (clear) clear.classList.remove('visible');
+  renderTable();
+}
+function setBriefSearch(val) {
+  briefSearchQuery = val;
+  const clear = document.getElementById('brief-search-clear');
+  if (clear) clear.classList.toggle('visible', val.length > 0);
+  renderBriefs();
+}
+function clearBriefSearch() {
+  briefSearchQuery = '';
+  const input = document.getElementById('brief-search-input');
+  const clear = document.getElementById('brief-search-clear');
+  if (input) input.value = '';
+  if (clear) clear.classList.remove('visible');
+  renderBriefs();
 }
 
 // Build flat list of kanban cards — one per active acquisition for multi-acq clients,
