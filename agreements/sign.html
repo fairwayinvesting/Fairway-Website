@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buyer Engagement Agreement — Fairway Investing</title>
+  <link rel="icon" href="/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --copper: #B5715A;
+      --copper-light: #C98468;
+      --dark: #181614;
+      --surface: #1C1815;
+      --text: #FAF6F1;
+      --text-dim: rgba(250,246,241,0.55);
+      --text-faint: rgba(250,246,241,0.3);
+      --border: rgba(181,113,90,0.2);
+      --border-subtle: rgba(250,246,241,0.08);
+    }
+    html { background: var(--dark); color: var(--text); font-family: 'Outfit', sans-serif; scroll-behavior: smooth; }
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* ── Loading / Error states ── */
+    #state-loading, #state-error { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center; }
+    #state-error, #state-success, #agreement-wrap { display: none; }
+    .state-icon { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
+    .state-icon.err { background: rgba(224,112,112,0.12); }
+    .state-icon.ok  { background: rgba(100,200,120,0.12); }
+    .state-icon svg { width: 24px; height: 24px; }
+    .state-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 400; margin-bottom: 14px; }
+    .state-body { font-size: 15px; color: var(--text-dim); line-height: 1.7; max-width: 440px; }
+    .state-contact { margin-top: 28px; font-size: 14px; color: var(--text-faint); }
+    .state-contact a { color: var(--copper); text-decoration: none; }
+
+    /* ── Header ── */
+    .site-header { padding: 24px 32px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+    .site-header img { display: block; }
+    .header-divider { width: 1px; height: 22px; background: var(--border-subtle); }
+    .header-label { font-size: 13px; color: var(--text-faint); letter-spacing: 0.04em; }
+
+    /* ── Main layout ── */
+    .sign-layout { display: grid; grid-template-columns: 1fr 380px; gap: 0; flex: 1; max-width: 1180px; margin: 0 auto; width: 100%; padding: 0 24px 60px; }
+    @media (max-width: 900px) { .sign-layout { grid-template-columns: 1fr; } .sign-sidebar { order: -1; } }
+
+    /* ── Agreement panel ── */
+    .agreement-panel { padding: 48px 48px 48px 0; }
+    @media (max-width: 900px) { .agreement-panel { padding: 32px 0; } }
+
+    .agr-kicker { font-size: 11px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--copper); margin-bottom: 14px; }
+    .agr-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 400; line-height: 1.2; margin-bottom: 10px; }
+    .agr-subtitle { font-size: 14px; color: var(--text-dim); margin-bottom: 36px; line-height: 1.6; }
+
+    /* Details card */
+    .details-card { background: rgba(250,246,241,0.04); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 24px; margin-bottom: 36px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px 24px; }
+    .detail-item label { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--copper); display: block; margin-bottom: 5px; }
+    .detail-item span { font-size: 14px; color: var(--text); }
+    @media (max-width: 500px) { .details-card { grid-template-columns: 1fr; } }
+
+    /* Terms content */
+    .terms-content { font-size: 14px; color: var(--text-dim); line-height: 1.75; }
+    .terms-content h3 { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: var(--text); margin: 40px 0 16px; padding-top: 32px; border-top: 1px solid var(--border-subtle); }
+    .terms-content h3:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+    .terms-content h4 { font-size: 13px; font-weight: 600; color: var(--text); margin: 20px 0 8px; }
+    .terms-content ol, .terms-content ul { padding-left: 24px; margin: 8px 0 8px 8px; }
+    .terms-content li { margin-bottom: 8px; }
+    .terms-content li.sub-item { list-style-type: lower-roman; margin-left: 16px; }
+    .terms-content p { margin-bottom: 12px; }
+    .terms-content .clause { margin-bottom: 24px; }
+    .terms-content .clause-num { font-weight: 600; color: var(--text); margin-right: 6px; }
+    .terms-content .indent { margin-left: 20px; }
+    .terms-content .deep-indent { margin-left: 36px; }
+
+    .annexure-divider { margin: 48px 0 36px; padding: 24px; background: rgba(181,113,90,0.07); border: 1px solid rgba(181,113,90,0.15); border-radius: 12px; text-align: center; }
+    .annexure-divider h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 400; margin-bottom: 6px; }
+    .annexure-divider p { font-size: 13px; color: var(--copper); font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
+
+    /* Bank details box */
+    .bank-box { background: rgba(250,246,241,0.04); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+    .bank-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid rgba(250,246,241,0.05); font-size: 14px; }
+    .bank-row:last-child { border-bottom: none; }
+    .bank-row .bank-lbl { color: var(--text-faint); font-size: 12px; }
+    .bank-row .bank-val { color: var(--text); font-weight: 500; }
+
+    /* ── Sidebar / signing form ── */
+    .sign-sidebar { padding: 48px 0 48px 40px; border-left: 1px solid var(--border-subtle); position: sticky; top: 0; max-height: 100vh; overflow-y: auto; }
+    @media (max-width: 900px) { .sign-sidebar { padding: 32px 0; border-left: none; border-bottom: 1px solid var(--border-subtle); position: static; max-height: none; } }
+
+    .sign-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 32px 28px; }
+    .sign-card h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 400; margin-bottom: 10px; }
+    .sign-card .sign-intro { font-size: 13.5px; color: var(--text-dim); line-height: 1.65; margin-bottom: 28px; }
+
+    .sign-field { margin-bottom: 20px; }
+    .sign-field label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--copper); margin-bottom: 8px; }
+    .sign-field input[type=text] {
+      width: 100%; background: rgba(250,246,241,0.05); border: 1px solid rgba(250,246,241,0.12);
+      border-radius: 10px; padding: 13px 16px; color: var(--text); font-family: 'Playfair Display', serif;
+      font-size: 16px; font-style: italic; outline: none; transition: border-color 0.15s;
+    }
+    .sign-field input[type=text]:focus { border-color: var(--copper); }
+    .sign-field input::placeholder { color: var(--text-faint); font-style: italic; }
+
+    .agree-check { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 26px; cursor: pointer; }
+    .agree-check input[type=checkbox] { width: 18px; height: 18px; flex-shrink: 0; accent-color: var(--copper); margin-top: 2px; cursor: pointer; }
+    .agree-check span { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+    .agree-check span strong { color: var(--text); }
+
+    .sign-btn {
+      width: 100%; background: var(--copper); color: var(--text); border: none; border-radius: 100px;
+      padding: 16px; font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer;
+      transition: background 0.15s, opacity 0.15s; letter-spacing: 0.02em;
+    }
+    .sign-btn:hover { background: var(--copper-light); }
+    .sign-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .sign-error { background: rgba(224,112,112,0.1); border: 1px solid rgba(224,112,112,0.3); border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #f08080; margin-bottom: 16px; display: none; }
+
+    .sign-legal { font-size: 11.5px; color: var(--text-faint); line-height: 1.6; margin-top: 20px; }
+
+    /* ── Success state ── */
+    #state-success { min-height: 100vh; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center; }
+  </style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="state-loading">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="animation:spin 1s linear infinite;">
+      <circle cx="20" cy="20" r="16" stroke="rgba(181,113,90,0.2)" stroke-width="3"/>
+      <path d="M20 4a16 16 0 0 1 16 16" stroke="#B5715A" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+    <span style="font-size:14px;color:rgba(250,246,241,0.4);">Loading your agreement…</span>
+  </div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+<!-- Error -->
+<div id="state-error">
+  <div class="state-icon err">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#f08080" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg>
+  </div>
+  <h2 class="state-title" id="error-title">Link unavailable</h2>
+  <p class="state-body" id="error-body">This signing link is no longer valid.</p>
+  <p class="state-contact">Questions? Contact <a href="mailto:luke@fairwayinvesting.com.au">luke@fairwayinvesting.com.au</a> or call <a href="tel:0416184333">0416 184 333</a></p>
+</div>
+
+<!-- Success -->
+<div id="state-success">
+  <div class="state-icon ok">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#6dbf7b" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <h2 class="state-title" id="success-title">Agreement signed.</h2>
+  <p class="state-body">Your signed Buyer Engagement Agreement has been emailed to you. Luke will be in touch shortly with next steps.</p>
+  <p class="state-contact" style="margin-top:24px;"><a href="mailto:luke@fairwayinvesting.com.au" style="color:#B5715A;text-decoration:none;">luke@fairwayinvesting.com.au</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="tel:0416184333" style="color:#B5715A;text-decoration:none;">0416 184 333</a></p>
+</div>
+
+<!-- Agreement -->
+<div id="agreement-wrap" style="display:flex;flex-direction:column;min-height:100vh;">
+
+  <header class="site-header">
+    <img src="/logo-icon.png" width="26" height="26" alt="">
+    <img src="/logo-word.png" width="140" height="21" alt="Fairway Investing">
+    <div class="header-divider"></div>
+    <span class="header-label">Buyer Engagement Agreement</span>
+  </header>
+
+  <div class="sign-layout">
+
+    <!-- Left: agreement text -->
+    <div class="agreement-panel">
+      <p class="agr-kicker">Engagement Agreement</p>
+      <h1 class="agr-title" id="agr-title">Buyer Engagement Agreement</h1>
+      <p class="agr-subtitle">Please read the full agreement below before signing. By typing your name and clicking "Sign Agreement" you confirm that you have read, understood, and agree to all terms.</p>
+
+      <div class="details-card" id="details-card"></div>
+
+      <div class="terms-content" id="terms-content"></div>
+    </div>
+
+    <!-- Right: signing form -->
+    <aside class="sign-sidebar">
+      <div class="sign-card">
+        <h2>Sign this agreement</h2>
+        <p class="sign-intro">Type your full legal name below exactly as it appears on your ID. This will serve as your electronic signature.</p>
+
+        <div class="sign-error" id="sign-error"></div>
+
+        <div class="sign-field">
+          <label>Your full legal name</label>
+          <input type="text" id="signer-name" placeholder="e.g. Jane Smith" autocomplete="name">
+        </div>
+
+        <label class="agree-check">
+          <input type="checkbox" id="agree-check">
+          <span>I have read, understood, and agree to be bound by all terms and conditions of this <strong>Buyer Engagement Agreement</strong>, including Annexure A.</span>
+        </label>
+
+        <button class="sign-btn" id="sign-btn" onclick="submitSignature()">Sign Agreement</button>
+
+        <p class="sign-legal">Your electronic signature is legally binding under the Electronic Transactions Act 1999 (Cth). A signed copy of this agreement will be emailed to you immediately after signing.</p>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+<script>
+  const token = new URLSearchParams(location.search).get('token');
+  let agData = null;
+
+  function fmt(n) {
+    return '$' + Number(n).toLocaleString('en-AU');
+  }
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  async function init() {
+    if (!token) { showError('Missing token', 'No signing token was found in this link. Please use the link from your email.'); return; }
+
+    let data;
+    try {
+      const res = await fetch(`/api/sign-agreement?token=${encodeURIComponent(token)}`);
+      data = await res.json();
+      if (!res.ok) { showError('Link unavailable', data.error || 'This signing link is no longer valid.'); return; }
+    } catch {
+      showError('Connection error', 'Unable to load your agreement. Please try refreshing the page.');
+      return;
+    }
+
+    agData = data;
+    document.title = `Engagement Agreement — ${esc(data.prospectName)} — Fairway Investing`;
+    document.getElementById('agr-title').textContent = 'Buyer Engagement Agreement';
+
+    // Render details card
+    const isSplit = data.isSplit;
+    const payTerms = isSplit ? `50% on signing · 50% on unconditional` : '100% upon signing';
+    document.getElementById('details-card').innerHTML = `
+      <div class="detail-item"><label>Client</label><span>${esc(data.prospectName)}</span></div>
+      <div class="detail-item"><label>Package</label><span>${isSplit ? '50/50 Split' : 'Pay in Full'}</span></div>
+      <div class="detail-item"><label>Service fee (ex GST)</label><span>${fmt(data.fee)}</span></div>
+      <div class="detail-item"><label>Total (inc GST)</label><span>${fmt(data.total)}</span></div>
+      <div class="detail-item"><label>Payment terms</label><span>${payTerms}</span></div>
+      <div class="detail-item"><label>Exclusive agency term</label><span>${esc(data.exclusivityTerm)}</span></div>
+      ${data.purchaseType ? `<div class="detail-item"><label>Type of purchase</label><span>${esc(data.purchaseType)}</span></div>` : ''}
+      ${data.priceRange ? `<div class="detail-item"><label>Price range</label><span>${esc(data.priceRange)}</span></div>` : ''}
+    `;
+
+    // Render agreement text
+    renderTerms(data);
+
+    // Show agreement
+    document.getElementById('state-loading').style.display = 'none';
+    document.getElementById('agreement-wrap').style.display = 'flex';
+  }
+
+  function renderTerms(d) {
+    const isSplit = d.isSplit;
+    const halfFee = fmt(d.halfFee);
+    const total = fmt(d.total);
+    const effectiveTerm = esc(d.exclusivityTerm);
+    const refundText = d.customRefundClause
+      ? `In consideration for the Services, the Client agrees to pay the Fee outlined in Annexure A. ${esc(d.customRefundClause)}`
+      : `In consideration for the Services, the Client agrees to pay the Fee outlined in Annexure A. This Fee is refundable if the Client is dissatisfied with the service after a period of 5 weeks. There will be no refund if termination of this Agreement is made by the Client within the 5-week period.`;
+
+    const paymentClause = isSplit
+      ? `<p class="indent"><strong>a.</strong> In accordance with Annexure A, the Client agrees to pay the Fee:</p>
+         <p class="deep-indent"><strong>i.</strong> 50% of the total Fee (${halfFee} inclusive of GST) is payable upon signing this Agreement.</p>
+         <p class="deep-indent"><strong>ii.</strong> The remaining 50% (${halfFee} inclusive of GST) is payable when the property purchase becomes unconditional.</p>
+         <p class="deep-indent"><strong>iii.</strong> Within 6 months following termination, if a property introduced during the Term is purchased.</p>`
+      : `<p class="indent"><strong>a.</strong> In accordance with Annexure A, the Client agrees to pay the Fee:</p>
+         <p class="deep-indent"><strong>i.</strong> Upon signing this Agreement — regardless of whether the Agent introduced the property, whether the Client self-sourced the property, or whether the Client engaged another party.</p>
+         <p class="deep-indent"><strong>ii.</strong> If the Client becomes the legal or beneficial owner of a property or shares in a company owning a property.</p>
+         <p class="deep-indent"><strong>iii.</strong> Within 6 months following termination, if a property introduced during the Term is purchased.</p>`;
+
+    const annexurePayment = isSplit
+      ? `<p class="indent"><strong>a.</strong> 50% of the Fee (${halfFee} inclusive of GST) is payable upon signing of this Agreement.</p>
+         <p class="indent"><strong>b.</strong> The remaining 50% (${halfFee} inclusive of GST) is payable when the property purchase becomes unconditional.</p>`
+      : `<p class="indent"><strong>a.</strong> 100% of the Fee (${total} inclusive of GST) is payable upon signing of this Agreement.</p>`;
+
+    document.getElementById('terms-content').innerHTML = `
+      <h3>Terms of Agreement</h3>
+
+      <div class="clause"><h4><span class="clause-num">1.</span>Appointment and Fees</h4>
+        <p class="indent"><strong>a.</strong> The Client appoints the Agent on an exclusive basis to perform the Services described in Annexure A, in accordance with the specifications provided by the Client and the terms of this Agreement. During the Term, the Client agrees not to engage any third party or entity to act as their agent (either directly or indirectly) to purchase property. This exclusivity allows the Agent to prioritise the Client's brief with full commitment and confidentiality.</p>
+        <p class="indent"><strong>b.</strong> ${refundText}</p>
+        <p class="indent"><strong>c.</strong> If there is any inconsistency between this Agreement and Annexure A, the terms in Annexure A will prevail.</p>
+      </div>
+
+      <div class="clause"><h4><span class="clause-num">2.</span>Effective Date</h4>
+        <p>This Agreement commences on the date the Client executes it (including electronically), or when the Agent receives any Fee payment from the Client — whichever occurs first.</p>
+      </div>
+
+      <div class="clause"><h4><span class="clause-num">3.</span>Term</h4>
+        <p>The term of this Agreement is the Minimum Exclusive Term of <strong>${effectiveTerm}</strong> as set out above.</p>
+      </div>
+
+      <div class="clause"><h4><span class="clause-num">4.</span>Termination</h4>
+        <p>Either party may terminate this Agreement by providing seven (7) days' written notice. Termination does not affect any rights or obligations accrued prior to the termination date.</p>
+      </div>
+
+      <div class="clause"><h4><span class="clause-num">5.</span>Client Obligations</h4>
+        <p>The Client agrees to:</p>
+        <p class="indent"><strong>i.</strong> Notify the Agent in writing of any changes to personal details, property requirements, or relevant circumstances that may impact the brief.</p>
+        <p class="indent"><strong>ii.</strong> Cooperate with the Agent by providing timely instructions and being available for property inspections and due diligence steps.</p>
+        <p class="indent"><strong>iii.</strong> Obtain independent legal, financial, tax, and investment advice relating to any purchase decision.</p>
+        <p class="indent"><strong>iv.</strong> Not proceed with the purchase of any property introduced by the Agent — verbally or in writing — unless through the Agent. This includes any property introduced during the Term, regardless of the purchase timing.</p>
+        <p class="indent"><strong>v.</strong> Not appoint another buyer's agent during the Term.</p>
+        <p>These obligations ensure alignment and transparency throughout the engagement and protect the Agent's work in identifying suitable properties on the Client's behalf.</p>
+      </div>
+
+      <div class="clause"><h4><span class="clause-num">6.</span>Authority &amp; Warranties</h4>
+        <p>The Client warrants that they have full legal authority to enter into this Agreement and have not signed conflicting agreements with any other buying agents.</p>
+      </div>
+
+      <div class="clause"><h4><span class="clause-num">7.</span>Payment Terms</h4>
+        ${paymentClause}
+        <p>These terms ensure the Agent is fairly compensated for their expertise and efforts, including situations where a purchase occurs shortly after the engagement ends.</p>
+      </div>
+
+      <div class="clause"><h4><span class="clause-num">8.</span>Indemnity &amp; Warranties</h4>
+        <p class="indent"><strong>a.</strong> The Client indemnifies the Agent for any legal or recovery costs incurred in collecting outstanding Fees.</p>
+        <p class="indent"><strong>b.</strong> The Agent is not liable for any indirect, incidental, or consequential losses, including but not limited to loss of income, opportunity, or goodwill.</p>
+        <p class="indent"><strong>c.</strong> A failure or delay by the Agent to enforce any part of this Agreement does not constitute a waiver of rights.</p>
+        <p class="indent"><strong>d.</strong> The Client indemnifies and holds the Agent harmless from all liabilities, claims, and expenses arising from the Client's breach of this Agreement or the Agent's proper execution of their duties.</p>
+        <p class="indent"><strong>e.</strong> The Client is responsible for their final purchasing decision and acknowledges that the Agent makes no guarantee regarding any Property. Clients are encouraged to undertake appropriate due diligence to assess aspects such as building integrity, zoning, neighbourhood suitability, and long-term financial consequences.</p>
+      </div>
+
+      <div class="clause"><h4><span class="clause-num">9.</span>Privacy, Data &amp; Intellectual Property</h4>
+        <p class="indent"><strong>a.</strong> The Client acknowledges that any market insights, data, or information shared by the Agent are general in nature and do not constitute financial advice. The Agent is not a licensed financial advisor under s913B of the Corporations Act 2001 (Cth).</p>
+        <p class="indent"><strong>b.</strong> Any such information is intended solely for the Client's use and must not be shared or relied upon by others.</p>
+        <p class="indent"><strong>c.</strong> Where information incorporates third-party data, the Agent does not warrant its accuracy or completeness and disclaims any liability arising from it.</p>
+        <p class="indent"><strong>d.</strong> All intellectual property, methodologies, client systems, databases, and tools developed or used by the Agent remain the exclusive property of the Agent. The Client agrees not to replicate, disclose, or misuse any of the Agent's intellectual property.</p>
+      </div>
+
+      <div class="clause"><h4><span class="clause-num">10.</span>Referrals to Third Parties</h4>
+        <p class="indent"><strong>a.</strong> The Agent may recommend third-party professionals (e.g. conveyancers, brokers, pest inspectors) to assist the Client during the purchase process.</p>
+        <p class="indent"><strong>b.</strong> These third parties are independent and not under the Agent's control. The Agent assumes no liability for their conduct or advice.</p>
+        <p class="indent"><strong>c.</strong> Where third-party services are arranged by the Agent, the Client agrees to either pre-pay or reimburse these costs promptly upon invoicing.</p>
+        <p class="indent"><strong>d.</strong> The Agent may receive a referral fee from these third parties. Any such arrangement does not increase the Client's cost or compromise the Agent's impartiality.</p>
+      </div>
+
+      <div class="clause"><h4><span class="clause-num">11.</span>Entire Agreement</h4>
+        <p class="indent"><strong>a.</strong> If any part of this Agreement is found to be unenforceable, the remainder remains in full force.</p>
+        <p class="indent"><strong>b.</strong> This Agreement does not establish a partnership or joint venture between the parties.</p>
+        <p class="indent"><strong>c.</strong> This document constitutes the entire agreement between the parties. The Client confirms they have not relied on any representations outside of this Agreement.</p>
+        <p class="indent"><strong>d.</strong> This Agreement supersedes all prior negotiations or communications.</p>
+        <p class="indent"><strong>e.</strong> Amendments must be made in writing and signed by both parties.</p>
+      </div>
+
+      <div class="clause"><h4><span class="clause-num">12.</span>Governing Laws</h4>
+        <p>This Agreement is governed by the laws of New South Wales, Australia.</p>
+      </div>
+
+      ${d.customClauses ? `<div class="clause"><h4><span class="clause-num">13.</span>Special Conditions</h4><p>${esc(d.customClauses)}</p></div>` : ''}
+
+      <div class="annexure-divider">
+        <p>ANNEXURE A</p>
+        <h2>Fairway Strategic Residential Purchase Service</h2>
+      </div>
+
+      <div class="clause"><h4>1.   Services / Inclusions</h4>
+        <p>The following list of services includes but is not limited to:</p>
+        <p class="indent"><strong>a.</strong> Access to relevant Fairway staff</p>
+        <p class="indent"><strong>b.</strong> Property and market reports</p>
+        <p class="indent"><strong>c.</strong> Search and identify suitable properties</p>
+        <p class="indent"><strong>d.</strong> Property negotiation</p>
+        <p class="indent"><strong>e.</strong> Introduction to professionals (e.g. conveyancers, brokers, inspectors)</p>
+      </div>
+
+      <div class="clause"><h4>2.   Payment Terms</h4>
+        <p>Pursuant to Clause 7 of the General Terms and Conditions, the Client agrees to pay the Agent the Fee on the following basis:</p>
+        ${annexurePayment}
+      </div>
+
+      <div class="clause"><h4>3.   Bank Details for Payment</h4>
+        <div class="bank-box">
+          <div class="bank-row"><span class="bank-lbl">Account Name</span><span class="bank-val">Fairway Investing Pty Ltd</span></div>
+          <div class="bank-row"><span class="bank-lbl">BSB</span><span class="bank-val">082-356</span></div>
+          <div class="bank-row"><span class="bank-lbl">Account Number</span><span class="bank-val">75-642-5498</span></div>
+          <div class="bank-row"><span class="bank-lbl">Reference</span><span class="bank-val">Your full name</span></div>
+        </div>
+      </div>
+    `;
+  }
+
+  async function submitSignature() {
+    const signerName = document.getElementById('signer-name').value.trim();
+    const agreed = document.getElementById('agree-check').checked;
+    const errEl = document.getElementById('sign-error');
+    const btn = document.getElementById('sign-btn');
+
+    errEl.style.display = 'none';
+
+    if (!signerName) { errEl.textContent = 'Please type your full legal name to sign.'; errEl.style.display = 'block'; return; }
+    if (!agreed) { errEl.textContent = 'Please confirm you have read and agree to the agreement terms.'; errEl.style.display = 'block'; return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Signing…';
+
+    try {
+      const res = await fetch(`/api/sign-agreement?token=${encodeURIComponent(token)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ signerName, agreed: true }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        errEl.textContent = data.error || 'Something went wrong. Please try again.';
+        errEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Sign Agreement';
+        return;
+      }
+
+      // Success
+      document.getElementById('agreement-wrap').style.display = 'none';
+      const successEl = document.getElementById('state-success');
+      successEl.style.display = 'flex';
+      document.getElementById('success-title').textContent = `Agreement signed, ${data.name || ''}.`.trim();
+
+    } catch {
+      errEl.textContent = 'Connection error. Please try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Sign Agreement';
+    }
+  }
+
+  function showError(title, body) {
+    document.getElementById('state-loading').style.display = 'none';
+    document.getElementById('error-title').textContent = title;
+    document.getElementById('error-body').textContent = body;
+    document.getElementById('state-error').style.display = 'flex';
+  }
+
+  init();
+</script>
+</body>
+</html>

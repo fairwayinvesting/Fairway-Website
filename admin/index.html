@@ -708,6 +708,10 @@
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10.5 10c1.657 0 3 .895 3 2v1h-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.4"/><circle cx="10.5" cy="4" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M2.5 13v-1c0-1.105 1.343-2 3.5-2s3.5.895 3.5 2v1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         Partners
       </button>
+      <button class="snav-item" onclick="showSection('prospects',this)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13 13v-1.5A2.5 2.5 0 0 0 10.5 9h-5A2.5 2.5 0 0 0 3 11.5V13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M11 2l1 1 2-2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Prospects
+      </button>
       <a class="snav-item" href="/proposal.html" target="_blank" style="text-decoration:none;">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="10" height="13" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 5h5M4.5 8h5M4.5 11h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M12 9l2.5 2.5-2.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Proposal
@@ -934,6 +938,16 @@
         <button class="btn-primary" onclick="openPartnerModal(null)" style="font-size:13px;padding:10px 20px;">+ Add partner</button>
       </div>
       <div id="partners-list"><span style="font-size:13px;color:rgba(247,243,237,0.25);">Loading…</span></div>
+    </div>
+
+    <!-- Prospects -->
+    <div id="sec-prospects" class="admin-section">
+      <div class="sec-header">
+        <h1>Prospects</h1>
+        <button class="btn-primary" onclick="openProspectModal(null)" style="font-size:13px;padding:10px 20px;">+ Add prospect</button>
+      </div>
+      <div id="prospects-pipeline" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;"></div>
+      <div id="prospects-list"><span style="font-size:13px;color:rgba(247,243,237,0.2);">Loading…</span></div>
     </div>
 
     <!-- Settings -->
@@ -1487,6 +1501,62 @@
     <div class="modal-footer">
       <button class="btn-secondary" id="modal-cancel">Cancel</button>
       <button class="btn-primary" id="modal-save">Save client</button>
+    </div>
+  </div>
+</div>
+
+<!-- Prospect modal -->
+<div id="prospect-modal-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:600;display:none;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)closeProspectModal()">
+  <div class="modal" style="max-height:90vh;overflow-y:auto;width:100%;max-width:560px;">
+    <h2 id="prospect-modal-title">Add prospect</h2>
+    <input type="hidden" id="pm-prospect-id">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">
+      <div class="field" style="grid-column:1/-1;"><label>Full name <span style="color:#e07070;">*</span></label><input type="text" id="pm-p-name" placeholder="Jane Smith"></div>
+      <div class="field"><label>Email <span style="color:#e07070;">*</span></label><input type="text" id="pm-p-email" placeholder="jane@example.com"></div>
+      <div class="field"><label>Phone</label><input type="text" id="pm-p-phone" placeholder="04xx xxx xxx"></div>
+      <div class="field"><label>Package</label>
+        <select id="pm-p-package" onchange="updateProspectFeeDefault()">
+          <option value="full">Pay in Full — $12,500 + GST</option>
+          <option value="split">50/50 Split — $15,000 + GST</option>
+        </select>
+      </div>
+      <div class="field"><label>Service fee (ex GST)</label><input type="number" id="pm-p-fee" placeholder="12500" step="500"></div>
+      <div class="field"><label>Type of purchase</label><input type="text" id="pm-p-type" placeholder="Residential" value="Residential"></div>
+      <div class="field"><label>Price range</label><input type="text" id="pm-p-range" placeholder="e.g. $600,000 – $800,000"></div>
+      <div class="field" style="grid-column:1/-1;"><label>Exclusive agency term</label><input type="text" id="pm-p-term" placeholder="6 months" value="6 months"></div>
+      <div class="field" style="grid-column:1/-1;"><label>Client's residential address</label><input type="text" id="pm-p-address" placeholder="123 Main St, Suburb NSW 2000"></div>
+      <div class="field" style="grid-column:1/-1;"><label>Custom refund clause <span style="font-size:11px;color:rgba(247,243,237,0.35);">(optional — replaces standard 5-week refund wording)</span></label><textarea id="pm-p-refund" rows="3" placeholder="e.g. This Fee is refundable in full if the Client is dissatisfied after 8 weeks of engagement."></textarea></div>
+      <div class="field" style="grid-column:1/-1;"><label>Special conditions / additional clauses <span style="font-size:11px;color:rgba(247,243,237,0.35);">(optional)</span></label><textarea id="pm-p-clauses" rows="3" placeholder="Any negotiated terms not covered above…"></textarea></div>
+    </div>
+    <div id="pm-p-error" style="display:none;font-size:13px;color:#e07070;margin-bottom:12px;"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeProspectModal()">Cancel</button>
+      <button class="btn-primary" id="pm-p-save-btn" onclick="saveProspect()">Create prospect</button>
+    </div>
+  </div>
+</div>
+
+<!-- Prospect panel (slide-in) -->
+<div id="prospect-panel-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;display:none;" onclick="if(event.target===this)closeProspectPanel()"></div>
+<div id="prospect-panel" style="position:fixed;top:0;right:-500px;width:460px;max-width:100vw;height:100vh;background:#1C1815;border-left:1px solid rgba(247,243,237,0.07);z-index:501;overflow-y:auto;transition:right 0.25s ease;padding:28px 28px 60px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+    <h2 id="pp-name" style="font-size:18px;font-weight:600;"></h2>
+    <button onclick="closeProspectPanel()" style="background:none;border:none;color:rgba(247,243,237,0.4);cursor:pointer;font-size:20px;line-height:1;">&times;</button>
+  </div>
+  <div id="pp-body"></div>
+</div>
+
+<!-- Invoice entity modal -->
+<div id="invoice-entity-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:700;display:none;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal" style="max-width:400px;">
+    <h2>Send invoice</h2>
+    <input type="hidden" id="ie-prospect-id">
+    <input type="hidden" id="ie-payment-type">
+    <div class="field"><label>Invoice billed to <span style="font-size:11px;color:rgba(247,243,237,0.35);">(edit for trusts, companies or SMSFs)</span></label><input type="text" id="ie-entity" placeholder="Entity or individual name"></div>
+    <div id="ie-error" style="display:none;font-size:13px;color:#e07070;margin-bottom:12px;"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="document.getElementById('invoice-entity-overlay').style.display='none'">Cancel</button>
+      <button class="btn-primary" id="ie-send-btn" onclick="confirmSendInvoice()">Send invoice</button>
     </div>
   </div>
 </div>
@@ -2090,6 +2160,7 @@ function showSection(id, btn) {
   if (id === 'briefs') renderBriefs();
   if (id === 'shortlist') loadShortlist();
   if (id === 'partners') renderPartnersSection();
+  if (id === 'prospects') renderProspects();
   if (id === 'settings') loadCompliance();
   localStorage.setItem('fw_admin_section', id);
 }
@@ -2164,6 +2235,7 @@ async function completeLogin() {
   loadCompliance();
   loadShortlist();
   loadCrmPartners();
+  loadProspects();
 }
 
 document.getElementById('gate-btn').addEventListener('click', async function() {
@@ -5850,6 +5922,402 @@ async function deletePresentation(id) {
 
 function copyLink(link, btn) {
   navigator.clipboard.writeText(link).then(() => { const orig = btn.textContent; btn.textContent = '✓ Copied'; setTimeout(() => { btn.textContent = orig; }, 2000); });
+}
+
+// ── Prospects ──────────────────────────────────────────────────────────────────
+
+let prospects = [];
+let ppProspectId = null;
+
+async function loadProspects() {
+  try {
+    const res = await api('GET', '/api/admin/agreements');
+    if (res.ok) { prospects = await res.json(); renderProspects(); }
+  } catch (e) { console.error('Failed to load prospects:', e); }
+}
+
+function renderProspects() {
+  // Pipeline summary
+  const pipe = document.getElementById('prospects-pipeline');
+  const total = prospects.length;
+  const sent = prospects.filter(p => p.agreement?.status === 'sent').length;
+  const signed = prospects.filter(p => p.agreement?.status === 'signed').length;
+  const converted = prospects.filter(p => p.convertedClientId).length;
+
+  const pipeline = prospects.reduce((sum, p) => {
+    if (p.payments?.engagement?.status === 'pending' || p.payments?.success?.status === 'pending') {
+      const ag = p.agreement;
+      const fee = ag.customFee ?? ag.fee;
+      const total = fee + Math.round(fee * 0.1);
+      return sum + total;
+    }
+    return sum;
+  }, 0);
+
+  const received = prospects.reduce((sum, p) => {
+    if (!p.payments) return sum;
+    if (p.payments.engagement?.status === 'received') sum += p.payments.engagement.amount;
+    if (p.payments.success?.status === 'received') sum += p.payments.success.amount;
+    return sum;
+  }, 0);
+
+  pipe.innerHTML = [
+    ['Total prospects', total, ''],
+    ['Awaiting signature', sent, ''],
+    ['Signed', signed, ''],
+    ['Outstanding fees', fmtCurrency(pipeline), 'color:#e8a87c;'],
+  ].map(([lbl, val, style]) => `
+    <div style="background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.07);border-radius:12px;padding:18px 20px;">
+      <div style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:8px;">${lbl}</div>
+      <div style="font-size:22px;font-weight:600;${style}">${val}</div>
+    </div>`).join('');
+
+  // Prospects table
+  const listEl = document.getElementById('prospects-list');
+  if (!prospects.length) {
+    listEl.innerHTML = '<p style="font-size:14px;color:rgba(247,243,237,0.25);padding:20px 0;">No prospects yet. Add one to get started.</p>';
+    return;
+  }
+
+  const STATUS_LABELS = { draft: 'Draft', sent: 'Sent', signed: 'Signed', cancelled: 'Cancelled' };
+  const STATUS_COLORS = { draft: 'rgba(247,243,237,0.3)', sent: '#e8a87c', signed: '#6dbf7b', cancelled: '#e07070' };
+
+  listEl.innerHTML = `
+    <table class="clients-table" style="width:100%;border-collapse:collapse;">
+      <thead><tr style="border-bottom:1px solid rgba(247,243,237,0.07);">
+        <th style="text-align:left;padding:10px 12px;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);">Name</th>
+        <th style="text-align:left;padding:10px 12px;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);">Package</th>
+        <th style="text-align:left;padding:10px 12px;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);">Fee</th>
+        <th style="text-align:left;padding:10px 12px;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);">Agreement</th>
+        <th style="text-align:left;padding:10px 12px;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);">Payment</th>
+        <th style="text-align:left;padding:10px 12px;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);">Added</th>
+      </tr></thead>
+      <tbody>
+        ${prospects.map(p => {
+          const ag = p.agreement;
+          const fee = ag.customFee ?? ag.fee;
+          const total = fee + Math.round(fee * 0.1);
+          const isSplit = ag.package === 'split';
+          const agStatus = p.convertedClientId ? 'converted' : (ag.status || 'draft');
+          const agColor = p.convertedClientId ? '#B5715A' : (STATUS_COLORS[ag.status] || 'rgba(247,243,237,0.3)');
+          const agLabel = p.convertedClientId ? 'Converted' : (STATUS_LABELS[ag.status] || 'Draft');
+
+          let payLabel = '—';
+          let payColor = 'rgba(247,243,237,0.3)';
+          if (p.payments) {
+            const engPaid = p.payments.engagement?.status === 'received';
+            const sucPaid = !p.payments.success || p.payments.success.status === 'received';
+            if (engPaid && sucPaid) { payLabel = 'Paid in full'; payColor = '#6dbf7b'; }
+            else if (engPaid) { payLabel = isSplit ? 'Partial (1/2)' : 'Paid'; payColor = '#e8a87c'; }
+            else { payLabel = 'Outstanding'; payColor = '#e07070'; }
+          }
+
+          return `<tr style="border-bottom:1px solid rgba(247,243,237,0.04);cursor:pointer;" onclick="openProspectPanel('${p.id}')">
+            <td style="padding:12px 12px;">
+              <div style="font-size:14px;font-weight:500;">${esc(p.name)}</div>
+              <div style="font-size:12px;color:rgba(247,243,237,0.35);">${esc(p.email)}</div>
+            </td>
+            <td style="padding:12px 12px;font-size:13px;">${isSplit ? '50/50 Split' : 'Pay in Full'}</td>
+            <td style="padding:12px 12px;font-size:13px;">${fmtCurrency(total)}</td>
+            <td style="padding:12px 12px;"><span style="font-size:12px;font-weight:600;color:${agColor};">${agLabel}</span></td>
+            <td style="padding:12px 12px;"><span style="font-size:12px;color:${payColor};">${payLabel}</span></td>
+            <td style="padding:12px 12px;font-size:12px;color:rgba(247,243,237,0.3);">${p.createdAt ? new Date(p.createdAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '—'}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+function fmtCurrency(n) {
+  return n ? '$' + Number(n).toLocaleString('en-AU') : '$0';
+}
+
+function openProspectModal(prospectId) {
+  const p = prospectId ? prospects.find(x => x.id === prospectId) : null;
+  document.getElementById('prospect-modal-title').textContent = p ? 'Edit agreement terms' : 'Add prospect';
+  document.getElementById('pm-prospect-id').value = p ? p.id : '';
+  document.getElementById('pm-p-name').value = p ? p.name : '';
+  document.getElementById('pm-p-email').value = p ? p.email : '';
+  document.getElementById('pm-p-phone').value = p ? (p.phone || '') : '';
+  document.getElementById('pm-p-package').value = p ? (p.agreement?.package || 'full') : 'full';
+  document.getElementById('pm-p-fee').value = p ? (p.agreement?.customFee ?? p.agreement?.fee ?? '') : '';
+  document.getElementById('pm-p-type').value = p ? (p.agreement?.purchaseType || 'Residential') : 'Residential';
+  document.getElementById('pm-p-range').value = p ? (p.agreement?.priceRange || '') : '';
+  document.getElementById('pm-p-term').value = p ? (p.agreement?.customExclusivityTerm || p.agreement?.exclusivityTerm || '6 months') : '6 months';
+  document.getElementById('pm-p-address').value = p ? (p.agreement?.residentialAddress || '') : '';
+  document.getElementById('pm-p-refund').value = p ? (p.agreement?.customRefundClause || '') : '';
+  document.getElementById('pm-p-clauses').value = p ? (p.agreement?.customClauses || '') : '';
+  document.getElementById('pm-p-error').style.display = 'none';
+  document.getElementById('pm-p-save-btn').textContent = p ? 'Save changes' : 'Create prospect';
+  document.getElementById('pm-p-name').disabled = !!p;
+  document.getElementById('pm-p-email').disabled = !!p;
+  updateProspectFeeDefault();
+  document.getElementById('prospect-modal-overlay').style.display = 'flex';
+}
+
+function updateProspectFeeDefault() {
+  const pkg = document.getElementById('pm-p-package').value;
+  const feeEl = document.getElementById('pm-p-fee');
+  if (!feeEl.value || feeEl.value === '12500' || feeEl.value === '15000') {
+    feeEl.value = pkg === 'split' ? '15000' : '12500';
+  }
+}
+
+function closeProspectModal() {
+  document.getElementById('prospect-modal-overlay').style.display = 'none';
+}
+
+async function saveProspect() {
+  const id = document.getElementById('pm-prospect-id').value;
+  const name = document.getElementById('pm-p-name').value.trim();
+  const email = document.getElementById('pm-p-email').value.trim();
+  const errEl = document.getElementById('pm-p-error');
+  errEl.style.display = 'none';
+
+  if (!name || !email) { errEl.textContent = 'Name and email are required.'; errEl.style.display = 'block'; return; }
+
+  const btn = document.getElementById('pm-p-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  const body = {
+    name, email,
+    phone: document.getElementById('pm-p-phone').value.trim(),
+    package: document.getElementById('pm-p-package').value,
+    fee: parseFloat(document.getElementById('pm-p-fee').value) || undefined,
+    exclusivityTerm: document.getElementById('pm-p-term').value.trim(),
+    purchaseType: document.getElementById('pm-p-type').value.trim(),
+    priceRange: document.getElementById('pm-p-range').value.trim(),
+    residentialAddress: document.getElementById('pm-p-address').value.trim(),
+    customRefundClause: document.getElementById('pm-p-refund').value.trim(),
+    customClauses: document.getElementById('pm-p-clauses').value.trim(),
+  };
+
+  let res;
+  if (id) {
+    res = await api('PUT', '/api/admin/agreements', { id, action: 'amend', ...body });
+  } else {
+    res = await api('POST', '/api/admin/agreements', body);
+  }
+
+  btn.disabled = false; btn.textContent = id ? 'Save changes' : 'Create prospect';
+
+  if (!res.ok) {
+    const d = await res.json().catch(() => ({}));
+    errEl.textContent = d.error || 'Failed to save. Please try again.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  await loadProspects();
+  closeProspectModal();
+  if (id && ppProspectId === id) openProspectPanel(id);
+}
+
+function openProspectPanel(prospectId) {
+  ppProspectId = prospectId;
+  const p = prospects.find(x => x.id === prospectId);
+  if (!p) return;
+
+  document.getElementById('pp-name').textContent = p.name;
+  document.getElementById('prospect-panel-overlay').style.display = 'block';
+  document.getElementById('prospect-panel').style.right = '0';
+
+  renderProspectPanel(p);
+}
+
+function closeProspectPanel() {
+  ppProspectId = null;
+  document.getElementById('prospect-panel').style.right = '-500px';
+  document.getElementById('prospect-panel-overlay').style.display = 'none';
+}
+
+function renderProspectPanel(p) {
+  const ag = p.agreement;
+  const fee = ag.customFee ?? ag.fee;
+  const gst = Math.round(fee * 0.1);
+  const total = fee + gst;
+  const isSplit = ag.package === 'split';
+  const halfFee = Math.round(total / 2);
+  const agStatus = ag.status || 'draft';
+
+  const statusBadge = (s, label) => {
+    const colors = { draft: 'rgba(247,243,237,0.2)', sent: '#e8a87c', signed: '#6dbf7b', cancelled: '#e07070' };
+    return `<span style="font-size:12px;font-weight:600;color:${colors[s]||'rgba(247,243,237,0.3)'};">${label}</span>`;
+  };
+
+  const paymentRow = (label, pmt) => {
+    if (!pmt) return '';
+    const isPaid = pmt.status === 'received';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(247,243,237,0.05);">
+      <div>
+        <div style="font-size:13px;">${label}</div>
+        <div style="font-size:12px;color:rgba(247,243,237,0.35);">${fmtCurrency(pmt.amount)} inc GST</div>
+      </div>
+      <div style="text-align:right;">
+        ${isPaid
+          ? `<span style="font-size:12px;font-weight:600;color:#6dbf7b;">Received</span>${pmt.invoiceSentAt ? `<div style="font-size:11px;color:rgba(247,243,237,0.25);margin-top:3px;">Invoice sent</div>` : `<div style="margin-top:6px;"><button class="btn-sm" onclick="openInvoiceModal('${p.id}','${label.toLowerCase().includes('unconditional')?'success':'engagement'}','${esc(p.payments?.invoiceEntity||p.name)}')">Send invoice</button></div>`}
+          `
+          : `<button class="btn-sm" onclick="markPaymentReceived('${p.id}','${label.toLowerCase().includes('unconditional')?'success':'engagement'}')">Mark received</button>`}
+      </div>
+    </div>`;
+  };
+
+  let actionsHtml = '';
+  if (!p.convertedClientId) {
+    if (agStatus === 'draft') {
+      actionsHtml = `<button class="btn-primary" style="width:100%;margin-bottom:10px;" onclick="sendAgreement('${p.id}','send')">Send agreement</button>
+        <button class="btn-secondary" style="width:100%;margin-bottom:10px;" onclick="openProspectModal('${p.id}')">Edit terms</button>`;
+    } else if (agStatus === 'sent') {
+      actionsHtml = `<button class="btn-primary" style="width:100%;margin-bottom:10px;" onclick="sendAgreement('${p.id}','resend')">Resend agreement</button>
+        <button class="btn-secondary" style="width:100%;margin-bottom:10px;" onclick="openProspectModal('${p.id}')">Edit &amp; resend</button>`;
+    } else if (agStatus === 'signed') {
+      actionsHtml = `<button class="btn-primary" style="width:100%;margin-bottom:10px;background:#B5715A;" onclick="convertToClient('${p.id}')">Convert to client</button>`;
+      if (ag.pdfBlobKey) {
+        actionsHtml += `<a href="/api/admin/agreements?pdfKey=${encodeURIComponent(ag.pdfBlobKey)}" target="_blank" class="btn-secondary" style="width:100%;display:block;margin-bottom:10px;box-sizing:border-box;text-align:center;text-decoration:none;padding:10px 16px;font-size:13px;">View signed PDF</a>`;
+      }
+    }
+    actionsHtml += `<button class="btn-sm" style="color:#e07070;border-color:rgba(224,112,112,0.25);width:100%;margin-top:8px;" onclick="deleteProspect('${p.id}')">Delete prospect</button>`;
+  }
+
+  document.getElementById('pp-body').innerHTML = `
+    <div style="margin-bottom:20px;">
+      <div style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">Contact</div>
+      <div style="font-size:13px;color:rgba(247,243,237,0.6);margin-bottom:4px;">${esc(p.email)}</div>
+      ${p.phone ? `<div style="font-size:13px;color:rgba(247,243,237,0.6);">${esc(p.phone)}</div>` : ''}
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <div style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">Agreement</div>
+      <div style="background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.07);border-radius:10px;padding:14px 16px;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(247,243,237,0.05);">
+          <span style="font-size:12px;color:rgba(247,243,237,0.35);">Status</span>${statusBadge(agStatus, p.convertedClientId ? 'Converted' : (agStatus.charAt(0).toUpperCase()+agStatus.slice(1)))}
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(247,243,237,0.05);">
+          <span style="font-size:12px;color:rgba(247,243,237,0.35);">Package</span><span style="font-size:13px;">${isSplit ? '50/50 Split' : 'Pay in Full'}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(247,243,237,0.05);">
+          <span style="font-size:12px;color:rgba(247,243,237,0.35);">Fee (inc GST)</span><span style="font-size:13px;font-weight:600;">${fmtCurrency(total)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(247,243,237,0.05);">
+          <span style="font-size:12px;color:rgba(247,243,237,0.35);">Exclusive term</span><span style="font-size:13px;">${esc(ag.customExclusivityTerm || ag.exclusivityTerm || '6 months')}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;">
+          <span style="font-size:12px;color:rgba(247,243,237,0.35);">Type</span><span style="font-size:13px;">${esc(ag.purchaseType || 'Residential')}</span>
+        </div>
+        ${ag.priceRange ? `<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid rgba(247,243,237,0.05);">
+          <span style="font-size:12px;color:rgba(247,243,237,0.35);">Price range</span><span style="font-size:13px;">${esc(ag.priceRange)}</span>
+        </div>` : ''}
+        ${ag.signedAt ? `<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid rgba(247,243,237,0.05);">
+          <span style="font-size:12px;color:rgba(247,243,237,0.35);">Signed</span><span style="font-size:12px;color:#6dbf7b;">${new Date(ag.signedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}</span>
+        </div>` : ''}
+        ${ag.sentAt && agStatus === 'sent' ? `<div style="padding:6px 0 0;font-size:11px;color:rgba(247,243,237,0.3);border-top:1px solid rgba(247,243,237,0.05);">Sent ${new Date(ag.sentAt).toLocaleDateString('en-AU',{day:'numeric',month:'short'})}</div>` : ''}
+      </div>
+      ${ag.customRefundClause || ag.customClauses ? `<div style="background:rgba(181,113,90,0.08);border:1px solid rgba(181,113,90,0.2);border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:12px;color:rgba(247,243,237,0.5);">
+        <div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#B5715A;margin-bottom:6px;">Custom terms applied</div>
+        ${ag.customRefundClause ? `<div>Refund: ${esc(ag.customRefundClause).slice(0,80)}…</div>` : ''}
+        ${ag.customClauses ? `<div style="margin-top:4px;">Special: ${esc(ag.customClauses).slice(0,80)}…</div>` : ''}
+      </div>` : ''}
+    </div>
+
+    ${p.payments ? `<div style="margin-bottom:20px;">
+      <div style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">Payments</div>
+      ${paymentRow(isSplit ? 'Engagement (50%)' : 'Engagement fee', p.payments.engagement)}
+      ${isSplit ? paymentRow('Unconditional (50%)', p.payments.success) : ''}
+    </div>` : ''}
+
+    ${p.convertedClientId ? `<div style="background:rgba(109,191,123,0.08);border:1px solid rgba(109,191,123,0.2);border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:rgba(247,243,237,0.6);">
+      <div style="font-weight:600;color:#6dbf7b;margin-bottom:4px;">Converted to client</div>
+      This prospect was converted. Manage them from the Clients section.
+    </div>` : ''}
+
+    ${actionsHtml ? `<div>${actionsHtml}</div>` : ''}
+  `;
+}
+
+async function sendAgreement(prospectId, action) {
+  const p = prospects.find(x => x.id === prospectId);
+  if (!p) return;
+
+  if (action === 'resend') {
+    if (!confirm(`Resend the agreement to ${p.name}? The previous signing link will be invalidated.`)) return;
+  }
+
+  const res = await api('PUT', '/api/admin/agreements', { id: prospectId, action });
+  if (!res.ok) {
+    const d = await res.json().catch(() => ({}));
+    alert(d.error || 'Failed to send agreement.');
+    return;
+  }
+  await loadProspects();
+  openProspectPanel(prospectId);
+}
+
+async function markPaymentReceived(prospectId, paymentType) {
+  if (!confirm(`Mark ${paymentType === 'success' ? 'unconditional' : 'engagement'} payment as received?`)) return;
+  const res = await api('PUT', '/api/admin/agreements', { id: prospectId, action: 'mark-payment', paymentType });
+  if (!res.ok) { const d = await res.json().catch(() => ({})); alert(d.error || 'Failed.'); return; }
+  await loadProspects();
+  if (ppProspectId === prospectId) openProspectPanel(prospectId);
+}
+
+function openInvoiceModal(prospectId, paymentType, currentEntity) {
+  document.getElementById('ie-prospect-id').value = prospectId;
+  document.getElementById('ie-payment-type').value = paymentType;
+  document.getElementById('ie-entity').value = currentEntity || '';
+  document.getElementById('ie-error').style.display = 'none';
+  document.getElementById('ie-send-btn').disabled = false;
+  document.getElementById('ie-send-btn').textContent = 'Send invoice';
+  document.getElementById('invoice-entity-overlay').style.display = 'flex';
+}
+
+async function confirmSendInvoice() {
+  const prospectId = document.getElementById('ie-prospect-id').value;
+  const paymentType = document.getElementById('ie-payment-type').value;
+  const invoiceEntity = document.getElementById('ie-entity').value.trim();
+  const errEl = document.getElementById('ie-error');
+  const btn = document.getElementById('ie-send-btn');
+
+  if (!invoiceEntity) { errEl.textContent = 'Please enter an entity name.'; errEl.style.display = 'block'; return; }
+
+  btn.disabled = true; btn.textContent = 'Sending…';
+  errEl.style.display = 'none';
+
+  const res = await api('PUT', '/api/admin/agreements', { id: prospectId, action: 'send-invoice', paymentType, invoiceEntity });
+  btn.disabled = false; btn.textContent = 'Send invoice';
+
+  if (!res.ok) {
+    const d = await res.json().catch(() => ({}));
+    errEl.textContent = d.error || 'Failed to send invoice.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const d = await res.json();
+  document.getElementById('invoice-entity-overlay').style.display = 'none';
+  alert(`Invoice #${d.invoiceNumber} sent to ${prospects.find(x=>x.id===prospectId)?.email || 'client'}.`);
+  await loadProspects();
+  if (ppProspectId === prospectId) openProspectPanel(prospectId);
+}
+
+async function convertToClient(prospectId) {
+  const p = prospects.find(x => x.id === prospectId);
+  if (!confirm(`Convert ${p?.name} to a full client? This will create their portal account and send a welcome email.`)) return;
+
+  const res = await api('PUT', '/api/admin/agreements', { id: prospectId, action: 'convert-to-client' });
+  if (!res.ok) { const d = await res.json().catch(() => ({})); alert(d.error || 'Failed to convert.'); return; }
+
+  await Promise.all([loadClients(), loadProspects()]);
+  closeProspectPanel();
+  alert(`${p?.name} has been converted to a client. A welcome email with portal setup link has been sent.`);
+}
+
+async function deleteProspect(prospectId) {
+  const p = prospects.find(x => x.id === prospectId);
+  if (!confirm(`Delete prospect "${p?.name}"? This cannot be undone.`)) return;
+  const res = await api('PUT', '/api/admin/agreements', { id: prospectId, action: 'delete' });
+  if (!res.ok) { const d = await res.json().catch(() => ({})); alert(d.error || 'Failed to delete.'); return; }
+  closeProspectPanel();
+  await loadProspects();
 }
 </script>
 </body>

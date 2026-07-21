@@ -11,6 +11,9 @@
 /reports/*
   X-Robots-Tag: noindex, nofollow
 
+/agreements/*
+  X-Robots-Tag: noindex, nofollow
+
 /discovery-call.html
   X-Robots-Tag: noindex, nofollow
 
