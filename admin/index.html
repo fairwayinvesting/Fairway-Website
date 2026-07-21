@@ -2197,10 +2197,26 @@ function renderTable() {
         <div class="cc-meta">
           <div class="cc-name">${esc(c.name)}<span class="cc-dot ${c.active ? 'cc-dot-active' : 'cc-dot-inactive'}">●</span></div>
           <div class="cc-email">${esc(c.email)}</div>
-          <select onchange="moveClientStage('${c.id}', this.value, this)" style="margin-top:5px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.09);border-radius:6px;color:${c.pipelineStage ? 'rgba(247,243,237,0.55)' : 'rgba(247,243,237,0.25)'};font-family:'Outfit',sans-serif;font-size:11px;padding:3px 22px 3px 7px;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(247,243,237,0.3)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 6px center;">
-            <option value="" ${!c.pipelineStage ? 'selected' : ''}>No stage</option>
-            ${PIPELINE_STAGES.map(s => `<option value="${s.key}" ${c.pipelineStage === s.key ? 'selected' : ''}>${s.label}</option>`).join('')}
-          </select>
+          ${(()=>{
+            const acqs = c.acquisitions || [];
+            const activeAcqs = acqs.filter(a => a.status !== 'settled');
+            const stageSelectStyle = (hasStage) => `background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.09);border-radius:6px;color:${hasStage ? 'rgba(247,243,237,0.55)' : 'rgba(247,243,237,0.25)'};font-family:'Outfit',sans-serif;font-size:11px;padding:3px 22px 3px 7px;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(247,243,237,0.3)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;`;
+            if (activeAcqs.length > 1) {
+              return `<div style="display:flex;flex-direction:column;gap:4px;margin-top:5px;">${activeAcqs.map(acq => `
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span style="font-size:10px;color:rgba(247,243,237,0.25);min-width:42px;letter-spacing:0.03em;">Acq ${acq.number}</span>
+                  <select onchange="moveKanbanCard('${c.id}','${acq.id}',this.value,this)" style="${stageSelectStyle(!!acq.pipelineStage)}">
+                    <option value="" ${!acq.pipelineStage ? 'selected' : ''}>No stage</option>
+                    ${PIPELINE_STAGES.map(s => `<option value="${s.key}" ${acq.pipelineStage === s.key ? 'selected' : ''}>${s.label}</option>`).join('')}
+                  </select>
+                </div>`).join('')}
+              </div>`;
+            }
+            return `<select onchange="moveClientStage('${c.id}', this.value, this)" style="margin-top:5px;${stageSelectStyle(!!c.pipelineStage)}">
+              <option value="" ${!c.pipelineStage ? 'selected' : ''}>No stage</option>
+              ${PIPELINE_STAGES.map(s => `<option value="${s.key}" ${c.pipelineStage === s.key ? 'selected' : ''}>${s.label}</option>`).join('')}
+            </select>`;
+          })()}
         </div>
         <div class="cc-markets">${markets}</div>
         <div class="cc-btn-cluster">
@@ -2396,6 +2412,7 @@ async function moveKanbanCard(clientId, acqId, newStage, selectEl) {
     }
     selectEl.disabled = false;
     renderPipeline();
+    renderTable();
   } catch {
     selectEl.disabled = false;
     selectEl.value = '';
@@ -4264,6 +4281,7 @@ async function updateAcqStage(clientId, acqId, stage) {
     c.pipelineStageUpdatedAt = new Date().toISOString();
   }
   renderPipeline();
+  renderTable();
 }
 
 async function markAcqSettled(clientId, acqId) {
