@@ -281,6 +281,8 @@ export default async (req) => {
 
     // delete prospect
     if (action === 'delete') {
+      const { password } = body;
+      if (!password || password !== process.env.ADMIN_PASSWORD) return json({ error: 'Incorrect password' }, 403);
       if (prospect.convertedClientId) return json({ error: 'Cannot delete a prospect that has been converted to a client' }, 400);
       all.splice(idx, 1);
       await store.setJSON('all', all);

@@ -1860,6 +1860,24 @@
   </div>
 </div>
 
+<!-- Delete prospect confirmation modal -->
+<div id="del-prospect-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:900;display:none;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)cancelDeleteProspect()">
+  <div style="background:#22201d;border:1px solid rgba(220,80,80,0.25);border-radius:18px;padding:32px;width:100%;max-width:400px;">
+    <h2 style="font-family:'Fraunces',serif;font-size:20px;font-weight:400;margin:0 0 6px;color:#f7f3ed;">Delete prospect</h2>
+    <p id="del-prospect-name" style="font-size:13px;color:rgba(247,243,237,0.4);margin:0 0 20px;"></p>
+    <p style="font-size:13.5px;color:rgba(247,243,237,0.55);margin:0 0 20px;line-height:1.5;">This cannot be undone. Enter your admin password to confirm.</p>
+    <div style="margin-bottom:24px;">
+      <label style="font-size:12px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:rgba(247,243,237,0.35);display:block;margin-bottom:8px;">Admin password</label>
+      <input id="del-prospect-pw" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')confirmDeleteProspect()" style="width:100%;box-sizing:border-box;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:10px 14px;font-family:'Outfit',sans-serif;font-size:15px;color:#f7f3ed;">
+      <p id="del-prospect-err" style="font-size:13px;color:#f08080;margin:8px 0 0;display:none;"></p>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn-secondary" onclick="cancelDeleteProspect()">Cancel</button>
+      <button id="del-prospect-confirm" style="background:#c0392b;color:#fff;border:none;border-radius:100px;padding:10px 22px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;" onclick="confirmDeleteProspect()">Delete prospect</button>
+    </div>
+  </div>
+</div>
+
 <div id="ms-edit-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:800;display:none;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)closeMilestoneEdit()">
   <div style="background:#22201d;border:1px solid rgba(247,243,237,0.1);border-radius:18px;padding:32px;width:100%;max-width:420px;">
     <h2 style="font-family:'Fraunces',serif;font-size:20px;font-weight:400;margin:0 0 6px;color:#f7f3ed;">Edit date</h2>
@@ -3088,6 +3106,7 @@ async function previewClient(clientId) {
 
 let _pendingDeleteId = null;
 let _pendingDeleteName = null;
+let _pendingDeleteProspectId = null;
 
 function deleteClient(id, name) {
   _pendingDeleteId = id;
@@ -6311,11 +6330,38 @@ async function convertToClient(prospectId) {
   alert(`${p?.name} has been converted to a client. A welcome email with portal setup link has been sent.`);
 }
 
-async function deleteProspect(prospectId) {
+function deleteProspect(prospectId) {
   const p = prospects.find(x => x.id === prospectId);
-  if (!confirm(`Delete prospect "${p?.name}"? This cannot be undone.`)) return;
-  const res = await api('PUT', '/api/admin/agreements', { id: prospectId, action: 'delete' });
-  if (!res.ok) { const d = await res.json().catch(() => ({})); alert(d.error || 'Failed to delete.'); return; }
+  if (!p) return;
+  _pendingDeleteProspectId = prospectId;
+  document.getElementById('del-prospect-name').textContent = p.name + ' · ' + p.email;
+  document.getElementById('del-prospect-pw').value = '';
+  document.getElementById('del-prospect-err').style.display = 'none';
+  document.getElementById('del-prospect-overlay').style.display = 'flex';
+  setTimeout(() => document.getElementById('del-prospect-pw').focus(), 80);
+}
+
+function cancelDeleteProspect() {
+  _pendingDeleteProspectId = null;
+  document.getElementById('del-prospect-overlay').style.display = 'none';
+}
+
+async function confirmDeleteProspect() {
+  const password = document.getElementById('del-prospect-pw').value;
+  const errEl = document.getElementById('del-prospect-err');
+  const btn = document.getElementById('del-prospect-confirm');
+  errEl.style.display = 'none';
+  if (!password) { errEl.textContent = 'Please enter your admin password.'; errEl.style.display = 'block'; return; }
+  btn.disabled = true; btn.textContent = 'Deleting…';
+  const res = await api('PUT', '/api/admin/agreements', { id: _pendingDeleteProspectId, action: 'delete', password });
+  btn.disabled = false; btn.textContent = 'Delete prospect';
+  if (!res.ok) {
+    const d = await res.json().catch(() => ({}));
+    errEl.textContent = d.error || 'Failed to delete.';
+    errEl.style.display = 'block';
+    return;
+  }
+  cancelDeleteProspect();
   closeProspectPanel();
   await loadProspects();
 }
