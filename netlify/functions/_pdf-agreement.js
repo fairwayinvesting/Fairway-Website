@@ -31,7 +31,7 @@ function docBuffer(doc) {
   });
 }
 
-export async function generateAgreementPdf(prospect) {
+export async function generateAgreementPdf(prospect, options = {}) {
   const doc = new PDFDocument({ margin: LEFT, size: 'A4', bufferPages: true, info: {
     Title: 'Buyer Engagement Agreement — Fairway Investing',
     Author: 'Fairway Investing Pty Ltd',
@@ -275,11 +275,21 @@ export async function generateAgreementPdf(prospect) {
   doc.moveTo(LEFT + thirdW + 12, sigY + 32).lineTo(LEFT + thirdW + 12 + lineLen, sigY + 32).strokeColor('#999').lineWidth(0.5).stroke();
   doc.moveTo(LEFT + thirdW * 2 + 12, sigY + 32).lineTo(LEFT + W, sigY + 32).strokeColor('#999').lineWidth(0.5).stroke();
 
-  doc.font('Times-Italic').fontSize(14).fillColor(DARK)
-    .text(FAIRWAY.agentSig, LEFT, sigY + 10, { width: lineLen });
-  if (ag.signerName) {
+  // Agent signature (left)
+  if (options.agentSignatureData) {
+    try { doc.image(options.agentSignatureData, LEFT, sigY, { fit: [lineLen, 30], align: 'left' }); } catch {}
+  } else {
+    doc.font('Times-Italic').fontSize(14).fillColor(DARK).text(FAIRWAY.agentSig, LEFT, sigY + 8, { width: lineLen });
+  }
+  // Client signature (middle)
+  if (ag.signerSignatureUrl) {
+    try {
+      const clientBuf = Buffer.from(ag.signerSignatureUrl.replace(/^data:[^,]+,/, ''), 'base64');
+      doc.image(clientBuf, LEFT + thirdW + 12, sigY, { fit: [lineLen, 30], align: 'left' });
+    } catch {}
+  } else if (ag.signerName) {
     doc.font('Times-Italic').fontSize(14).fillColor(DARK)
-      .text(ag.signerName, LEFT + thirdW + 12, sigY + 10, { width: lineLen });
+      .text(ag.signerName, LEFT + thirdW + 12, sigY + 8, { width: lineLen });
   }
   doc.font('Helvetica').fontSize(9).fillColor(DARK)
     .text(signedDate, LEFT + thirdW * 2 + 12, sigY + 14, { width: lineLen });
@@ -391,10 +401,21 @@ export async function generateAgreementPdf(prospect) {
   doc.moveTo(LEFT + thirdW + 12, aSigY + 32).lineTo(LEFT + thirdW + 12 + lineLen, aSigY + 32).strokeColor('#999').lineWidth(0.5).stroke();
   doc.moveTo(LEFT + thirdW * 2 + 12, aSigY + 32).lineTo(LEFT + W, aSigY + 32).strokeColor('#999').lineWidth(0.5).stroke();
 
-  doc.font('Times-Italic').fontSize(14).fillColor(DARK).text(FAIRWAY.agentSig, LEFT, aSigY + 10, { width: lineLen });
-  if (ag.signerName) {
+  // Agent signature (left) — Annexure A
+  if (options.agentSignatureData) {
+    try { doc.image(options.agentSignatureData, LEFT, aSigY, { fit: [lineLen, 30], align: 'left' }); } catch {}
+  } else {
+    doc.font('Times-Italic').fontSize(14).fillColor(DARK).text(FAIRWAY.agentSig, LEFT, aSigY + 8, { width: lineLen });
+  }
+  // Client signature (middle) — Annexure A
+  if (ag.signerSignatureUrl) {
+    try {
+      const clientBuf = Buffer.from(ag.signerSignatureUrl.replace(/^data:[^,]+,/, ''), 'base64');
+      doc.image(clientBuf, LEFT + thirdW + 12, aSigY, { fit: [lineLen, 30], align: 'left' });
+    } catch {}
+  } else if (ag.signerName) {
     doc.font('Times-Italic').fontSize(14).fillColor(DARK)
-      .text(ag.signerName, LEFT + thirdW + 12, aSigY + 10, { width: lineLen });
+      .text(ag.signerName, LEFT + thirdW + 12, aSigY + 8, { width: lineLen });
   }
   doc.font('Helvetica').fontSize(9).fillColor(DARK).text(signedDate, LEFT + thirdW * 2 + 12, aSigY + 14, { width: lineLen });
   doc.font('Helvetica').fontSize(7.5).fillColor(MID)

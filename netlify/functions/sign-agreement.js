@@ -3,6 +3,16 @@ import { Resend } from 'resend';
 import { generateAgreementPdf } from './_pdf-agreement.js';
 import { appendAudit } from './_audit.js';
 
+async function loadAgentSignature() {
+  try {
+    const dataUrl = await getStore('fairway-settings').get('agent-signature', { type: 'text' });
+    if (!dataUrl) return null;
+    return Buffer.from(dataUrl.replace(/^data:[^,]+,/, ''), 'base64');
+  } catch {
+    return null;
+  }
+}
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
@@ -35,6 +45,8 @@ export default async (req) => {
     const gst = Math.round(effectiveFee * 0.1);
     const total = effectiveFee + gst;
     const isSplit = ag.package === 'split';
+    // Return agent signature URL so the signing page can display it
+    const agentSigDataUrl = await getStore('fairway-settings').get('agent-signature', { type: 'text' }).catch(() => null);
     return json({
       prospectName: prospect.name,
       package: ag.package,
@@ -49,6 +61,7 @@ export default async (req) => {
       residentialAddress: ag.residentialAddress || '',
       customRefundClause: ag.customRefundClause || null,
       customClauses: ag.customClauses || null,
+      agentSignatureUrl: agentSigDataUrl || null,
     });
   }
 
@@ -70,6 +83,9 @@ export default async (req) => {
     ag.signedAt = new Date().toISOString();
     ag.signerName = signerName;
     ag.signerIp = signerIp;
+    if (body.signatureDataUrl && body.signatureDataUrl.startsWith('data:image/')) {
+      ag.signerSignatureUrl = body.signatureDataUrl;
+    }
 
     // Set up payment tracking
     const effectiveFee = ag.customFee ?? ag.fee;
@@ -85,9 +101,10 @@ export default async (req) => {
     };
 
     // Generate the signed PDF
+    const agentSignatureData = await loadAgentSignature();
     let pdfBuffer;
     try {
-      pdfBuffer = await generateAgreementPdf(prospect);
+      pdfBuffer = await generateAgreementPdf(prospect, { agentSignatureData });
       const pdfKey = `agreements/${prospect.id}/v${ag.version || 1}.pdf`;
       await getStore('fairway-agreements').set(pdfKey, pdfBuffer, { metadata: { contentType: 'application/pdf' } });
       ag.pdfBlobKey = pdfKey;

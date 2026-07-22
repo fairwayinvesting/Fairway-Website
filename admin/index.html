@@ -9,7 +9,7 @@
   <meta name="theme-color" content="#22201d">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Outfit',sans-serif;font-weight:300;background:#1a1916;color:#f7f3ed;-webkit-font-smoothing:antialiased;min-height:100vh;}
@@ -954,6 +954,47 @@
     <div id="sec-settings" class="admin-section">
       <div class="sec-header">
         <h1>Settings</h1>
+      </div>
+
+      <!-- My Signature -->
+      <div class="settings-block" id="sig-settings-block">
+        <h2>My Signature</h2>
+        <p style="font-size:13px;color:rgba(247,243,237,0.45);margin-bottom:20px;line-height:1.6;">Create your agent signature for Buyer Engagement Agreements. It will appear on all signed PDFs.</p>
+
+        <!-- Current signature preview -->
+        <div id="agent-sig-preview" style="display:none;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.09);border-radius:12px;padding:16px 20px;margin-bottom:16px;">
+          <p style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#bd7a70;margin-bottom:10px;">Current signature</p>
+          <img id="agent-sig-preview-img" src="" alt="" style="max-width:200px;height:48px;object-fit:contain;object-position:left center;filter:invert(1) brightness(0.85);display:block;margin-bottom:12px;">
+          <button onclick="deleteAgentSig()" style="background:none;border:none;font-family:'Outfit',sans-serif;font-size:12.5px;color:rgba(220,80,80,0.7);cursor:pointer;padding:0;">Remove signature</button>
+        </div>
+
+        <!-- Signature creation area -->
+        <div id="agent-sig-creator">
+          <div style="display:flex;gap:4px;margin-bottom:12px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.07);border-radius:10px;padding:3px;width:fit-content;">
+            <button class="sig-tab active" id="admin-tab-generate" onclick="setAdminSigMode('generate')" style="padding:8px 20px;border-radius:8px;border:1px solid transparent;font-family:'Outfit',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .15s;color:rgba(247,243,237,0.3);background:transparent;" >Generate</button>
+            <button class="sig-tab" id="admin-tab-draw" onclick="setAdminSigMode('draw')" style="padding:8px 20px;border-radius:8px;border:1px solid transparent;font-family:'Outfit',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .15s;color:rgba(247,243,237,0.3);background:transparent;">Draw</button>
+          </div>
+
+          <!-- Generate mode: name input -->
+          <div id="admin-sig-generate-area">
+            <div style="margin-bottom:12px;">
+              <label style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#bd7a70;display:block;margin-bottom:8px;">Signature text</label>
+              <input type="text" id="admin-sig-name-input" value="L. Clifford" oninput="renderAdminGeneratedSig()" style="background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.1);border-radius:10px;padding:11px 14px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:15px;outline:none;width:100%;max-width:260px;">
+            </div>
+          </div>
+
+          <!-- Canvas (used for both modes) -->
+          <div style="position:relative;border-radius:10px;overflow:hidden;border:1px solid rgba(247,243,237,0.12);margin-bottom:10px;background:#fff;width:100%;max-width:340px;">
+            <canvas id="admin-sig-canvas" style="display:block;width:100%;height:90px;cursor:default;background:#fff;"></canvas>
+            <div id="admin-sig-draw-hint" style="display:none;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;font-size:12px;color:rgba(0,0,0,0.25);font-style:italic;">Draw your signature here</div>
+          </div>
+
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <button onclick="saveAdminSig()" id="save-sig-btn" style="background:#bd7a70;color:#fff;border:none;border-radius:100px;padding:10px 24px;font-family:'Outfit',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;">Save signature</button>
+            <button id="admin-sig-clear-btn" onclick="clearAdminSig()" style="display:none;background:none;border:none;font-family:'Outfit',sans-serif;font-size:12.5px;color:rgba(247,243,237,0.3);cursor:pointer;text-decoration:underline;text-underline-offset:2px;">Clear</button>
+          </div>
+          <p id="save-sig-status" style="font-size:12.5px;margin-top:10px;display:none;"></p>
+        </div>
       </div>
 
       <div class="settings-block" id="compliance-block">
@@ -2179,7 +2220,7 @@ function showSection(id, btn) {
   if (id === 'shortlist') loadShortlist();
   if (id === 'partners') renderPartnersSection();
   if (id === 'prospects') renderProspects();
-  if (id === 'settings') loadCompliance();
+  if (id === 'settings') { loadCompliance(); loadAgentSignatureSettings(); }
   localStorage.setItem('fw_admin_section', id);
 }
 
@@ -2254,6 +2295,8 @@ async function completeLogin() {
   loadShortlist();
   loadCrmPartners();
   loadProspects();
+  // Load signature settings for the settings section (non-blocking)
+  setTimeout(() => loadAgentSignatureSettings(), 500);
 }
 
 document.getElementById('gate-btn').addEventListener('click', async function() {
@@ -4823,6 +4866,185 @@ async function saveReactivation() {
     renderPipeline();
   } else { alert('Reactivation failed.'); }
   btn.disabled = false; btn.textContent = 'Reactivate client';
+}
+
+// ── Agent Signature Settings ──────────────────────────────────────────────────
+
+let adminSigMode = 'generate';
+let adminSigHasDrawing = false;
+let adminSigCtx = null;
+let adminSigDrawing = false;
+let adminSigLastX = 0, adminSigLastY = 0;
+let adminSigDpr = 1;
+let adminSigW = 340, adminSigH = 90;
+
+async function loadAgentSignatureSettings() {
+  try {
+    const res = await api('GET', '/api/admin/settings');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.agentSignatureUrl) {
+      const preview = document.getElementById('agent-sig-preview');
+      const img = document.getElementById('agent-sig-preview-img');
+      if (preview && img) {
+        img.src = data.agentSignatureUrl;
+        preview.style.display = 'block';
+      }
+    }
+  } catch {}
+  initAdminSigCanvas();
+}
+
+function initAdminSigCanvas() {
+  const canvas = document.getElementById('admin-sig-canvas');
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  adminSigDpr = dpr;
+  adminSigW = canvas.offsetWidth || 340;
+  adminSigH = 90;
+  canvas.width = adminSigW * dpr;
+  canvas.height = adminSigH * dpr;
+  adminSigCtx = canvas.getContext('2d');
+  adminSigCtx.scale(dpr, dpr);
+  setAdminSigMode('generate');
+  setupAdminDrawEvents(canvas);
+}
+
+function setAdminSigMode(mode) {
+  adminSigMode = mode;
+  adminSigHasDrawing = false;
+
+  const tabGen = document.getElementById('admin-tab-generate');
+  const tabDraw = document.getElementById('admin-tab-draw');
+  const genArea = document.getElementById('admin-sig-generate-area');
+  const drawHint = document.getElementById('admin-sig-draw-hint');
+  const clearBtn = document.getElementById('admin-sig-clear-btn');
+  const canvas = document.getElementById('admin-sig-canvas');
+
+  const activeStyle = 'background:rgba(181,113,90,0.14);color:#bd7a70;border-color:rgba(181,113,90,0.22);';
+  const inactiveStyle = 'background:transparent;color:rgba(247,243,237,0.3);border-color:transparent;';
+
+  if (tabGen) tabGen.style.cssText += mode === 'generate' ? activeStyle : inactiveStyle;
+  if (tabDraw) tabDraw.style.cssText += mode === 'draw' ? activeStyle : inactiveStyle;
+  if (genArea) genArea.style.display = mode === 'generate' ? 'block' : 'none';
+  if (drawHint) drawHint.style.display = mode === 'draw' ? 'flex' : 'none';
+  if (clearBtn) clearBtn.style.display = mode === 'draw' ? 'inline' : 'none';
+  if (canvas) canvas.style.cursor = mode === 'draw' ? 'crosshair' : 'default';
+
+  clearAdminSigInternal();
+
+  if (mode === 'generate') {
+    renderAdminGeneratedSig();
+  }
+}
+
+function clearAdminSigInternal() {
+  if (!adminSigCtx) return;
+  adminSigCtx.fillStyle = '#ffffff';
+  adminSigCtx.fillRect(0, 0, adminSigW, adminSigH);
+  adminSigHasDrawing = false;
+}
+
+function clearAdminSig() {
+  clearAdminSigInternal();
+  const drawHint = document.getElementById('admin-sig-draw-hint');
+  if (drawHint && adminSigMode === 'draw') drawHint.style.display = 'flex';
+}
+
+async function renderAdminGeneratedSig() {
+  if (adminSigMode !== 'generate' || !adminSigCtx) return;
+  clearAdminSigInternal();
+
+  const input = document.getElementById('admin-sig-name-input');
+  const text = (input?.value || 'L. Clifford').trim();
+  if (!text) return;
+
+  try { await document.fonts.load('700 52px "Dancing Script"'); } catch {}
+
+  adminSigCtx.font = '700 52px "Dancing Script", cursive';
+  adminSigCtx.fillStyle = '#1A1614';
+  adminSigCtx.textBaseline = 'middle';
+  const textW = adminSigCtx.measureText(text).width;
+  const x = textW > adminSigW - 24 ? 12 : Math.max(16, (adminSigW - textW) / 2);
+  adminSigCtx.fillText(text, x, adminSigH / 2);
+}
+
+function setupAdminDrawEvents(canvas) {
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    return [t.clientX - rect.left, t.clientY - rect.top];
+  }
+  function startDraw(e) {
+    if (adminSigMode !== 'draw') return;
+    e.preventDefault();
+    adminSigDrawing = true;
+    [adminSigLastX, adminSigLastY] = getPos(e);
+  }
+  function moveDraw(e) {
+    if (!adminSigDrawing || adminSigMode !== 'draw') return;
+    e.preventDefault();
+    const [x, y] = getPos(e);
+    adminSigCtx.beginPath();
+    adminSigCtx.moveTo(adminSigLastX, adminSigLastY);
+    adminSigCtx.lineTo(x, y);
+    adminSigCtx.strokeStyle = '#1A1614';
+    adminSigCtx.lineWidth = 2.5;
+    adminSigCtx.lineCap = 'round';
+    adminSigCtx.lineJoin = 'round';
+    adminSigCtx.stroke();
+    [adminSigLastX, adminSigLastY] = [x, y];
+    if (!adminSigHasDrawing) {
+      adminSigHasDrawing = true;
+      const hint = document.getElementById('admin-sig-draw-hint');
+      if (hint) hint.style.display = 'none';
+    }
+  }
+  function endDraw() { adminSigDrawing = false; }
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', moveDraw);
+  canvas.addEventListener('mouseup', endDraw);
+  canvas.addEventListener('mouseleave', endDraw);
+  canvas.addEventListener('touchstart', startDraw, { passive: false });
+  canvas.addEventListener('touchmove', moveDraw, { passive: false });
+  canvas.addEventListener('touchend', endDraw);
+}
+
+async function saveAdminSig() {
+  if (adminSigMode === 'draw' && !adminSigHasDrawing) {
+    alert('Please draw your signature first.');
+    return;
+  }
+  const canvas = document.getElementById('admin-sig-canvas');
+  const dataUrl = canvas.toDataURL('image/png');
+  const btn = document.getElementById('save-sig-btn');
+  const status = document.getElementById('save-sig-status');
+
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  const res = await api('PUT', '/api/admin/settings', { agentSignature: dataUrl });
+  btn.disabled = false;
+  btn.textContent = 'Save signature';
+
+  if (res.ok) {
+    const preview = document.getElementById('agent-sig-preview');
+    const img = document.getElementById('agent-sig-preview-img');
+    if (preview && img) { img.src = dataUrl; preview.style.display = 'block'; }
+    if (status) { status.textContent = 'Saved!'; status.style.color = '#6dbf7b'; status.style.display = 'block'; setTimeout(() => { status.style.display = 'none'; }, 2500); }
+  } else {
+    if (status) { status.textContent = 'Save failed — please try again.'; status.style.color = '#f08080'; status.style.display = 'block'; }
+  }
+}
+
+async function deleteAgentSig() {
+  if (!confirm('Remove your saved signature?')) return;
+  const res = await api('PUT', '/api/admin/settings', { deleteAgentSignature: true });
+  if (res.ok) {
+    const preview = document.getElementById('agent-sig-preview');
+    if (preview) preview.style.display = 'none';
+  }
 }
 
 // ── Compliance ────────────────────────────────────────────────────────────────

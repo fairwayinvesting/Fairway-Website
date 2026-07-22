@@ -7,7 +7,7 @@
   <link rel="icon" href="/favicon.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Outfit:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -32,10 +32,11 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinner { animation: spin 1s linear infinite; }
 
-    /* ── Error / Success states ── */
+    /* ── Error / Success / Agreement states (all hidden by default) ── */
     #state-error, #state-success, #agreement-wrap { display: none; }
     #state-error { min-height: 100vh; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center; }
     #state-success { min-height: 100vh; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center; }
+    #agreement-wrap { flex-direction: column; min-height: 100vh; }
 
     .state-icon { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 28px; }
     .state-icon.err { background: rgba(224,112,112,0.1); border: 1px solid rgba(224,112,112,0.2); }
@@ -102,7 +103,7 @@
     }
     @media (max-width: 960px) {
       .sign-layout { grid-template-columns: 1fr; padding: 0 20px 80px; }
-      .sign-sidebar { order: 99; } /* sidebar always below on mobile */
+      .sign-sidebar { order: 99; }
     }
 
     /* ── Agreement panel ── */
@@ -134,6 +135,8 @@
     .agent-signed-icon svg { width: 16px; height: 16px; }
     .agent-signed-text .lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--green); margin-bottom: 4px; }
     .agent-signed-text .name { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 400; font-style: italic; color: var(--text); margin-bottom: 2px; }
+    .agent-signed-sig { margin-top: 4px; }
+    .agent-signed-sig canvas { display: block; max-width: 160px; height: 42px; }
     .agent-signed-text .role { font-size: 12px; color: var(--text-faint); }
 
     /* Details card */
@@ -213,7 +216,7 @@
     .sign-card .sign-intro { font-size: 13px; color: var(--text-dim); line-height: 1.65; margin-bottom: 28px; }
 
     .sign-field { margin-bottom: 22px; }
-    .sign-field label {
+    .sign-field label, .sign-field .field-label {
       display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
       text-transform: uppercase; color: var(--copper); margin-bottom: 9px;
     }
@@ -225,7 +228,48 @@
     }
     .sign-field input[type=text]:focus { border-color: var(--copper); background: rgba(250,246,241,0.06); }
     .sign-field input::placeholder { color: var(--text-faint); font-style: italic; }
-    .sign-hint { font-size: 11.5px; color: var(--text-faint); margin-top: 7px; line-height: 1.5; }
+
+    /* ── Signature section ── */
+    .sig-tabs {
+      display: flex; gap: 4px; margin-bottom: 12px;
+      background: rgba(250,246,241,0.04); border: 1px solid rgba(250,246,241,0.07);
+      border-radius: 10px; padding: 3px;
+    }
+    .sig-tab {
+      flex: 1; padding: 8px; border: 1px solid transparent; border-radius: 8px;
+      font-family: 'Outfit', sans-serif; font-size: 12.5px; font-weight: 500;
+      cursor: pointer; transition: all 0.15s; color: var(--text-faint);
+      background: transparent; letter-spacing: 0.02em;
+    }
+    .sig-tab.active {
+      background: rgba(181,113,90,0.14); color: var(--copper);
+      border-color: rgba(181,113,90,0.22);
+    }
+    .sig-canvas-wrap {
+      position: relative; border-radius: 10px; overflow: hidden;
+      border: 1px solid rgba(250,246,241,0.14); margin-bottom: 8px;
+    }
+    #sig-canvas {
+      display: block; width: 100%; height: 80px;
+      cursor: crosshair; background: #fff;
+    }
+    .sig-canvas-hint {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      pointer-events: none;
+      font-size: 12px; color: rgba(0,0,0,0.25); font-style: italic;
+    }
+    .sig-clear-btn {
+      background: none; border: none; color: var(--text-faint);
+      font-size: 11.5px; cursor: pointer; padding: 0;
+      font-family: 'Outfit', sans-serif;
+      text-decoration: underline; text-underline-offset: 2px;
+      display: none; margin-bottom: 6px;
+    }
+    .sig-date {
+      font-size: 11.5px; color: var(--text-faint); margin: 6px 0 0;
+    }
+    .sig-date strong { color: rgba(250,246,241,0.5); font-weight: 500; }
 
     .agree-check {
       display: flex; gap: 14px; align-items: flex-start;
@@ -300,7 +344,7 @@
 </div>
 
 <!-- Error -->
-<div id="state-error" style="display:flex;">
+<div id="state-error">
   <div>
     <div class="state-icon err">
       <svg viewBox="0 0 24 24" fill="none" stroke="#f08080" stroke-width="1.8">
@@ -345,7 +389,7 @@
 </div>
 
 <!-- Agreement -->
-<div id="agreement-wrap" style="display:flex;flex-direction:column;min-height:100vh;">
+<div id="agreement-wrap">
 
   <header class="site-header">
     <img src="/logo-icon.png" width="26" height="26" alt="">
@@ -383,7 +427,7 @@
     <div class="agreement-panel">
       <p class="agr-kicker">Confidential — Prepared for you</p>
       <h1 class="agr-title">Buyer Engagement Agreement</h1>
-      <p class="agr-subtitle">Please read the full agreement below. By typing your full legal name and clicking "Sign Agreement" you confirm you have read, understood, and agree to all terms.</p>
+      <p class="agr-subtitle">Please read the full agreement below. When ready, add your signature in the panel to the right (or below on mobile) and click "Sign Agreement."</p>
 
       <!-- Agent pre-signed trust block -->
       <div class="agent-signed-block">
@@ -394,7 +438,9 @@
         </div>
         <div class="agent-signed-text">
           <p class="lbl">Agent has signed</p>
-          <p class="name">Luke Clifford</p>
+          <div class="agent-signed-sig" id="agent-sig-display">
+            <p class="name">Luke Clifford</p>
+          </div>
           <p class="role">Buyer's Agent — Fairway Investing Pty Ltd</p>
         </div>
       </div>
@@ -410,14 +456,27 @@
         <div class="sign-card">
           <p class="sign-card-kicker">Your signature required</p>
           <h2>Sign this agreement</h2>
-          <p class="sign-intro">Type your full legal name below exactly as it appears on your ID. This constitutes your electronic signature and is legally binding.</p>
+          <p class="sign-intro">Enter your full legal name, then create your signature below — either by generating one from your name or drawing it.</p>
 
           <div class="sign-error" id="sign-error"></div>
 
           <div class="sign-field">
             <label>Full legal name</label>
-            <input type="text" id="signer-name" placeholder="e.g. Jane Smith" autocomplete="name">
-            <p class="sign-hint">This will appear as your signature on the agreement</p>
+            <input type="text" id="signer-name" placeholder="e.g. Jane Smith" autocomplete="name" oninput="onNameChange()">
+          </div>
+
+          <div class="sign-field">
+            <span class="field-label">Your signature</span>
+            <div class="sig-tabs">
+              <button class="sig-tab active" id="tab-generate" onclick="setSigMode('generate')">Generate</button>
+              <button class="sig-tab" id="tab-draw" onclick="setSigMode('draw')">Draw</button>
+            </div>
+            <div class="sig-canvas-wrap">
+              <canvas id="sig-canvas"></canvas>
+              <div id="sig-draw-hint" class="sig-canvas-hint" style="display:none;">Sign here with your finger or mouse</div>
+            </div>
+            <button class="sig-clear-btn" id="sig-clear-btn" onclick="clearSigCanvas()">Clear</button>
+            <p class="sig-date">Signing on <strong id="sig-date-text"></strong></p>
           </div>
 
           <label class="agree-check">
@@ -460,6 +519,15 @@
   const token = new URLSearchParams(location.search).get('token');
   let agData = null;
 
+  // ── Signature state ──────────────────────────────────────────────────────
+  let sigMode = 'generate';
+  let sigHasDrawing = false;
+  let sigCtx = null;
+  let sigDrawing = false;
+  let sigLastX = 0, sigLastY = 0;
+  let sigDpr = 1;
+  let sigW = 320, sigH = 80;
+
   function fmt(n) { return '$' + Number(n).toLocaleString('en-AU'); }
   function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
@@ -488,6 +556,16 @@
     agData = data;
     document.title = `Engagement Agreement — ${esc(data.prospectName)} — Fairway Investing`;
 
+    // Agent signature display
+    if (data.agentSignatureUrl) {
+      const display = document.getElementById('agent-sig-display');
+      const img = new Image();
+      img.src = data.agentSignatureUrl;
+      img.style.cssText = 'max-width:160px;height:42px;object-fit:contain;object-position:left center;filter:invert(1) brightness(0.85);';
+      display.innerHTML = '';
+      display.appendChild(img);
+    }
+
     // Details card
     const isSplit = data.isSplit;
     const payTerms = isSplit ? `50% on signing · 50% on unconditional` : '100% upon signing';
@@ -506,7 +584,147 @@
 
     document.getElementById('state-loading').style.display = 'none';
     document.getElementById('agreement-wrap').style.display = 'flex';
+
+    // Init signature canvas after layout
+    requestAnimationFrame(initSigCanvas);
   }
+
+  // ── Signature canvas ─────────────────────────────────────────────────────
+
+  function initSigCanvas() {
+    const canvas = document.getElementById('sig-canvas');
+    const dpr = window.devicePixelRatio || 1;
+    sigDpr = dpr;
+    sigW = canvas.offsetWidth || 280;
+    sigH = 80;
+
+    canvas.width = sigW * dpr;
+    canvas.height = sigH * dpr;
+    sigCtx = canvas.getContext('2d');
+    sigCtx.scale(dpr, dpr);
+
+    // Date
+    document.getElementById('sig-date-text').textContent = new Date().toLocaleDateString('en-AU', {
+      day: 'numeric', month: 'long', year: 'numeric'
+    });
+
+    // Auto-detect mobile (coarse pointer = touch device) → default to Draw
+    const isMobile = window.matchMedia('(pointer: coarse)').matches;
+    setSigMode(isMobile ? 'draw' : 'generate');
+
+    setupDrawEvents(canvas);
+  }
+
+  function setSigMode(mode) {
+    sigMode = mode;
+    sigHasDrawing = false;
+
+    document.getElementById('tab-generate').classList.toggle('active', mode === 'generate');
+    document.getElementById('tab-draw').classList.toggle('active', mode === 'draw');
+    document.getElementById('sig-draw-hint').style.display = mode === 'draw' ? 'flex' : 'none';
+    document.getElementById('sig-clear-btn').style.display = mode === 'draw' ? 'block' : 'none';
+    document.getElementById('sig-canvas').style.cursor = mode === 'draw' ? 'crosshair' : 'default';
+
+    clearSigCanvasInternal();
+
+    if (mode === 'generate') {
+      renderGeneratedSig();
+    }
+  }
+
+  function clearSigCanvasInternal() {
+    if (!sigCtx) return;
+    sigCtx.fillStyle = '#ffffff';
+    sigCtx.fillRect(0, 0, sigW, sigH);
+    sigHasDrawing = false;
+  }
+
+  function clearSigCanvas() {
+    clearSigCanvasInternal();
+    if (sigMode === 'draw') {
+      document.getElementById('sig-draw-hint').style.display = 'flex';
+    }
+  }
+
+  async function renderGeneratedSig() {
+    if (sigMode !== 'generate' || !sigCtx) return;
+    clearSigCanvasInternal();
+
+    const name = (document.getElementById('signer-name')?.value || '').trim();
+    if (!name) return;
+
+    // Format: first initial + last name → "J. Smith"
+    const parts = name.split(/\s+/);
+    const sigText = parts.length >= 2 ? `${parts[0][0].toUpperCase()}. ${parts.slice(1).join(' ')}` : name;
+
+    try {
+      await document.fonts.load('700 48px "Dancing Script"');
+    } catch {}
+
+    sigCtx.font = '700 48px "Dancing Script", cursive';
+    sigCtx.fillStyle = '#1A1614';
+    sigCtx.textBaseline = 'middle';
+
+    const textW = sigCtx.measureText(sigText).width;
+    const x = textW > sigW - 24 ? 12 : Math.max(16, (sigW - textW) / 2);
+    sigCtx.fillText(sigText, x, sigH / 2);
+  }
+
+  function onNameChange() {
+    if (sigMode === 'generate') {
+      renderGeneratedSig();
+    }
+  }
+
+  function setupDrawEvents(canvas) {
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const t = e.touches ? e.touches[0] : e;
+      return [t.clientX - rect.left, t.clientY - rect.top];
+    }
+
+    function startDraw(e) {
+      if (sigMode !== 'draw') return;
+      e.preventDefault();
+      sigDrawing = true;
+      [sigLastX, sigLastY] = getPos(e);
+    }
+
+    function moveDraw(e) {
+      if (!sigDrawing || sigMode !== 'draw') return;
+      e.preventDefault();
+      const [x, y] = getPos(e);
+      sigCtx.beginPath();
+      sigCtx.moveTo(sigLastX, sigLastY);
+      sigCtx.lineTo(x, y);
+      sigCtx.strokeStyle = '#1A1614';
+      sigCtx.lineWidth = 2.5;
+      sigCtx.lineCap = 'round';
+      sigCtx.lineJoin = 'round';
+      sigCtx.stroke();
+      [sigLastX, sigLastY] = [x, y];
+      if (!sigHasDrawing) {
+        sigHasDrawing = true;
+        document.getElementById('sig-draw-hint').style.display = 'none';
+      }
+    }
+
+    function endDraw() { sigDrawing = false; }
+
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', moveDraw);
+    canvas.addEventListener('mouseup', endDraw);
+    canvas.addEventListener('mouseleave', endDraw);
+    canvas.addEventListener('touchstart', startDraw, { passive: false });
+    canvas.addEventListener('touchmove', moveDraw, { passive: false });
+    canvas.addEventListener('touchend', endDraw);
+  }
+
+  function getSigDataUrl() {
+    return document.getElementById('sig-canvas').toDataURL('image/png');
+  }
+
+  // ── Terms rendering ──────────────────────────────────────────────────────
 
   function renderTerms(d) {
     const isSplit = d.isSplit;
@@ -638,6 +856,8 @@
     `;
   }
 
+  // ── Submit ───────────────────────────────────────────────────────────────
+
   async function submitSignature() {
     const signerName = document.getElementById('signer-name').value.trim();
     const agreed = document.getElementById('agree-check').checked;
@@ -646,17 +866,32 @@
 
     errEl.style.display = 'none';
 
-    if (!signerName) { errEl.textContent = 'Please type your full legal name to sign.'; errEl.style.display = 'block'; return; }
-    if (!agreed) { errEl.textContent = 'Please confirm you have read and agree to the agreement terms.'; errEl.style.display = 'block'; return; }
+    if (!signerName) {
+      errEl.textContent = 'Please type your full legal name to sign.';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (sigMode === 'draw' && !sigHasDrawing) {
+      errEl.textContent = 'Please draw your signature in the box above before signing.';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (!agreed) {
+      errEl.textContent = 'Please confirm you have read and agree to the agreement terms.';
+      errEl.style.display = 'block';
+      return;
+    }
 
     btn.disabled = true;
     btn.textContent = 'Signing…';
+
+    const signatureDataUrl = getSigDataUrl();
 
     try {
       const res = await fetch(`/api/sign-agreement?token=${encodeURIComponent(token)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ signerName, agreed: true }),
+        body: JSON.stringify({ signerName, agreed: true, signatureDataUrl }),
       });
       const data = await res.json();
 
@@ -668,7 +903,6 @@
         return;
       }
 
-      // Advance progress steps
       document.querySelectorAll('.progress-step').forEach((el, i) => {
         el.classList.remove('active');
         if (i === 0) el.classList.add('done');
