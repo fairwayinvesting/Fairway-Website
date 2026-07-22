@@ -86,7 +86,8 @@ export default async (req) => {
   if (req.method === 'POST') {
     const body = await req.json().catch(() => ({}));
     const { clientId, action, acqId, strategyNotes, targetMarkets, customMarkets, budgetMin, budgetMax,
-            propertyTypes, propertyCriteria, customCriteria, excludedCharacteristics, customExclusions, status } = body;
+            propertyTypes, propertyCriteria, customCriteria, excludedCharacteristics, customExclusions, status,
+            overrideEntityType, overrideEntityName, overrideFundingMethod, overrideTimeline } = body;
     if (!clientId) return json({ error: 'clientId required' }, 400);
 
     const allClients = (await clientStore.get('all', { type: 'json' }).catch(() => null)) || [];
@@ -136,13 +137,13 @@ export default async (req) => {
       customCriteria: customCriteria ?? existing?.customCriteria ?? [],
       excludedCharacteristics: excludedCharacteristics ?? existing?.excludedCharacteristics ?? [],
       customExclusions: customExclusions ?? existing?.customExclusions ?? [],
-      // Derived from questionnaire — auto-bundled
-      entityType: entity.type,
-      entityName: entity.name,
-      timeline: q?.timeframe ?? '',
-      fundingMethod: q?.fundingMethod ?? '',
-      coInvestor: q?.coInvestor ?? 'No',
-      p2Name: q?.coInvestor === 'Yes' ? `${q.p2FirstName || ''} ${q.p2LastName || ''}`.trim() : '',
+      // Derived from questionnaire, but allow admin overrides
+      entityType: overrideEntityType ?? existing?.entityType ?? entity.type,
+      entityName: overrideEntityName !== undefined ? overrideEntityName : (existing?.entityName ?? entity.name),
+      timeline: overrideTimeline ?? existing?.timeline ?? (q?.timeframe ?? ''),
+      fundingMethod: overrideFundingMethod ?? existing?.fundingMethod ?? (q?.fundingMethod ?? ''),
+      coInvestor: q?.coInvestor ?? existing?.coInvestor ?? 'No',
+      p2Name: q?.coInvestor === 'Yes' ? `${q.p2FirstName || ''} ${q.p2LastName || ''}`.trim() : (existing?.p2Name ?? ''),
       status: newStatus,
       updatedAt: now,
       createdAt: existing?.createdAt || now,

@@ -241,6 +241,7 @@ export default async (req) => {
         active: true,
         createdAt: new Date().toISOString(),
         setupToken,
+        setupTokenExpiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         pipelineStage: 'onboarding',
         pipelineStageUpdatedAt: new Date().toISOString(),
         status: 'active',
@@ -267,13 +268,17 @@ export default async (req) => {
       await store.setJSON('all', all);
 
       const setupUrl = `https://fairwayinvesting.com.au/clients/setup.html?token=${setupToken}&email=${encodeURIComponent(prospect.email)}`;
-      resend.emails.send({
-        from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
-        to: [prospect.email],
-        reply_to: 'luke@fairwayinvesting.com.au',
-        subject: 'Welcome to Fairway — set up your client portal',
-        html: buildWelcomeEmail(prospect.name, setupUrl),
-      }).catch(err => console.error('Welcome email failed:', err?.message || err));
+      try {
+        await resend.emails.send({
+          from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
+          to: [prospect.email],
+          reply_to: 'luke@fairwayinvesting.com.au',
+          subject: 'Welcome to Fairway — set up your client portal',
+          html: buildWelcomeEmail(prospect.name, setupUrl),
+        });
+      } catch (err) {
+        console.error('Welcome email failed:', err?.message || err);
+      }
 
       appendAudit('prospect_converted', `Converted ${prospect.name} <${prospect.email}> to client ${newClient.id}`);
       return json({ ok: true, clientId: newClient.id });
@@ -369,7 +374,7 @@ function buildWelcomeEmail(name, setupUrl) {
 <table cellpadding="0" cellspacing="0" border="0"><tr><td style="border-radius:100px;background:#B5715A;">
 <a href="${setupUrl}" style="display:inline-block;font-size:15px;font-weight:500;color:#FAF6F1;text-decoration:none;padding:15px 34px;">Set up my portal &rarr;</a>
 </td></tr></table>
-<p style="font-size:12px;color:rgba(250,246,241,0.3);margin:24px 0 0;line-height:1.6;">This link expires in 72 hours. Any questions? Call Luke on 0416 184 333.</p>
+<p style="font-size:12px;color:rgba(250,246,241,0.3);margin:24px 0 0;line-height:1.6;">This link expires in 7 days. Any questions? Call Luke on 0416 184 333.</p>
 </td></tr>
 <tr><td style="padding:24px 0 0;text-align:center;"><p style="font-size:12px;color:rgba(250,246,241,0.25);margin:0;line-height:1.7;">Fairway Investing &middot; Suite 211, Level 2/5 Alexander Street, Crows Nest NSW 2065</p></td></tr>
 </table></td></tr></table></body></html>`;

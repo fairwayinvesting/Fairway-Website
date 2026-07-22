@@ -138,8 +138,8 @@ export default async (req) => {
   const clients = (await store.get('all', { type: 'json' })) || [];
 
   if (req.method === 'GET') {
-    return json(clients.filter(c => !c.deleted).map(({ id, name, email, markets, active, createdAt, setupToken, pipelineStage, pipelineStageUpdatedAt, status, engagementNumber, referralSource, referrerId, acquisitions, customFields }) =>
-      ({ id, name, email, markets, active, createdAt, hasSetupToken: !!setupToken, pipelineStage: pipelineStage || null, pipelineStageUpdatedAt: pipelineStageUpdatedAt || null, status: status || 'active', engagementNumber: engagementNumber || 1, referralSource: referralSource || null, referrerId: referrerId || null, acquisitions: acquisitions || [], customFields: customFields || [] })
+    return json(clients.filter(c => !c.deleted).map(({ id, name, email, markets, active, createdAt, setupToken, pipelineStage, pipelineStageUpdatedAt, status, engagementNumber, referralSource, referrerId, acquisitions, customFields, welcomeEmailSentAt, welcomeEmailFailed }) =>
+      ({ id, name, email, markets, active, createdAt, hasSetupToken: !!setupToken, pipelineStage: pipelineStage || null, pipelineStageUpdatedAt: pipelineStageUpdatedAt || null, status: status || 'active', engagementNumber: engagementNumber || 1, referralSource: referralSource || null, referrerId: referrerId || null, acquisitions: acquisitions || [], customFields: customFields || [], welcomeEmailSentAt: welcomeEmailSentAt || null, welcomeEmailFailed: welcomeEmailFailed || false })
     ));
   }
 
@@ -184,6 +184,7 @@ export default async (req) => {
     clients.push(client);
     await store.setJSON('all', clients);
 
+    let emailSent = false;
     if (sendEmail) {
       try {
         await resend.emails.send({
@@ -193,13 +194,17 @@ export default async (req) => {
           subject: 'Welcome to Fairway — set up your portal access',
           html: buildWelcomeEmail(client.name, client.email, setupToken),
         });
+        emailSent = true;
+        client.welcomeEmailSentAt = new Date().toISOString();
       } catch (err) {
         console.error('Welcome email failed:', err?.message || err);
+        client.welcomeEmailFailed = true;
       }
+      await store.setJSON('all', clients);
     }
 
     appendAudit('client_created', `Created client ${client.name} <${client.email}>`);
-    return json({ ok: true, id: client.id }, 201);
+    return json({ ok: true, id: client.id, emailSent }, 201);
   }
 
   if (req.method === 'PUT') {
@@ -331,6 +336,9 @@ export default async (req) => {
           subject: 'Set up your Fairway portal access',
           html: buildWelcomeEmail(client.name, client.email, setupToken),
         });
+        client.welcomeEmailSentAt = new Date().toISOString();
+        client.welcomeEmailFailed = false;
+        await store.setJSON('all', clients);
       } catch (err) {
         console.error('Resend setup email failed:', err?.message || err);
         return json({ error: 'Email failed to send' }, 500);

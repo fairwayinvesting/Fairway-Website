@@ -1780,8 +1780,26 @@
       <button class="brief-modal-head-close" onclick="closeBrief()">&times;</button>
     </div>
     <div class="brief-modal-body">
-      <!-- Questionnaire summary pills -->
-      <div class="brief-q-summary" id="brief-q-summary"></div>
+      <!-- Client overview — editable fields pre-filled from questionnaire -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid rgba(247,243,237,0.07)" id="brief-overview-row">
+        <div>
+          <label style="display:block;font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:7px;">Entity type</label>
+          <select id="brief-entity-type" style="width:100%;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.11);border-radius:9px;padding:9px 12px;font-size:13.5px;font-family:'Outfit',sans-serif;font-weight:300;color:#f7f3ed;outline:none;cursor:pointer;transition:border-color .2s;appearance:none;-webkit-appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4l4 4 4-4' stroke='rgba(247,243,237,0.3)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;" onfocus="this.style.borderColor='rgba(189,122,112,0.5)'" onblur="this.style.borderColor='rgba(247,243,237,0.11)'">
+            <option value="Individual">Individual</option>
+            <option value="Company">Company</option>
+            <option value="Trust">Trust</option>
+            <option value="SMSF">SMSF</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:7px;">Funding method</label>
+          <input type="text" id="brief-funding-method" placeholder="e.g. Pre-approved finance" style="width:100%;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.11);border-radius:9px;padding:9px 12px;font-size:13.5px;font-family:'Outfit',sans-serif;font-weight:300;color:#f7f3ed;outline:none;transition:border-color .2s;box-sizing:border-box;" onfocus="this.style.borderColor='rgba(189,122,112,0.5)'" onblur="this.style.borderColor='rgba(247,243,237,0.11)'">
+        </div>
+        <div>
+          <label style="display:block;font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:7px;">Target timeframe</label>
+          <input type="text" id="brief-timeline" placeholder="e.g. 6–12 months" style="width:100%;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.11);border-radius:9px;padding:9px 12px;font-size:13.5px;font-family:'Outfit',sans-serif;font-weight:300;color:#f7f3ed;outline:none;transition:border-color .2s;box-sizing:border-box;" onfocus="this.style.borderColor='rgba(189,122,112,0.5)'" onblur="this.style.borderColor='rgba(247,243,237,0.11)'">
+        </div>
+      </div>
 
       <!-- Strategy -->
       <div class="brief-field">
@@ -2850,11 +2868,18 @@ document.getElementById('modal-save').addEventListener('click', async function()
       const idx = clients.findIndex(c => c.id === id);
       if (idx !== -1) { clients[idx].name = name; clients[idx].markets = markets; clients[idx].active = active; clients[idx].referralSource = referralSource; clients[idx].referrerId = referrerId; }
     } else {
-      clients.push({ id: data.id, name, email: email.toLowerCase().trim(), markets, active: true, createdAt: new Date().toISOString(), referralSource: referralSource || null, referrerId: referrerId || null });
+      clients.push({ id: data.id, name, email: email.toLowerCase().trim(), markets, active: true, createdAt: new Date().toISOString(), referralSource: referralSource || null, referrerId: referrerId || null, welcomeEmailSentAt: data.emailSent ? new Date().toISOString() : null, welcomeEmailFailed: sendEmail && !data.emailSent });
     }
     renderTable();
     renderPartnersSection();
     closeModal();
+    if (!id) {
+      if (sendEmail) {
+        showToast(data.emailSent ? `Welcome email sent to ${email}` : `Client saved — welcome email failed to send`, data.emailSent ? 'success' : 'warning');
+      } else {
+        showToast(`Client saved`);
+      }
+    }
   } else {
     errEl.textContent = data.error || 'Save failed.';
     errEl.classList.add('visible');
@@ -2862,6 +2887,20 @@ document.getElementById('modal-save').addEventListener('click', async function()
   this.disabled = false;
   this.textContent = 'Save client';
 });
+
+function showToast(msg, type = 'success') {
+  const existing = document.getElementById('admin-toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.id = 'admin-toast';
+  const bg = type === 'warning' ? 'rgba(232,168,124,0.12)' : 'rgba(109,191,123,0.1)';
+  const border = type === 'warning' ? 'rgba(232,168,124,0.3)' : 'rgba(109,191,123,0.3)';
+  const color = type === 'warning' ? '#e8a87c' : '#6dbf7b';
+  t.style.cssText = `position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:${bg};border:1px solid ${border};color:${color};padding:12px 22px;border-radius:100px;font-size:13px;font-family:'Outfit',sans-serif;z-index:9999;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,0.4);opacity:1;transition:opacity .3s;`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 4500);
+}
 
 async function notifyMarkets(id, name) {
   if (!confirm(`Send "${name}" an email letting them know their market reports are ready?`)) return;
@@ -2943,7 +2982,9 @@ async function openBrief(clientId, clientName, acqId = null) {
   document.getElementById('brief-strategy').value = '';
   document.getElementById('brief-budget-min').value = '';
   document.getElementById('brief-budget-max').value = '';
-  document.getElementById('brief-q-summary').innerHTML = '';
+  document.getElementById('brief-entity-type').value = 'Individual';
+  document.getElementById('brief-funding-method').value = '';
+  document.getElementById('brief-timeline').value = '';
   document.getElementById('brief-error').style.display = 'none';
   document.getElementById('brief-custom-market-input').value = '';
   document.getElementById('brief-custom-markets').innerHTML = '';
@@ -2972,17 +3013,13 @@ async function openBrief(clientId, clientName, acqId = null) {
     if (!res.ok) return;
     const { brief, questionnaire } = await res.json();
 
-    // Populate Q pills
-    if (questionnaire) {
-      const qEl = document.getElementById('brief-q-summary');
-      const pills = [];
-      if (questionnaire.entityType) pills.push(questionnaire.entityType);
-      if (questionnaire.timeframe) pills.push(questionnaire.timeframe);
-      if (questionnaire.fundingMethod) pills.push(questionnaire.fundingMethod);
-      if (questionnaire.coInvestor === 'Yes' && questionnaire.p2FirstName) pills.push('Co-investor: ' + questionnaire.p2FirstName + ' ' + (questionnaire.p2LastName || ''));
-      if (questionnaire.maxPurchasePrice) pills.push('Budget: ' + pfMoney(questionnaire.maxPurchasePrice));
-      qEl.innerHTML = pills.map(p => `<span class="brief-q-pill">${p}</span>`).join('');
-    }
+    // Populate editable overview fields — prefer stored brief values over questionnaire
+    const entityType = brief?.entityType || questionnaire?.entityType || 'Individual';
+    const fundingMethod = brief?.fundingMethod || questionnaire?.fundingMethod || '';
+    const timeline = brief?.timeline || questionnaire?.timeframe || '';
+    document.getElementById('brief-entity-type').value = entityType;
+    document.getElementById('brief-funding-method').value = fundingMethod;
+    document.getElementById('brief-timeline').value = timeline;
 
     const DEFAULT_STRATEGY = 'Acquire a residential asset in a supply-constrained growth market with value-add potential and a rental yield profile that supports a balanced growth and cash flow approach.';
 
@@ -3097,6 +3134,9 @@ async function saveBrief(status) {
     customExclusions: _customExclusions.slice(),
     budgetMin: document.getElementById('brief-budget-min').value.trim().replace(/[,$]/g, ''),
     budgetMax: document.getElementById('brief-budget-max').value.trim().replace(/[,$]/g, ''),
+    overrideEntityType: document.getElementById('brief-entity-type').value,
+    overrideFundingMethod: document.getElementById('brief-funding-method').value.trim(),
+    overrideTimeline: document.getElementById('brief-timeline').value.trim(),
     status,
   };
 
@@ -4133,13 +4173,38 @@ function buildPaymentSection(client) {
   </div>`;
 }
 
+function buildEmailStatusSection(client) {
+  if (!client) return '';
+  const sentAt = client.welcomeEmailSentAt;
+  const failed = client.welcomeEmailFailed;
+  if (!sentAt && !failed) return '';
+  const fmtDate = iso => new Date(iso).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  if (failed && !sentAt) {
+    return `<div style="background:rgba(232,100,100,0.07);border:1px solid rgba(232,100,100,0.18);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;">
+      <span style="font-size:16px;">⚠️</span>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:rgba(232,100,100,0.9);margin-bottom:2px;">Welcome email failed to send</div>
+        <div style="font-size:12px;color:rgba(247,243,237,0.4);">Use the 3-dot menu to resend the setup link.</div>
+      </div>
+    </div>`;
+  }
+  return `<div style="background:rgba(109,191,123,0.07);border:1px solid rgba(109,191,123,0.18);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;">
+    <span style="font-size:16px;">✉️</span>
+    <div>
+      <div style="font-size:12px;font-weight:600;color:#6dbf7b;margin-bottom:2px;">Welcome email sent</div>
+      <div style="font-size:12px;color:rgba(247,243,237,0.4);">${fmtDate(sentAt)}</div>
+    </div>
+  </div>`;
+}
+
 function renderProfileTab() {
   const el = document.getElementById('profile-body');
   const q = crmQuestionnaire;
   const client = clients.find(c => c.id === crmProfileClientId);
   const paymentSection = buildPaymentSection(client);
+  const emailSection = buildEmailStatusSection(client);
   if (!q) {
-    el.innerHTML = `${paymentSection}<div class="profile-section">
+    el.innerHTML = `${paymentSection}${emailSection}<div class="profile-section">
       <div class="profile-section-title">Personal details</div>
       <div class="profile-fields">
         <div class="profile-field"><label>Name</label><div class="pf-val">${pfVal(client?.name)}</div></div>
@@ -4169,6 +4234,7 @@ function renderProfileTab() {
 
   el.innerHTML = `
     ${paymentSection}
+    ${emailSection}
     <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
       <button class="btn-secondary" onclick="crmProfileEditing=true;renderProfileTab();" style="font-size:12px;padding:7px 14px;">Edit profile</button>
     </div>
@@ -4629,8 +4695,11 @@ function toggleAcqAccordion(acqId) {
 async function addAcquisition(clientId) {
   const res = await api('PUT', '/api/admin/clients', { id: clientId, action: 'add-acquisition' });
   if (!res.ok) return alert('Failed to add acquisition.');
-  // Reload all clients to guarantee local state matches server (avoids Blobs eventual-consistency races)
-  await loadClients();
+  const data = await res.json();
+  const c = clients.find(x => x.id === clientId);
+  if (c && data.acquisitions) c.acquisitions = data.acquisitions;
+  renderTable();
+  renderPipeline();
   if (crmProfileClientId === clientId) renderEngagementTab();
 }
 
@@ -4641,7 +4710,15 @@ async function deleteAcquisition(clientId, acqId, label) {
     const d = await res.json().catch(() => ({}));
     return alert(d.error || 'Failed to delete acquisition.');
   }
-  await loadClients();
+  const data = await res.json().catch(() => ({}));
+  const c = clients.find(x => x.id === clientId);
+  if (c && data.acquisitions) {
+    c.acquisitions = data.acquisitions;
+    const latestActive = [...c.acquisitions].reverse().find(a => a.status === 'active');
+    if (latestActive) c.pipelineStage = latestActive.pipelineStage;
+  }
+  renderTable();
+  renderPipeline();
   if (crmProfileClientId === clientId) renderEngagementTab();
 }
 
@@ -6395,7 +6472,16 @@ async function saveProspect() {
     return;
   }
 
-  await loadProspects();
+  const data = await res.json().catch(() => ({}));
+  if (data.prospect) {
+    if (id) {
+      const i = prospects.findIndex(x => x.id === id);
+      if (i !== -1) prospects[i] = data.prospect;
+    } else {
+      prospects.push(data.prospect);
+    }
+  }
+  renderProspects();
   closeProspectModal();
   if (id && ppProspectId === id) openProspectPanel(id);
 }
@@ -6540,7 +6626,12 @@ async function sendAgreement(prospectId, action) {
     alert(d.error || 'Failed to send agreement.');
     return;
   }
-  await loadProspects();
+  const data = await res.json().catch(() => ({}));
+  if (data.prospect) {
+    const i = prospects.findIndex(x => x.id === prospectId);
+    if (i !== -1) prospects[i] = data.prospect;
+  }
+  renderProspects();
   openProspectPanel(prospectId);
 }
 
@@ -6557,10 +6648,14 @@ async function markPaymentReceived(prospectId, paymentType) {
   if (!confirm(`Mark ${paymentType === 'success' ? 'unconditional' : 'engagement'} payment as received?`)) return;
   const res = await api('PUT', '/api/admin/agreements', { id: prospectId, action: 'mark-payment', paymentType });
   if (!res.ok) { const d = await res.json().catch(() => ({})); alert(d.error || 'Failed.'); return; }
-  await loadProspects();
+  const data = await res.json().catch(() => ({}));
+  if (data.prospect) {
+    const i = prospects.findIndex(x => x.id === prospectId);
+    if (i !== -1) prospects[i] = data.prospect;
+  }
+  renderProspects();
   renderTable();
   if (ppProspectId === prospectId) openProspectPanel(prospectId);
-  // If a client profile is open and it links to this prospect, refresh it
   if (crmProfileClientId) {
     const linkedClient = clients.find(c => c.prospectId === prospectId);
     if (linkedClient && linkedClient.id === crmProfileClientId) renderProfileTab();
@@ -6602,7 +6697,11 @@ async function confirmSendInvoice() {
   const d = await res.json();
   document.getElementById('invoice-entity-overlay').style.display = 'none';
   alert(`Invoice #${d.invoiceNumber} sent to ${prospects.find(x=>x.id===prospectId)?.email || 'client'}.`);
-  await loadProspects();
+  if (d.prospect) {
+    const i = prospects.findIndex(x => x.id === prospectId);
+    if (i !== -1) prospects[i] = d.prospect;
+  }
+  renderProspects();
   if (ppProspectId === prospectId) openProspectPanel(prospectId);
 }
 

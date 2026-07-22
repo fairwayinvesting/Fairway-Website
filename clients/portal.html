@@ -719,11 +719,15 @@
 
     async function init() {
       let me;
-      try {
-        const res = await fetch('/api/me');
-        if (!res.ok) { location.href = '/clients/'; return; }
-        me = await res.json();
-      } catch { location.href = '/clients/'; return; }
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const res = await fetch('/api/me');
+          if (res.status === 401) { location.href = '/clients/'; return; }
+          if (res.ok) { me = await res.json(); break; }
+        } catch {}
+        if (attempt === 0) await new Promise(r => setTimeout(r, 1500));
+        else { location.href = '/clients/'; return; }
+      }
 
       // Check for multiple acquisitions
       let multiAcqData = null;

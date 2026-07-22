@@ -86,6 +86,9 @@ export default async (req) => {
     if (body.signatureDataUrl && body.signatureDataUrl.startsWith('data:image/')) {
       ag.signerSignatureUrl = body.signatureDataUrl;
     }
+    if (body.residentialAddress?.trim()) {
+      ag.residentialAddress = body.residentialAddress.trim();
+    }
 
     // Set up payment tracking
     const effectiveFee = ag.customFee ?? ag.fee;

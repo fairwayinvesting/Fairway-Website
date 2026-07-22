@@ -466,6 +466,11 @@
           </div>
 
           <div class="sign-field">
+            <label>Residential address</label>
+            <input type="text" id="signer-address" placeholder="e.g. 123 Smith St, Mosman NSW 2088" autocomplete="street-address">
+          </div>
+
+          <div class="sign-field">
             <span class="field-label">Your signature</span>
             <div class="sig-tabs">
               <button class="sig-tab active" id="tab-generate" onclick="setSigMode('generate')">Generate</button>
@@ -866,8 +871,15 @@
 
     errEl.style.display = 'none';
 
+    const signerAddress = document.getElementById('signer-address').value.trim();
+
     if (!signerName) {
       errEl.textContent = 'Please type your full legal name to sign.';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (!signerAddress) {
+      errEl.textContent = 'Please enter your residential address.';
       errEl.style.display = 'block';
       return;
     }
@@ -891,7 +903,7 @@
       const res = await fetch(`/api/sign-agreement?token=${encodeURIComponent(token)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ signerName, agreed: true, signatureDataUrl }),
+        body: JSON.stringify({ signerName, residentialAddress: signerAddress, agreed: true, signatureDataUrl }),
       });
       const data = await res.json();
 
