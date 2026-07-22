@@ -3098,10 +3098,12 @@ async function notifyBrief() {
   const res = await api('POST', '/api/admin/brief', { clientId: _briefClientId, acqId: _briefAcqId, action: 'notify' });
   if (res.ok) {
     btn.textContent = '✓ Sent';
+    const c = clients.find(x => x.id === _briefClientId);
+    showToast(`Buying brief sent to ${c ? c.email : 'client'}`);
     setTimeout(() => { btn.disabled = false; btn.textContent = '✉ Notify client'; }, 3000);
   } else {
     const err = await res.json().catch(() => ({}));
-    alert('Failed to send: ' + (err.error || 'unknown error'));
+    showToast('Failed to send buying brief — ' + (err.error || 'unknown error'), 'warning');
     btn.disabled = false;
     btn.textContent = '✉ Notify client';
   }
