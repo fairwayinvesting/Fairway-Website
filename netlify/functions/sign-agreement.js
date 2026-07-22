@@ -114,30 +114,34 @@ export default async (req) => {
 
     await store.setJSON('all', all);
 
-    // Send confirmation emails (fire-and-forget)
+    // Send confirmation emails — must be awaited before returning (Netlify terminates on return)
     const signedDate = new Date(ag.signedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
     const paymentInfo = isSplit
       ? `50% on signing (${fmt(halfFee)}) and 50% when your property goes unconditional (${fmt(halfFee)})`
       : `${fmt(total)} in full`;
     const attachments = pdfBuffer ? [{ filename: `Fairway-Engagement-Agreement-${prospect.name.replace(/\s+/g, '-')}.pdf`, content: pdfBuffer }] : [];
 
-    Promise.all([
-      resend.emails.send({
-        from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
-        to: [prospect.email],
-        reply_to: 'luke@fairwayinvesting.com.au',
-        subject: 'Your signed Fairway Engagement Agreement',
-        html: buildSignedClientEmail(prospect.name, signedDate, paymentInfo, isSplit, fmt(total), fmt(halfFee)),
-        attachments,
-      }),
-      resend.emails.send({
-        from: 'Fairway Portal <info@fairwayinvesting.com.au>',
-        to: ['luke@fairwayinvesting.com.au'],
-        subject: `✅ ${prospect.name} signed their engagement agreement`,
-        html: buildSignedLukeEmail(prospect.name, prospect.email, signerName, signedDate, ag.package, fmt(total)),
-        attachments,
-      }),
-    ]).catch(err => console.error('Post-signing emails failed:', err?.message || err));
+    try {
+      await Promise.all([
+        resend.emails.send({
+          from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
+          to: [prospect.email],
+          reply_to: 'luke@fairwayinvesting.com.au',
+          subject: 'Your signed Fairway Engagement Agreement',
+          html: buildSignedClientEmail(prospect.name, signedDate, paymentInfo, isSplit, fmt(total), fmt(halfFee)),
+          attachments,
+        }),
+        resend.emails.send({
+          from: 'Fairway Portal <info@fairwayinvesting.com.au>',
+          to: ['luke@fairwayinvesting.com.au'],
+          subject: `${prospect.name} signed their engagement agreement`,
+          html: buildSignedLukeEmail(prospect.name, prospect.email, signerName, signedDate, ag.package, fmt(total)),
+          attachments,
+        }),
+      ]);
+    } catch (err) {
+      console.error('Post-signing emails failed:', err?.message || err);
+    }
 
     appendAudit('agreement_signed', `${prospect.name} <${prospect.email}> signed their engagement agreement (IP: ${signerIp})`);
     return json({ ok: true, name: prospect.name });

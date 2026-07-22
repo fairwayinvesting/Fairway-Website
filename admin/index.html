@@ -2429,12 +2429,21 @@ function renderTable() {
       : `<span style="font-size:11.5px;color:rgba(247,243,237,0.2);">No markets assigned</span>`;
     const initials = pcpInitials(c.name);
     const hasMarkets = !!(c.markets?.length);
+    const linkedProspect = c.prospectId ? prospects.find(p => p.id === c.prospectId) : null;
+    const pmts = linkedProspect?.payments;
+    const engOutstanding = pmts?.engagement?.status === 'pending';
+    const sucOutstanding = pmts?.success?.status === 'pending';
+    const hasOutstanding = engOutstanding || sucOutstanding;
     return `<div class="client-card${c.active ? '' : ' cc-inactive'}" id="cc-${c.id}">
       <div class="cc-row">
         <div class="cc-avatar">${esc(initials)}</div>
         <div class="cc-meta">
           <div class="cc-name">${esc(c.name)}<span class="cc-dot ${c.active ? 'cc-dot-active' : 'cc-dot-inactive'}">●</span></div>
           <div class="cc-email">${esc(c.email)}</div>
+          ${hasOutstanding ? `<div style="display:inline-flex;align-items:center;gap:5px;background:rgba(232,168,124,0.1);border:1px solid rgba(232,168,124,0.22);border-radius:100px;padding:2px 9px;font-size:10.5px;color:#e8a87c;margin-top:5px;cursor:pointer;" onclick="openClientProfile('${c.id}')">
+            <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><circle cx="4.5" cy="4.5" r="4" stroke="#e8a87c" stroke-width="1"/><path d="M4.5 2.5v2.5l1.5 1" stroke="#e8a87c" stroke-width="1" stroke-linecap="round"/></svg>
+            Payment outstanding
+          </div>` : ''}
           ${(()=>{
             const acqs = c.acquisitions || [];
             const activeAcqs = acqs.filter(a => a.status !== 'settled');
@@ -4096,12 +4105,41 @@ function pfMoney(v) {
   return isNaN(n) ? String(v) : '$' + n.toLocaleString('en-AU');
 }
 
+function buildPaymentSection(client) {
+  const linkedProspect = client?.prospectId ? prospects.find(p => p.id === client.prospectId) : null;
+  const pmts = linkedProspect?.payments;
+  if (!pmts) return '';
+  const isSplit = !!pmts.success;
+  const engPending = pmts.engagement?.status === 'pending';
+  const sucPending = isSplit && pmts.success?.status === 'pending';
+  if (!engPending && !sucPending) return '';
+
+  const fmtP = n => '$' + Number(n).toLocaleString('en-AU');
+  const payRows = [
+    engPending ? { label: isSplit ? 'Engagement fee (50%)' : 'Engagement fee', amount: pmts.engagement.amount, type: 'engagement' } : null,
+    sucPending ? { label: 'Unconditional fee (50%)', amount: pmts.success.amount, type: 'success' } : null,
+  ].filter(Boolean);
+
+  return `<div style="background:rgba(232,168,124,0.07);border:1px solid rgba(232,168,124,0.2);border-radius:12px;padding:16px 18px;margin-bottom:20px;">
+    <div style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#e8a87c;margin-bottom:12px;">Payment outstanding</div>
+    ${payRows.map(row => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(247,243,237,0.06);">
+      <div>
+        <div style="font-size:13px;color:rgba(247,243,237,0.8);">${row.label}</div>
+        <div style="font-size:12px;color:rgba(247,243,237,0.35);">${fmtP(row.amount)} inc GST</div>
+      </div>
+      <button onclick="markPaymentReceived('${linkedProspect.id}','${row.type}')" style="background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.2);color:#6dbf7b;border-radius:100px;padding:6px 14px;font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;white-space:nowrap;">Mark received</button>
+    </div>`).join('')}
+  </div>`;
+}
+
 function renderProfileTab() {
   const el = document.getElementById('profile-body');
   const q = crmQuestionnaire;
   const client = clients.find(c => c.id === crmProfileClientId);
+  const paymentSection = buildPaymentSection(client);
   if (!q) {
-    el.innerHTML = `<div class="profile-section">
+    el.innerHTML = `${paymentSection}<div class="profile-section">
       <div class="profile-section-title">Personal details</div>
       <div class="profile-fields">
         <div class="profile-field"><label>Name</label><div class="pf-val">${pfVal(client?.name)}</div></div>
@@ -4130,6 +4168,7 @@ function renderProfileTab() {
   const hasProps = q.ownProperties === 'Yes';
 
   el.innerHTML = `
+    ${paymentSection}
     <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
       <button class="btn-secondary" onclick="crmProfileEditing=true;renderProfileTab();" style="font-size:12px;padding:7px 14px;">Edit profile</button>
     </div>
@@ -6519,7 +6558,13 @@ async function markPaymentReceived(prospectId, paymentType) {
   const res = await api('PUT', '/api/admin/agreements', { id: prospectId, action: 'mark-payment', paymentType });
   if (!res.ok) { const d = await res.json().catch(() => ({})); alert(d.error || 'Failed.'); return; }
   await loadProspects();
+  renderTable();
   if (ppProspectId === prospectId) openProspectPanel(prospectId);
+  // If a client profile is open and it links to this prospect, refresh it
+  if (crmProfileClientId) {
+    const linkedClient = clients.find(c => c.prospectId === prospectId);
+    if (linkedClient && linkedClient.id === crmProfileClientId) renderProfileTab();
+  }
 }
 
 function openInvoiceModal(prospectId, paymentType, currentEntity) {
@@ -6563,7 +6608,11 @@ async function confirmSendInvoice() {
 
 async function convertToClient(prospectId) {
   const p = prospects.find(x => x.id === prospectId);
-  if (!confirm(`Convert ${p?.name} to a full client? This will create their portal account and send a welcome email.`)) return;
+  const hasPending = p?.payments?.engagement?.status === 'pending' || p?.payments?.success?.status === 'pending';
+  const msg = hasPending
+    ? `Convert ${p?.name} to a client now? Payment is still outstanding — you can mark it received from their client profile once paid.`
+    : `Convert ${p?.name} to a full client? This will create their portal account and send a welcome email.`;
+  if (!confirm(msg)) return;
 
   const res = await api('PUT', '/api/admin/agreements', { id: prospectId, action: 'convert-to-client' });
   if (!res.ok) { const d = await res.json().catch(() => ({})); alert(d.error || 'Failed to convert.'); return; }
