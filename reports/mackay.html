@@ -686,7 +686,6 @@ const chartObserver = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('canvas').forEach(c => chartObserver.observe(c));
 
-try{
 const map = L.map('map', {
   center: [-21.14, 149.19], zoom: 11,
   zoomControl: false, dragging: false, scrollWheelZoom: false,
@@ -714,8 +713,6 @@ pts.forEach(p => {
     .bindTooltip(p.label, { permanent: p.perm, direction: 'top', offset: [0,-10], className: 'fw-tip' });
 });
 
-setTimeout(function() { try { map.invalidateSize(); } catch(ef) {} }, 1000);
-}catch(e){}
 </script>
 </body>
 </html>

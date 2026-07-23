@@ -1081,23 +1081,6 @@ const chartObserver = new IntersectionObserver((entries) => {
 }, { threshold: 0.2 });
 
 document.querySelectorAll('canvas').forEach(c => chartObserver.observe(c));
-setTimeout(function() {
-  if (typeof Chart !== 'undefined') {
-    document.querySelectorAll('canvas').forEach(function(c) {
-      if (!c._chartDone) {
-        c._chartDone = true;
-        try {
-          var cid = c.id;
-          if (cid === 'popChart') lineChart('popChart', DATA.popYears, [{ label: 'Population', data: DATA.population, borderColor: COPPER, backgroundColor: COPPER_ALPHA, tension: 0.4, fill: true, pointRadius: 3, pointBackgroundColor: COPPER }], false);
-          if (cid === 'priceChart') priceLineChart('priceChart');
-          if (cid === 'rentChart') rentLineChart('rentChart');
-        } catch(ef) {}
-      }
-    });
-  }
-}, 500);
-
-try{
 const map = L.map('map', {
   center: [-37.855, 144.78], zoom: 10,
   zoomControl: false, dragging: false, scrollWheelZoom: false,
@@ -1163,8 +1146,6 @@ pts.forEach(p => {
     if (activeEl && !activeEl.contains(e.target)) hideTip();
   }, { passive: true });
 })();
-setTimeout(function() { try { map.invalidateSize(); } catch(ef) {} }, 1000);
-}catch(e){}
 </script>
 
 </body>

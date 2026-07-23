@@ -686,7 +686,6 @@ const chartObserver = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('canvas').forEach(c => chartObserver.observe(c));
 
-try{
 const map = L.map('map', {
   center: [-38.02, 144.4], zoom: 11,
   zoomControl: false, dragging: false, scrollWheelZoom: false,
@@ -715,8 +714,6 @@ pts.forEach(p => {
 L.polyline([[-37.814, 144.963], [-38.147, 144.36]], {
   color: 'rgba(189,122,112,0.5)', weight: 2, dashArray: '6 5',
 }).addTo(map);
-setTimeout(function() { try { map.invalidateSize(); } catch(ef) {} }, 1000);
-}catch(e){}
 </script>
 </body>
 </html>
