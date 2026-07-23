@@ -714,6 +714,7 @@ pts.forEach(p => {
 L.polyline([[-37.814, 144.963], [-37.674, 144.434]], {
   color: 'rgba(189,122,112,0.5)', weight: 2, dashArray: '6 5',
 }).addTo(map);
+setTimeout(function() { try { map.invalidateSize(); } catch(ef) {} }, 1000);
 }catch(e){}
 </script>
 </body>

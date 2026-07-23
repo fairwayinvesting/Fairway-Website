@@ -713,6 +713,7 @@ pts.forEach(p => {
     .bindTooltip(p.label, { permanent: p.perm, direction: 'top', offset: [0,-10], className: 'fw-tip' });
 });
 
+setTimeout(function() { try { map.invalidateSize(); } catch(ef) {} }, 1000);
 }catch(e){}
 </script>
 </body>
