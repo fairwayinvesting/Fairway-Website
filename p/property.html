@@ -139,15 +139,24 @@
     /* Lightbox */
     .p-lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:1000;cursor:pointer;align-items:center;justify-content:center;padding:20px;}
     .p-lightbox.open{display:flex;}
-    .p-lightbox img{max-width:100%;max-height:90vh;object-fit:contain;border-radius:10px;cursor:default;}
-    .p-lightbox-close{position:absolute;top:18px;right:22px;font-size:32px;line-height:1;color:rgba(247,243,237,0.45);cursor:pointer;font-weight:300;}
+    .p-lightbox img{max-width:min(100%,900px);max-height:90vh;object-fit:contain;border-radius:10px;cursor:default;}
+    .p-lightbox-close{position:absolute;top:18px;right:22px;font-size:32px;line-height:1;color:rgba(247,243,237,0.45);cursor:pointer;font-weight:300;transition:color .15s;}
+    .p-lightbox-close:hover{color:rgba(247,243,237,0.8);}
+    .p-lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.45);border:1px solid rgba(247,243,237,0.12);color:rgba(247,243,237,0.75);border-radius:50%;width:48px;height:48px;font-size:30px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;z-index:2;padding:0;}
+    .p-lb-nav:hover{background:rgba(0,0,0,0.72);color:#f7f3ed;}
+    .p-lb-prev{left:20px;}
+    .p-lb-next{right:20px;}
+    .p-lb-nav[hidden]{display:none!important;}
+    @media(max-width:600px){.p-lb-nav{width:40px;height:40px;font-size:24px;}.p-lb-prev{left:8px;}.p-lb-next{right:8px;}}
   </style>
 </head>
 <body>
 
 <div class="p-lightbox" id="p-lightbox" onclick="closeLightbox()">
   <span class="p-lightbox-close" onclick="closeLightbox()">&times;</span>
+  <button class="p-lb-nav p-lb-prev" id="p-lb-prev" onclick="event.stopPropagation();navLightbox(-1)">&#8249;</button>
   <img id="p-lightbox-img" src="" alt="" onclick="event.stopPropagation()">
+  <button class="p-lb-nav p-lb-next" id="p-lb-next" onclick="event.stopPropagation();navLightbox(1)">&#8250;</button>
 </div>
 <div id="loading">Loading…</div>
 
@@ -202,19 +211,35 @@ function calcCashflow(cf) {
 
 function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-function openLightbox(src, alt) {
-  document.getElementById('p-lightbox-img').src = src;
-  document.getElementById('p-lightbox-img').alt = alt || '';
+let _lbAll = [], _lbIdx = 0;
+
+function openLightbox(idx) {
+  _lbIdx = idx;
+  const item = _lbAll[idx];
+  document.getElementById('p-lightbox-img').src = item.src;
+  document.getElementById('p-lightbox-img').alt = item.alt || '';
+  document.getElementById('p-lb-prev').hidden = idx === 0;
+  document.getElementById('p-lb-next').hidden = idx === _lbAll.length - 1;
   document.getElementById('p-lightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
+}
+function navLightbox(dir) {
+  const next = _lbIdx + dir;
+  if (next >= 0 && next < _lbAll.length) openLightbox(next);
 }
 function closeLightbox() {
   document.getElementById('p-lightbox').classList.remove('open');
   document.body.style.overflow = '';
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('p-lightbox').classList.contains('open')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') navLightbox(-1);
+  if (e.key === 'ArrowRight') navLightbox(1);
+});
 
 function render(d) {
+  _lbAll = [];
   const content = document.getElementById('p-content');
   const typeLabels = { house:'House', unit:'Unit', townhouse:'Townhouse', duplex:'Duplex', land:'Land' };
   const statusMap = { offer: ['Under Offer','p-status-offer'], sold: ['Sold','p-status-sold'], available: ['Available','p-status-available'] };
@@ -252,11 +277,17 @@ function render(d) {
   if (imgs.length) {
     html += `<hr class="p-divider"><div class="p-section">`;
     if (imgs.length === 1) {
-      html += `<div class="p-img-single"><img src="${esc(imgs[0].url)}" alt="${esc(d.address)}"></div>`;
+      const idx = _lbAll.length;
+      _lbAll.push({src: imgs[0].url, alt: d.address});
+      html += `<div class="p-img-single" style="cursor:zoom-in;" onclick="openLightbox(${idx})"><img src="${esc(imgs[0].url)}" alt="${esc(d.address)}" style="pointer-events:none;"></div>`;
       if (imgs[0].caption) html += `<p class="p-img-caption">${esc(imgs[0].caption)}</p>`;
     } else {
       const gridClass = imgs.length === 2 ? 'p-img-grid-2' : 'p-img-grid-3';
-      html += `<div class="${gridClass}">${imgs.map(img => `<div class="p-img-item"><img src="${esc(img.url)}" alt="${img.caption ? esc(img.caption) : ''}">${img.caption ? `<p class="p-img-caption">${esc(img.caption)}</p>` : ''}</div>`).join('')}</div>`;
+      html += `<div class="${gridClass}">${imgs.map(img => {
+        const idx = _lbAll.length;
+        _lbAll.push({src: img.url, alt: img.caption || d.address});
+        return `<div class="p-img-item" style="cursor:zoom-in;" onclick="openLightbox(${idx})"><img src="${esc(img.url)}" alt="${img.caption ? esc(img.caption) : ''}" style="pointer-events:none;">${img.caption ? `<p class="p-img-caption">${esc(img.caption)}</p>` : ''}</div>`;
+      }).join('')}</div>`;
     }
     html += `</div>`;
   }
@@ -368,7 +399,7 @@ function render(d) {
       visibleItems.forEach(item => {
         html += `<div>`;
         html += `<p style="font-size:10px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">${esc(item.label||'Risk')}</p>`;
-        if (item.imageUrl) html += `<img src="${esc(item.imageUrl)}" class="p-section-img" style="margin-top:0;cursor:zoom-in;" alt="${esc(item.label||'Risk map')}" onclick="openLightbox(this.src,this.alt)">`;
+        if (item.imageUrl) { const idx = _lbAll.length; _lbAll.push({src: item.imageUrl, alt: item.label||'Risk map'}); html += `<img src="${esc(item.imageUrl)}" class="p-section-img" style="margin-top:0;cursor:zoom-in;" alt="${esc(item.label||'Risk map')}" onclick="openLightbox(${idx})">`; }
         if (item.notes) html += `<p style="font-size:13px;color:rgba(247,243,237,0.5);line-height:1.65;margin-top:8px;">${esc(item.notes)}</p>`;
         html += `</div>`;
       });
@@ -403,7 +434,7 @@ function render(d) {
       html += `</div>`;
     }
     if (dm.notes) html += `<p style="font-size:14px;color:rgba(247,243,237,0.5);line-height:1.7;margin-bottom:10px;">${esc(dm.notes)}</p>`;
-    if (dm.imageUrl) html += `<img src="${esc(dm.imageUrl)}" class="p-section-img" alt="Demographics">`;
+    if (dm.imageUrl) { const idx = _lbAll.length; _lbAll.push({src: dm.imageUrl, alt: 'Demographics'}); html += `<img src="${esc(dm.imageUrl)}" class="p-section-img" alt="Demographics" style="cursor:zoom-in;" onclick="openLightbox(${idx})">`; }
     html += `</div>`;
   }
 
