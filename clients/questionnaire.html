@@ -575,6 +575,10 @@
               </select>
             </div>
           </div>
+          <div class="field" style="margin-top:12px">
+            <label>Property address</label>
+            <input type="text" id="pporAddress" autocomplete="street-address" placeholder="e.g. 12 Smith St, Mosman NSW 2088">
+          </div>
           <div class="field-row col2" style="margin-top:12px">
             <div class="field">
               <label>Estimated current value</label>
@@ -1039,6 +1043,10 @@ function addPropertyBlock(data) {
         </select>
       </div>
     </div>
+    <div class="field" style="margin-top:12px">
+      <label>Property address</label>
+      <input type="text" data-field="address" autocomplete="street-address" placeholder="e.g. 45 Main Rd, Geelong VIC 3220">
+    </div>
     <div class="field-row col2" style="margin-top:12px">
       <div class="field">
         <label>Purchase date (approx.)</label>
@@ -1133,7 +1141,7 @@ function collectData() {
     fundingMethod: rv('fundingMethod'), cashSavings: gv('cashSavings'), annualSalary: gv('annualSalary'),
     dependants: gv('dependants'), weeklyRentPaid: gv('weeklyRentPaid'), otherDebts: gv('otherDebts'),
     ownPpor: rv('ownPpor') || 'No',
-    pporState: gv('pporState'), pporType: gv('pporType'),
+    pporState: gv('pporState'), pporAddress: gv('pporAddress'), pporType: gv('pporType'),
     pporValue: gv('pporValue'), pporLoan: gv('pporLoan'),
     pporRate: gv('pporRate'), pporStructure: gv('pporStructure'),
     ownProperties: rv('ownProperties') || 'No', properties,
@@ -1174,7 +1182,7 @@ function populateForm(s, restoreStep) {
    'motivation','cashSavings','annualSalary','dependants','weeklyRentPaid','otherDebts',
    'brokerName','brokerEmail','brokerPhone','brokerCapacity',
    'accountantName','accountantEmail','accountantPhone','maxPurchasePrice',
-   'pporValue','pporLoan','pporRate'
+   'pporValue','pporLoan','pporRate','pporAddress'
   ].forEach(id => { const e=document.getElementById(id); if(e&&s[id]) e.value=s[id]; });
 
   if (s.dob) { const e=document.getElementById('dob'); if(e) e.value=s.dob; }

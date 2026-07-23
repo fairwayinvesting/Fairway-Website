@@ -4295,7 +4295,8 @@ function renderProfileTab() {
           <div class="profile-field"><label>PPOR state</label><div class="pf-val">${pfVal(q.pporState)}</div></div>
           <div class="profile-field"><label>PPOR value</label><div class="pf-val">${pfVal(pfMoney(q.pporValue))}</div></div>
           <div class="profile-field"><label>PPOR loan balance</label><div class="pf-val">${pfVal(pfMoney(q.pporLoan))}</div></div>
-          <div class="profile-field"><label>PPOR rate</label><div class="pf-val">${pfVal(q.pporRate)}</div></div>` : '<div class="profile-field"><label>Own PPOR?</label><div class="pf-val">No</div></div>'}
+          <div class="profile-field"><label>PPOR rate</label><div class="pf-val">${pfVal(q.pporRate)}</div></div>
+          ${q.pporAddress ? `<div class="profile-field full"><label>PPOR address</label><div class="pf-val">${pfVal(q.pporAddress)}</div></div>` : ''}` : '<div class="profile-field"><label>Own PPOR?</label><div class="pf-val">No</div></div>'}
       </div>
     </div>
 
@@ -4334,6 +4335,7 @@ function renderProfileTab() {
         <div style="background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.07);border-radius:10px;padding:12px 14px;margin-bottom:8px;">
           <div style="font-size:12px;font-weight:500;color:rgba(247,243,237,0.4);margin-bottom:8px;">Property ${i + 1} — ${esc(p.state || '')} ${esc(p.type || '')}</div>
           <div class="profile-fields">
+            ${p.address ? `<div class="profile-field full"><label>Address</label><div class="pf-val">${pfVal(p.address)}</div></div>` : ''}
             <div class="profile-field"><label>Valuation</label><div class="pf-val">${pfVal(pfMoney(p.valuation))}</div></div>
             <div class="profile-field"><label>Loan balance</label><div class="pf-val">${pfVal(pfMoney(p.loanBalance))}</div></div>
             <div class="profile-field"><label>Weekly rent</label><div class="pf-val">${pfVal(p.weeklyRent ? '$' + p.weeklyRent + '/wk' : '')}</div></div>
@@ -4460,7 +4462,7 @@ function renderProfileEditTab(el, q) {
         ${f('dependants','Dependants',q.dependants)} ${f('otherDebts','Other debts',q.otherDebts)}
         ${f('weeklyRentPaid','Weekly rent paid',q.weeklyRentPaid)} ${f('fundingMethod','Funding method',q.fundingMethod)}
         ${f('maxPurchasePrice','Max purchase price',q.maxPurchasePrice)}
-        ${q.ownPpor==='Yes'?`${f('pporState','PPOR state',q.pporState)}${f('pporValue','PPOR value',q.pporValue)}${f('pporLoan','PPOR loan balance',q.pporLoan)}${f('pporRate','PPOR rate',q.pporRate)}`:''}
+        ${q.ownPpor==='Yes'?`${f('pporState','PPOR state',q.pporState)}${f('pporValue','PPOR value',q.pporValue)}${f('pporLoan','PPOR loan balance',q.pporLoan)}${f('pporRate','PPOR rate',q.pporRate)}${f('pporAddress','PPOR address',q.pporAddress,'full')}`:''}
       </div>
     </div>
     <div class="profile-section">

@@ -60,7 +60,7 @@ function buildSheetHeaders() {
   for (let i = 0; i < 7; i++) {
     const n = `Property ${i + 1}`;
     propHeaders.push(
-      `${n} State`, `${n} Type`, `${n} Purchase Date`,
+      `${n} State`, `${n} Address`, `${n} Type`, `${n} Purchase Date`,
       `${n} Valuation`, `${n} Loan Balance`, `${n} Weekly Rent`,
       `${n} Interest Rate`, `${n} Loan Structure`, `${n} Own Another?`
     );
@@ -92,7 +92,7 @@ function buildSheetHeaders() {
     'States to Avoid?', 'States to Avoid List',
     'Max Purchase Price',
     'Own PPOR?',
-    'PPOR State', 'PPOR Type', 'PPOR Value',
+    'PPOR State', 'PPOR Address', 'PPOR Type', 'PPOR Value',
     'PPOR Loan', 'PPOR Interest Rate', 'PPOR Loan Structure',
   ];
 }
@@ -104,7 +104,7 @@ function buildSheetRow(timestamp, d) {
     const p = props[i] || {};
     const ownAnother = i < props.length - 1 ? 'Yes' : (props[i] ? 'No' : '');
     propCols.push(
-      p.state || '', p.type || '', p.purchaseDate || '',
+      p.state || '', p.address || '', p.type || '', p.purchaseDate || '',
       p.valuation || '', p.loanBalance || '', p.weeklyRent || '',
       p.interestRate || '', p.loanStructure || '', ownAnother
     );
@@ -136,9 +136,9 @@ function buildSheetRow(timestamp, d) {
     d.accountantIntro || '',
     d.statesToAvoid || 'No', d.statesToAvoidList || '',
     d.maxPurchasePrice || '',
-    // PPOR columns (add matching headers to Google Sheet)
+    // PPOR columns
     d.ownPpor || 'No',
-    d.pporState || '', d.pporType || '', d.pporValue || '',
+    d.pporState || '', d.pporAddress || '', d.pporType || '', d.pporValue || '',
     d.pporLoan || '', d.pporRate || '', d.pporStructure || '',
   ];
 }
