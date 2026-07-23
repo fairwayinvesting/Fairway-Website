@@ -587,7 +587,7 @@
 
 <script>
 // reveal-fallback-early
-try{setTimeout(function(){document.querySelectorAll(".reveal,.reveal-left,.reveal-scale").forEach(function(el){el.classList.add("visible");});},800);}catch(e){}
+try{setTimeout(function(){document.querySelectorAll(".reveal,.reveal-left,.reveal-scale").forEach(function(el){el.classList.add("visible");});},800);setTimeout(function(){document.querySelectorAll(".reveal,.reveal-left,.reveal-scale").forEach(function(el){el.classList.add("visible");});document.querySelectorAll("[data-target]").forEach(animateCounter);},2500);}catch(e){}
 
 const D = window.MARKETS['rockhampton'];
 const COPPER = '#bd7a70';
@@ -598,8 +598,7 @@ const LIGHT_GRID = 'rgba(34,32,29,0.07)';
 const DARK_TICK = 'rgba(247,243,237,0.35)';
 const LIGHT_TICK = 'rgba(34,32,29,0.4)';
 
-Chart.defaults.font.family = "'Outfit', sans-serif";
-Chart.defaults.font.weight = '300';
+if(typeof Chart!=='undefined'){Chart.defaults.font.family="'Outfit',sans-serif";Chart.defaults.font.weight='300';}
 
 function lineChart(id, labels, datasets, darkBg) {
   const grid = darkBg ? DARK_GRID : LIGHT_GRID;
@@ -687,6 +686,7 @@ const chartObserver = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('canvas').forEach(c => chartObserver.observe(c));
 
+try{
 const map = L.map('map', {
   center: [-23.38, 150.51], zoom: 12,
   zoomControl: false, dragging: false, scrollWheelZoom: false,
@@ -713,6 +713,7 @@ pts.forEach(p => {
     .bindTooltip(p.label, { permanent: p.perm, direction: 'top', offset: [0,-10], className: 'fw-tip' });
 });
 
+}catch(e){}
 </script>
 </body>
 </html>

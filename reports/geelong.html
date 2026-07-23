@@ -323,7 +323,7 @@
     <p class="eyebrow reveal">Infrastructure pipeline</p>
     <h2 class="sec-h2 reveal" style="color:#f7f3ed;">Major approved &amp; committed projects</h2>
     <div class="reveal" style="display:inline-flex;align-items:baseline;gap:10px;margin-bottom:44px;padding:20px 28px;background:rgba(189,122,112,0.1);border:1px solid rgba(189,122,112,0.2);border-radius:14px;">
-      <span style="font-family:'Fraunces',serif;font-size:42px;font-weight:400;color:#bd7a70;" id="infraTotal" data-target="8.98">$0B</span>
+      <span style="font-family:'Fraunces',serif;font-size:42px;font-weight:400;color:#bd7a70;" id="infraTotal" data-target="8.98" data-prefix="$" data-suffix="B" data-decimal="2">$0B</span>
       <span style="font-size:15px;font-weight:300;color:rgba(247,243,237,0.5);">total committed &amp; approved infrastructure investment</span>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;" class="r-3col">
@@ -990,7 +990,7 @@
 <script src="/js/markets.js"></script>
 <script>
 // reveal-fallback-early
-try{setTimeout(function(){document.querySelectorAll(".reveal,.reveal-left,.reveal-scale").forEach(function(el){el.classList.add("visible");});},800);}catch(e){}
+try{setTimeout(function(){document.querySelectorAll(".reveal,.reveal-left,.reveal-scale").forEach(function(el){el.classList.add("visible");});},800);setTimeout(function(){document.querySelectorAll(".reveal,.reveal-left,.reveal-scale").forEach(function(el){el.classList.add("visible");});document.querySelectorAll("[data-target]").forEach(animateCounter);},2500);}catch(e){}
 const DATA = window.MARKETS.geelong;
 
 // Brand colours
@@ -1002,8 +1002,7 @@ const LIGHT_GRID = 'rgba(34,32,29,0.07)';
 const DARK_TICK = 'rgba(247,243,237,0.35)';
 const LIGHT_TICK = 'rgba(34,32,29,0.4)';
 
-Chart.defaults.font.family = "'Outfit', sans-serif";
-Chart.defaults.font.weight = '300';
+if(typeof Chart!=='undefined'){Chart.defaults.font.family="'Outfit',sans-serif";Chart.defaults.font.weight='300';}
 
 function lineChart(id, labels, datasets, darkBg) {
   const grid = darkBg ? DARK_GRID : LIGHT_GRID;
@@ -1182,6 +1181,7 @@ const chartObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('canvas').forEach(c => chartObserver.observe(c));
 
 // ─── MAP (fully static, no interaction) ────────────────────────────────────
+try{
 const map = L.map('map', {
   center: [-38.20, 144.42],
   zoom: 10,
@@ -1274,6 +1274,7 @@ L.polyline([[-37.8136, 144.9631], [-38.1499, 144.3617]], {
   }, { passive: true });
 })();
 
+}catch(e){}
 </script>
 
 </body>
