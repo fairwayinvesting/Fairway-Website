@@ -501,7 +501,7 @@
         <div class="stat-label" style="color:rgba(247,243,237,0.4);">Auction clearance rate <i class="tip tip-lt" data-tip="The share of properties sold at or before auction. Above 70% indicates strong buyer competition — markets above 75% tend to see sustained price growth.">i</i></div>
       </div>
       <div style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:16px;padding:24px 20px;">
-        <div class="stat-val" style="font-size:40px;color:#f7f3ed;" data-target="2.1" data-prefix="" data-suffix=" mths" data-decimal="1">0</div>
+        <div class="stat-val" style="font-size:40px;color:#f7f3ed;" data-target="0.5" data-prefix="" data-suffix=" mths" data-decimal="1">0</div>
         <div class="stat-label" style="color:rgba(247,243,237,0.4);">Months of supply <i class="tip tip-lt tip-r" data-tip="At the current sales pace, how long it would take to sell all properties currently on market. Under 3 months is seller-favoured; over 6 months shifts power to buyers.">i</i></div>
       </div>
     </div>
@@ -987,30 +987,11 @@
   <p style="font-size:12px;font-weight:300;color:rgba(247,243,237,0.2);line-height:1.7;">This report is prepared by Fairway Investing for client use only. Data is sourced from third parties and is believed to be reliable but is not guaranteed. Figures are approximate and should be independently verified. This report does not constitute financial advice. &copy; 2026 Fairway Investing Pty Ltd &nbsp;&middot;&nbsp; ABN 68 699 032 598</p>
 </footer>
 
+<script src="/js/markets.js"></script>
 <script>
 // reveal-fallback-early
 try{setTimeout(function(){document.querySelectorAll(".reveal,.reveal-left,.reveal-scale").forEach(function(el){el.classList.add("visible");});},800);}catch(e){}
-// ─── DATA ──────────────────────────────────────────────────────────────────
-const DATA = {
-  population: [238000,244000,249000,254000,258000,261000,263000,266000,268000,270000],
-  popYears:   [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
-  housePrice: [490000,530000,560000,575000,590000,670000,720000,695000,680000,710000],
-  unitPrice:  [320000,345000,360000,368000,380000,415000,450000,435000,425000,435000],
-  priceYears: [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
-  yieldHouse: [4.8,4.7,4.5,4.3,4.1,3.8,3.9,4.1,4.2,4.2],
-  yieldUnit:  [5.5,5.4,5.2,5.0,4.8,4.6,4.8,5.0,5.1,5.1],
-  yieldYears: [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
-  vacancy:    [2.1,1.9,1.6,1.8,1.2,0.7,0.8,0.9,0.8,0.8],
-  vacYears:   [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
-  stock:      [1820,1740,1650,1580,1310,1180,1250,1280,1240,1240],
-  stockMonths:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-  stockVals:  [1380,1320,1290,1260,1240,1220,1240,1270,1260,1250,1240,1240],
-  htMonths:    ["Jul '25","Aug '25","Sep '25","Oct '25","Nov '25","Dec '25","Jan '26","Feb '26","Mar '26","Apr '26","May '26","Jun '26"],
-  htHousePrice:[845722,849204,853492,859681,866688,872518,883720,893307,903020,914018,919455,924894],
-  htUnitPrice: [708123,707857,709069,709277,708596,709427,712275,716288,721752,725617,728234,730851],
-  htHouseRent: [504,506,508,509,511,513,515,517,519,520,521,522],
-  htUnitRent:  [418,420,422,424,426,427,428,429,430,430,430,431],
-};
+const DATA = window.MARKETS.geelong;
 
 // Brand colours
 const COPPER = '#bd7a70';

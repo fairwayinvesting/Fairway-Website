@@ -16,10 +16,10 @@
 //   population[], housePrice[], unitPrice[], yieldHouse[], yieldUnit[]
 //   vacancy[], stockVals[]
 //
-// Source suggestions: CoreLogic, SQM Research, Suburbtrends, ABS
-// Price/yield/DOM: CoreLogic data via propertyvalue.com.au
-// Vacancy rates: SQM Research (May 2026)
-// Historical chart arrays: estimated — update with CoreLogic subscription
+// Source: HtAG Analytics (primary) — LGA and suburb level data via MCP
+// Price/yield/DOM/rent/growth: HtAG Analytics
+// Historical chart arrays (htMonths series): HtAG Analytics, 12-month rolling
+// Population, demographics: ABS / HtAG
 // Last updated: July 2026
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -27,12 +27,12 @@ window.MARKETS = {
 
   // ── GEELONG ──────────────────────────────────────────────────────────────
   geelong: {
-    // ── Monthly update fields ──
-    heroPrice: '~$760k', heroYield: '3.4–4.6%', heroPopulation: '270k', heroVacancy: '1.7%', // SQM Research May 2026
-    houseMedian: 760000, unitMedian: 555000,  // Greater Geelong City LGA; house & unit: CoreLogic/Area Specialist July 2025
-    houseRentRange: '$505–$535', unitRentRange: '$460–$490',
-    houseYieldRange: '3.4–3.7%', unitYieldRange: '4.3–4.6%',
-    vacancyRate: 1.7, daysOnMarket: 26, clearanceRate: 68, propertiesListed: 1240,
+    // ── Monthly update fields ── Source: HtAG Analytics VIC215, period ending June 2026
+    heroPrice: '~$925k', heroYield: '2.9–3.1%', heroPopulation: '270k', heroVacancy: '1.5%',
+    houseMedian: 924894, unitMedian: 730851,
+    houseRentRange: '$510–$535', unitRentRange: '$420–$445',
+    houseYieldRange: '2.9–3.1%', unitYieldRange: '3.0–3.2%',
+    vacancyRate: 1.5, daysOnMarket: 31, clearanceRate: 79, propertiesListed: 365,
     popTotal: 270000, popGrowth: 2.1, medianAge: 37, ownerOccupier: 62, employed: 63, unemployment: 4.1,
     conditions: {
       rentalDemand:  { label: 'Very High', pct: 88 },
@@ -41,20 +41,25 @@ window.MARKETS = {
       infraPipeline: { label: 'Very High', pct: 92 },
       popMomentum:   { label: 'Strong',    pct: 82 },
     },
-    housePerf: { yr1:{val:1.0,bar:10}, yr3:{val:2.5,bar:25}, yr5:{val:3.2,bar:32}, yr10:{val:6.5,bar:65} },
-    unitPerf:  { yr1:{val:0.0,bar:0},  yr3:{val:3.0,bar:30}, yr5:{val:3.0,bar:30}, yr10:{val:5.8,bar:58} },
+    housePerf: { yr1:{val:9.8,bar:98}, yr3:{val:0.0,bar:0}, yr5:{val:4.1,bar:41}, yr10:{val:6.6,bar:66} },
+    unitPerf:  { yr1:{val:3.2,bar:32}, yr3:{val:-1.8,bar:0}, yr5:{val:-1.2,bar:0}, yr10:{val:4.7,bar:47} },
     population:  [238000,244000,249000,254000,258000,261000,263000,266000,268000,270000],
     popYears:    [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
-    housePrice:  [490000,530000,560000,575000,590000,670000,720000,695000,680000,710000],
-    unitPrice:   [320000,345000,360000,368000,380000,415000,450000,435000,425000,435000],
+    housePrice:  [490000,530000,560000,575000,590000,670000,720000,695000,680000,924894],
+    unitPrice:   [320000,345000,360000,368000,380000,415000,450000,435000,425000,730851],
     priceYears:  [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
-    yieldHouse:  [4.8,4.7,4.5,4.3,4.1,3.8,3.9,4.1,4.2,4.2],
-    yieldUnit:   [5.5,5.4,5.2,5.0,4.8,4.6,4.8,5.0,5.1,5.1],
+    yieldHouse:  [4.8,4.7,4.5,4.3,4.1,3.8,3.9,4.1,4.2,2.9],
+    yieldUnit:   [5.5,5.4,5.2,5.0,4.8,4.6,4.8,5.0,5.1,3.1],
     yieldYears:  [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
-    vacancy:     [2.1,1.9,1.6,1.8,1.2,0.7,0.8,0.9,0.8,0.8],
+    vacancy:     [2.1,1.9,1.6,1.8,1.2,0.7,0.8,0.9,0.8,1.5],
     vacYears:    [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
     stockMonths: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
     stockVals:   [1380,1320,1290,1260,1240,1220,1240,1270,1260,1250,1240,1240],
+    htMonths:    ["Jul '25","Aug '25","Sep '25","Oct '25","Nov '25","Dec '25","Jan '26","Feb '26","Mar '26","Apr '26","May '26","Jun '26"],
+    htHousePrice:[845722,849204,853492,859681,866688,872518,883720,893307,903020,914018,919455,924894],
+    htUnitPrice: [708123,707857,709069,709277,708596,709427,712275,716288,721752,725617,728234,730851],
+    htHouseRent: [504,506,508,509,511,513,515,517,519,520,521,522],
+    htUnitRent:  [418,420,422,424,426,427,428,429,430,430,430,431],
   },
 
   // ── BACCHUS MARSH ─────────────────────────────────────────────────────────
