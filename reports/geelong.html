@@ -988,6 +988,8 @@
 </footer>
 
 <script>
+// reveal-fallback-early
+try{setTimeout(function(){document.querySelectorAll(".reveal,.reveal-left,.reveal-scale").forEach(function(el){el.classList.add("visible");});},800);}catch(e){}
 // ─── DATA ──────────────────────────────────────────────────────────────────
 const DATA = {
   population: [238000,244000,249000,254000,258000,261000,263000,266000,268000,270000],

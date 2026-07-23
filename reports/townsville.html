@@ -13,7 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500;1,9..144,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="/data/markets.js"></script>
+  <script src="/js/markets.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -586,6 +586,8 @@
 </footer>
 
 <script>
+// reveal-fallback-early
+try{setTimeout(function(){document.querySelectorAll(".reveal,.reveal-left,.reveal-scale").forEach(function(el){el.classList.add("visible");});},800);}catch(e){}
 
 const D = window.MARKETS['townsville'];
 const COPPER = '#bd7a70';
