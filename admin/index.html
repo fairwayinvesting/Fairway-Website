@@ -5449,7 +5449,13 @@ async function saveSlItem() {
   if (slEditId) { res = await api('PUT', '/api/admin/shortlist', { id: slEditId, ...body }); }
   else { res = await api('POST', '/api/admin/shortlist', body); }
   if (res.ok) {
-    shortlistItems = await api('GET', '/api/admin/shortlist').then(r => r.json());
+    const data = await res.json();
+    if (slEditId) {
+      const idx = shortlistItems.findIndex(i => i.id === slEditId);
+      if (idx !== -1) shortlistItems[idx] = data.item;
+    } else {
+      shortlistItems.unshift(data.item);
+    }
     renderShortlist(); closeSlModal();
   } else { alert('Save failed.'); }
   btn.disabled = false; btn.textContent = 'Save';
