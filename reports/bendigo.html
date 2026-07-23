@@ -12,9 +12,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500;1,9..144,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="/css/leaflet.css">
+  <script src="/js/leaflet.js"></script>
+  <script src="/js/chart.min.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html{scroll-behavior:smooth;overflow-x:hidden;}
@@ -1013,7 +1013,7 @@ setTimeout(function() {
       }
     });
   }
-}, 1500);
+}, 500);
 
 try{
 const map = L.map('map', {
