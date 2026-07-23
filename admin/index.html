@@ -2244,6 +2244,7 @@ function showSection(id, btn) {
   if (id === 'partners') renderPartnersSection();
   if (id === 'prospects') renderProspects();
   if (id === 'settings') { loadCompliance(); loadAgentSignatureSettings(); }
+  if (id === 'reports') renderReports();
   localStorage.setItem('fw_admin_section', id);
 }
 

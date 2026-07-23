@@ -1036,6 +1036,7 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.15 });
 
 document.querySelectorAll('.reveal, .reveal-left, .reveal-scale').forEach(el => observer.observe(el));
+setTimeout(() => document.querySelectorAll('.reveal, .reveal-left, .reveal-scale').forEach(el => el.classList.add('visible')), 2500);
 
 function animateCounter(el) {
   if (el.dataset.animated) return;
