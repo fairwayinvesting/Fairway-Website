@@ -31,7 +31,9 @@ export default async (req) => {
       agentName:   body.agentName?.trim()   || '',
       agentAgency: body.agentAgency?.trim() || '',
       agentPhone:  body.agentPhone?.trim()  || '',
-      agentEmail:  body.agentEmail?.trim()  || '',
+      agentEmail:  body.agentEmail?.trim()   || '',
+      bankValuation: body.bankValuation?.trim() || '',
+      bankLender:  body.bankLender?.trim()   || '',
       source:      body.source              || 'own',
       notes:       body.notes?.trim()       || '',
       clientId:    body.clientId            || null,
@@ -53,7 +55,7 @@ export default async (req) => {
     if (idx === -1) return json({ error: 'Not found' }, 404);
     const fields = ['address','suburb','state','price','propertyType','bedrooms','bathrooms',
                     'carspaces','landSize','agentName','agentAgency','agentPhone','agentEmail',
-                    'source','notes','status','clientId','clientName'];
+                    'source','notes','status','clientId','clientName','bankValuation','bankLender'];
     fields.forEach(f => { if (body[f] !== undefined) all[idx][f] = body[f]; });
     await store.setJSON('all', all);
     appendAudit('shortlist_updated', `Updated shortlist item: ${all[idx].address}`);

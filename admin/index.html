@@ -1760,6 +1760,11 @@
         <div class="field"><label>Email</label><input type="email" id="sl-agent-email" placeholder="james@raywhite.com"></div>
       </div>
     </div>
+    <p style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin:16px 0 10px;">Bank valuation</p>
+    <div class="row-2">
+      <div class="field"><label>Valuation amount</label><input type="text" id="sl-bank-val" placeholder="$540,000"></div>
+      <div class="field"><label>Lender</label><input type="text" id="sl-bank-lender" placeholder="e.g. ANZ, CBA"></div>
+    </div>
     <div class="field" style="margin-top:4px;"><label>Notes</label><textarea id="sl-notes" rows="3" placeholder="Quick notes on the property..." style="resize:vertical;width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:14px;padding:11px 14px;"></textarea></div>
     <div style="display:flex;gap:10px;margin-top:20px;align-items:center;">
       <button class="btn-primary" onclick="saveSlItem()" id="sl-save-btn" style="font-size:13px;padding:10px 22px;">Save</button>
@@ -5373,6 +5378,7 @@ function renderShortlist() {
       ${item.clientName ? `<div style="font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:rgba(189,122,112,0.7);margin-bottom:4px;">${esc(item.clientName)}</div>` : ''}
       ${item.suburb ? `<div class="sl-card-sub">${esc(item.suburb)}${item.state ? ' ' + esc(item.state) : ''} · ${esc(typeLabels[item.propertyType] || item.propertyType)}</div>` : ''}
       ${item.price ? `<div class="sl-card-price">${esc(item.price)}</div>` : ''}
+      ${item.bankValuation ? `<div style="font-size:12px;color:rgba(109,191,123,0.8);margin-top:3px;">Bank val: ${esc(item.bankValuation)}${item.bankLender ? ` <span style="color:rgba(247,243,237,0.3);">· ${esc(item.bankLender)}</span>` : ''}</div>` : ''}
       ${specs ? `<div class="sl-card-specs">${esc(specs)}</div>` : ''}
       ${item.notes ? `<div style="font-size:12px;color:rgba(247,243,237,0.35);margin-top:4px;line-height:1.5;">${esc(item.notes)}</div>` : ''}
       ${agentLine}
@@ -5403,6 +5409,8 @@ function openSlModal(itemId) {
   document.getElementById('sl-agent-agency').value = item ? (item.agentAgency || '') : '';
   document.getElementById('sl-agent-phone').value = item ? (item.agentPhone || '') : '';
   document.getElementById('sl-agent-email').value = item ? (item.agentEmail || '') : '';
+  document.getElementById('sl-bank-val').value = item ? (item.bankValuation || '') : '';
+  document.getElementById('sl-bank-lender').value = item ? (item.bankLender || '') : '';
   document.getElementById('sl-notes').value = item ? item.notes : '';
   // Populate and set client dropdown
   const slClientSel = document.getElementById('sl-client');
@@ -5441,6 +5449,8 @@ async function saveSlItem() {
     agentAgency: document.getElementById('sl-agent-agency').value.trim(),
     agentPhone: document.getElementById('sl-agent-phone').value.trim(),
     agentEmail: document.getElementById('sl-agent-email').value.trim(),
+    bankValuation: document.getElementById('sl-bank-val').value.trim(),
+    bankLender: document.getElementById('sl-bank-lender').value.trim(),
     notes: document.getElementById('sl-notes').value.trim(),
     clientId: document.getElementById('sl-client').value || null,
     clientName: document.getElementById('sl-client').selectedOptions[0]?.text !== '— No client assigned —'
