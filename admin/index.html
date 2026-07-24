@@ -943,7 +943,14 @@
     <div id="sec-partners" class="admin-section">
       <div class="sec-header">
         <h1>Directory</h1>
-        <button class="btn-primary" onclick="openPartnerModal(null)" style="font-size:13px;padding:10px 20px;">+ Add contact</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div class="admin-search-wrap">
+            <svg class="admin-search-icon" width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <input class="admin-search-input" id="dir-search-input" type="text" placeholder="Search contacts…" oninput="setDirSearch(this.value)">
+            <button class="admin-search-clear" id="dir-search-clear" onclick="clearDirSearch()" title="Clear">×</button>
+          </div>
+          <button class="btn-primary" onclick="openPartnerModal(null)" style="font-size:13px;padding:10px 20px;">+ Add contact</button>
+        </div>
       </div>
       <div id="dir-filter-bar" class="dir-filter-bar"></div>
       <div id="partners-list"><span style="font-size:13px;color:rgba(247,243,237,0.25);">Loading…</span></div>
@@ -2058,7 +2065,7 @@ function renderPartnerList() {
 // ── CRM referral partners ─────────────────────────────────────────────────────
 let crmPartners = [];
 let crmPartnerPanelId = null;
-let dirProfFilter = 'all', dirStateFilter = 'all';
+let dirProfFilter = 'all', dirStateFilter = 'all', dirSearchQuery = '';
 let assignProfSelectedId = null;
 
 const DIR_PROFESSIONS = [
@@ -2139,6 +2146,18 @@ function renderPartnersSection() {
   let filtered = crmPartners;
   if (dirProfFilter !== 'all') filtered = filtered.filter(p => p.type === dirProfFilter);
   if (dirStateFilter !== 'all') filtered = filtered.filter(p => p.state === dirStateFilter);
+  if (dirSearchQuery) {
+    const q = dirSearchQuery.toLowerCase();
+    filtered = filtered.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      (p.company || '').toLowerCase().includes(q) ||
+      (p.email || '').toLowerCase().includes(q) ||
+      (p.phone || '').toLowerCase().includes(q) ||
+      dirProfLabel(p.type).toLowerCase().includes(q) ||
+      (p.state || '').toLowerCase().includes(q) ||
+      (p.notes || '').toLowerCase().includes(q)
+    );
+  }
 
   if (!filtered.length) {
     listEl.innerHTML = crmPartners.length
@@ -2871,6 +2890,22 @@ function clearBriefSearch() {
   if (input) input.value = '';
   if (clear) clear.classList.remove('visible');
   renderBriefs();
+}
+
+function setDirSearch(val) {
+  dirSearchQuery = val.trim();
+  const clear = document.getElementById('dir-search-clear');
+  if (clear) clear.classList.toggle('visible', !!dirSearchQuery);
+  renderPartnersSection();
+}
+
+function clearDirSearch() {
+  dirSearchQuery = '';
+  const input = document.getElementById('dir-search-input');
+  const clear = document.getElementById('dir-search-clear');
+  if (input) input.value = '';
+  if (clear) clear.classList.remove('visible');
+  renderPartnersSection();
 }
 
 // Build flat list of kanban cards — one per active acquisition for multi-acq clients,
