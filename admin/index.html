@@ -2790,6 +2790,11 @@ function selectedMarkets() {
 document.getElementById('f-active').addEventListener('change', function() {
   document.getElementById('active-label').textContent = this.checked ? 'Active' : 'Inactive';
 });
+document.getElementById('f-send-email').addEventListener('change', function() {
+  document.getElementById('pw-note').textContent = this.checked
+    ? 'Leave blank — the welcome email will include a link for the client to set their own password.'
+    : 'Leave blank — you can send portal access later via the ··· menu on their client card.';
+});
 
 function openAdd() {
   document.getElementById('edit-id').value = '';
@@ -2866,15 +2871,26 @@ document.getElementById('modal-save').addEventListener('click', async function()
     ? { id, name, markets, active, referralSource, referrerId, ...(password ? { password } : {}) }
     : { name, email, password, markets, sendEmail, referralSource, referrerId };
 
-  const res = await api(id ? 'PUT' : 'POST', '/api/admin/clients', body);
-  const data = await res.json();
+  let res, data;
+  try {
+    res = await api(id ? 'PUT' : 'POST', '/api/admin/clients', body);
+    data = await res.json();
+  } catch (err) {
+    errEl.textContent = 'Network error — please check your connection and try again.';
+    errEl.classList.add('visible');
+    this.disabled = false;
+    this.textContent = 'Save client';
+    return;
+  }
 
   if (res.ok) {
     if (id) {
       const idx = clients.findIndex(c => c.id === id);
       if (idx !== -1) { clients[idx].name = name; clients[idx].markets = markets; clients[idx].active = active; clients[idx].referralSource = referralSource; clients[idx].referrerId = referrerId; }
     } else {
-      clients.push({ id: data.id, name, email: email.toLowerCase().trim(), markets, active: true, createdAt: new Date().toISOString(), referralSource: referralSource || null, referrerId: referrerId || null, welcomeEmailSentAt: data.emailSent ? new Date().toISOString() : null, welcomeEmailFailed: sendEmail && !data.emailSent });
+      // Unshift so the new client appears at the top of the list on page 1
+      clients.unshift({ id: data.id, name, email: email.toLowerCase().trim(), markets, active: true, createdAt: new Date().toISOString(), referralSource: referralSource || null, referrerId: referrerId || null, welcomeEmailSentAt: data.emailSent ? new Date().toISOString() : null, welcomeEmailFailed: sendEmail && !data.emailSent });
+      clientPage = 0;
     }
     renderTable();
     renderPartnersSection();
@@ -2883,7 +2899,7 @@ document.getElementById('modal-save').addEventListener('click', async function()
       if (sendEmail) {
         showToast(data.emailSent ? `Welcome email sent to ${email}` : `Client saved — welcome email failed to send`, data.emailSent ? 'success' : 'warning');
       } else {
-        showToast(`Client saved`);
+        showToast(`Client saved — use the ··· menu to send portal access when ready`);
       }
     }
   } else {
