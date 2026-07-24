@@ -394,8 +394,7 @@ function render(d) {
     const visibleItems = rItems.filter(i => i.imageUrl || i.notes);
     if (visibleItems.length) {
       html += `<hr class="p-divider"><div class="p-section"><p class="p-section-label">Risk profile</p>`;
-      const cols = visibleItems.length === 1 ? '1fr' : '1fr 1fr';
-      html += `<div style="display:grid;grid-template-columns:${cols};gap:14px;">`;
+      html += `<div style="display:grid;grid-template-columns:1fr;gap:20px;">`;
       visibleItems.forEach(item => {
         html += `<div>`;
         html += `<p style="font-size:10px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">${esc(item.label||'Risk')}</p>`;
