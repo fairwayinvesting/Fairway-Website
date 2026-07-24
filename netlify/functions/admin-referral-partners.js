@@ -23,7 +23,7 @@ export default async (req) => {
   if (req.method === 'POST') {
     let body;
     try { body = await req.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
-    const { name, email, phone, company, type, notes, state, isReferralPartner } = body;
+    const { name, email, phone, company, type, notes, state, region, isReferralPartner } = body;
     if (!name) return json({ error: 'Name required' }, 400);
     try {
       const list = (await store.get('all', { type: 'json' })) || [];
@@ -36,6 +36,7 @@ export default async (req) => {
         type: type || null,
         notes: notes || null,
         state: state || null,
+        region: region || null,
         isReferralPartner: typeof isReferralPartner === 'boolean' ? isReferralPartner : null,
         createdAt: new Date().toISOString(),
       };
@@ -51,7 +52,7 @@ export default async (req) => {
   if (req.method === 'PUT') {
     let body;
     try { body = await req.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
-    const { id, name, email, phone, company, type, notes, state, isReferralPartner } = body;
+    const { id, name, email, phone, company, type, notes, state, region, isReferralPartner } = body;
     if (!id) return json({ error: 'id required' }, 400);
     if (!name) return json({ error: 'Name required' }, 400);
     try {
@@ -67,6 +68,7 @@ export default async (req) => {
         type: type || null,
         notes: notes || null,
         state: state || null,
+        region: region || null,
         isReferralPartner: typeof isReferralPartner === 'boolean' ? isReferralPartner : list[idx].isReferralPartner,
         updatedAt: new Date().toISOString(),
       };

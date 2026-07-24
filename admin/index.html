@@ -1663,6 +1663,10 @@
       </select>
     </div>
     <div class="field">
+      <label>Region</label>
+      <input type="text" id="pm-region" placeholder="e.g. Inner West, Northern Suburbs, Gold Coast">
+    </div>
+    <div class="field">
       <label>Email</label>
       <input type="email" id="pm-email" placeholder="jane@example.com">
     </div>
@@ -2166,6 +2170,7 @@ function renderPartnersSection() {
       (p.phone || '').toLowerCase().includes(q) ||
       dirProfLabel(normalizeProfType(p.type)).toLowerCase().includes(q) ||
       (p.state || '').toLowerCase().includes(q) ||
+      (p.region || '').toLowerCase().includes(q) ||
       (p.notes || '').toLowerCase().includes(q)
     );
   }
@@ -2244,12 +2249,13 @@ function openPartnerModal(id) {
     document.getElementById('pm-company').value = p.company || '';
     document.getElementById('pm-type').value = normalizeProfType(p.type) || '';
     document.getElementById('pm-state').value = p.state || '';
+    document.getElementById('pm-region').value = p.region || '';
     document.getElementById('pm-email').value = p.email || '';
     document.getElementById('pm-phone').value = p.phone || '';
     document.getElementById('pm-is-referral').checked = p.isReferralPartner !== false;
     document.getElementById('pm-notes').value = p.notes || '';
   } else {
-    ['pm-name','pm-company','pm-email','pm-phone','pm-notes'].forEach(fid => { document.getElementById(fid).value = ''; });
+    ['pm-name','pm-company','pm-region','pm-email','pm-phone','pm-notes'].forEach(fid => { document.getElementById(fid).value = ''; });
     document.getElementById('pm-type').value = '';
     document.getElementById('pm-state').value = '';
     document.getElementById('pm-is-referral').checked = true;
@@ -2275,6 +2281,7 @@ async function savePartner() {
     company: document.getElementById('pm-company').value.trim() || null,
     type: document.getElementById('pm-type').value || null,
     state: document.getElementById('pm-state').value || null,
+    region: document.getElementById('pm-region').value.trim() || null,
     email: document.getElementById('pm-email').value.trim() || null,
     phone: document.getElementById('pm-phone').value.trim() || null,
     isReferralPartner: document.getElementById('pm-is-referral').checked,
@@ -2329,7 +2336,7 @@ function openCrmPartnerPanel(id) {
   const p = crmPartners.find(x => x.id === id);
   if (!p) return;
   document.getElementById('prtnr-name').textContent = p.name;
-  const subParts = [dirProfLabel(p.type), p.company, p.state].filter(Boolean);
+  const subParts = [dirProfLabel(p.type), p.company, [p.region, p.state].filter(Boolean).join(', ')].filter(Boolean);
   document.getElementById('prtnr-sub').textContent = subParts.join(' · ') || 'Directory contact';
   document.getElementById('prtnr-actions').innerHTML = `
     <button class="btn-secondary" onclick="openPartnerModal('${id}')" style="font-size:12px;padding:7px 14px;">Edit</button>
@@ -2360,6 +2367,7 @@ function renderCrmPartnerPanel() {
         ${pf('Profession', dirProfLabel(p.type))}
         ${pf('Company', p.company)}
         ${pf('State', p.state)}
+        ${pf('Region', p.region)}
         ${pf('Email', p.email)}
         ${pf('Phone', p.phone)}
       </div>
