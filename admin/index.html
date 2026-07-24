@@ -2082,9 +2082,25 @@ const DIR_PROFESSIONS = [
 ];
 const DIR_STATES = ['NSW','VIC','QLD','SA','WA','TAS','ACT','NT'];
 
+const LEGACY_PROF_MAP = {
+  'Mortgage broker': 'mortgage-broker',
+  'Accountant': 'accountant',
+  'Financial planner': 'financial-planner',
+  "Buyer's agent": 'buyers-agent',
+  'Solicitor / conveyancer': 'conveyancer',
+  'Personal referral': 'other',
+  'Other': 'other',
+};
+
+function normalizeProfType(type) {
+  if (!type) return null;
+  return LEGACY_PROF_MAP[type] || type;
+}
+
 function dirProfLabel(type) {
   if (!type) return '';
-  const found = DIR_PROFESSIONS.find(p => p.key === type);
+  const normalized = normalizeProfType(type);
+  const found = DIR_PROFESSIONS.find(p => p.key === normalized);
   return found ? found.label : type;
 }
 
@@ -2120,19 +2136,14 @@ function renderPartnersSection() {
   const listEl = document.getElementById('partners-list');
   if (!filterEl || !listEl) return;
 
-  // Build profession pills from types present in the data
-  const profPresent = new Set(crmPartners.map(p => p.type).filter(Boolean));
+  // Build profession pills — normalise legacy type strings to canonical keys first
+  const profPresent = new Set(crmPartners.map(p => normalizeProfType(p.type)).filter(Boolean));
   const statePresent = new Set(crmPartners.map(p => p.state).filter(Boolean));
-  const knownKeys = new Set(DIR_PROFESSIONS.map(pr => pr.key));
-  const legacyTypes = [...profPresent].filter(t => !knownKeys.has(t));
   filterEl.innerHTML = `
     <div class="dir-pills">
       <button class="dir-pill ${dirProfFilter==='all'?'active':''}" onclick="dirProfFilter='all';renderPartnersSection()">All</button>
       ${DIR_PROFESSIONS.filter(pr => profPresent.has(pr.key)).map(pr =>
         `<button class="dir-pill ${dirProfFilter===pr.key?'active':''}" onclick="dirProfFilter='${pr.key}';renderPartnersSection()">${esc(pr.label)}</button>`
-      ).join('')}
-      ${legacyTypes.map(t =>
-        `<button class="dir-pill ${dirProfFilter===t?'active':''}" onclick="dirProfFilter='${esc(t)}';renderPartnersSection()">${esc(t)}</button>`
       ).join('')}
     </div>
     ${statePresent.size ? `<div style="display:flex;align-items:center;gap:8px;">
@@ -2144,7 +2155,7 @@ function renderPartnersSection() {
 
   // Apply filters
   let filtered = crmPartners;
-  if (dirProfFilter !== 'all') filtered = filtered.filter(p => p.type === dirProfFilter);
+  if (dirProfFilter !== 'all') filtered = filtered.filter(p => normalizeProfType(p.type) === dirProfFilter);
   if (dirStateFilter !== 'all') filtered = filtered.filter(p => p.state === dirStateFilter);
   if (dirSearchQuery) {
     const q = dirSearchQuery.toLowerCase();
@@ -2153,7 +2164,7 @@ function renderPartnersSection() {
       (p.company || '').toLowerCase().includes(q) ||
       (p.email || '').toLowerCase().includes(q) ||
       (p.phone || '').toLowerCase().includes(q) ||
-      dirProfLabel(p.type).toLowerCase().includes(q) ||
+      dirProfLabel(normalizeProfType(p.type)).toLowerCase().includes(q) ||
       (p.state || '').toLowerCase().includes(q) ||
       (p.notes || '').toLowerCase().includes(q)
     );
