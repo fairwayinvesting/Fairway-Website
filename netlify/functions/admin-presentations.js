@@ -182,8 +182,18 @@ export default async (req) => {
         const { clientId } = body;
         toSend = clientId ? [clientId] : [];
       } else {
-        // First send — only clients who haven't received it yet
-        toSend = pres.assignedClients.filter(cid => !pres.sentClients.includes(cid) && !(pres.revokedClients||[]).includes(cid));
+        // First send — only clients who haven't received it yet.
+        // If the frontend passes explicit targetClients, use those directly to avoid
+        // reading stale Blob data immediately after a save (eventual-consistency race).
+        if (Array.isArray(body.targetClients) && body.targetClients.length) {
+          toSend = body.targetClients.filter(cid => !(pres.revokedClients||[]).includes(cid));
+          // Ensure they're in assignedClients in case the blob was stale on the save step
+          for (const cid of toSend) {
+            if (!pres.assignedClients.includes(cid)) pres.assignedClients.push(cid);
+          }
+        } else {
+          toSend = pres.assignedClients.filter(cid => !pres.sentClients.includes(cid) && !(pres.revokedClients||[]).includes(cid));
+        }
       }
       let tokensDirty = false;
       let sent = 0;
@@ -207,7 +217,7 @@ export default async (req) => {
       presentations[idx] = pres;
       if (tokensDirty || sent > 0) await store.setJSON('all', presentations);
       if (sent > 0) appendAudit('presentation_sent', `Sent "${pres.address}" to ${sent} client${sent !== 1 ? 's' : ''}`);
-      return json({ ok: true, sent });
+      return json({ ok: true, sent, sentClients: pres.sentClients });
     }
 
     // Regular update — merge all known fields

@@ -6239,14 +6239,24 @@ async function notifyPresentation(id) {
 
   const btns = [...document.querySelectorAll(`button[onclick="notifyPresentation('${id}')"]`)];
   btns.forEach(b => { b.textContent = 'Sending…'; b.disabled = true; });
-  const res = await api('PUT', '/api/admin/presentations', { id, action });
+  // Pass targetClients for first-send so the backend doesn't rely on a fresh Blob read
+  // immediately after a save (avoids the eventual-consistency race that returns sent=0)
+  const payload = { id, action };
+  if (!isResend) payload.targetClients = toNotify;
+  const res = await api('PUT', '/api/admin/presentations', payload);
   const data = await res.json();
   btns.forEach(b => { b.textContent = isResend ? '✉ Re-notify' : '✉ Notify'; b.disabled = false; });
-  if (res.ok) {
-    toNotify.forEach(cid => { if (!p.sentClients.includes(cid)) p.sentClients.push(cid); });
+  if (res.ok && data.sent > 0) {
+    // Sync local sentClients from what the backend actually sent
+    if (data.sentClients) p.sentClients = data.sentClients;
+    else toNotify.forEach(cid => { if (!p.sentClients.includes(cid)) p.sentClients.push(cid); });
     renderPresentations();
     alert(`Sent to ${data.sent} client${data.sent !== 1 ? 's' : ''}.`);
-  } else alert('Send failed. Please try again.');
+  } else if (res.ok && data.sent === 0) {
+    alert('No emails were sent — please try again.');
+  } else {
+    alert('Send failed. Please try again.');
+  }
 }
 
 async function notifyPresentationFromModal() {
