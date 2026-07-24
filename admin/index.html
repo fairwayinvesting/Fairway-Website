@@ -2242,7 +2242,7 @@ function openPartnerModal(id) {
     if (!p) return;
     document.getElementById('pm-name').value = p.name || '';
     document.getElementById('pm-company').value = p.company || '';
-    document.getElementById('pm-type').value = p.type || '';
+    document.getElementById('pm-type').value = normalizeProfType(p.type) || '';
     document.getElementById('pm-state').value = p.state || '';
     document.getElementById('pm-email').value = p.email || '';
     document.getElementById('pm-phone').value = p.phone || '';
