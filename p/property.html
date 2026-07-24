@@ -183,7 +183,7 @@ function getVideoHtml(url) {
   if (m) return `<iframe src="https://www.youtube.com/embed/${m[1]}?rel=0&modestbranding=1" allowfullscreen></iframe>`;
   m = url.match(/vimeo\.com\/(\d+)/);
   if (m) return `<iframe src="https://player.vimeo.com/video/${m[1]}?dnt=1" allowfullscreen></iframe>`;
-  m = url.match(/streamable\.com\/([a-z0-9]+)/i);
+  m = url.match(/streamable\.com\/(?:e\/)?([a-z0-9]+)/i);
   if (m) return `<iframe src="https://streamable.com/e/${m[1]}" allowfullscreen></iframe>`;
   if (/\.(mp4|webm|mov)(\?|$)/i.test(url)) return `<video src="${url}" controls playsinline></video>`;
   return null;
