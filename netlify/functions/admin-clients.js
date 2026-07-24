@@ -138,8 +138,8 @@ export default async (req) => {
   const clients = (await store.get('all', { type: 'json' })) || [];
 
   if (req.method === 'GET') {
-    return json(clients.filter(c => !c.deleted).map(({ id, name, email, markets, active, createdAt, setupToken, pipelineStage, pipelineStageUpdatedAt, status, engagementNumber, referralSource, referrerId, acquisitions, customFields, welcomeEmailSentAt, welcomeEmailFailed }) =>
-      ({ id, name, email, markets, active, createdAt, hasSetupToken: !!setupToken, pipelineStage: pipelineStage || null, pipelineStageUpdatedAt: pipelineStageUpdatedAt || null, status: status || 'active', engagementNumber: engagementNumber || 1, referralSource: referralSource || null, referrerId: referrerId || null, acquisitions: acquisitions || [], customFields: customFields || [], welcomeEmailSentAt: welcomeEmailSentAt || null, welcomeEmailFailed: welcomeEmailFailed || false })
+    return json(clients.filter(c => !c.deleted).map(({ id, name, email, markets, active, createdAt, setupToken, pipelineStage, pipelineStageUpdatedAt, status, engagementNumber, referralSource, referrerId, acquisitions, customFields, welcomeEmailSentAt, welcomeEmailFailed, dealProfessionals }) =>
+      ({ id, name, email, markets, active, createdAt, hasSetupToken: !!setupToken, pipelineStage: pipelineStage || null, pipelineStageUpdatedAt: pipelineStageUpdatedAt || null, status: status || 'active', engagementNumber: engagementNumber || 1, referralSource: referralSource || null, referrerId: referrerId || null, acquisitions: acquisitions || [], customFields: customFields || [], welcomeEmailSentAt: welcomeEmailSentAt || null, welcomeEmailFailed: welcomeEmailFailed || false, dealProfessionals: dealProfessionals || [] })
     ));
   }
 
@@ -209,7 +209,7 @@ export default async (req) => {
 
   if (req.method === 'PUT') {
     const body = await req.json().catch(() => ({}));
-    const { id, name, markets, active, password, action, datesArchived, pipelineStage, status, engagementNumber, referralSource, referrerId, customFields } = body;
+    const { id, name, markets, active, password, action, datesArchived, pipelineStage, status, engagementNumber, referralSource, referrerId, customFields, dealProfessionals } = body;
     const idx = clients.findIndex(c => c.id === id);
     if (idx === -1) return json({ error: 'Client not found' }, 404);
 
@@ -390,6 +390,7 @@ export default async (req) => {
     if (referralSource !== undefined) client.referralSource = referralSource;
     if (referrerId !== undefined) client.referrerId = referrerId;
     if (customFields !== undefined) client.customFields = customFields;
+    if (dealProfessionals !== undefined) client.dealProfessionals = dealProfessionals;
     if (password) {
       const salt = crypto.randomBytes(16).toString('hex');
       client.passwordHash = await pbkdf2Hash(password, salt);

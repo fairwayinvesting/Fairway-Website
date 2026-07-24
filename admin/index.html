@@ -64,6 +64,14 @@
     .partner-row-company{font-size:12.5px;color:rgba(247,243,237,0.4);flex:1;}
     .partner-row-type{font-size:11.5px;color:rgba(247,243,237,0.3);min-width:130px;}
     .partner-row-count{font-size:12px;font-weight:500;color:rgba(189,122,112,0.85);min-width:80px;text-align:right;}
+    .dir-filter-bar{margin-bottom:20px;}
+    .dir-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+    .dir-pill{background:none;border:1px solid rgba(247,243,237,0.10);border-radius:100px;color:rgba(247,243,237,0.45);font-family:'Outfit',sans-serif;font-size:12px;padding:5px 13px;cursor:pointer;transition:all .15s;}
+    .dir-pill:hover{border-color:rgba(247,243,237,0.22);color:#f7f3ed;}
+    .dir-pill.active{background:rgba(247,243,237,0.08);border-color:rgba(247,243,237,0.22);color:#f7f3ed;font-weight:500;}
+    .dir-prof-badge{display:inline-block;font-size:11px;background:rgba(134,152,124,0.15);border:1px solid rgba(134,152,124,0.25);border-radius:100px;padding:2px 9px;color:rgba(134,152,124,0.9);white-space:nowrap;}
+    .dir-state-badge{display:inline-block;font-size:11px;background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.1);border-radius:100px;padding:2px 9px;color:rgba(247,243,237,0.45);white-space:nowrap;}
+    .dir-ref-badge{display:inline-block;font-size:11px;background:rgba(189,122,112,0.12);border:1px solid rgba(189,122,112,0.22);border-radius:100px;padding:2px 9px;color:rgba(189,122,112,0.85);white-space:nowrap;}
     /* Briefs section */
     .brief-row{display:flex;align-items:center;gap:14px;padding:14px 18px;background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:12px;margin-bottom:10px;flex-wrap:wrap;}
     .brief-row-name{font-size:14px;font-weight:400;color:#f7f3ed;flex:1;min-width:120px;}
@@ -706,7 +714,7 @@
       </button>
       <button class="snav-item" onclick="showSection('partners',this)">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10.5 10c1.657 0 3 .895 3 2v1h-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.4"/><circle cx="10.5" cy="4" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M2.5 13v-1c0-1.105 1.343-2 3.5-2s3.5.895 3.5 2v1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-        Partners
+        Directory
       </button>
       <button class="snav-item" onclick="showSection('prospects',this)">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13 13v-1.5A2.5 2.5 0 0 0 10.5 9h-5A2.5 2.5 0 0 0 3 11.5V13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M11 2l1 1 2-2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -931,12 +939,13 @@
       <div id="sl-grid" class="sl-grid"></div>
     </div>
 
-    <!-- Partners -->
+    <!-- Directory -->
     <div id="sec-partners" class="admin-section">
       <div class="sec-header">
-        <h1>Partners</h1>
-        <button class="btn-primary" onclick="openPartnerModal(null)" style="font-size:13px;padding:10px 20px;">+ Add partner</button>
+        <h1>Directory</h1>
+        <button class="btn-primary" onclick="openPartnerModal(null)" style="font-size:13px;padding:10px 20px;">+ Add contact</button>
       </div>
+      <div id="dir-filter-bar" class="dir-filter-bar"></div>
       <div id="partners-list"><span style="font-size:13px;color:rgba(247,243,237,0.25);">Loading…</span></div>
     </div>
 
@@ -1121,6 +1130,7 @@
     <button class="profile-tab" onclick="switchProfileTab('properties',this)">Properties</button>
     <button class="profile-tab" onclick="switchProfileTab('engagement',this)">Engagement</button>
     <button class="profile-tab" onclick="switchProfileTab('notes',this)">Notes</button>
+    <button class="profile-tab" onclick="switchProfileTab('professionals',this)">Professionals</button>
   </div>
   <div class="profile-body" id="profile-body">
     <div style="text-align:center;padding:40px;color:rgba(247,243,237,0.2);font-size:13px;">Loading…</div>
@@ -1602,10 +1612,10 @@
   </div>
 </div>
 
-<!-- Partner add/edit modal -->
+<!-- Directory contact add/edit modal -->
 <div id="partner-modal-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:600;display:none;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)closePartnerModal()">
   <div class="modal">
-    <h2 id="pm-title">Add partner</h2>
+    <h2 id="pm-title">Add contact</h2>
     <input type="hidden" id="pm-id">
     <div class="field">
       <label>Full name <span style="color:#e07070;">*</span></label>
@@ -1616,16 +1626,33 @@
       <input type="text" id="pm-company" placeholder="Smith Advisory">
     </div>
     <div class="field">
-      <label>Type</label>
+      <label>Profession</label>
       <select id="pm-type" style="width:100%;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.11);border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Outfit',sans-serif;font-weight:300;color:#f7f3ed;outline:none;">
-        <option value="">— Select type —</option>
-        <option value="Mortgage broker">Mortgage broker</option>
-        <option value="Accountant">Accountant</option>
-        <option value="Financial planner">Financial planner</option>
-        <option value="Buyer's agent">Buyer's agent</option>
-        <option value="Solicitor / conveyancer">Solicitor / conveyancer</option>
-        <option value="Personal referral">Personal referral</option>
-        <option value="Other">Other</option>
+        <option value="">— Select profession —</option>
+        <option value="property-manager">Property Manager</option>
+        <option value="conveyancer">Conveyancer</option>
+        <option value="sales-agent">Sales Agent</option>
+        <option value="mortgage-broker">Mortgage Broker</option>
+        <option value="accountant">Accountant</option>
+        <option value="building-pest">Building &amp; Pest</option>
+        <option value="financial-planner">Financial Planner</option>
+        <option value="buyers-agent">Buyer's Agent</option>
+        <option value="trade">Trade</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>State / Territory</label>
+      <select id="pm-state" style="width:100%;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.11);border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Outfit',sans-serif;font-weight:300;color:#f7f3ed;outline:none;">
+        <option value="">— Not specified —</option>
+        <option>NSW</option>
+        <option>VIC</option>
+        <option>QLD</option>
+        <option>SA</option>
+        <option>WA</option>
+        <option>TAS</option>
+        <option>ACT</option>
+        <option>NT</option>
       </select>
     </div>
     <div class="field">
@@ -1636,14 +1663,39 @@
       <label>Phone</label>
       <input type="text" id="pm-phone" placeholder="0412 345 678">
     </div>
+    <div class="field" style="display:flex;align-items:flex-start;gap:12px;padding:6px 0;">
+      <input type="checkbox" id="pm-is-referral" style="margin-top:3px;accent-color:#bd7a70;width:15px;height:15px;flex-shrink:0;cursor:pointer;">
+      <div>
+        <div style="font-size:13.5px;color:#f7f3ed;cursor:pointer;" onclick="document.getElementById('pm-is-referral').click()">Referral partner</div>
+        <div style="font-size:12px;color:rgba(247,243,237,0.4);margin-top:2px;">Track clients referred by this contact.</div>
+      </div>
+    </div>
     <div class="field">
       <label>Notes</label>
-      <textarea id="pm-notes" rows="3" placeholder="Any notes about this partner…" style="width:100%;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.11);border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Outfit',sans-serif;font-weight:300;color:#f7f3ed;outline:none;resize:vertical;box-sizing:border-box;"></textarea>
+      <textarea id="pm-notes" rows="3" placeholder="Any notes about this contact…" style="width:100%;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.11);border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Outfit',sans-serif;font-weight:300;color:#f7f3ed;outline:none;resize:vertical;box-sizing:border-box;"></textarea>
     </div>
     <div class="error-msg" id="pm-error"></div>
     <div class="modal-footer">
       <button class="btn-secondary" onclick="closePartnerModal()">Cancel</button>
-      <button class="btn-primary" id="pm-save" onclick="savePartner()">Save partner</button>
+      <button class="btn-primary" id="pm-save" onclick="savePartner()">Save contact</button>
+    </div>
+  </div>
+</div>
+
+<!-- Assign professional modal -->
+<div id="assign-prof-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:650;display:none;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)closeAssignProfModal()">
+  <div class="modal" style="max-width:440px;">
+    <h2>Assign professional</h2>
+    <input type="text" id="assign-prof-search" placeholder="Search by name, company or profession…" oninput="renderAssignProfList()" style="width:100%;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.11);border-radius:10px;padding:11px 14px;font-size:13.5px;font-family:'Outfit',sans-serif;color:#f7f3ed;outline:none;box-sizing:border-box;margin-bottom:12px;">
+    <div id="assign-prof-list" style="max-height:240px;overflow-y:auto;border:1px solid rgba(247,243,237,0.08);border-radius:10px;margin-bottom:16px;"></div>
+    <div id="assign-prof-selected" style="display:none;padding:12px 14px;background:rgba(134,152,124,0.08);border:1px solid rgba(134,152,124,0.2);border-radius:10px;margin-bottom:14px;">
+      <div style="font-size:13px;color:#f7f3ed;font-weight:500;margin-bottom:10px;" id="assign-prof-sel-name"></div>
+      <label style="font-size:12px;color:rgba(247,243,237,0.5);display:block;margin-bottom:4px;">Role in this deal</label>
+      <input type="text" id="assign-prof-role" placeholder="e.g. Conveyancer" style="width:100%;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.11);border-radius:8px;padding:9px 12px;font-size:13px;font-family:'Outfit',sans-serif;color:#f7f3ed;outline:none;box-sizing:border-box;">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeAssignProfModal()">Cancel</button>
+      <button class="btn-primary" id="assign-prof-btn" onclick="saveAssignProf()" disabled>Assign</button>
     </div>
   </div>
 </div>
@@ -2006,6 +2058,28 @@ function renderPartnerList() {
 // ── CRM referral partners ─────────────────────────────────────────────────────
 let crmPartners = [];
 let crmPartnerPanelId = null;
+let dirProfFilter = 'all', dirStateFilter = 'all';
+let assignProfSelectedId = null;
+
+const DIR_PROFESSIONS = [
+  { key: 'property-manager', label: 'Property Manager' },
+  { key: 'conveyancer', label: 'Conveyancer' },
+  { key: 'sales-agent', label: 'Sales Agent' },
+  { key: 'mortgage-broker', label: 'Mortgage Broker' },
+  { key: 'accountant', label: 'Accountant' },
+  { key: 'building-pest', label: 'Building & Pest' },
+  { key: 'financial-planner', label: 'Financial Planner' },
+  { key: 'buyers-agent', label: "Buyer's Agent" },
+  { key: 'trade', label: 'Trade' },
+  { key: 'other', label: 'Other' },
+];
+const DIR_STATES = ['NSW','VIC','QLD','SA','WA','TAS','ACT','NT'];
+
+function dirProfLabel(type) {
+  if (!type) return '';
+  const found = DIR_PROFESSIONS.find(p => p.key === type);
+  return found ? found.label : type;
+}
 
 async function loadCrmPartners() {
   try {
@@ -2028,29 +2102,80 @@ function populatePartnerDropdown() {
   const sel = document.getElementById('f-referrer-id');
   if (!sel) return;
   const cur = sel.value;
+  const referralPartners = crmPartners.filter(p => p.isReferralPartner !== false);
   sel.innerHTML = '<option value="">— No referrer —</option>' +
-    crmPartners.map(p => `<option value="${p.id}">${esc(p.name)}${p.company ? ` (${esc(p.company)})` : ''}</option>`).join('');
+    referralPartners.map(p => `<option value="${p.id}">${esc(p.name)}${p.company ? ` (${esc(p.company)})` : ''}</option>`).join('');
   if (cur) sel.value = cur;
 }
 
 function renderPartnersSection() {
-  const el = document.getElementById('partners-list');
-  if (!el) return;
-  if (!crmPartners.length) {
-    el.innerHTML = '<p style="font-size:14px;color:rgba(247,243,237,0.25);padding:8px 0;">No partners added yet. Add a partner to start tracking referrals.</p>';
+  const filterEl = document.getElementById('dir-filter-bar');
+  const listEl = document.getElementById('partners-list');
+  if (!filterEl || !listEl) return;
+
+  // Build profession pills from types present in the data
+  const profPresent = new Set(crmPartners.map(p => p.type).filter(Boolean));
+  const statePresent = new Set(crmPartners.map(p => p.state).filter(Boolean));
+  const knownKeys = new Set(DIR_PROFESSIONS.map(pr => pr.key));
+  const legacyTypes = [...profPresent].filter(t => !knownKeys.has(t));
+  filterEl.innerHTML = `
+    <div class="dir-pills">
+      <button class="dir-pill ${dirProfFilter==='all'?'active':''}" onclick="dirProfFilter='all';renderPartnersSection()">All</button>
+      ${DIR_PROFESSIONS.filter(pr => profPresent.has(pr.key)).map(pr =>
+        `<button class="dir-pill ${dirProfFilter===pr.key?'active':''}" onclick="dirProfFilter='${pr.key}';renderPartnersSection()">${esc(pr.label)}</button>`
+      ).join('')}
+      ${legacyTypes.map(t =>
+        `<button class="dir-pill ${dirProfFilter===t?'active':''}" onclick="dirProfFilter='${esc(t)}';renderPartnersSection()">${esc(t)}</button>`
+      ).join('')}
+    </div>
+    ${statePresent.size ? `<div style="display:flex;align-items:center;gap:8px;">
+      <select style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.10);border-radius:100px;color:rgba(247,243,237,0.6);font-family:'Outfit',sans-serif;font-size:12px;padding:5px 13px;cursor:pointer;outline:none;" onchange="dirStateFilter=this.value;renderPartnersSection()">
+        <option value="all" ${dirStateFilter==='all'?'selected':''}>All states</option>
+        ${DIR_STATES.filter(s => statePresent.has(s)).map(s => `<option value="${s}" ${dirStateFilter===s?'selected':''}>${s}</option>`).join('')}
+      </select>
+    </div>` : ''}`;
+
+  // Apply filters
+  let filtered = crmPartners;
+  if (dirProfFilter !== 'all') filtered = filtered.filter(p => p.type === dirProfFilter);
+  if (dirStateFilter !== 'all') filtered = filtered.filter(p => p.state === dirStateFilter);
+
+  if (!filtered.length) {
+    listEl.innerHTML = crmPartners.length
+      ? '<p style="font-size:14px;color:rgba(247,243,237,0.25);padding:8px 0;">No contacts match the current filter.</p>'
+      : '<p style="font-size:14px;color:rgba(247,243,237,0.25);padding:8px 0;">No contacts added yet. Use "+ Add contact" to build your directory.</p>';
     renderTopReferrers();
     return;
   }
+
   const referralCounts = {};
   clients.forEach(c => { if (c.referrerId) referralCounts[c.referrerId] = (referralCounts[c.referrerId] || 0) + 1; });
-  const sorted = [...crmPartners].sort((a,b) => (referralCounts[b.id]||0) - (referralCounts[a.id]||0));
-  el.innerHTML = sorted.map(p => {
-    const count = referralCounts[p.id] || 0;
+  const dealCounts = {};
+  clients.forEach(c => (c.dealProfessionals || []).forEach(dp => {
+    dealCounts[dp.contactId] = (dealCounts[dp.contactId] || 0) + 1;
+  }));
+
+  const sorted = [...filtered].sort((a, b) => {
+    const ar = referralCounts[a.id] || 0, br = referralCounts[b.id] || 0;
+    if (ar !== br) return br - ar;
+    return a.name.localeCompare(b.name);
+  });
+
+  listEl.innerHTML = sorted.map(p => {
+    const isRef = p.isReferralPartner !== false;
+    const refCount = referralCounts[p.id] || 0;
+    const dealCount = dealCounts[p.id] || 0;
+    const profLabel = dirProfLabel(p.type);
     return `<div class="partner-row" onclick="openCrmPartnerPanel('${p.id}')">
-      <div class="partner-row-name">${esc(p.name)}</div>
-      <div class="partner-row-company">${esc(p.company || '—')}</div>
-      <div class="partner-row-type">${esc(p.type || '—')}</div>
-      <div class="partner-row-count">${count} referral${count !== 1 ? 's' : ''}</div>
+      <div class="partner-row-name">${esc(p.name)}<span style="display:block;font-size:11.5px;color:rgba(247,243,237,0.3);margin-top:1px;">${esc(p.company || '')}</span></div>
+      <div style="flex:1;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        ${profLabel ? `<span class="dir-prof-badge">${esc(profLabel)}</span>` : ''}
+        ${p.state ? `<span class="dir-state-badge">${esc(p.state)}</span>` : ''}
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+        ${isRef && refCount > 0 ? `<span class="dir-ref-badge">${refCount} referral${refCount!==1?'s':''}</span>` : ''}
+        ${dealCount > 0 ? `<span style="font-size:11.5px;color:rgba(247,243,237,0.4);">${dealCount} deal${dealCount!==1?'s':''}</span>` : ''}
+      </div>
     </div>`;
   }).join('');
   renderTopReferrers();
@@ -2078,22 +2203,26 @@ function renderTopReferrers() {
 
 function openPartnerModal(id) {
   document.getElementById('pm-id').value = id || '';
-  document.getElementById('pm-title').textContent = id ? 'Edit partner' : 'Add partner';
+  document.getElementById('pm-title').textContent = id ? 'Edit contact' : 'Add contact';
   document.getElementById('pm-error').classList.remove('visible');
   document.getElementById('pm-save').disabled = false;
-  document.getElementById('pm-save').textContent = 'Save partner';
+  document.getElementById('pm-save').textContent = 'Save contact';
   if (id) {
     const p = crmPartners.find(x => x.id === id);
     if (!p) return;
     document.getElementById('pm-name').value = p.name || '';
     document.getElementById('pm-company').value = p.company || '';
     document.getElementById('pm-type').value = p.type || '';
+    document.getElementById('pm-state').value = p.state || '';
     document.getElementById('pm-email').value = p.email || '';
     document.getElementById('pm-phone').value = p.phone || '';
+    document.getElementById('pm-is-referral').checked = p.isReferralPartner !== false;
     document.getElementById('pm-notes').value = p.notes || '';
   } else {
-    ['pm-name','pm-company','pm-email','pm-phone','pm-notes'].forEach(id => { document.getElementById(id).value = ''; });
+    ['pm-name','pm-company','pm-email','pm-phone','pm-notes'].forEach(fid => { document.getElementById(fid).value = ''; });
     document.getElementById('pm-type').value = '';
+    document.getElementById('pm-state').value = '';
+    document.getElementById('pm-is-referral').checked = true;
   }
   document.getElementById('partner-modal-overlay').style.display = 'flex';
 }
@@ -2115,8 +2244,10 @@ async function savePartner() {
     name,
     company: document.getElementById('pm-company').value.trim() || null,
     type: document.getElementById('pm-type').value || null,
+    state: document.getElementById('pm-state').value || null,
     email: document.getElementById('pm-email').value.trim() || null,
     phone: document.getElementById('pm-phone').value.trim() || null,
+    isReferralPartner: document.getElementById('pm-is-referral').checked,
     notes: document.getElementById('pm-notes').value.trim() || null,
   };
   try {
@@ -2168,7 +2299,8 @@ function openCrmPartnerPanel(id) {
   const p = crmPartners.find(x => x.id === id);
   if (!p) return;
   document.getElementById('prtnr-name').textContent = p.name;
-  document.getElementById('prtnr-sub').textContent = [p.type, p.company].filter(Boolean).join(' · ') || 'Partner';
+  const subParts = [dirProfLabel(p.type), p.company, p.state].filter(Boolean);
+  document.getElementById('prtnr-sub').textContent = subParts.join(' · ') || 'Directory contact';
   document.getElementById('prtnr-actions').innerHTML = `
     <button class="btn-secondary" onclick="openPartnerModal('${id}')" style="font-size:12px;padding:7px 14px;">Edit</button>
     <button class="btn-secondary" onclick="deletePartner('${id}')" style="font-size:12px;padding:7px 14px;color:#f08080;border-color:rgba(240,128,128,0.2);">Delete</button>`;
@@ -2187,28 +2319,181 @@ function renderCrmPartnerPanel() {
   const el = document.getElementById('prtnr-body');
   const p = crmPartners.find(x => x.id === crmPartnerPanelId);
   if (!p || !el) return;
-  const referred = clients.filter(c => c.referrerId === p.id);
+  const isRef = p.isReferralPartner !== false;
+  const referred = isRef ? clients.filter(c => c.referrerId === p.id) : [];
+  const dealsClients = clients.filter(c => (c.dealProfessionals || []).some(dp => dp.contactId === p.id));
   const pf = (label, val) => val ? `<div class="profile-field"><label>${label}</label><div class="pf-val">${esc(val)}</div></div>` : '';
   el.innerHTML = `
     <div class="profile-section">
       <div class="profile-section-title">Details</div>
       <div class="profile-fields">
-        ${pf('Type', p.type)}
+        ${pf('Profession', dirProfLabel(p.type))}
         ${pf('Company', p.company)}
+        ${pf('State', p.state)}
         ${pf('Email', p.email)}
         ${pf('Phone', p.phone)}
       </div>
-      ${p.notes ? `<div style="margin-top:16px;font-size:13px;color:rgba(247,243,237,0.55);line-height:1.65;">${esc(p.notes)}</div>` : ''}
+      ${isRef ? `<div style="margin-top:12px;"><span class="dir-ref-badge">Referral partner</span></div>` : ''}
+      ${p.notes ? `<div style="margin-top:16px;font-size:13px;color:rgba(247,243,237,0.55);line-height:1.65;white-space:pre-wrap;">${esc(p.notes)}</div>` : ''}
     </div>
-    <div class="profile-section">
+    ${isRef ? `<div class="profile-section">
       <div class="profile-section-title">Referred clients (${referred.length})</div>
       ${referred.length ? referred.map(c => `
         <div class="dash-row" style="cursor:pointer;" onclick="closeCrmPartnerPanel();openClientProfile('${c.id}')">
           <div class="dash-row-label">${esc(c.name)}<span style="display:block;font-size:11.5px;color:rgba(247,243,237,0.3);">${esc(c.email)}</span></div>
           <div class="dash-row-meta">${c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '—'}</div>
         </div>`).join('') : '<p style="font-size:13px;color:rgba(247,243,237,0.25);padding:4px 0;">No clients referred yet.</p>'}
+    </div>` : ''}
+    <div class="profile-section">
+      <div class="profile-section-title">Deals involved (${dealsClients.length})</div>
+      ${dealsClients.length ? dealsClients.map(c => {
+        const dp = (c.dealProfessionals || []).find(d => d.contactId === p.id);
+        return `<div class="dash-row" style="cursor:pointer;" onclick="closeCrmPartnerPanel();openClientProfile('${c.id}')">
+          <div class="dash-row-label">${esc(c.name)}<span style="display:block;font-size:11.5px;color:rgba(247,243,237,0.3);">${esc(dp && dp.role ? dp.role : '')}</span></div>
+          <div class="dash-row-meta">${c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '—'}</div>
+        </div>`;
+      }).join('') : '<p style="font-size:13px;color:rgba(247,243,237,0.25);padding:4px 0;">Not assigned to any client deals yet.</p>'}
     </div>
   `;
+}
+
+function openContactFromProfile(contactId) {
+  closeClientProfile();
+  setTimeout(() => openCrmPartnerPanel(contactId), 50);
+}
+
+function renderProfessionalsTab() {
+  const el = document.getElementById('profile-body');
+  if (!el) return;
+  const client = clients.find(c => c.id === crmProfileClientId);
+  if (!client) return;
+  const profs = client.dealProfessionals || [];
+  el.innerHTML = `
+    <div class="profile-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div class="profile-section-title" style="margin:0;">Professionals involved in deal</div>
+        <button class="btn-secondary" onclick="openAssignProfModal()" style="font-size:12px;padding:6px 14px;">+ Assign</button>
+      </div>
+      ${profs.length === 0
+        ? '<p style="font-size:13px;color:rgba(247,243,237,0.25);padding:4px 0;">No professionals assigned to this deal yet.</p>'
+        : profs.map((dp, i) => {
+            const contact = crmPartners.find(x => x.id === dp.contactId);
+            if (!contact) return '';
+            const profLabel = dirProfLabel(contact.type);
+            return `<div class="dash-row">
+              <div class="dash-row-label">
+                <span style="cursor:pointer;color:#f7f3ed;" onclick="openContactFromProfile('${contact.id}')">${esc(contact.name)}</span>
+                <span style="display:block;font-size:11.5px;color:rgba(247,243,237,0.3);">${esc(dp.role || profLabel || '')}${contact.company ? ` · ${esc(contact.company)}` : ''}</span>
+              </div>
+              <div class="dash-row-meta" style="display:flex;gap:8px;align-items:center;">
+                ${profLabel ? `<span class="dir-prof-badge">${esc(profLabel)}</span>` : ''}
+                <button onclick="removeProfessional(${i})" style="background:none;border:none;color:rgba(240,128,128,0.5);font-size:20px;cursor:pointer;padding:0;line-height:1;" title="Remove">&times;</button>
+              </div>
+            </div>`;
+          }).join('')
+      }
+    </div>`;
+}
+
+function openAssignProfModal() {
+  assignProfSelectedId = null;
+  document.getElementById('assign-prof-search').value = '';
+  document.getElementById('assign-prof-role').value = '';
+  document.getElementById('assign-prof-selected').style.display = 'none';
+  document.getElementById('assign-prof-btn').disabled = true;
+  document.getElementById('assign-prof-btn').textContent = 'Assign';
+  renderAssignProfList();
+  document.getElementById('assign-prof-overlay').style.display = 'flex';
+}
+
+function closeAssignProfModal() {
+  document.getElementById('assign-prof-overlay').style.display = 'none';
+}
+
+function renderAssignProfList() {
+  const q = (document.getElementById('assign-prof-search').value || '').toLowerCase().trim();
+  const client = clients.find(c => c.id === crmProfileClientId);
+  const existingIds = new Set((client && client.dealProfessionals || []).map(dp => dp.contactId));
+  let list = crmPartners.filter(p => !existingIds.has(p.id));
+  if (q) list = list.filter(p =>
+    p.name.toLowerCase().includes(q) ||
+    (p.company || '').toLowerCase().includes(q) ||
+    dirProfLabel(p.type).toLowerCase().includes(q) ||
+    (p.type || '').toLowerCase().includes(q)
+  );
+  const el = document.getElementById('assign-prof-list');
+  if (!list.length) {
+    el.innerHTML = '<div style="padding:20px;text-align:center;font-size:13px;color:rgba(247,243,237,0.25);">No contacts found.</div>';
+    return;
+  }
+  el.innerHTML = list.map(p => {
+    const profLabel = dirProfLabel(p.type);
+    const isSelected = assignProfSelectedId === p.id;
+    return `<div onclick="selectAssignProf('${p.id}')" style="padding:11px 14px;cursor:pointer;border-bottom:1px solid rgba(247,243,237,0.06);display:flex;align-items:center;gap:10px;${isSelected?'background:rgba(134,152,124,0.10);':''}">
+      <div style="flex:1;">
+        <div style="font-size:13.5px;color:#f7f3ed;">${esc(p.name)}${p.company?`<span style="color:rgba(247,243,237,0.35);font-size:12px;"> · ${esc(p.company)}</span>`:''}</div>
+        ${profLabel||p.state?`<div style="margin-top:3px;display:flex;gap:5px;flex-wrap:wrap;">${profLabel?`<span class="dir-prof-badge">${esc(profLabel)}</span>`:''} ${p.state?`<span class="dir-state-badge">${esc(p.state)}</span>`:''}</div>`:''}
+      </div>
+      ${isSelected?`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="#86987c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`:''}
+    </div>`;
+  }).join('');
+}
+
+function selectAssignProf(id) {
+  assignProfSelectedId = id;
+  const contact = crmPartners.find(p => p.id === id);
+  if (!contact) return;
+  document.getElementById('assign-prof-sel-name').textContent = contact.name + (contact.company ? ` · ${contact.company}` : '');
+  const profLabel = dirProfLabel(contact.type);
+  if (!document.getElementById('assign-prof-role').value) {
+    document.getElementById('assign-prof-role').value = profLabel || '';
+  }
+  document.getElementById('assign-prof-selected').style.display = 'block';
+  document.getElementById('assign-prof-btn').disabled = false;
+  renderAssignProfList();
+}
+
+async function saveAssignProf() {
+  if (!assignProfSelectedId || !crmProfileClientId) return;
+  const btn = document.getElementById('assign-prof-btn');
+  btn.disabled = true; btn.textContent = 'Assigning…';
+  const role = document.getElementById('assign-prof-role').value.trim();
+  const client = clients.find(c => c.id === crmProfileClientId);
+  if (!client) return;
+  const dealProfessionals = [...(client.dealProfessionals || []), { contactId: assignProfSelectedId, role }];
+  try {
+    const res = await api('PUT', '/api/admin/clients', { id: crmProfileClientId, dealProfessionals });
+    if (res.ok) {
+      client.dealProfessionals = dealProfessionals;
+      closeAssignProfModal();
+      renderProfessionalsTab();
+      renderPartnersSection();
+    } else {
+      btn.disabled = false; btn.textContent = 'Assign';
+      alert('Failed to assign. Please try again.');
+    }
+  } catch {
+    btn.disabled = false; btn.textContent = 'Assign';
+    alert('Connection error — not saved. Please try again.');
+  }
+}
+
+async function removeProfessional(idx) {
+  const client = clients.find(c => c.id === crmProfileClientId);
+  if (!client) return;
+  const dealProfessionals = (client.dealProfessionals || []).filter((_, i) => i !== idx);
+  try {
+    const res = await api('PUT', '/api/admin/clients', { id: crmProfileClientId, dealProfessionals });
+    if (res.ok) {
+      client.dealProfessionals = dealProfessionals;
+      renderProfessionalsTab();
+      renderPartnersSection();
+    } else {
+      alert('Failed to remove. Please try again.');
+    }
+  } catch {
+    alert('Connection error — not saved. Please try again.');
+  }
 }
 
 // Auth is handled entirely by the fw_admin HttpOnly cookie set by admin-login.
@@ -4156,6 +4441,7 @@ function switchProfileTab(tab, btn) {
   else if (tab === 'properties') renderPropertiesTab();
   else if (tab === 'engagement') renderEngagementTab();
   else if (tab === 'notes') renderNotesTab();
+  else if (tab === 'professionals') renderProfessionalsTab();
 }
 
 function pfVal(v) {
