@@ -2535,6 +2535,7 @@ async function loadCrmPartners() {
   }
   renderPartnersSection();
   populatePartnerDropdown();
+  renderDashboard();
 }
 
 function populatePartnerDropdown() {
@@ -5918,7 +5919,158 @@ function renderEngagementTab() {
         </div>`;
       }).join('')}
     </div>` : ''}
+    ${buildManualFeeSection(client)}
   `;
+}
+
+function buildManualFeeSection(client) {
+  const fee = client.manualFee;
+  const fmt = n => '$' + Number(n || 0).toLocaleString('en-AU', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const today = localDateStr(new Date());
+
+  const editForm = (vals) => `
+    <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">Fee details</div>
+    <div style="margin-bottom:8px;">
+      <label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Total fee (ex GST)</label>
+      <input id="fee-total-${client.id}" class="pf-edit-input" type="number" step="0.01" min="0" placeholder="e.g. 12500" value="${vals?.totalFee || ''}">
+    </div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Notes (optional)</label>
+      <textarea id="fee-notes-${client.id}" class="pf-edit-input" placeholder="e.g. Full service fee" rows="2" style="resize:vertical;">${esc(vals?.notes || '')}</textarea>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-sm" style="background:rgba(189,122,112,0.15);border-color:rgba(189,122,112,0.25);color:#bd7a70;" onclick="saveFeeDetails('${client.id}')">Save</button>
+      <button class="btn-sm" onclick="toggleFeeEditForm('${client.id}')">Cancel</button>
+    </div>`;
+
+  const pmtFormHtml = `
+    <div id="fee-pmt-form-${client.id}" style="display:none;background:rgba(247,243,237,0.04);border-radius:10px;padding:14px 16px;margin-bottom:12px;">
+      <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">Record payment</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <div><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Amount (ex GST)</label>
+          <input id="fee-pmt-amt-${client.id}" class="pf-edit-input" type="number" step="0.01" min="0" placeholder="e.g. 6250"></div>
+        <div><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Date</label>
+          <input id="fee-pmt-date-${client.id}" class="pf-edit-input" type="date" value="${today}"></div>
+      </div>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Note</label>
+        <input id="fee-pmt-note-${client.id}" class="pf-edit-input" type="text" placeholder="e.g. Deposit, Final payment">
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-sm" style="background:rgba(189,122,112,0.15);border-color:rgba(189,122,112,0.25);color:#bd7a70;" onclick="addFeePayment('${client.id}')">Save payment</button>
+        <button class="btn-sm" onclick="document.getElementById('fee-pmt-form-${client.id}').style.display='none'">Cancel</button>
+      </div>
+    </div>`;
+
+  if (!fee || !fee.totalFee) {
+    return `<div class="profile-section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="profile-section-title" style="margin-bottom:0;">Fees</div>
+      </div>
+      <div id="fee-edit-wrap-${client.id}" style="display:none;background:rgba(247,243,237,0.04);border-radius:10px;padding:14px 16px;margin-bottom:12px;">${editForm(null)}</div>
+      <p style="font-size:13px;color:rgba(247,243,237,0.25);margin:0 0 12px;">No fee assigned yet.</p>
+      <button class="btn-sm" onclick="document.getElementById('fee-edit-wrap-${client.id}').style.display='block';this.style.display='none'">Assign fee</button>
+    </div>`;
+  }
+
+  const totalFee = fee.totalFee || 0;
+  const gst = totalFee * 0.1;
+  const incGst = totalFee + gst;
+  const payments = fee.payments || [];
+  const paidAmt = payments.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+  const outstanding = Math.max(0, totalFee - paidAmt);
+  const paidPct = totalFee > 0 ? Math.round((paidAmt / totalFee) * 100) : 0;
+  const isPaid = outstanding <= 0;
+
+  return `<div class="profile-section">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div class="profile-section-title" style="margin-bottom:0;">Fees</div>
+      <button class="btn-sm" onclick="toggleFeeEditForm('${client.id}')">Edit</button>
+    </div>
+    <div id="fee-edit-wrap-${client.id}" style="display:none;background:rgba(247,243,237,0.04);border-radius:10px;padding:14px 16px;margin-bottom:14px;">${editForm(fee)}</div>
+    <div style="background:rgba(247,243,237,0.04);border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(247,243,237,0.06);">
+        <span style="font-size:12.5px;color:rgba(247,243,237,0.45);">Total fee (ex GST)</span>
+        <span style="font-size:13px;color:#f7f3ed;font-weight:500;">${fmt(totalFee)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(247,243,237,0.06);">
+        <span style="font-size:12px;color:rgba(247,243,237,0.3);">+ GST (10%)</span>
+        <span style="font-size:12px;color:rgba(247,243,237,0.3);">${fmt(gst)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(247,243,237,0.06);">
+        <span style="font-size:12.5px;color:rgba(247,243,237,0.45);">Total inc GST</span>
+        <span style="font-size:13px;color:#f7f3ed;">${fmt(incGst)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(247,243,237,0.06);">
+        <span style="font-size:12.5px;color:rgba(247,243,237,0.45);">Paid (ex GST)</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:11px;color:${isPaid?'#6dbf7b':'#e8a87c'};background:${isPaid?'rgba(109,191,123,0.1)':'rgba(232,168,124,0.1)'};border-radius:100px;padding:2px 8px;">${paidPct}%</span>
+          <span style="font-size:13px;color:${isPaid?'#6dbf7b':'#f7f3ed'};font-weight:500;">${fmt(paidAmt)}</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;">
+        <span style="font-size:12.5px;color:rgba(247,243,237,0.45);">Outstanding (ex GST)</span>
+        <span style="font-size:13px;color:${outstanding > 0 ? '#e8a87c' : '#6dbf7b'};font-weight:500;">${fmt(outstanding)}</span>
+      </div>
+    </div>
+    ${payments.length ? `<div style="margin-bottom:14px;">
+      <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:8px;">Payment history</div>
+      ${payments.map(p => `<div style="display:flex;align-items:center;padding:8px 0;border-bottom:1px solid rgba(247,243,237,0.05);">
+        <div style="flex:1;"><div style="font-size:13px;color:#f7f3ed;">${fmt(p.amount)}</div>
+          <div style="font-size:11.5px;color:rgba(247,243,237,0.3);">${p.note ? esc(p.note) + ' · ' : ''}${new Date(p.paidAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}</div>
+        </div>
+        <button onclick="deleteFeePayment('${client.id}','${p.id}')" style="background:none;border:none;color:rgba(247,243,237,0.2);cursor:pointer;font-size:18px;padding:4px 8px;line-height:1;" title="Remove">&#215;</button>
+      </div>`).join('')}
+    </div>` : ''}
+    ${pmtFormHtml}
+    <button class="btn-sm" onclick="document.getElementById('fee-pmt-form-${client.id}').style.display='block'">+ Record payment</button>
+    ${fee.notes ? `<p style="font-size:12px;color:rgba(247,243,237,0.3);margin-top:10px;margin-bottom:0;">${esc(fee.notes)}</p>` : ''}
+  </div>`;
+}
+
+function toggleFeeEditForm(clientId) {
+  const wrap = document.getElementById('fee-edit-wrap-' + clientId);
+  if (!wrap) return;
+  wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+}
+
+async function saveFeeDetails(clientId) {
+  const client = clients.find(c => c.id === clientId);
+  if (!client) return;
+  const totalFee = parseFloat(document.getElementById('fee-total-' + clientId)?.value) || 0;
+  const notes = document.getElementById('fee-notes-' + clientId)?.value?.trim() || '';
+  const manualFee = { ...(client.manualFee || {}), totalFee, notes };
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, manualFee });
+  if (!res.ok) return alert('Failed to save fee details.');
+  client.manualFee = manualFee;
+  renderEngagementTab();
+}
+
+async function addFeePayment(clientId) {
+  const client = clients.find(c => c.id === clientId);
+  if (!client) return;
+  const amount = parseFloat(document.getElementById('fee-pmt-amt-' + clientId)?.value);
+  if (!amount || amount <= 0) return alert('Please enter a valid payment amount.');
+  const dateVal = document.getElementById('fee-pmt-date-' + clientId)?.value;
+  const paidAt = dateVal ? new Date(dateVal + 'T00:00:00').toISOString() : new Date().toISOString();
+  const note = document.getElementById('fee-pmt-note-' + clientId)?.value?.trim() || '';
+  const existing = client.manualFee || {};
+  const manualFee = { ...existing, payments: [...(existing.payments || []), { id: crypto.randomUUID(), amount, note, paidAt }] };
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, manualFee });
+  if (!res.ok) return alert('Failed to save payment.');
+  client.manualFee = manualFee;
+  renderEngagementTab();
+}
+
+async function deleteFeePayment(clientId, paymentId) {
+  if (!confirm('Remove this payment record?')) return;
+  const client = clients.find(c => c.id === clientId);
+  if (!client?.manualFee) return;
+  const manualFee = { ...client.manualFee, payments: (client.manualFee.payments || []).filter(p => p.id !== paymentId) };
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, manualFee });
+  if (!res.ok) return alert('Failed to remove payment.');
+  client.manualFee = manualFee;
+  renderEngagementTab();
 }
 
 function toggleAcqAccordion(acqId) {
