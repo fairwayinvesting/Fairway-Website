@@ -7233,36 +7233,16 @@ async function saveQrCode() {
   }
 }
 
-async function downloadQrActive() {
-  const urlEl = document.getElementById('qr-url-input');
-  const dlBtn = document.getElementById('qr-dl-btn');
-  const url = urlEl ? urlEl.value.trim() : '';
+function downloadQrActive() {
+  const url = document.getElementById('qr-url-input')?.value.trim();
   if (!url) return;
-  const noteEl = document.getElementById('qr-note-input');
-  const note = noteEl ? noteEl.value.trim() : '';
-  if (dlBtn) { dlBtn.disabled = true; dlBtn.textContent = 'Downloading…'; }
-  await downloadQrCode(url, note);
-  if (dlBtn) { dlBtn.disabled = false; dlBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3M2 13h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Download PNG'; }
+  const note = document.getElementById('qr-note-input')?.value.trim() || '';
+  downloadQrCode(url, note);
 }
 
-async function downloadQrCode(url, note) {
-  try {
-    const src = `/api/admin/qr-image?url=${encodeURIComponent(url)}&size=2000&color=0d2137`;
-    const res = await fetch(src);
-    if (!res.ok) throw new Error('Failed');
-    const blob = await res.blob();
-    const objUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const slug = (note || url).replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase().slice(0, 40) || 'qr-code';
-    a.href = objUrl;
-    a.download = `${slug}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(objUrl), 10000);
-  } catch {
-    alert('Download failed. Please try again.');
-  }
+function downloadQrCode(url, note) {
+  const slug = (note || url).replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase().slice(0, 40) || 'qr-code';
+  window.location.href = `/api/admin/qr-image?url=${encodeURIComponent(url)}&size=2000&color=0d2137&download=1&filename=${encodeURIComponent(slug)}`;
 }
 
 async function deleteQrCode(id) {
