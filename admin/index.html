@@ -79,7 +79,17 @@
     /* Settings subsections */
     .settings-block{background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.07);border-radius:16px;padding:24px 28px;margin-bottom:12px;}
     .settings-block>h2{font-family:'Fraunces',serif;font-size:18px;font-weight:400;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(247,243,237,0.07);}
-    .settings-category{font-size:10.5px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(247,243,237,0.22);margin:28px 0 10px;padding:0;}
+    .settings-layout{display:flex;gap:0;align-items:flex-start;}
+    .settings-nav{width:176px;flex-shrink:0;padding-right:28px;border-right:1px solid rgba(247,243,237,0.07);margin-right:36px;position:sticky;top:24px;}
+    .settings-nav-group{margin-bottom:22px;}
+    .settings-nav-group:last-child{margin-bottom:0;}
+    .settings-nav-label{font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(247,243,237,0.2);margin:0 0 5px;padding:0 10px;}
+    .settings-nav-item{display:block;width:100%;text-align:left;background:none;border:none;padding:8px 10px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13.5px;color:rgba(247,243,237,0.48);cursor:pointer;transition:all .15s;margin-bottom:1px;}
+    .settings-nav-item:hover{background:rgba(247,243,237,0.05);color:rgba(247,243,237,0.82);}
+    .settings-nav-item.active{background:rgba(247,243,237,0.08);color:#f7f3ed;font-weight:500;}
+    .settings-content{flex:1;min-width:0;}
+    .settings-panel{display:none;}
+    .settings-panel.active{display:block;}
 
     /* Compliance */
     .comp-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
@@ -490,6 +500,10 @@
       .ms-row{grid-template-columns:1fr 1fr;}.ms-row-header{display:none!important;}
       .sec-header h1{font-size:24px;}
       .dash-stats{grid-template-columns:1fr 1fr;}
+      .settings-layout{flex-direction:column;}
+      .settings-nav{width:100%;border-right:none;border-bottom:1px solid rgba(247,243,237,0.07);padding-right:0;margin-right:0;padding-bottom:16px;margin-bottom:20px;position:static;display:flex;flex-wrap:wrap;gap:4px;}
+      .settings-nav-group{margin-bottom:0;display:contents;}
+      .settings-nav-label{display:none;}
     }
     @media(max-width:520px){
       .admin-main{padding:20px 16px;}
@@ -955,193 +969,209 @@
         <h1>Settings</h1>
       </div>
 
-      <!-- ── Profile ─────────────────────────────────────────────────────────── -->
-      <p class="settings-category">Profile</p>
+      <div class="settings-layout">
 
-      <!-- My Signature -->
-      <div class="settings-block" id="sig-settings-block">
-        <h2>My Signature</h2>
-        <p style="font-size:13px;color:rgba(247,243,237,0.45);margin-bottom:20px;line-height:1.6;">Create your agent signature for Buyer Engagement Agreements. It will appear on all signed PDFs.</p>
-
-        <!-- Current signature preview -->
-        <div id="agent-sig-preview" style="display:none;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.09);border-radius:12px;padding:16px 20px;margin-bottom:16px;">
-          <p style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#bd7a70;margin-bottom:10px;">Current signature</p>
-          <img id="agent-sig-preview-img" src="" alt="" style="max-width:200px;height:48px;object-fit:contain;object-position:left center;filter:invert(1) brightness(0.85);display:block;margin-bottom:12px;">
-          <button onclick="deleteAgentSig()" style="background:none;border:none;font-family:'Outfit',sans-serif;font-size:12.5px;color:rgba(220,80,80,0.7);cursor:pointer;padding:0;">Remove signature</button>
-        </div>
-
-        <!-- Signature creation area -->
-        <div id="agent-sig-creator">
-          <div style="display:flex;gap:4px;margin-bottom:12px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.07);border-radius:10px;padding:3px;width:fit-content;">
-            <button class="sig-tab active" id="admin-tab-generate" onclick="setAdminSigMode('generate')" style="padding:8px 20px;border-radius:8px;border:1px solid transparent;font-family:'Outfit',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .15s;color:rgba(247,243,237,0.3);background:transparent;" >Generate</button>
-            <button class="sig-tab" id="admin-tab-draw" onclick="setAdminSigMode('draw')" style="padding:8px 20px;border-radius:8px;border:1px solid transparent;font-family:'Outfit',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .15s;color:rgba(247,243,237,0.3);background:transparent;">Draw</button>
+        <!-- ── Sidebar nav ───────────────────────────────────────────────────── -->
+        <nav class="settings-nav">
+          <div class="settings-nav-group">
+            <p class="settings-nav-label">Profile</p>
+            <button class="settings-nav-item active" onclick="showSettingsPanel('signature',this)">My Signature</button>
           </div>
-
-          <!-- Generate mode: name input -->
-          <div id="admin-sig-generate-area">
-            <div style="margin-bottom:12px;">
-              <label style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#bd7a70;display:block;margin-bottom:8px;">Signature text</label>
-              <input type="text" id="admin-sig-name-input" value="L. Clifford" oninput="renderAdminGeneratedSig()" style="background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.1);border-radius:10px;padding:11px 14px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:15px;outline:none;width:100%;max-width:260px;">
-            </div>
+          <div class="settings-nav-group">
+            <p class="settings-nav-label">Business</p>
+            <button class="settings-nav-item" onclick="showSettingsPanel('compliance',this)">Compliance</button>
           </div>
-
-          <!-- Canvas (used for both modes) -->
-          <div style="position:relative;border-radius:10px;overflow:hidden;border:1px solid rgba(247,243,237,0.12);margin-bottom:10px;background:#fff;width:100%;max-width:340px;">
-            <canvas id="admin-sig-canvas" style="display:block;width:100%;height:90px;cursor:default;background:#fff;"></canvas>
-            <div id="admin-sig-draw-hint" style="display:none;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;font-size:12px;color:rgba(0,0,0,0.25);font-style:italic;">Draw your signature here</div>
+          <div class="settings-nav-group">
+            <p class="settings-nav-label">Tools</p>
+            <button class="settings-nav-item" onclick="showSettingsPanel('qr-codes',this)">QR Codes</button>
           </div>
-
-          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-            <button onclick="saveAdminSig()" id="save-sig-btn" style="background:#bd7a70;color:#fff;border:none;border-radius:100px;padding:10px 24px;font-family:'Outfit',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;">Save signature</button>
-            <button id="admin-sig-clear-btn" onclick="clearAdminSig()" style="display:none;background:none;border:none;font-family:'Outfit',sans-serif;font-size:12.5px;color:rgba(247,243,237,0.3);cursor:pointer;text-decoration:underline;text-underline-offset:2px;">Clear</button>
+          <div class="settings-nav-group">
+            <p class="settings-nav-label">Account</p>
+            <button class="settings-nav-item" onclick="showSettingsPanel('security',this)">Security</button>
+            <button class="settings-nav-item" onclick="showSettingsPanel('activity',this)">Activity log</button>
           </div>
-          <p id="save-sig-status" style="font-size:12.5px;margin-top:10px;display:none;"></p>
-        </div>
-      </div>
-
-      <!-- ── Business ────────────────────────────────────────────────────────── -->
-      <p class="settings-category">Business</p>
-
-      <div class="settings-block" id="compliance-block">
-        <h2>Compliance</h2>
-        <div id="comp-alert" style="display:none;" class="comp-alert">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2L1.5 13h13L8 2z" stroke="#e8a87c" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 7v3M8 11.5v.5" stroke="#e8a87c" stroke-width="1.4" stroke-linecap="round"/></svg>
-          <span id="comp-alert-text"></span>
-        </div>
-
-        <p class="comp-section-head">Licences</p>
-        <div id="comp-licences" class="comp-list"></div>
-        <button class="comp-add" onclick="openCompModal('licence')">+ Add licence</button>
-
-        <p class="comp-section-head" style="margin-top:22px;">Insurance</p>
-        <div id="comp-insurances" class="comp-list"></div>
-        <button class="comp-add" onclick="openCompModal('insurance')">+ Add insurance</button>
-
-        <p class="comp-section-head" style="margin-top:22px;">Memberships</p>
-        <div id="comp-memberships" class="comp-list"></div>
-        <button class="comp-add" onclick="openCompModal('membership')">+ Add membership</button>
-
-        <p class="comp-section-head" style="margin-top:22px;">CPD — <span id="cpd-year"></span></p>
-        <div id="cpd-block" style="background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.09);border-radius:12px;padding:16px 18px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <span id="cpd-label" style="font-size:13.5px;color:#f7f3ed;"></span>
-            <button onclick="openCpdModal()" style="background:none;border:none;font-family:'Outfit',sans-serif;font-size:12.5px;color:#bd7a70;cursor:pointer;padding:0;">Edit</button>
+          <div class="settings-nav-group">
+            <p class="settings-nav-label">Links</p>
+            <button class="settings-nav-item" onclick="showSettingsPanel('site-pages',this)">Site pages</button>
           </div>
-          <div class="cpd-bar-wrap"><div class="cpd-bar" id="cpd-bar"></div></div>
-          <div id="cpd-sub" style="font-size:12px;color:rgba(247,243,237,0.35);margin-top:6px;"></div>
-        </div>
-      </div>
+        </nav>
 
-      <!-- ── Tools ───────────────────────────────────────────────────────────── -->
-      <p class="settings-category">Tools</p>
+        <!-- ── Content panels ───────────────────────────────────────────────── -->
+        <div class="settings-content">
 
-      <div class="settings-block">
-        <h2>QR Codes</h2>
-        <p style="font-size:13px;color:rgba(247,243,237,0.45);margin-bottom:24px;line-height:1.6;">Generate QR codes for any URL. Each code uses a short link so you can update the destination at any time without reprinting.</p>
+          <!-- My Signature -->
+          <div id="settings-panel-signature" class="settings-panel active">
+            <div class="settings-block" id="sig-settings-block">
+              <h2>My Signature</h2>
+              <p style="font-size:13px;color:rgba(247,243,237,0.45);margin-bottom:20px;line-height:1.6;">Create your agent signature for Buyer Engagement Agreements. It will appear on all signed PDFs.</p>
 
-        <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;margin-bottom:20px;">
-          <div style="flex:1;min-width:200px;">
-            <div class="field">
-              <label>URL <span style="color:#e07070;">*</span></label>
-              <input type="url" id="qr-url-input" placeholder="https://fairwayinvesting.com.au" oninput="qrPreviewDebounce()" style="width:100%;box-sizing:border-box;">
-            </div>
-            <div class="field">
-              <label>Note <span style="color:rgba(247,243,237,0.3);font-weight:300;">(optional)</span></label>
-              <input type="text" id="qr-note-input" placeholder="e.g. Business card, Email footer">
-            </div>
-            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:4px;">
-              <button onclick="saveQrCode()" id="qr-save-btn" class="btn-primary" style="font-size:13px;padding:10px 22px;" disabled>Save</button>
-              <span id="qr-status" style="font-size:13px;color:rgba(247,243,237,0.4);"></span>
-            </div>
-          </div>
-          <div style="flex-shrink:0;">
-            <div style="font-size:11px;color:rgba(247,243,237,0.3);text-align:center;margin-bottom:8px;letter-spacing:0.04em;text-transform:uppercase;">Preview</div>
-            <div id="qr-preview-wrap" style="width:160px;height:160px;background:#f7f3ed;border-radius:16px;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.25);">
-              <span id="qr-preview-placeholder" style="font-size:11.5px;color:rgba(0,0,0,0.28);text-align:center;padding:14px;line-height:1.6;">Enter a URL<br>to preview</span>
-              <img id="qr-preview-img" src="" alt="QR preview" style="display:none;width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none';document.getElementById('qr-preview-placeholder').style.display='block'">
-            </div>
-          </div>
-        </div>
+              <div id="agent-sig-preview" style="display:none;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.09);border-radius:12px;padding:16px 20px;margin-bottom:16px;">
+                <p style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#bd7a70;margin-bottom:10px;">Current signature</p>
+                <img id="agent-sig-preview-img" src="" alt="" style="max-width:200px;height:48px;object-fit:contain;object-position:left center;filter:invert(1) brightness(0.85);display:block;margin-bottom:12px;">
+                <button onclick="deleteAgentSig()" style="background:none;border:none;font-family:'Outfit',sans-serif;font-size:12.5px;color:rgba(220,80,80,0.7);cursor:pointer;padding:0;">Remove signature</button>
+              </div>
 
-        <div id="qr-saved-list" style="margin-top:24px;"></div>
-      </div>
-
-      <!-- ── Account ─────────────────────────────────────────────────────────── -->
-      <p class="settings-category">Account</p>
-
-      <div class="settings-block">
-        <h2 onclick="toggleSecuritySection(this)" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;">
-          Security
-          <svg id="security-chevron" width="18" height="18" viewBox="0 0 18 18" fill="none" style="transition:transform .2s;flex-shrink:0;opacity:0.5;transform:rotate(-90deg);"><path d="M4.5 6.75L9 11.25L13.5 6.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </h2>
-        <div id="security-body" style="display:none;">
-          <div class="totp-setup">
-            <div id="totp-status-active" style="display:none;">
-              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-                <span style="font-size:14px;color:rgba(247,243,237,0.55);">Two-factor authentication</span>
-                <span style="background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.25);color:#6dbf7b;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;border-radius:100px;padding:3px 10px;white-space:nowrap;">On</span>
-                <button id="totp-reconfig-btn" style="background:none;border:none;font-family:'Outfit',sans-serif;font-size:13px;font-weight:400;color:#bd7a70;cursor:pointer;padding:0;margin-left:2px;">Manage</button>
+              <div id="agent-sig-creator">
+                <div style="display:flex;gap:4px;margin-bottom:12px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.07);border-radius:10px;padding:3px;width:fit-content;">
+                  <button class="sig-tab active" id="admin-tab-generate" onclick="setAdminSigMode('generate')" style="padding:8px 20px;border-radius:8px;border:1px solid transparent;font-family:'Outfit',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .15s;color:rgba(247,243,237,0.3);background:transparent;">Generate</button>
+                  <button class="sig-tab" id="admin-tab-draw" onclick="setAdminSigMode('draw')" style="padding:8px 20px;border-radius:8px;border:1px solid transparent;font-family:'Outfit',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .15s;color:rgba(247,243,237,0.3);background:transparent;">Draw</button>
+                </div>
+                <div id="admin-sig-generate-area">
+                  <div style="margin-bottom:12px;">
+                    <label style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#bd7a70;display:block;margin-bottom:8px;">Signature text</label>
+                    <input type="text" id="admin-sig-name-input" value="L. Clifford" oninput="renderAdminGeneratedSig()" style="background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.1);border-radius:10px;padding:11px 14px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:15px;outline:none;width:100%;max-width:260px;">
+                  </div>
+                </div>
+                <div style="position:relative;border-radius:10px;overflow:hidden;border:1px solid rgba(247,243,237,0.12);margin-bottom:10px;background:#fff;width:100%;max-width:340px;">
+                  <canvas id="admin-sig-canvas" style="display:block;width:100%;height:90px;cursor:default;background:#fff;"></canvas>
+                  <div id="admin-sig-draw-hint" style="display:none;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;font-size:12px;color:rgba(0,0,0,0.25);font-style:italic;">Draw your signature here</div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                  <button onclick="saveAdminSig()" id="save-sig-btn" style="background:#bd7a70;color:#fff;border:none;border-radius:100px;padding:10px 24px;font-family:'Outfit',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;">Save signature</button>
+                  <button id="admin-sig-clear-btn" onclick="clearAdminSig()" style="display:none;background:none;border:none;font-family:'Outfit',sans-serif;font-size:12.5px;color:rgba(247,243,237,0.3);cursor:pointer;text-decoration:underline;text-underline-offset:2px;">Clear</button>
+                </div>
+                <p id="save-sig-status" style="font-size:12.5px;margin-top:10px;display:none;"></p>
               </div>
             </div>
-            <div id="totp-section">
-              <p style="font-size:13.5px;color:rgba(247,243,237,0.4);margin-bottom:18px;">Two-factor authentication (2FA) adds an extra layer of security to your admin login.</p>
-              <button class="btn-secondary" id="totp-setup-btn">Set up 2FA</button>
-            </div>
-            <div id="totp-panel" style="display:none;margin-top:20px;"></div>
           </div>
-          <div style="margin-top:28px;padding-top:24px;border-top:1px solid rgba(247,243,237,0.07);">
-            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-              <div>
-                <p style="font-size:14px;color:rgba(247,243,237,0.75);margin:0 0 3px;">Sign out of all devices</p>
-                <p style="font-size:12.5px;color:rgba(247,243,237,0.35);margin:0;">Invalidates all active admin sessions immediately, including on other browsers or devices.</p>
+
+          <!-- Compliance -->
+          <div id="settings-panel-compliance" class="settings-panel">
+            <div class="settings-block" id="compliance-block">
+              <h2>Compliance</h2>
+              <div id="comp-alert" style="display:none;" class="comp-alert">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2L1.5 13h13L8 2z" stroke="#e8a87c" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 7v3M8 11.5v.5" stroke="#e8a87c" stroke-width="1.4" stroke-linecap="round"/></svg>
+                <span id="comp-alert-text"></span>
               </div>
-              <button id="logout-all-btn" onclick="logoutAllDevices()" style="background:rgba(220,80,80,0.1);border:1px solid rgba(220,80,80,0.25);color:#e07070;border-radius:100px;padding:9px 20px;font-family:'Outfit',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;white-space:nowrap;">Sign out all devices</button>
+              <p class="comp-section-head">Licences</p>
+              <div id="comp-licences" class="comp-list"></div>
+              <button class="comp-add" onclick="openCompModal('licence')">+ Add licence</button>
+              <p class="comp-section-head" style="margin-top:22px;">Insurance</p>
+              <div id="comp-insurances" class="comp-list"></div>
+              <button class="comp-add" onclick="openCompModal('insurance')">+ Add insurance</button>
+              <p class="comp-section-head" style="margin-top:22px;">Memberships</p>
+              <div id="comp-memberships" class="comp-list"></div>
+              <button class="comp-add" onclick="openCompModal('membership')">+ Add membership</button>
+              <p class="comp-section-head" style="margin-top:22px;">CPD — <span id="cpd-year"></span></p>
+              <div id="cpd-block" style="background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.09);border-radius:12px;padding:16px 18px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span id="cpd-label" style="font-size:13.5px;color:#f7f3ed;"></span>
+                  <button onclick="openCpdModal()" style="background:none;border:none;font-family:'Outfit',sans-serif;font-size:12.5px;color:#bd7a70;cursor:pointer;padding:0;">Edit</button>
+                </div>
+                <div class="cpd-bar-wrap"><div class="cpd-bar" id="cpd-bar"></div></div>
+                <div id="cpd-sub" style="font-size:12px;color:rgba(247,243,237,0.35);margin-top:6px;"></div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div class="settings-block">
-        <h2 onclick="toggleAuditLog(this)" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;">
-          Activity log
-          <svg id="audit-chevron" width="18" height="18" viewBox="0 0 18 18" fill="none" style="transition:transform .2s;flex-shrink:0;opacity:0.5;transform:rotate(-90deg);"><path d="M4.5 6.75L9 11.25L13.5 6.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </h2>
-        <div id="audit-body" style="display:none;">
-          <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
-            <button class="btn-secondary" onclick="loadAuditLog()" style="padding:8px 18px;font-size:13px;">Refresh</button>
+          <!-- QR Codes -->
+          <div id="settings-panel-qr-codes" class="settings-panel">
+            <div class="settings-block">
+              <h2>QR Codes</h2>
+              <p style="font-size:13px;color:rgba(247,243,237,0.45);margin-bottom:24px;line-height:1.6;">Generate QR codes for any URL. Each code uses a short link so you can update the destination at any time without reprinting.</p>
+              <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;margin-bottom:20px;">
+                <div style="flex:1;min-width:200px;">
+                  <div class="field">
+                    <label>URL <span style="color:#e07070;">*</span></label>
+                    <input type="url" id="qr-url-input" placeholder="https://fairwayinvesting.com.au" oninput="qrPreviewDebounce()" style="width:100%;box-sizing:border-box;">
+                  </div>
+                  <div class="field">
+                    <label>Note <span style="color:rgba(247,243,237,0.3);font-weight:300;">(optional)</span></label>
+                    <input type="text" id="qr-note-input" placeholder="e.g. Business card, Email footer">
+                  </div>
+                  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:4px;">
+                    <button onclick="saveQrCode()" id="qr-save-btn" class="btn-primary" style="font-size:13px;padding:10px 22px;" disabled>Save</button>
+                    <span id="qr-status" style="font-size:13px;color:rgba(247,243,237,0.4);"></span>
+                  </div>
+                </div>
+                <div style="flex-shrink:0;">
+                  <div style="font-size:11px;color:rgba(247,243,237,0.3);text-align:center;margin-bottom:8px;letter-spacing:0.04em;text-transform:uppercase;">Preview</div>
+                  <div id="qr-preview-wrap" style="width:160px;height:160px;background:#f7f3ed;border-radius:16px;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.25);">
+                    <span id="qr-preview-placeholder" style="font-size:11.5px;color:rgba(0,0,0,0.28);text-align:center;padding:14px;line-height:1.6;">Enter a URL<br>to preview</span>
+                    <img id="qr-preview-img" src="" alt="QR preview" style="display:none;width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none';document.getElementById('qr-preview-placeholder').style.display='block'">
+                  </div>
+                </div>
+              </div>
+              <div id="qr-saved-list" style="margin-top:24px;"></div>
+            </div>
           </div>
-          <div id="audit-list" style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);line-height:1.8;"></div>
-        </div>
-      </div>
 
-      <!-- ── Links ───────────────────────────────────────────────────────────── -->
-      <p class="settings-category">Links</p>
+          <!-- Security -->
+          <div id="settings-panel-security" class="settings-panel">
+            <div class="settings-block">
+              <h2>Security</h2>
+              <div id="security-body">
+                <div class="totp-setup">
+                  <div id="totp-status-active" style="display:none;">
+                    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                      <span style="font-size:14px;color:rgba(247,243,237,0.55);">Two-factor authentication</span>
+                      <span style="background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.25);color:#6dbf7b;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;border-radius:100px;padding:3px 10px;white-space:nowrap;">On</span>
+                      <button id="totp-reconfig-btn" style="background:none;border:none;font-family:'Outfit',sans-serif;font-size:13px;font-weight:400;color:#bd7a70;cursor:pointer;padding:0;margin-left:2px;">Manage</button>
+                    </div>
+                  </div>
+                  <div id="totp-section">
+                    <p style="font-size:13.5px;color:rgba(247,243,237,0.4);margin-bottom:18px;">Two-factor authentication (2FA) adds an extra layer of security to your admin login.</p>
+                    <button class="btn-secondary" id="totp-setup-btn">Set up 2FA</button>
+                  </div>
+                  <div id="totp-panel" style="display:none;margin-top:20px;"></div>
+                </div>
+                <div style="margin-top:28px;padding-top:24px;border-top:1px solid rgba(247,243,237,0.07);">
+                  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+                    <div>
+                      <p style="font-size:14px;color:rgba(247,243,237,0.75);margin:0 0 3px;">Sign out of all devices</p>
+                      <p style="font-size:12.5px;color:rgba(247,243,237,0.35);margin:0;">Invalidates all active admin sessions immediately, including on other browsers or devices.</p>
+                    </div>
+                    <button id="logout-all-btn" onclick="logoutAllDevices()" style="background:rgba(220,80,80,0.1);border:1px solid rgba(220,80,80,0.25);color:#e07070;border-radius:100px;padding:9px 20px;font-family:'Outfit',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;white-space:nowrap;">Sign out all devices</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-      <div class="settings-block">
-        <h2>Site pages</h2>
-        <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Public</p>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:22px;">
-          <a href="/" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Main site</span><span class="plc-name">Homepage</span><span class="plc-url">fairwayinvesting.com.au</span></a>
-          <a href="/discovery-call.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Booking confirmation</span><span class="plc-name">Discovery call</span><span class="plc-url">/discovery-call.html</span></a>
-          <a href="/strategy-session.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Booking confirmation</span><span class="plc-name">Strategy session</span><span class="plc-url">/strategy-session.html</span></a>
-          <a href="/privacy.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Legal</span><span class="plc-name">Privacy Policy</span><span class="plc-url">/privacy.html</span></a>
-          <a href="/terms.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Legal</span><span class="plc-name">Terms of Service</span><span class="plc-url">/terms.html</span></a>
-          <a href="/404.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">System</span><span class="plc-name">404 Not found</span><span class="plc-url">/404.html</span></a>
-        </div>
-        <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Client portal</p>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:22px;">
-          <a href="/clients/" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Portal</span><span class="plc-name">Client login</span><span class="plc-url">/clients/</span></a>
-          <a href="/clients/portal.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Portal</span><span class="plc-name">Client dashboard</span><span class="plc-url">/clients/portal.html</span></a>
-          <a href="/clients/setup.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Portal</span><span class="plc-name">Password setup</span><span class="plc-url">/clients/setup.html</span></a>
-          <a href="/clients/questionnaire.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Portal</span><span class="plc-name">Onboarding questionnaire</span><span class="plc-url">/clients/questionnaire.html</span></a>
-        </div>
-        <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Partner referral pages</p>
-        <div id="partner-list-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:22px;"></div>
-        <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Property presentations</p>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
-          <a href="/p/property.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Presentation</span><span class="plc-name">Viewer template</span><span class="plc-url">/p/property.html</span></a>
-        </div>
-      </div>
+          <!-- Activity log -->
+          <div id="settings-panel-activity" class="settings-panel">
+            <div class="settings-block">
+              <h2>Activity log</h2>
+              <div id="audit-body">
+                <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+                  <button class="btn-secondary" onclick="loadAuditLog()" style="padding:8px 18px;font-size:13px;">Refresh</button>
+                </div>
+                <div id="audit-list" style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.5);line-height:1.8;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Site pages -->
+          <div id="settings-panel-site-pages" class="settings-panel">
+            <div class="settings-block">
+              <h2>Site pages</h2>
+              <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Public</p>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:22px;">
+                <a href="/" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Main site</span><span class="plc-name">Homepage</span><span class="plc-url">fairwayinvesting.com.au</span></a>
+                <a href="/discovery-call.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Booking confirmation</span><span class="plc-name">Discovery call</span><span class="plc-url">/discovery-call.html</span></a>
+                <a href="/strategy-session.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Booking confirmation</span><span class="plc-name">Strategy session</span><span class="plc-url">/strategy-session.html</span></a>
+                <a href="/privacy.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Legal</span><span class="plc-name">Privacy Policy</span><span class="plc-url">/privacy.html</span></a>
+                <a href="/terms.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Legal</span><span class="plc-name">Terms of Service</span><span class="plc-url">/terms.html</span></a>
+                <a href="/404.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">System</span><span class="plc-name">404 Not found</span><span class="plc-url">/404.html</span></a>
+              </div>
+              <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Client portal</p>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:22px;">
+                <a href="/clients/" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Portal</span><span class="plc-name">Client login</span><span class="plc-url">/clients/</span></a>
+                <a href="/clients/portal.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Portal</span><span class="plc-name">Client dashboard</span><span class="plc-url">/clients/portal.html</span></a>
+                <a href="/clients/setup.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Portal</span><span class="plc-name">Password setup</span><span class="plc-url">/clients/setup.html</span></a>
+                <a href="/clients/questionnaire.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Portal</span><span class="plc-name">Onboarding questionnaire</span><span class="plc-url">/clients/questionnaire.html</span></a>
+              </div>
+              <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Partner referral pages</p>
+              <div id="partner-list-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:22px;"></div>
+              <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Property presentations</p>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
+                <a href="/p/property.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Presentation</span><span class="plc-name">Viewer template</span><span class="plc-url">/p/property.html</span></a>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- end settings-content -->
+      </div><!-- end settings-layout -->
     </div>
 
   </div><!-- end admin-main -->
@@ -4352,28 +4382,17 @@ async function logoutAllDevices() {
   }
 }
 
-function toggleSecuritySection() {
-  const body = document.getElementById('security-body');
-  const chevron = document.getElementById('security-chevron');
-  const open = body.style.display === 'none';
-  body.style.display = open ? 'block' : 'none';
-  chevron.style.transform = open ? 'rotate(0deg)' : 'rotate(-90deg)';
-}
-
-function toggleAuditLog(h2el) {
-  const body = document.getElementById('audit-body');
-  const chevron = document.getElementById('audit-chevron');
-  const open = body.style.display === 'none';
-  body.style.display = open ? 'block' : 'none';
-  chevron.style.transform = open ? 'rotate(0deg)' : 'rotate(-90deg)';
-  if (open && !document.getElementById('audit-list').textContent.trim()) loadAuditLog();
+function showSettingsPanel(id, btn) {
+  document.querySelectorAll('#sec-settings .settings-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.settings-nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('settings-panel-' + id)?.classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (id === 'activity' && !document.getElementById('audit-list').textContent.trim()) loadAuditLog();
 }
 
 async function loadAuditLog() {
   const el = document.getElementById('audit-list');
   if (!el) return;
-  const body = document.getElementById('audit-body');
-  if (body && body.style.display === 'none') return;
   const res = await api('GET', '/api/admin/audit-log');
   if (!res.ok) { el.textContent = 'Could not load activity log.'; return; }
   const entries = await res.json();
