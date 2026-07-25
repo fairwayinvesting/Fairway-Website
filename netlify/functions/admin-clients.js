@@ -138,8 +138,8 @@ export default async (req) => {
   const clients = (await store.get('all', { type: 'json' })) || [];
 
   if (req.method === 'GET') {
-    return json(clients.filter(c => !c.deleted).map(({ id, name, email, markets, active, createdAt, setupToken, pipelineStage, pipelineStageUpdatedAt, status, engagementNumber, referralSource, referrerId, acquisitions, customFields, welcomeEmailSentAt, welcomeEmailFailed, dealProfessionals, manualFee }) =>
-      ({ id, name, email, markets, active, createdAt, hasSetupToken: !!setupToken, pipelineStage: pipelineStage || null, pipelineStageUpdatedAt: pipelineStageUpdatedAt || null, status: status || 'active', engagementNumber: engagementNumber || 1, referralSource: referralSource || null, referrerId: referrerId || null, acquisitions: acquisitions || [], customFields: customFields || [], welcomeEmailSentAt: welcomeEmailSentAt || null, welcomeEmailFailed: welcomeEmailFailed || false, dealProfessionals: dealProfessionals || [], manualFee: manualFee || null })
+    return json(clients.filter(c => !c.deleted).map(({ id, name, email, markets, active, createdAt, setupToken, pipelineStage, pipelineStageUpdatedAt, status, engagementNumber, referralSource, referrerId, acquisitions, customFields, welcomeEmailSentAt, welcomeEmailFailed, dealProfessionals, manualFee, manualFeeDeleteLog }) =>
+      ({ id, name, email, markets, active, createdAt, hasSetupToken: !!setupToken, pipelineStage: pipelineStage || null, pipelineStageUpdatedAt: pipelineStageUpdatedAt || null, status: status || 'active', engagementNumber: engagementNumber || 1, referralSource: referralSource || null, referrerId: referrerId || null, acquisitions: acquisitions || [], customFields: customFields || [], welcomeEmailSentAt: welcomeEmailSentAt || null, welcomeEmailFailed: welcomeEmailFailed || false, dealProfessionals: dealProfessionals || [], manualFee: manualFee || null, manualFeeDeleteLog: manualFeeDeleteLog || [] })
     ));
   }
 
@@ -392,6 +392,7 @@ export default async (req) => {
     if (customFields !== undefined) client.customFields = customFields;
     if (dealProfessionals !== undefined) client.dealProfessionals = dealProfessionals;
     if (manualFee !== undefined) client.manualFee = manualFee;
+    if (body.manualFeeDeleteLog !== undefined) client.manualFeeDeleteLog = body.manualFeeDeleteLog;
     if (password) {
       const salt = crypto.randomBytes(16).toString('hex');
       client.passwordHash = await pbkdf2Hash(password, salt);
