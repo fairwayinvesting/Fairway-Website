@@ -143,8 +143,7 @@ export default async (req) => {
       const resolvedFees = manualFees?.length ? manualFees
         : (manualFee?.totalFee ? [{ id: 'fee-1', label: 'Acquisition 1', totalFee: manualFee.totalFee, notes: manualFee.notes || '', payments: manualFee.payments || [], createdAt: '' }] : []);
       return { id, name, email, markets, active, createdAt, hasSetupToken: !!setupToken, pipelineStage: pipelineStage || null, pipelineStageUpdatedAt: pipelineStageUpdatedAt || null, status: status || 'active', engagementNumber: engagementNumber || 1, referralSource: referralSource || null, referrerId: referrerId || null, acquisitions: acquisitions || [], customFields: customFields || [], welcomeEmailSentAt: welcomeEmailSentAt || null, welcomeEmailFailed: welcomeEmailFailed || false, dealProfessionals: dealProfessionals || [], manualFee: manualFee || null, manualFees: resolvedFees, manualFeeDeleteLog: manualFeeDeleteLog || [] };
-    })
-    ));
+    }));
   }
 
   if (req.method === 'POST') {
