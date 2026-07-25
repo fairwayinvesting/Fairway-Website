@@ -19,6 +19,6 @@ export default async (req) => {
 };
 
 export const config = {
-  path: '/go/:id',
+  path: '/go/*',
   method: ['GET'],
 };
