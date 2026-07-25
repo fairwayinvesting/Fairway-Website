@@ -2184,7 +2184,7 @@ function renderPartnersSection() {
     const dealCount = dealCounts[p.id] || 0;
     const profLabel = dirProfLabel(p.type);
     return `<div class="partner-row" onclick="openCrmPartnerPanel('${p.id}')">
-      <div class="partner-row-name">${esc(p.name)}<span style="display:block;font-size:11.5px;color:rgba(247,243,237,0.3);margin-top:1px;">${esc(p.company || '')}</span></div>
+      <div class="partner-row-name">${esc(p.name)}<span style="display:block;font-size:11.5px;color:rgba(247,243,237,0.3);margin-top:1px;">${esc(p.company || '')}</span>${p.region ? `<span style="display:block;font-size:11px;color:rgba(247,243,237,0.22);margin-top:1px;">${esc(p.region)}</span>` : ''}</div>
       <div style="flex:1;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
         ${profLabel ? `<span class="dir-prof-badge">${esc(profLabel)}</span>` : ''}
         ${p.state ? `<span class="dir-state-badge">${esc(p.state)}</span>` : ''}
