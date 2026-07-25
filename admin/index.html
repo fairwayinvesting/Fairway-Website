@@ -7231,7 +7231,12 @@ async function saveQrCode() {
 
 function downloadQrCode(shortUrl, note) {
   const slug = (note || shortUrl).replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase().slice(0, 40) || 'qr-code';
-  window.location.href = `/api/admin/qr-image?url=${encodeURIComponent(shortUrl)}&size=2000&color=0d2137&download=1&filename=${encodeURIComponent(slug)}`;
+  const a = document.createElement('a');
+  a.href = `/api/admin/qr-image?url=${encodeURIComponent(shortUrl)}&size=2000&color=0d2137&download=1&filename=${encodeURIComponent(slug)}`;
+  a.download = slug + '.png';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 async function deleteQrCode(id) {
