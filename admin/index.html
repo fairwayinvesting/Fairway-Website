@@ -90,6 +90,27 @@
     .settings-content{flex:1;min-width:0;}
     .settings-panel{display:none;}
     .settings-panel.active{display:block;}
+    .settings-form{max-width:560px;}
+    .settings-2col{display:grid;grid-template-columns:1fr 1fr;gap:0 20px;}
+    .settings-2col .field{min-width:0;}
+    /* Toggle switch */
+    .notif-row{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding:16px 0;border-bottom:1px solid rgba(247,243,237,0.05);}
+    .notif-row:last-child{border-bottom:none;padding-bottom:0;}
+    .notif-row-text{}
+    .notif-row-label{font-size:14px;color:rgba(247,243,237,0.8);}
+    .notif-row-sub{font-size:12px;color:rgba(247,243,237,0.35);margin-top:3px;}
+    .tog{position:relative;width:42px;height:24px;flex-shrink:0;margin-top:2px;}
+    .tog input{opacity:0;width:0;height:0;position:absolute;}
+    .tog-track{position:absolute;inset:0;background:rgba(247,243,237,0.1);border-radius:100px;cursor:pointer;transition:background .2s;}
+    .tog input:checked~.tog-track{background:#bd7a70;}
+    .tog-thumb{position:absolute;width:18px;height:18px;left:3px;top:3px;background:#f7f3ed;border-radius:50%;transition:transform .2s;pointer-events:none;}
+    .tog input:checked~.tog-thumb{transform:translateX(18px);}
+    /* Logo upload */
+    .logo-upload-area{border:1px dashed rgba(247,243,237,0.15);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s;background:rgba(247,243,237,0.02);}
+    .logo-upload-area:hover{border-color:rgba(189,122,112,0.4);}
+    /* Email template vars hint */
+    .tpl-vars{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+    .tpl-var{font-size:11.5px;font-family:monospace;background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.1);border-radius:6px;padding:3px 8px;color:rgba(247,243,237,0.5);}
 
     /* Compliance */
     .comp-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
@@ -979,14 +1000,20 @@
           </div>
           <div class="settings-nav-group">
             <p class="settings-nav-label">Business</p>
+            <button class="settings-nav-item" onclick="showSettingsPanel('business-details',this)">Business details</button>
+            <button class="settings-nav-item" onclick="showSettingsPanel('branding',this)">Branding</button>
+            <button class="settings-nav-item" onclick="showSettingsPanel('booking-links',this)">Booking links</button>
             <button class="settings-nav-item" onclick="showSettingsPanel('compliance',this)">Compliance</button>
           </div>
           <div class="settings-nav-group">
             <p class="settings-nav-label">Tools</p>
             <button class="settings-nav-item" onclick="showSettingsPanel('qr-codes',this)">QR Codes</button>
+            <button class="settings-nav-item" onclick="showSettingsPanel('email-templates',this)">Email templates</button>
+            <button class="settings-nav-item" onclick="showSettingsPanel('agreement-terms',this)">Agreement terms</button>
           </div>
           <div class="settings-nav-group">
             <p class="settings-nav-label">Account</p>
+            <button class="settings-nav-item" onclick="showSettingsPanel('notifications',this)">Notifications</button>
             <button class="settings-nav-item" onclick="showSettingsPanel('security',this)">Security</button>
             <button class="settings-nav-item" onclick="showSettingsPanel('activity',this)">Activity log</button>
           </div>
@@ -1166,6 +1193,224 @@
               <p style="font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Property presentations</p>
               <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
                 <a href="/p/property.html" target="_blank" rel="noopener" class="page-link-card"><span class="plc-label">Presentation</span><span class="plc-name">Viewer template</span><span class="plc-url">/p/property.html</span></a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Business details -->
+          <div id="settings-panel-business-details" class="settings-panel">
+            <div class="settings-block">
+              <h2>Business details</h2>
+              <p style="font-size:13px;color:rgba(247,243,237,0.45);margin-bottom:24px;line-height:1.6;">Used across PDFs, agreements, and client communications.</p>
+              <div class="settings-form">
+                <div class="settings-2col">
+                  <div class="field">
+                    <label>Business name</label>
+                    <input type="text" id="biz-name" placeholder="Fairway Investing">
+                  </div>
+                  <div class="field">
+                    <label>ABN</label>
+                    <input type="text" id="biz-abn" placeholder="12 345 678 901">
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Street address</label>
+                  <input type="text" id="biz-address" placeholder="123 Collins Street">
+                </div>
+                <div class="settings-2col">
+                  <div class="field">
+                    <label>Suburb</label>
+                    <input type="text" id="biz-suburb" placeholder="Melbourne">
+                  </div>
+                  <div class="field">
+                    <label>Postcode</label>
+                    <input type="text" id="biz-postcode" placeholder="3000" maxlength="4" style="max-width:100px;">
+                  </div>
+                </div>
+                <div class="field" style="max-width:220px;">
+                  <label>State</label>
+                  <select id="biz-state">
+                    <option value="">— select —</option>
+                    <option>ACT</option><option>NSW</option><option>NT</option>
+                    <option>QLD</option><option>SA</option><option>TAS</option>
+                    <option>VIC</option><option>WA</option>
+                  </select>
+                </div>
+                <div class="settings-2col">
+                  <div class="field">
+                    <label>Phone</label>
+                    <input type="tel" id="biz-phone" placeholder="+61 4xx xxx xxx">
+                  </div>
+                  <div class="field">
+                    <label>Email</label>
+                    <input type="email" id="biz-email" placeholder="luke@fairwayinvesting.com.au">
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Website</label>
+                  <input type="url" id="biz-website" placeholder="https://fairwayinvesting.com.au">
+                </div>
+                <div style="display:flex;gap:12px;align-items:center;margin-top:4px;">
+                  <button onclick="saveBusinessDetails()" class="btn-primary" style="font-size:13px;padding:10px 22px;">Save</button>
+                  <span id="biz-status" style="font-size:13px;color:rgba(247,243,237,0.4);"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Branding -->
+          <div id="settings-panel-branding" class="settings-panel">
+            <div class="settings-block">
+              <h2>Branding</h2>
+              <p style="font-size:13px;color:rgba(247,243,237,0.45);margin-bottom:24px;line-height:1.6;">Accent colour and logo used across admin and client-facing materials.</p>
+              <div class="settings-form">
+                <div class="field">
+                  <label>Accent colour</label>
+                  <div style="display:flex;align-items:center;gap:12px;">
+                    <input type="color" id="brand-color-picker" value="#bd7a70" oninput="document.getElementById('brand-color-hex').value=this.value" style="width:44px;height:44px;padding:2px;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;cursor:pointer;">
+                    <input type="text" id="brand-color-hex" placeholder="#bd7a70" maxlength="7" oninput="syncColorPicker(this.value)" style="max-width:120px;">
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Logo</label>
+                  <div id="brand-logo-preview" style="display:none;margin-bottom:12px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.09);border-radius:12px;padding:16px 20px;display:none;align-items:center;gap:16px;">
+                    <img id="brand-logo-img" src="" alt="Logo" style="max-height:52px;max-width:160px;object-fit:contain;">
+                    <button onclick="removeBrandLogo()" style="background:none;border:none;font-family:'Outfit',sans-serif;font-size:12.5px;color:rgba(220,80,80,0.7);cursor:pointer;padding:0;white-space:nowrap;">Remove</button>
+                  </div>
+                  <input type="file" id="brand-logo-file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style="display:none;" onchange="previewBrandLogo(this)">
+                  <div class="logo-upload-area" onclick="document.getElementById('brand-logo-file').click()">
+                    <p style="font-size:13.5px;color:rgba(247,243,237,0.45);margin:0 0 4px;">Click to upload</p>
+                    <p style="font-size:12px;color:rgba(247,243,237,0.25);margin:0;">PNG, JPG, SVG or WebP — max 1 MB</p>
+                  </div>
+                </div>
+                <div style="display:flex;gap:12px;align-items:center;margin-top:4px;">
+                  <button onclick="saveBranding()" class="btn-primary" style="font-size:13px;padding:10px 22px;">Save</button>
+                  <span id="branding-status" style="font-size:13px;color:rgba(247,243,237,0.4);"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Booking links -->
+          <div id="settings-panel-booking-links" class="settings-panel">
+            <div class="settings-block">
+              <h2>Booking links</h2>
+              <p style="font-size:13px;color:rgba(247,243,237,0.45);margin-bottom:24px;line-height:1.6;">Calendly or booking page URLs used in emails and client communications.</p>
+              <div class="settings-form">
+                <div class="field">
+                  <label>Discovery call</label>
+                  <input type="url" id="booking-discovery" placeholder="https://calendly.com/…">
+                </div>
+                <div class="field">
+                  <label>Strategy session</label>
+                  <input type="url" id="booking-strategy" placeholder="https://calendly.com/…">
+                </div>
+                <div style="display:flex;gap:12px;align-items:center;margin-top:4px;">
+                  <button onclick="saveBookingLinks()" class="btn-primary" style="font-size:13px;padding:10px 22px;">Save</button>
+                  <span id="booking-status" style="font-size:13px;color:rgba(247,243,237,0.4);"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Email templates -->
+          <div id="settings-panel-email-templates" class="settings-panel">
+            <div class="settings-block">
+              <h2>Email templates</h2>
+              <p style="font-size:13px;color:rgba(247,243,237,0.45);margin-bottom:24px;line-height:1.6;">Customise the emails sent to clients. Use <code style="font-size:12px;background:rgba(247,243,237,0.06);padding:1px 5px;border-radius:4px;">{{variable}}</code> placeholders for dynamic values.</p>
+              <div class="settings-form">
+                <div class="field">
+                  <label>Template</label>
+                  <select id="email-tpl-select" onchange="switchEmailTemplate(this.value)">
+                    <option value="welcome">Welcome — portal access created</option>
+                    <option value="brief-received">Brief received — confirmation</option>
+                    <option value="shortlist">New shortlist — property added</option>
+                    <option value="agreement">Agreement ready to sign</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Subject line</label>
+                  <input type="text" id="email-tpl-subject" placeholder="Subject…">
+                </div>
+                <div class="field">
+                  <label>Body</label>
+                  <textarea id="email-tpl-body" rows="10" placeholder="Write your email body here…" style="min-height:200px;"></textarea>
+                </div>
+                <div id="email-tpl-vars" style="margin-bottom:16px;">
+                  <p style="font-size:11px;color:rgba(247,243,237,0.3);margin-bottom:6px;letter-spacing:0.06em;text-transform:uppercase;">Available variables</p>
+                  <div class="tpl-vars" id="email-tpl-vars-list"></div>
+                </div>
+                <div style="display:flex;gap:12px;align-items:center;">
+                  <button onclick="saveEmailTemplate()" class="btn-primary" style="font-size:13px;padding:10px 22px;">Save template</button>
+                  <span id="email-tpl-status" style="font-size:13px;color:rgba(247,243,237,0.4);"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Agreement terms -->
+          <div id="settings-panel-agreement-terms" class="settings-panel">
+            <div class="settings-block">
+              <h2>Agreement terms</h2>
+              <p style="font-size:13px;color:rgba(247,243,237,0.45);margin-bottom:24px;line-height:1.6;">Default special conditions pre-filled into new Buyer Engagement Agreements. You can edit them per-agreement before sending.</p>
+              <div class="settings-form">
+                <div class="field">
+                  <label>Special conditions</label>
+                  <textarea id="agreement-terms-body" rows="12" placeholder="Enter your standard special conditions…" style="min-height:220px;"></textarea>
+                </div>
+                <div style="display:flex;gap:12px;align-items:center;">
+                  <button onclick="saveAgreementTerms()" class="btn-primary" style="font-size:13px;padding:10px 22px;">Save</button>
+                  <span id="agreement-terms-status" style="font-size:13px;color:rgba(247,243,237,0.4);"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notifications -->
+          <div id="settings-panel-notifications" class="settings-panel">
+            <div class="settings-block">
+              <h2>Notifications</h2>
+              <p style="font-size:13px;color:rgba(247,243,237,0.45);margin-bottom:24px;line-height:1.6;">Choose which events send you an email notification to <span style="color:#f7f3ed;">luke@fairwayinvesting.com.au</span>.</p>
+              <div style="max-width:520px;">
+                <div class="notif-row">
+                  <div class="notif-row-text">
+                    <div class="notif-row-label">New client registered</div>
+                    <div class="notif-row-sub">When a client creates a portal account</div>
+                  </div>
+                  <label class="tog"><input type="checkbox" id="notif-new-client" checked><div class="tog-track"></div><div class="tog-thumb"></div></label>
+                </div>
+                <div class="notif-row">
+                  <div class="notif-row-text">
+                    <div class="notif-row-label">Brief submitted</div>
+                    <div class="notif-row-sub">When a client completes a buying brief</div>
+                  </div>
+                  <label class="tog"><input type="checkbox" id="notif-brief-submitted" checked><div class="tog-track"></div><div class="tog-thumb"></div></label>
+                </div>
+                <div class="notif-row">
+                  <div class="notif-row-text">
+                    <div class="notif-row-label">Questionnaire completed</div>
+                    <div class="notif-row-sub">When a client submits their onboarding questionnaire</div>
+                  </div>
+                  <label class="tog"><input type="checkbox" id="notif-questionnaire" checked><div class="tog-track"></div><div class="tog-thumb"></div></label>
+                </div>
+                <div class="notif-row">
+                  <div class="notif-row-text">
+                    <div class="notif-row-label">Agreement signed</div>
+                    <div class="notif-row-sub">When a client signs a Buyer Engagement Agreement</div>
+                  </div>
+                  <label class="tog"><input type="checkbox" id="notif-agreement-signed" checked><div class="tog-track"></div><div class="tog-thumb"></div></label>
+                </div>
+                <div class="notif-row">
+                  <div class="notif-row-text">
+                    <div class="notif-row-label">Shortlist viewed</div>
+                    <div class="notif-row-sub">When a client opens a property shortlist</div>
+                  </div>
+                  <label class="tog"><input type="checkbox" id="notif-shortlist-viewed"><div class="tog-track"></div><div class="tog-thumb"></div></label>
+                </div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:center;margin-top:24px;">
+                <button onclick="saveNotificationSettings()" class="btn-primary" style="font-size:13px;padding:10px 22px;">Save</button>
+                <span id="notif-status" style="font-size:13px;color:rgba(247,243,237,0.4);"></span>
               </div>
             </div>
           </div>
@@ -4382,12 +4627,224 @@ async function logoutAllDevices() {
   }
 }
 
+const _settingsPanelLoaded = new Set();
 function showSettingsPanel(id, btn) {
   document.querySelectorAll('#sec-settings .settings-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.settings-nav-item').forEach(b => b.classList.remove('active'));
   document.getElementById('settings-panel-' + id)?.classList.add('active');
   if (btn) btn.classList.add('active');
-  if (id === 'activity' && !document.getElementById('audit-list').textContent.trim()) loadAuditLog();
+  if (!_settingsPanelLoaded.has(id)) {
+    _settingsPanelLoaded.add(id);
+    if (id === 'activity') loadAuditLog();
+    if (id === 'business-details') loadBusinessDetails();
+    if (id === 'branding') loadBranding();
+    if (id === 'booking-links') loadBookingLinks();
+    if (id === 'notifications') loadNotificationSettings();
+    if (id === 'email-templates') loadEmailTemplates();
+    if (id === 'agreement-terms') loadAgreementTerms();
+  }
+}
+
+// ── Generic settings helpers ───────────────────────────────────────────────
+async function getSettingsData(key) {
+  try {
+    const res = await api('GET', `/api/admin/settings?key=${encodeURIComponent(key)}`);
+    return res.ok ? res.json() : {};
+  } catch { return {}; }
+}
+async function putSettingsData(key, data) {
+  return api('PUT', '/api/admin/settings', { key, data });
+}
+function settingsStatus(elId, msg, isError) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = isError ? '#e07070' : 'rgba(247,243,237,0.4)';
+  if (!isError) setTimeout(() => { el.textContent = ''; }, 2500);
+}
+
+// ── Business details ───────────────────────────────────────────────────────
+async function loadBusinessDetails() {
+  const d = await getSettingsData('business-details');
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+  set('biz-name', d.name); set('biz-abn', d.abn); set('biz-address', d.address);
+  set('biz-suburb', d.suburb); set('biz-postcode', d.postcode); set('biz-phone', d.phone);
+  set('biz-email', d.email); set('biz-website', d.website);
+  const stateEl = document.getElementById('biz-state');
+  if (stateEl && d.state) stateEl.value = d.state;
+}
+async function saveBusinessDetails() {
+  const get = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const data = {
+    name: get('biz-name'), abn: get('biz-abn'), address: get('biz-address'),
+    suburb: get('biz-suburb'), state: get('biz-state'), postcode: get('biz-postcode'),
+    phone: get('biz-phone'), email: get('biz-email'), website: get('biz-website'),
+  };
+  settingsStatus('biz-status', 'Saving…', false);
+  const res = await putSettingsData('business-details', data);
+  res.ok ? settingsStatus('biz-status', 'Saved!', false) : settingsStatus('biz-status', 'Error saving.', true);
+}
+
+// ── Branding ───────────────────────────────────────────────────────────────
+let _brandLogoBase64 = null;
+let _brandLogoMime = null;
+
+async function loadBranding() {
+  const d = await getSettingsData('branding');
+  if (d.accentColor) {
+    const picker = document.getElementById('brand-color-picker');
+    const hex = document.getElementById('brand-color-hex');
+    if (picker) picker.value = d.accentColor;
+    if (hex) hex.value = d.accentColor;
+  }
+  if (d.logoBase64) {
+    _brandLogoBase64 = d.logoBase64;
+    _brandLogoMime = d.logoMime || 'image/png';
+    const img = document.getElementById('brand-logo-img');
+    const preview = document.getElementById('brand-logo-preview');
+    if (img) img.src = `data:${_brandLogoMime};base64,${_brandLogoBase64}`;
+    if (preview) preview.style.display = 'flex';
+  }
+}
+function syncColorPicker(hex) {
+  if (/^#[0-9a-f]{6}$/i.test(hex)) {
+    const p = document.getElementById('brand-color-picker');
+    if (p) p.value = hex;
+  }
+}
+function previewBrandLogo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 1024 * 1024) { alert('Logo must be under 1 MB.'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    const [header, b64] = dataUrl.split(',');
+    _brandLogoBase64 = b64;
+    _brandLogoMime = file.type;
+    const img = document.getElementById('brand-logo-img');
+    const preview = document.getElementById('brand-logo-preview');
+    if (img) img.src = dataUrl;
+    if (preview) preview.style.display = 'flex';
+  };
+  reader.readAsDataURL(file);
+}
+function removeBrandLogo() {
+  _brandLogoBase64 = null;
+  _brandLogoMime = null;
+  const img = document.getElementById('brand-logo-img');
+  const preview = document.getElementById('brand-logo-preview');
+  const fileInput = document.getElementById('brand-logo-file');
+  if (img) img.src = '';
+  if (preview) preview.style.display = 'none';
+  if (fileInput) fileInput.value = '';
+}
+async function saveBranding() {
+  const hexEl = document.getElementById('brand-color-hex');
+  const pickerEl = document.getElementById('brand-color-picker');
+  const accentColor = (hexEl && /^#[0-9a-f]{6}$/i.test(hexEl.value)) ? hexEl.value : (pickerEl ? pickerEl.value : '#bd7a70');
+  const data = { accentColor };
+  if (_brandLogoBase64) { data.logoBase64 = _brandLogoBase64; data.logoMime = _brandLogoMime; }
+  settingsStatus('branding-status', 'Saving…', false);
+  const res = await putSettingsData('branding', data);
+  res.ok ? settingsStatus('branding-status', 'Saved!', false) : settingsStatus('branding-status', 'Error saving.', true);
+}
+
+// ── Booking links ──────────────────────────────────────────────────────────
+async function loadBookingLinks() {
+  const d = await getSettingsData('booking-links');
+  const disc = document.getElementById('booking-discovery');
+  const strat = document.getElementById('booking-strategy');
+  if (disc) disc.value = d.discoveryCall || '';
+  if (strat) strat.value = d.strategySession || '';
+}
+async function saveBookingLinks() {
+  const data = {
+    discoveryCall: (document.getElementById('booking-discovery')?.value || '').trim(),
+    strategySession: (document.getElementById('booking-strategy')?.value || '').trim(),
+  };
+  settingsStatus('booking-status', 'Saving…', false);
+  const res = await putSettingsData('booking-links', data);
+  res.ok ? settingsStatus('booking-status', 'Saved!', false) : settingsStatus('booking-status', 'Error saving.', true);
+}
+
+// ── Notifications ──────────────────────────────────────────────────────────
+async function loadNotificationSettings() {
+  const d = await getSettingsData('notifications');
+  const defaults = { newClient: true, briefSubmitted: true, questionnaire: true, agreementSigned: true, shortlistViewed: false };
+  const merged = { ...defaults, ...d };
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.checked = !!val; };
+  set('notif-new-client', merged.newClient);
+  set('notif-brief-submitted', merged.briefSubmitted);
+  set('notif-questionnaire', merged.questionnaire);
+  set('notif-agreement-signed', merged.agreementSigned);
+  set('notif-shortlist-viewed', merged.shortlistViewed);
+}
+async function saveNotificationSettings() {
+  const cb = id => !!document.getElementById(id)?.checked;
+  const data = {
+    newClient: cb('notif-new-client'),
+    briefSubmitted: cb('notif-brief-submitted'),
+    questionnaire: cb('notif-questionnaire'),
+    agreementSigned: cb('notif-agreement-signed'),
+    shortlistViewed: cb('notif-shortlist-viewed'),
+  };
+  settingsStatus('notif-status', 'Saving…', false);
+  const res = await putSettingsData('notifications', data);
+  res.ok ? settingsStatus('notif-status', 'Saved!', false) : settingsStatus('notif-status', 'Error saving.', true);
+}
+
+// ── Email templates ────────────────────────────────────────────────────────
+const EMAIL_TPL_VARS = {
+  welcome: ['{{clientFirstName}}', '{{portalLink}}', '{{agentName}}'],
+  'brief-received': ['{{clientFirstName}}', '{{agentName}}'],
+  shortlist: ['{{clientFirstName}}', '{{propertyCount}}', '{{portalLink}}', '{{agentName}}'],
+  agreement: ['{{clientFirstName}}', '{{signingLink}}', '{{agentName}}'],
+};
+const EMAIL_TPL_DEFAULTS = {
+  welcome: { subject: 'Your Fairway client portal is ready', body: 'Hi {{clientFirstName}},\n\nYour client portal is now set up and ready to go.\n\nYou can log in here: {{portalLink}}\n\nDon\'t hesitate to reach out if you have any questions.\n\n{{agentName}}' },
+  'brief-received': { subject: 'Thanks — we\'ve received your brief', body: 'Hi {{clientFirstName}},\n\nThank you for completing your buying brief. We\'ll review it shortly and be in touch.\n\n{{agentName}}' },
+  shortlist: { subject: 'New properties in your shortlist', body: 'Hi {{clientFirstName}},\n\nWe\'ve added {{propertyCount}} new propert(ies) to your shortlist. You can view them in your portal:\n\n{{portalLink}}\n\n{{agentName}}' },
+  agreement: { subject: 'Your Buyer Engagement Agreement is ready', body: 'Hi {{clientFirstName}},\n\nYour Buyer Engagement Agreement is ready for signing:\n\n{{signingLink}}\n\nPlease review and sign at your earliest convenience.\n\n{{agentName}}' },
+};
+let _emailTemplates = {};
+
+async function loadEmailTemplates() {
+  _emailTemplates = await getSettingsData('email-templates');
+  switchEmailTemplate(document.getElementById('email-tpl-select')?.value || 'welcome');
+}
+function switchEmailTemplate(type) {
+  const saved = _emailTemplates[type] || {};
+  const defaults = EMAIL_TPL_DEFAULTS[type] || {};
+  const subj = document.getElementById('email-tpl-subject');
+  const body = document.getElementById('email-tpl-body');
+  const varsList = document.getElementById('email-tpl-vars-list');
+  if (subj) subj.value = saved.subject ?? defaults.subject ?? '';
+  if (body) body.value = saved.body ?? defaults.body ?? '';
+  if (varsList) varsList.innerHTML = (EMAIL_TPL_VARS[type] || []).map(v => `<span class="tpl-var">${v}</span>`).join('');
+}
+async function saveEmailTemplate() {
+  const type = document.getElementById('email-tpl-select')?.value;
+  if (!type) return;
+  const subject = document.getElementById('email-tpl-subject')?.value || '';
+  const body = document.getElementById('email-tpl-body')?.value || '';
+  _emailTemplates[type] = { subject, body };
+  settingsStatus('email-tpl-status', 'Saving…', false);
+  const res = await putSettingsData('email-templates', _emailTemplates);
+  res.ok ? settingsStatus('email-tpl-status', 'Saved!', false) : settingsStatus('email-tpl-status', 'Error saving.', true);
+}
+
+// ── Agreement terms ────────────────────────────────────────────────────────
+async function loadAgreementTerms() {
+  const d = await getSettingsData('agreement-terms');
+  const el = document.getElementById('agreement-terms-body');
+  if (el) el.value = d.specialConditions || '';
+}
+async function saveAgreementTerms() {
+  const body = document.getElementById('agreement-terms-body')?.value || '';
+  settingsStatus('agreement-terms-status', 'Saving…', false);
+  const res = await putSettingsData('agreement-terms', { specialConditions: body });
+  res.ok ? settingsStatus('agreement-terms-status', 'Saved!', false) : settingsStatus('agreement-terms-status', 'Error saving.', true);
 }
 
 async function loadAuditLog() {
