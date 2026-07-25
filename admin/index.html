@@ -112,6 +112,63 @@
     .tpl-vars{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
     .tpl-var{font-size:11.5px;font-family:monospace;background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.1);border-radius:6px;padding:3px 8px;color:rgba(247,243,237,0.5);}
 
+    /* ── Tasks ─────────────────────────────────────────────────────────── */
+    .task-add-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.08);border-radius:16px;padding:16px 20px;margin-bottom:28px;}
+    .task-add-input{flex:1;min-width:180px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.1);border-radius:10px;padding:11px 14px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:300;color:#f7f3ed;outline:none;transition:border-color .2s;}
+    .task-add-input:focus{border-color:rgba(189,122,112,0.55);}
+    .task-add-input::placeholder{color:rgba(247,243,237,0.2);}
+    .task-urg-sel{display:flex;gap:3px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.07);border-radius:10px;padding:3px;flex-shrink:0;}
+    .task-urg-btn{padding:7px 13px;border-radius:8px;border:none;font-family:'Outfit',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .15s;background:transparent;color:rgba(247,243,237,0.35);}
+    .task-urg-btn[data-urg="high"].active{background:rgba(220,80,80,0.15);color:#e07070;}
+    .task-urg-btn[data-urg="medium"].active{background:rgba(232,168,124,0.15);color:#e8a87c;}
+    .task-urg-btn[data-urg="low"].active{background:rgba(109,191,123,0.15);color:#6dbf7b;}
+    .task-section-head{display:flex;align-items:center;gap:10px;margin:0 0 12px;}
+    .task-section-head-label{font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.25);}
+    .task-section-head-count{font-size:11.5px;color:rgba(247,243,237,0.2);}
+    .task-section-div{flex:1;height:1px;background:rgba(247,243,237,0.06);}
+    .task-item{display:flex;align-items:flex-start;gap:12px;padding:13px 16px;background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.07);border-left-width:3px;border-radius:12px;margin-bottom:7px;transition:opacity .2s;}
+    .task-item[data-urg="high"]{border-left-color:rgba(220,80,80,0.45);}
+    .task-item[data-urg="medium"]{border-left-color:rgba(232,168,124,0.45);}
+    .task-item[data-urg="low"]{border-left-color:rgba(109,191,123,0.35);}
+    .task-item.task-done{opacity:0.5;}
+    .task-item.task-done .task-title{text-decoration:line-through;color:rgba(247,243,237,0.4);}
+    .task-check{width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(247,243,237,0.2);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:1px;}
+    .task-check:hover{border-color:rgba(189,122,112,0.6);background:rgba(189,122,112,0.06);}
+    .task-item.task-done .task-check{background:#bd7a70;border-color:#bd7a70;}
+    .task-tick{display:none;}
+    .task-item.task-done .task-tick{display:block;}
+    .task-body{flex:1;min-width:0;}
+    .task-title{font-size:14px;font-weight:300;color:#f7f3ed;line-height:1.5;word-break:break-word;}
+    .task-meta{display:flex;align-items:center;gap:7px;margin-top:5px;flex-wrap:wrap;}
+    .task-urg-badge{font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;border-radius:100px;padding:2px 8px;}
+    .task-urg-badge[data-urg="high"]{background:rgba(220,80,80,0.1);color:#e07070;}
+    .task-urg-badge[data-urg="medium"]{background:rgba(232,168,124,0.1);color:#e8a87c;}
+    .task-urg-badge[data-urg="low"]{background:rgba(109,191,123,0.1);color:#6dbf7b;}
+    .task-roll-badge{font-size:10.5px;color:rgba(247,243,237,0.28);background:rgba(247,243,237,0.05);border-radius:100px;padding:2px 8px;}
+    .task-del{background:none;border:none;cursor:pointer;opacity:0;transition:opacity .15s;padding:3px;color:rgba(247,243,237,0.3);flex-shrink:0;border-radius:6px;line-height:1;}
+    .task-item:hover .task-del{opacity:1;}
+    .task-del:hover{color:#e07070;background:rgba(220,80,80,0.08);}
+    /* Stats */
+    .task-stats{margin-top:36px;padding-top:28px;border-top:1px solid rgba(247,243,237,0.07);}
+    .task-stats-tabs{display:flex;gap:3px;background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.07);border-radius:10px;padding:3px;width:fit-content;margin-bottom:28px;}
+    .task-stat-tab{padding:7px 15px;border-radius:7px;border:none;font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;background:transparent;color:rgba(247,243,237,0.38);}
+    .task-stat-tab.active{background:rgba(247,243,237,0.08);color:#f7f3ed;font-weight:500;}
+    .task-stats-body{display:flex;gap:48px;align-items:flex-start;flex-wrap:wrap;}
+    .task-stats-hero .task-pct{font-family:'Fraunces',serif;font-size:60px;font-weight:400;line-height:1;color:#f7f3ed;}
+    .task-stats-hero .task-pct-sub{font-size:14px;color:rgba(247,243,237,0.4);margin-top:8px;}
+    .task-stats-hero .task-streak{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:13px;color:#e8a87c;background:rgba(232,168,124,0.08);border-radius:100px;padding:4px 12px;border:1px solid rgba(232,168,124,0.15);}
+    .task-chart-wrap{flex:1;min-width:280px;}
+    .task-chart{display:flex;gap:6px;align-items:flex-end;margin-bottom:6px;}
+    .task-chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;}
+    .task-chart-bar-wrap{height:80px;width:100%;position:relative;background:rgba(247,243,237,0.03);border-radius:4px;}
+    .task-chart-bar{position:absolute;bottom:0;left:0;right:0;border-radius:4px 4px 0 0;transition:height .4s ease;min-height:0px;}
+    .task-chart-bar.bar-today{background:rgba(189,122,112,0.7);}
+    .task-chart-bar.bar-high{background:rgba(109,191,123,0.55);}
+    .task-chart-bar.bar-mid{background:rgba(232,168,124,0.5);}
+    .task-chart-bar.bar-low{background:rgba(247,243,237,0.15);}
+    .task-chart-bar.bar-empty{background:rgba(247,243,237,0.06);}
+    .task-chart-lbl{font-size:10.5px;color:rgba(247,243,237,0.28);text-align:center;}
+    .task-chart-sublbl{font-size:9.5px;color:rgba(247,243,237,0.18);text-align:center;}
     /* Compliance */
     .comp-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
     .comp-item{background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.09);border-radius:12px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;}
@@ -720,6 +777,10 @@
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6.5" height="6.5" rx="1.5" fill="currentColor" opacity=".8"/><rect x="8.5" y="1" width="6.5" height="6.5" rx="1.5" fill="currentColor" opacity=".8"/><rect x="1" y="8.5" width="6.5" height="6.5" rx="1.5" fill="currentColor" opacity=".8"/><rect x="8.5" y="8.5" width="6.5" height="6.5" rx="1.5" fill="currentColor" opacity=".8"/></svg>
         Dashboard
       </button>
+      <button class="snav-item" onclick="showSection('tasks',this)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h8M2 8h8M2 12h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M11.5 11.5l1.5 1.5 2.5-2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Tasks
+      </button>
       <button class="snav-item" onclick="showSection('clients',this)">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         Clients
@@ -805,6 +866,53 @@
       <div class="dash-panel" style="margin-top:18px;">
         <div class="dash-panel-title">Top referrers</div>
         <div id="dash-referrers"><span style="font-size:13px;color:rgba(247,243,237,0.2);">Loading…</span></div>
+      </div>
+    </div>
+
+    <!-- Tasks -->
+    <div id="sec-tasks" class="admin-section">
+      <div class="sec-header">
+        <div>
+          <h1 id="tasks-date-head" style="font-family:'Fraunces',serif;font-size:28px;font-weight:400;"></h1>
+          <p id="tasks-today-sub" style="font-size:13.5px;color:rgba(247,243,237,0.38);margin-top:4px;"></p>
+        </div>
+      </div>
+
+      <!-- Add task -->
+      <div class="task-add-row">
+        <input type="text" id="task-add-input" class="task-add-input" placeholder="Add a task for today…" onkeydown="if(event.key==='Enter')addTask()">
+        <div class="task-urg-sel">
+          <button class="task-urg-btn" data-urg="high" onclick="setTaskUrgency('high',this)">High</button>
+          <button class="task-urg-btn active" data-urg="medium" onclick="setTaskUrgency('medium',this)">Medium</button>
+          <button class="task-urg-btn" data-urg="low" onclick="setTaskUrgency('low',this)">Low</button>
+        </div>
+        <button onclick="addTask()" class="btn-primary" style="font-size:13px;padding:10px 20px;white-space:nowrap;flex-shrink:0;">Add task</button>
+      </div>
+
+      <!-- Active tasks -->
+      <div id="task-list-active"></div>
+
+      <!-- Completed today -->
+      <div id="task-done-section" style="display:none;margin-top:20px;">
+        <div class="task-section-head">
+          <span class="task-section-head-label">Done today</span>
+          <span class="task-section-head-count" id="task-done-count"></span>
+          <div class="task-section-div"></div>
+        </div>
+        <div id="task-list-done"></div>
+      </div>
+
+      <!-- Stats -->
+      <div class="task-stats">
+        <p style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:16px;">Completion stats</p>
+        <div class="task-stats-tabs">
+          <button class="task-stat-tab active" onclick="renderTaskStats('week',this)">Week</button>
+          <button class="task-stat-tab" onclick="renderTaskStats('month',this)">Month</button>
+          <button class="task-stat-tab" onclick="renderTaskStats('quarter',this)">Quarter</button>
+          <button class="task-stat-tab" onclick="renderTaskStats('biannual',this)">6 months</button>
+          <button class="task-stat-tab" onclick="renderTaskStats('year',this)">Year</button>
+        </div>
+        <div class="task-stats-body" id="task-stats-body"></div>
       </div>
     </div>
 
@@ -2872,6 +2980,7 @@ function showSection(id, btn) {
   if (id === 'prospects') renderProspects();
   if (id === 'settings') { loadCompliance(); loadAgentSignatureSettings(); }
   if (id === 'reports') renderReports();
+  if (id === 'tasks') loadTasks();
   localStorage.setItem('fw_admin_section', id);
 }
 
@@ -4625,6 +4734,259 @@ async function logoutAllDevices() {
     btn.textContent = 'Sign out all devices';
     alert('Logout failed — please try again.');
   }
+}
+
+// ── Tasks ──────────────────────────────────────────────────────────────────
+let allTasks = [];
+let taskNewUrgency = 'medium';
+let _taskStatPeriod = 'week';
+let _tasksLoaded = false;
+
+function localDateStr(d) {
+  const dt = d || new Date();
+  return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+}
+
+async function loadTasks() {
+  const dateHead = document.getElementById('tasks-date-head');
+  if (dateHead) {
+    const d = new Date();
+    dateHead.textContent = d.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  }
+  const res = await api('GET', '/api/admin/tasks');
+  if (!res.ok) return;
+  allTasks = await res.json();
+  _tasksLoaded = true;
+  renderTaskList();
+  renderTaskStats(_taskStatPeriod);
+}
+
+function renderTaskList() {
+  const today = localDateStr();
+  const active = allTasks.filter(t => !t.deletedAt && !t.completedAt && t.dueDate <= today);
+  const doneToday = allTasks.filter(t => !t.deletedAt && t.completedAt && localDateStr(new Date(t.completedAt)) === today);
+
+  const urgOrder = { high: 0, medium: 1, low: 2 };
+  active.sort((a, b) => (urgOrder[a.urgency] ?? 1) - (urgOrder[b.urgency] ?? 1) || a.dueDate.localeCompare(b.dueDate));
+
+  const activeEl = document.getElementById('task-list-active');
+  if (activeEl) {
+    if (active.length === 0) {
+      activeEl.innerHTML = `<div style="padding:24px 0;text-align:center;color:rgba(247,243,237,0.18);font-size:13.5px;">No active tasks — add one above.</div>`;
+    } else {
+      activeEl.innerHTML = `<div class="task-section-head">
+        <span class="task-section-head-label">Active</span>
+        <span class="task-section-head-count">${active.length}</span>
+        <div class="task-section-div"></div>
+      </div>` + active.map(t => taskItemHtml(t, today)).join('');
+    }
+  }
+
+  const doneSec = document.getElementById('task-done-section');
+  const doneEl = document.getElementById('task-list-done');
+  const doneCount = document.getElementById('task-done-count');
+  if (doneSec && doneEl) {
+    if (doneToday.length > 0) {
+      doneSec.style.display = 'block';
+      if (doneCount) doneCount.textContent = doneToday.length;
+      doneEl.innerHTML = doneToday.map(t => taskItemHtml(t, today)).join('');
+    } else {
+      doneSec.style.display = 'none';
+    }
+  }
+
+  const sub = document.getElementById('tasks-today-sub');
+  if (sub) {
+    const total = active.length + doneToday.length;
+    sub.textContent = total === 0 ? 'Nothing scheduled yet' : `${doneToday.length} of ${total} done today`;
+  }
+}
+
+function taskItemHtml(t, today) {
+  const done = !!t.completedAt;
+  const daysOver = done ? 0 : Math.round((new Date(today) - new Date(t.dueDate)) / 86400000);
+  const rollLabel = !done && daysOver > 0 ? (daysOver === 1 ? 'from yesterday' : `${daysOver}d overdue`) : '';
+  return `<div class="task-item${done?' task-done':''}" data-urg="${t.urgency}">
+    <div class="task-check" onclick="toggleTask('${t.id}')">
+      <svg class="task-tick" width="10" height="8" viewBox="0 0 10 8" fill="none">
+        <path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="task-body">
+      <div class="task-title">${esc(t.title)}</div>
+      <div class="task-meta">
+        <span class="task-urg-badge" data-urg="${t.urgency}">${t.urgency.charAt(0).toUpperCase()+t.urgency.slice(1)}</span>
+        ${rollLabel ? `<span class="task-roll-badge">↑ ${rollLabel}</span>` : ''}
+      </div>
+    </div>
+    <button class="task-del" onclick="deleteTask('${t.id}')" title="Delete">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>`;
+}
+
+function setTaskUrgency(urg, btn) {
+  taskNewUrgency = urg;
+  document.querySelectorAll('.task-urg-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+async function addTask() {
+  const input = document.getElementById('task-add-input');
+  const title = input?.value.trim();
+  if (!title) { input?.focus(); return; }
+  const res = await api('POST', '/api/admin/tasks', { title, urgency: taskNewUrgency, dueDate: localDateStr() });
+  if (!res.ok) return;
+  const task = await res.json();
+  allTasks.push(task);
+  if (input) input.value = '';
+  renderTaskList();
+  renderTaskStats(_taskStatPeriod);
+}
+
+async function toggleTask(id) {
+  const task = allTasks.find(t => t.id === id);
+  if (!task) return;
+  const completedAt = task.completedAt ? null : new Date().toISOString();
+  const res = await api('PUT', '/api/admin/tasks', { id, completedAt });
+  if (!res.ok) return;
+  task.completedAt = completedAt;
+  renderTaskList();
+  renderTaskStats(_taskStatPeriod);
+}
+
+async function deleteTask(id) {
+  const res = await api('DELETE', `/api/admin/tasks?id=${id}`);
+  if (!res.ok) return;
+  const task = allTasks.find(t => t.id === id);
+  if (task) task.deletedAt = new Date().toISOString();
+  renderTaskList();
+  renderTaskStats(_taskStatPeriod);
+}
+
+function calcStreak(tasks) {
+  const active = tasks.filter(t => !t.deletedAt);
+  let streak = 0;
+  const today = new Date(); today.setHours(0,0,0,0);
+  for (let i = 0; i < 180; i++) {
+    const d = new Date(today); d.setDate(today.getDate() - i);
+    const ds = localDateStr(d);
+    const dayTasks = active.filter(t => t.dueDate === ds);
+    if (dayTasks.length === 0) { if (streak > 0) break; continue; }
+    const dayDone = dayTasks.filter(t => t.completedAt && localDateStr(new Date(t.completedAt)) === ds);
+    if (dayDone.length > 0) { streak++; }
+    else if (i > 0) break; // past day with tasks but none completed
+  }
+  return streak;
+}
+
+function renderTaskStats(period, btn) {
+  _taskStatPeriod = period;
+  if (btn) {
+    document.querySelectorAll('.task-stat-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  const active = allTasks.filter(t => !t.deletedAt);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayDs = localDateStr(today);
+  const periodDays = { week: 7, month: 30, quarter: 90, biannual: 180, year: 365 }[period];
+  const start = new Date(today); start.setDate(today.getDate() - periodDays + 1);
+
+  const scheduled = active.filter(t => { const d = new Date(t.dueDate+'T00:00:00'); return d >= start && d <= today; });
+  const completed = active.filter(t => { if (!t.completedAt) return false; const d = new Date(t.completedAt); d.setHours(0,0,0,0); return d >= start && d <= today; });
+
+  const total = scheduled.length;
+  const done = completed.length;
+  const pct = total > 0 ? Math.round(done / total * 100) : null;
+  const streak = calcStreak(active);
+
+  const periodLabel = { week:'this week', month:'this month', quarter:'this quarter', biannual:'this 6 months', year:'this year' }[period];
+
+  const chartCols = buildTaskChart(period, active, today);
+
+  const body = document.getElementById('task-stats-body');
+  if (!body) return;
+  body.innerHTML = `
+    <div class="task-stats-hero">
+      <div class="task-pct">${pct !== null ? pct + '%' : '—'}</div>
+      <div class="task-pct-sub">${done} of ${total} tasks completed ${periodLabel}</div>
+      ${streak >= 2 ? `<div class="task-streak">🔥 ${streak}-day streak</div>` : ''}
+    </div>
+    <div class="task-chart-wrap">
+      <div class="task-chart">
+        ${chartCols.map(c => `<div class="task-chart-col">
+          <div class="task-chart-bar-wrap">
+            <div class="task-chart-bar ${c.cls}" style="height:${c.h}%" title="${c.done}/${c.total} tasks"></div>
+          </div>
+          <div class="task-chart-lbl">${c.lbl}</div>
+          ${c.sublbl ? `<div class="task-chart-sublbl">${c.sublbl}</div>` : ''}
+        </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function buildTaskChart(period, tasks, today) {
+  const ds = (d) => localDateStr(d);
+  const todayDs = ds(today);
+
+  function colData(label, sublbl, dayTasks, isNow) {
+    const done = dayTasks.filter(t => t.completedAt).length;
+    const total = dayTasks.length;
+    const pct = total > 0 ? Math.round(done / total * 100) : 0;
+    const h = total > 0 ? Math.max(pct, 5) : 3;
+    const cls = isNow ? 'bar-today' : pct >= 80 ? 'bar-high' : pct >= 50 ? 'bar-mid' : total > 0 ? 'bar-low' : 'bar-empty';
+    return { lbl: label, sublbl, h, cls, done, total };
+  }
+
+  if (period === 'week') {
+    return Array.from({length:7}, (_,i) => {
+      const d = new Date(today); d.setDate(today.getDate() - (6-i));
+      const dStr = ds(d);
+      const dayTasks = tasks.filter(t => t.dueDate === dStr);
+      const lbl = d.toLocaleDateString('en-AU',{weekday:'short'});
+      return colData(lbl, dStr === todayDs ? 'Today' : '', dayTasks, dStr === todayDs);
+    });
+  }
+
+  if (period === 'month') {
+    return Array.from({length:5}, (_,i) => {
+      const wEnd = new Date(today); wEnd.setDate(today.getDate() - i * 7);
+      const wStart = new Date(wEnd); wStart.setDate(wEnd.getDate() - 6);
+      const wTasks = tasks.filter(t => { const d = new Date(t.dueDate+'T00:00:00'); return d >= wStart && d <= wEnd; });
+      const isNow = i === 0;
+      return colData(wStart.toLocaleDateString('en-AU',{day:'numeric',month:'short'}),'',wTasks,isNow);
+    }).reverse();
+  }
+
+  if (period === 'quarter') {
+    return Array.from({length:3}, (_,i) => {
+      const mDate = new Date(today.getFullYear(), today.getMonth() - (2-i), 1);
+      const mEnd = new Date(mDate.getFullYear(), mDate.getMonth()+1, 0);
+      const mTasks = tasks.filter(t => { const d = new Date(t.dueDate+'T00:00:00'); return d >= mDate && d <= mEnd; });
+      const isNow = i === 2;
+      return colData(mDate.toLocaleDateString('en-AU',{month:'short'}),'',mTasks,isNow);
+    });
+  }
+
+  if (period === 'biannual') {
+    return Array.from({length:6}, (_,i) => {
+      const mDate = new Date(today.getFullYear(), today.getMonth() - (5-i), 1);
+      const mEnd = new Date(mDate.getFullYear(), mDate.getMonth()+1, 0);
+      const mTasks = tasks.filter(t => { const d = new Date(t.dueDate+'T00:00:00'); return d >= mDate && d <= mEnd; });
+      const isNow = i === 5;
+      return colData(mDate.toLocaleDateString('en-AU',{month:'short'}),'',mTasks,isNow);
+    });
+  }
+
+  // year — 12 months
+  return Array.from({length:12}, (_,i) => {
+    const mDate = new Date(today.getFullYear(), today.getMonth() - (11-i), 1);
+    const mEnd = new Date(mDate.getFullYear(), mDate.getMonth()+1, 0);
+    const mTasks = tasks.filter(t => { const d = new Date(t.dueDate+'T00:00:00'); return d >= mDate && d <= mEnd; });
+    const isNow = i === 11;
+    return colData(mDate.toLocaleDateString('en-AU',{month:'short'}),'',mTasks,isNow);
+  });
 }
 
 const _settingsPanelLoaded = new Set();
