@@ -77,8 +77,9 @@
     .brief-row-name{font-size:14px;font-weight:400;color:#f7f3ed;flex:1;min-width:120px;}
     .brief-row-email{font-size:12.5px;color:rgba(247,243,237,0.35);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     /* Settings subsections */
-    .settings-block{margin-bottom:40px;}
-    .settings-block>h2{font-family:'Fraunces',serif;font-size:20px;font-weight:400;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid rgba(247,243,237,0.07);}
+    .settings-block{background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.07);border-radius:16px;padding:24px 28px;margin-bottom:12px;}
+    .settings-block>h2{font-family:'Fraunces',serif;font-size:18px;font-weight:400;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(247,243,237,0.07);}
+    .settings-category{font-size:10.5px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(247,243,237,0.22);margin:28px 0 10px;padding:0;}
 
     /* Compliance */
     .comp-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
@@ -954,6 +955,9 @@
         <h1>Settings</h1>
       </div>
 
+      <!-- ── Profile ─────────────────────────────────────────────────────────── -->
+      <p class="settings-category">Profile</p>
+
       <!-- My Signature -->
       <div class="settings-block" id="sig-settings-block">
         <h2>My Signature</h2>
@@ -995,6 +999,9 @@
         </div>
       </div>
 
+      <!-- ── Business ────────────────────────────────────────────────────────── -->
+      <p class="settings-category">Business</p>
+
       <div class="settings-block" id="compliance-block">
         <h2>Compliance</h2>
         <div id="comp-alert" style="display:none;" class="comp-alert">
@@ -1024,6 +1031,43 @@
           <div id="cpd-sub" style="font-size:12px;color:rgba(247,243,237,0.35);margin-top:6px;"></div>
         </div>
       </div>
+
+      <!-- ── Tools ───────────────────────────────────────────────────────────── -->
+      <p class="settings-category">Tools</p>
+
+      <div class="settings-block">
+        <h2>QR Codes</h2>
+        <p style="font-size:13px;color:rgba(247,243,237,0.45);margin-bottom:24px;line-height:1.6;">Generate QR codes for any URL. Each code uses a short link so you can update the destination at any time without reprinting.</p>
+
+        <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;margin-bottom:20px;">
+          <div style="flex:1;min-width:200px;">
+            <div class="field">
+              <label>URL <span style="color:#e07070;">*</span></label>
+              <input type="url" id="qr-url-input" placeholder="https://fairwayinvesting.com.au" oninput="qrPreviewDebounce()" style="width:100%;box-sizing:border-box;">
+            </div>
+            <div class="field">
+              <label>Note <span style="color:rgba(247,243,237,0.3);font-weight:300;">(optional)</span></label>
+              <input type="text" id="qr-note-input" placeholder="e.g. Business card, Email footer">
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:4px;">
+              <button onclick="saveQrCode()" id="qr-save-btn" class="btn-primary" style="font-size:13px;padding:10px 22px;" disabled>Save</button>
+              <span id="qr-status" style="font-size:13px;color:rgba(247,243,237,0.4);"></span>
+            </div>
+          </div>
+          <div style="flex-shrink:0;">
+            <div style="font-size:11px;color:rgba(247,243,237,0.3);text-align:center;margin-bottom:8px;letter-spacing:0.04em;text-transform:uppercase;">Preview</div>
+            <div id="qr-preview-wrap" style="width:160px;height:160px;background:#f7f3ed;border-radius:16px;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.25);">
+              <span id="qr-preview-placeholder" style="font-size:11.5px;color:rgba(0,0,0,0.28);text-align:center;padding:14px;line-height:1.6;">Enter a URL<br>to preview</span>
+              <img id="qr-preview-img" src="" alt="QR preview" style="display:none;width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none';document.getElementById('qr-preview-placeholder').style.display='block'">
+            </div>
+          </div>
+        </div>
+
+        <div id="qr-saved-list" style="margin-top:24px;"></div>
+      </div>
+
+      <!-- ── Account ─────────────────────────────────────────────────────────── -->
+      <p class="settings-category">Account</p>
 
       <div class="settings-block">
         <h2 onclick="toggleSecuritySection(this)" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;">
@@ -1070,37 +1114,8 @@
         </div>
       </div>
 
-      <!-- QR Codes -->
-      <div class="settings-block">
-        <h2>QR Codes</h2>
-        <p style="font-size:13px;color:rgba(247,243,237,0.45);margin-bottom:24px;line-height:1.6;">Generate QR codes for any URL. Save them with a note and download as high-resolution PNG for print.</p>
-
-        <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;margin-bottom:20px;">
-          <div style="flex:1;min-width:200px;">
-            <div class="field">
-              <label>URL <span style="color:#e07070;">*</span></label>
-              <input type="url" id="qr-url-input" placeholder="https://fairwayinvesting.com.au" oninput="qrPreviewDebounce()" style="width:100%;box-sizing:border-box;">
-            </div>
-            <div class="field">
-              <label>Note <span style="color:rgba(247,243,237,0.3);font-weight:300;">(optional)</span></label>
-              <input type="text" id="qr-note-input" placeholder="e.g. Business card, Email footer">
-            </div>
-            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:4px;">
-              <button onclick="saveQrCode()" id="qr-save-btn" class="btn-primary" style="font-size:13px;padding:10px 22px;" disabled>Save</button>
-              <span id="qr-status" style="font-size:13px;color:rgba(247,243,237,0.4);"></span>
-            </div>
-          </div>
-          <div style="flex-shrink:0;">
-            <div style="font-size:11px;color:rgba(247,243,237,0.3);text-align:center;margin-bottom:8px;letter-spacing:0.04em;text-transform:uppercase;">Preview</div>
-            <div id="qr-preview-wrap" style="width:160px;height:160px;background:#f7f3ed;border-radius:16px;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.25);">
-              <span id="qr-preview-placeholder" style="font-size:11.5px;color:rgba(0,0,0,0.28);text-align:center;padding:14px;line-height:1.6;">Enter a URL<br>to preview</span>
-              <img id="qr-preview-img" src="" alt="QR preview" style="display:none;width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none';document.getElementById('qr-preview-placeholder').style.display='block'">
-            </div>
-          </div>
-        </div>
-
-        <div id="qr-saved-list" style="margin-top:24px;"></div>
-      </div>
+      <!-- ── Links ───────────────────────────────────────────────────────────── -->
+      <p class="settings-category">Links</p>
 
       <div class="settings-block">
         <h2>Site pages</h2>
