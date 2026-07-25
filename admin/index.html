@@ -2676,14 +2676,21 @@ function renderDashboardFees() {
     return bOut - aOut;
   });
   el.innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
       <div style="background:rgba(109,191,123,0.07);border:1px solid rgba(109,191,123,0.15);border-radius:10px;padding:14px 16px;">
-        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#6dbf7b;margin-bottom:6px;">Collected (ex GST)</div>
-        <div style="font-family:'Fraunces',serif;font-size:26px;color:#f7f3ed;">${fmt(totalCollected)}</div>
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#6dbf7b;margin-bottom:6px;">Collected</div>
+        <div style="font-family:'Fraunces',serif;font-size:24px;color:#f7f3ed;line-height:1.1;">${fmt(totalCollected)}</div>
+        <div style="font-size:11.5px;color:rgba(247,243,237,0.35);margin-top:4px;">${fmt(totalCollected * 1.1)} inc GST</div>
       </div>
       <div style="background:rgba(232,168,124,0.07);border:1px solid rgba(232,168,124,0.15);border-radius:10px;padding:14px 16px;">
-        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#e8a87c;margin-bottom:6px;">Outstanding (ex GST)</div>
-        <div style="font-family:'Fraunces',serif;font-size:26px;color:#f7f3ed;">${fmt(totalOutstanding)}</div>
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#e8a87c;margin-bottom:6px;">Outstanding</div>
+        <div style="font-family:'Fraunces',serif;font-size:24px;color:#f7f3ed;line-height:1.1;">${fmt(totalOutstanding)}</div>
+        <div style="font-size:11.5px;color:rgba(247,243,237,0.35);margin-top:4px;">${fmt(totalOutstanding * 1.1)} inc GST</div>
+      </div>
+      <div style="background:rgba(189,122,112,0.07);border:1px solid rgba(189,122,112,0.2);border-radius:10px;padding:14px 16px;">
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#bd7a70;margin-bottom:6px;">GST to ATO</div>
+        <div style="font-family:'Fraunces',serif;font-size:24px;color:#f7f3ed;line-height:1.1;">${fmt(totalCollected * 0.1)}</div>
+        <div style="font-size:11.5px;color:rgba(247,243,237,0.35);margin-top:4px;">10% of collected</div>
       </div>
     </div>
     ${sorted.map(c => {
@@ -2701,6 +2708,7 @@ function renderDashboardFees() {
           </div>
           <div style="text-align:right;flex-shrink:0;">
             <div style="font-size:13px;font-weight:500;color:${isPaid?'#6dbf7b':'#e8a87c'};">${isPaid ? 'Cleared' : fmt(outstanding) + ' due'}</div>
+            ${!isPaid ? `<div style="font-size:11.5px;color:rgba(247,243,237,0.3);margin-top:2px;">${fmt(outstanding * 1.1)} inc GST</div>` : ''}
           </div>
           ${isPaid ? `<span style="font-size:18px;color:#6dbf7b;flex-shrink:0;">&#10003;</span>` : `<button class="btn-sm" style="flex-shrink:0;" onclick="(function(el){el.style.display=el.style.display==='none'?'block':'none'})(document.getElementById('dash-fee-form-${c.id}'))">+ Payment</button>`}
         </div>
