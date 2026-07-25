@@ -18,18 +18,32 @@ export default async (req) => {
   if (req.method === 'POST') {
     let body;
     try { body = await req.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
-    const { url, note } = body;
-    if (!url) return json({ error: 'url required' }, 400);
+    const { destinationUrl, note } = body;
+    if (!destinationUrl) return json({ error: 'destinationUrl required' }, 400);
     const list = (await store.get('all', { type: 'json' }).catch(() => null)) || [];
     const item = {
       id: crypto.randomUUID(),
-      url: url.trim(),
+      destinationUrl: destinationUrl.trim(),
       note: note?.trim() || null,
       createdAt: new Date().toISOString(),
     };
     list.unshift(item);
     await store.set('all', JSON.stringify(list));
     return json(item, 201);
+  }
+
+  if (req.method === 'PUT') {
+    let body;
+    try { body = await req.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
+    const { id, destinationUrl } = body;
+    if (!id) return json({ error: 'id required' }, 400);
+    if (!destinationUrl) return json({ error: 'destinationUrl required' }, 400);
+    const list = (await store.get('all', { type: 'json' }).catch(() => null)) || [];
+    const idx = list.findIndex(i => i.id === id);
+    if (idx === -1) return json({ error: 'Not found' }, 404);
+    list[idx] = { ...list[idx], destinationUrl: destinationUrl.trim(), updatedAt: new Date().toISOString() };
+    await store.set('all', JSON.stringify(list));
+    return json(list[idx]);
   }
 
   if (req.method === 'DELETE') {
@@ -45,5 +59,5 @@ export default async (req) => {
 
 export const config = {
   path: '/api/admin/qr-codes',
-  method: ['GET', 'POST', 'DELETE'],
+  method: ['GET', 'POST', 'PUT', 'DELETE'],
 };
