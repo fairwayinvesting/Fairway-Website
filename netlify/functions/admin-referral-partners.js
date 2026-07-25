@@ -8,7 +8,7 @@ const json = (data, status = 200) =>
 export default async (req) => {
   if (!(await checkAdmin(req))) return json({ error: 'Unauthorized' }, 401);
 
-  const store = getStore('fairway-referral-partners');
+  const store = getStore({ name: 'fairway-referral-partners', consistency: 'strong' });
 
   if (req.method === 'GET') {
     try {
@@ -41,7 +41,7 @@ export default async (req) => {
         createdAt: new Date().toISOString(),
       };
       list.push(partner);
-      await store.setJSON('all', list);
+      await store.set('all', JSON.stringify(list));
       return json(partner, 201);
     } catch (err) {
       console.error('referral-partners POST failed:', err?.message || err);
@@ -72,7 +72,7 @@ export default async (req) => {
         isReferralPartner: typeof isReferralPartner === 'boolean' ? isReferralPartner : list[idx].isReferralPartner,
         updatedAt: new Date().toISOString(),
       };
-      await store.setJSON('all', list);
+      await store.set('all', JSON.stringify(list));
       return json(list[idx]);
     } catch (err) {
       console.error('referral-partners PUT failed:', err?.message || err);
@@ -86,7 +86,7 @@ export default async (req) => {
     try {
       const list = (await store.get('all', { type: 'json' })) || [];
       if (!list.find(p => p.id === id)) return json({ error: 'Partner not found' }, 404);
-      await store.setJSON('all', list.filter(p => p.id !== id));
+      await store.set('all', JSON.stringify(list.filter(p => p.id !== id)));
       return json({ ok: true });
     } catch (err) {
       console.error('referral-partners DELETE failed:', err?.message || err);
