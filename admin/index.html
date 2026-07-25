@@ -867,6 +867,10 @@
         <div class="dash-panel-title">Top referrers</div>
         <div id="dash-referrers"><span style="font-size:13px;color:rgba(247,243,237,0.2);">Loading…</span></div>
       </div>
+      <div class="dash-panel" style="margin-top:18px;">
+        <div class="dash-panel-title">Fees</div>
+        <div id="dash-fees"><span style="font-size:13px;color:rgba(247,243,237,0.2);">Loading…</span></div>
+      </div>
     </div>
 
     <!-- Tasks -->
@@ -2649,6 +2653,101 @@ function renderTopReferrers() {
   </div>`).join('');
 }
 
+function renderDashboardFees() {
+  const el = document.getElementById('dash-fees');
+  if (!el) return;
+  const today = localDateStr(new Date());
+  const fmt = n => '$' + Number(n || 0).toLocaleString('en-AU', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const feeClients = clients.filter(c => c.manualFee && c.manualFee.totalFee);
+  if (!feeClients.length) {
+    el.innerHTML = '<p style="font-size:13px;color:rgba(247,243,237,0.25);padding:4px 0;">No fees assigned yet. Open a client\'s Engagement tab to assign a fee.</p>';
+    return;
+  }
+  const calcPaid = fee => (fee.payments || []).reduce((s, p) => s + (Number(p.amount) || 0), 0);
+  let totalCollected = 0, totalOutstanding = 0;
+  feeClients.forEach(c => {
+    const paid = calcPaid(c.manualFee);
+    totalCollected += paid;
+    totalOutstanding += Math.max(0, (c.manualFee.totalFee || 0) - paid);
+  });
+  const sorted = [...feeClients].sort((a, b) => {
+    const aOut = Math.max(0, (a.manualFee.totalFee||0) - calcPaid(a.manualFee));
+    const bOut = Math.max(0, (b.manualFee.totalFee||0) - calcPaid(b.manualFee));
+    return bOut - aOut;
+  });
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+      <div style="background:rgba(109,191,123,0.07);border:1px solid rgba(109,191,123,0.15);border-radius:10px;padding:14px 16px;">
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#6dbf7b;margin-bottom:6px;">Collected (ex GST)</div>
+        <div style="font-family:'Fraunces',serif;font-size:26px;color:#f7f3ed;">${fmt(totalCollected)}</div>
+      </div>
+      <div style="background:rgba(232,168,124,0.07);border:1px solid rgba(232,168,124,0.15);border-radius:10px;padding:14px 16px;">
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#e8a87c;margin-bottom:6px;">Outstanding (ex GST)</div>
+        <div style="font-family:'Fraunces',serif;font-size:26px;color:#f7f3ed;">${fmt(totalOutstanding)}</div>
+      </div>
+    </div>
+    ${sorted.map(c => {
+      const fee = c.manualFee;
+      const totalFee = fee.totalFee || 0;
+      const paid = calcPaid(fee);
+      const outstanding = Math.max(0, totalFee - paid);
+      const isPaid = outstanding <= 0;
+      const paidPct = totalFee > 0 ? Math.round((paid / totalFee) * 100) : 0;
+      return `<div style="border-bottom:1px solid rgba(247,243,237,0.06);">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 0;">
+          <div style="flex:1;min-width:0;cursor:pointer;" onclick="openClientEngagementTab('${c.id}')">
+            <div style="font-size:13.5px;color:${isPaid?'rgba(247,243,237,0.4)':'#f7f3ed'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(c.name)}</div>
+            <div style="font-size:11.5px;color:rgba(247,243,237,0.3);margin-top:2px;">Total ${fmt(totalFee)} ex GST · ${paidPct}% paid</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:13px;font-weight:500;color:${isPaid?'#6dbf7b':'#e8a87c'};">${isPaid ? 'Cleared' : fmt(outstanding) + ' due'}</div>
+          </div>
+          ${isPaid ? `<span style="font-size:18px;color:#6dbf7b;flex-shrink:0;">&#10003;</span>` : `<button class="btn-sm" style="flex-shrink:0;" onclick="(function(el){el.style.display=el.style.display==='none'?'block':'none'})(document.getElementById('dash-fee-form-${c.id}'))">+ Payment</button>`}
+        </div>
+        <div id="dash-fee-form-${c.id}" style="display:none;background:rgba(247,243,237,0.04);border-radius:10px;padding:14px 16px;margin-bottom:12px;">
+          <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">Record payment — ${esc(c.name)}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+            <div><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Amount (ex GST)</label>
+              <input id="dash-fee-amt-${c.id}" class="pf-edit-input" type="number" step="0.01" min="0" placeholder="${fmt(outstanding).replace('$','')}"></div>
+            <div><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Date</label>
+              <input id="dash-fee-date-${c.id}" class="pf-edit-input" type="date" value="${today}"></div>
+          </div>
+          <div style="margin-bottom:10px;"><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Note</label>
+            <input id="dash-fee-note-${c.id}" class="pf-edit-input" type="text" placeholder="e.g. Deposit, Final payment"></div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn-sm" style="background:rgba(189,122,112,0.15);border-color:rgba(189,122,112,0.25);color:#bd7a70;" onclick="dashAddFeePayment('${c.id}')">Save payment</button>
+            <button class="btn-sm" onclick="document.getElementById('dash-fee-form-${c.id}').style.display='none'">Cancel</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+async function dashAddFeePayment(clientId) {
+  const client = clients.find(c => c.id === clientId);
+  if (!client) return;
+  const amount = parseFloat(document.getElementById('dash-fee-amt-' + clientId)?.value);
+  if (!amount || amount <= 0) return alert('Please enter a valid payment amount.');
+  const dateVal = document.getElementById('dash-fee-date-' + clientId)?.value;
+  const paidAt = dateVal ? new Date(dateVal + 'T00:00:00').toISOString() : new Date().toISOString();
+  const note = document.getElementById('dash-fee-note-' + clientId)?.value?.trim() || '';
+  const existing = client.manualFee || {};
+  const manualFee = { ...existing, payments: [...(existing.payments || []), { id: crypto.randomUUID(), amount, note, paidAt }] };
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, manualFee });
+  if (!res.ok) return alert('Failed to save payment.');
+  client.manualFee = manualFee;
+  renderDashboardFees();
+  if (crmProfileClientId === clientId) renderEngagementTab();
+}
+
+async function openClientEngagementTab(clientId) {
+  await openClientProfile(clientId);
+  const engTab = document.querySelector(".profile-tab[onclick*=\"'engagement'\"]");
+  if (engTab) switchProfileTab('engagement', engTab);
+}
+
+
 function openPartnerModal(id) {
   document.getElementById('pm-id').value = id || '';
   document.getElementById('pm-title').textContent = id ? 'Edit contact' : 'Add contact';
@@ -2999,6 +3098,7 @@ function renderDashboard() {
   }).filter(m => m._d >= now && m._d <= in14).sort((a,b) => a._d - b._d);
   document.getElementById('ds-dates').textContent = upcoming.length || '0';
   renderTopReferrers();
+  renderDashboardFees();
 
   const datesEl = document.getElementById('dash-dates');
   if (!upcoming.length) {
@@ -6044,6 +6144,7 @@ async function saveFeeDetails(clientId) {
   if (!res.ok) return alert('Failed to save fee details.');
   client.manualFee = manualFee;
   renderEngagementTab();
+  renderDashboardFees();
 }
 
 async function addFeePayment(clientId) {
@@ -6060,6 +6161,7 @@ async function addFeePayment(clientId) {
   if (!res.ok) return alert('Failed to save payment.');
   client.manualFee = manualFee;
   renderEngagementTab();
+  renderDashboardFees();
 }
 
 async function deleteFeePayment(clientId, paymentId) {
@@ -6071,6 +6173,7 @@ async function deleteFeePayment(clientId, paymentId) {
   if (!res.ok) return alert('Failed to remove payment.');
   client.manualFee = manualFee;
   renderEngagementTab();
+  renderDashboardFees();
 }
 
 function toggleAcqAccordion(acqId) {
