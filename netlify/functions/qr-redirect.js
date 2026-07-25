@@ -1,17 +1,24 @@
 import { getStore } from '@netlify/blobs';
 
 export default async (req) => {
-  const { searchParams, pathname } = new URL(req.url);
-  // ID comes from the ?id= param injected by the netlify.toml redirect rule,
-  // or falls back to the last path segment for direct function invocation.
-  const id = searchParams.get('id') || pathname.split('/').filter(Boolean).pop();
+  const { pathname, searchParams } = new URL(req.url);
 
-  if (!id) return new Response('Not found', { status: 404 });
+  // When invoked via the netlify.toml rewrite rule:
+  //   /go/<uuid>  →  /.netlify/functions/qr-redirect/<uuid>
+  // The UUID lands as the last path segment.
+  // Fallback: ?id= query param (kept for compatibility).
+  const id = pathname.split('/').filter(Boolean).pop()
+          || searchParams.get('id');
+
+  if (!id || id === 'qr-redirect') {
+    return new Response('Not found', { status: 404 });
+  }
 
   try {
     const store = getStore({ name: 'fairway-qr-codes', consistency: 'strong' });
     const list = (await store.get('all', { type: 'json' }).catch(() => null)) || [];
     const item = list.find(q => q.id === id);
+
     if (!item) return new Response('QR code not found', { status: 404 });
 
     let dest = item.destinationUrl || item.url || '';

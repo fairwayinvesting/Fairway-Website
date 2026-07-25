@@ -33,7 +33,7 @@
 # ── QR short-link redirects ───────────────────────────────────────────────────
 [[redirects]]
   from = "/go/*"
-  to = "/.netlify/functions/qr-redirect?id=:splat"
+  to = "/.netlify/functions/qr-redirect/:splat"
   status = 200
   force = true
 
