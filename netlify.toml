@@ -10,6 +10,10 @@
   path = "/reports/*"
   function = "reports-guard"
 
+[[edge_functions]]
+  path = "/go/*"
+  function = "qr-redirect"
+
 # ── Security headers ──────────────────────────────────────────────────────────
 [[headers]]
   for = "/*"
@@ -29,13 +33,6 @@
   for = "/clients/*"
   [headers.values]
     X-Frame-Options = "DENY"
-
-# ── QR short-link redirects ───────────────────────────────────────────────────
-[[redirects]]
-  from = "/go/*"
-  to = "/.netlify/functions/qr-redirect/:splat"
-  status = 200
-  force = true
 
 # ── Block raw data/config directories from public access ─────────────────────
 [[redirects]]
