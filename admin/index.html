@@ -2658,73 +2658,79 @@ function renderDashboardFees() {
   if (!el) return;
   const today = localDateStr(new Date());
   const fmt = n => '$' + Number(n || 0).toLocaleString('en-AU', {minimumFractionDigits:2, maximumFractionDigits:2});
-  const feeClients = clients.filter(c => c.manualFee && c.manualFee.totalFee);
-  if (!feeClients.length) {
+  const calcPaid = fee => (fee.payments || []).filter(p => !p.refundedAt).reduce((s, p) => s + (Number(p.amount) || 0), 0);
+
+  // Build flat list of {client, fee} pairs across all clients
+  const rows = [];
+  clients.forEach(c => {
+    getManualFees(c).filter(f => f.totalFee).forEach(f => rows.push({ c, f }));
+  });
+
+  if (!rows.length) {
     el.innerHTML = '<p style="font-size:13px;color:rgba(247,243,237,0.25);padding:4px 0;">No fees assigned yet. Open a client\'s Engagement tab to assign a fee.</p>';
     return;
   }
-  const calcPaid = fee => (fee.payments || []).filter(p => !p.refundedAt).reduce((s, p) => s + (Number(p.amount) || 0), 0);
+
   let totalCollected = 0, totalOutstanding = 0;
-  feeClients.forEach(c => {
-    const paid = calcPaid(c.manualFee);
+  rows.forEach(({ f }) => {
+    const paid = calcPaid(f);
     totalCollected += paid;
-    totalOutstanding += Math.max(0, (c.manualFee.totalFee || 0) - paid);
+    totalOutstanding += Math.max(0, (f.totalFee || 0) - paid);
   });
-  const sorted = [...feeClients].sort((a, b) => {
-    const aOut = Math.max(0, (a.manualFee.totalFee||0) - calcPaid(a.manualFee));
-    const bOut = Math.max(0, (b.manualFee.totalFee||0) - calcPaid(b.manualFee));
-    return bOut - aOut;
-  });
+  rows.sort((a, b) => Math.max(0,(b.f.totalFee||0)-calcPaid(b.f)) - Math.max(0,(a.f.totalFee||0)-calcPaid(a.f)));
+
+  const multiPerClient = {};
+  rows.forEach(({ c }) => { multiPerClient[c.id] = (multiPerClient[c.id] || 0) + 1; });
+
   el.innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
       <div style="background:rgba(109,191,123,0.07);border:1px solid rgba(109,191,123,0.15);border-radius:10px;padding:14px 16px;">
         <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#6dbf7b;margin-bottom:6px;">Collected</div>
         <div style="font-family:'Fraunces',serif;font-size:24px;color:#f7f3ed;line-height:1.1;">${fmt(totalCollected)}</div>
-        <div style="font-size:11.5px;color:rgba(247,243,237,0.35);margin-top:4px;">${fmt(totalCollected * 1.1)} inc GST</div>
+        <div style="font-size:11.5px;color:rgba(247,243,237,0.35);margin-top:4px;">${fmt(totalCollected*1.1)} inc GST</div>
       </div>
       <div style="background:rgba(232,168,124,0.07);border:1px solid rgba(232,168,124,0.15);border-radius:10px;padding:14px 16px;">
         <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#e8a87c;margin-bottom:6px;">Outstanding</div>
         <div style="font-family:'Fraunces',serif;font-size:24px;color:#f7f3ed;line-height:1.1;">${fmt(totalOutstanding)}</div>
-        <div style="font-size:11.5px;color:rgba(247,243,237,0.35);margin-top:4px;">${fmt(totalOutstanding * 1.1)} inc GST</div>
+        <div style="font-size:11.5px;color:rgba(247,243,237,0.35);margin-top:4px;">${fmt(totalOutstanding*1.1)} inc GST</div>
       </div>
       <div style="background:rgba(189,122,112,0.07);border:1px solid rgba(189,122,112,0.2);border-radius:10px;padding:14px 16px;">
         <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#bd7a70;margin-bottom:6px;">GST to ATO</div>
-        <div style="font-family:'Fraunces',serif;font-size:24px;color:#f7f3ed;line-height:1.1;">${fmt(totalCollected * 0.1)}</div>
+        <div style="font-family:'Fraunces',serif;font-size:24px;color:#f7f3ed;line-height:1.1;">${fmt(totalCollected*0.1)}</div>
         <div style="font-size:11.5px;color:rgba(247,243,237,0.35);margin-top:4px;">10% of collected</div>
       </div>
     </div>
-    ${sorted.map(c => {
-      const fee = c.manualFee;
-      const totalFee = fee.totalFee || 0;
-      const paid = calcPaid(fee);
-      const outstanding = Math.max(0, totalFee - paid);
+    ${rows.map(({ c, f }) => {
+      const paid = calcPaid(f);
+      const outstanding = Math.max(0, (f.totalFee||0) - paid);
       const isPaid = outstanding <= 0;
-      const paidPct = totalFee > 0 ? Math.round((paid / totalFee) * 100) : 0;
+      const paidPct = f.totalFee > 0 ? Math.round((paid/f.totalFee)*100) : 0;
+      const nameLabel = multiPerClient[c.id] > 1 ? esc(c.name) + ' <span style="color:rgba(247,243,237,0.35);">· ' + esc(f.label||'Fee') + '</span>' : esc(c.name);
       return `<div style="border-bottom:1px solid rgba(247,243,237,0.06);">
         <div style="display:flex;align-items:center;gap:12px;padding:12px 0;">
           <div style="flex:1;min-width:0;cursor:pointer;" onclick="openClientEngagementTab('${c.id}')">
-            <div style="font-size:13.5px;color:${isPaid?'rgba(247,243,237,0.4)':'#f7f3ed'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(c.name)}</div>
-            <div style="font-size:11.5px;color:rgba(247,243,237,0.3);margin-top:2px;">Total ${fmt(totalFee)} ex GST · ${paidPct}% paid</div>
+            <div style="font-size:13.5px;color:${isPaid?'rgba(247,243,237,0.4)':'#f7f3ed'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${nameLabel}</div>
+            <div style="font-size:11.5px;color:rgba(247,243,237,0.3);margin-top:2px;">Total ${fmt(f.totalFee)} ex GST · ${paidPct}% paid</div>
           </div>
           <div style="text-align:right;flex-shrink:0;">
-            <div style="font-size:13px;font-weight:500;color:${isPaid?'#6dbf7b':'#e8a87c'};">${isPaid ? 'Cleared' : fmt(outstanding) + ' due'}</div>
-            ${!isPaid ? `<div style="font-size:11.5px;color:rgba(247,243,237,0.3);margin-top:2px;">${fmt(outstanding * 1.1)} inc GST</div>` : ''}
+            <div style="font-size:13px;font-weight:500;color:${isPaid?'#6dbf7b':'#e8a87c'};">${isPaid ? 'Cleared' : fmt(outstanding)+' due'}</div>
+            ${!isPaid ? `<div style="font-size:11.5px;color:rgba(247,243,237,0.3);margin-top:2px;">${fmt(outstanding*1.1)} inc GST</div>` : ''}
           </div>
-          ${isPaid ? `<span style="font-size:18px;color:#6dbf7b;flex-shrink:0;">&#10003;</span>` : `<button class="btn-sm" style="flex-shrink:0;" onclick="(function(el){el.style.display=el.style.display==='none'?'block':'none'})(document.getElementById('dash-fee-form-${c.id}'))">+ Payment</button>`}
+          ${isPaid ? `<span style="font-size:18px;color:#6dbf7b;flex-shrink:0;">&#10003;</span>` : `<button class="btn-sm" style="flex-shrink:0;" onclick="(function(w){w.style.display=w.style.display==='none'?'block':'none'})(document.getElementById('dash-fee-form-${f.id}'))">+ Payment</button>`}
         </div>
-        <div id="dash-fee-form-${c.id}" style="display:none;background:rgba(247,243,237,0.04);border-radius:10px;padding:14px 16px;margin-bottom:12px;">
-          <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">Record payment — ${esc(c.name)}</div>
+        <div id="dash-fee-form-${f.id}" style="display:none;background:rgba(247,243,237,0.04);border-radius:10px;padding:14px 16px;margin-bottom:12px;">
+          <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">Record payment — ${esc(c.name)}${multiPerClient[c.id]>1?' · '+esc(f.label||'Fee'):''}</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
             <div><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Amount (ex GST)</label>
-              <input id="dash-fee-amt-${c.id}" class="pf-edit-input" type="number" step="0.01" min="0" placeholder="${fmt(outstanding).replace('$','')}"></div>
+              <input id="dash-fee-amt-${f.id}" class="pf-edit-input" type="number" step="0.01" min="0" placeholder="${fmt(outstanding).replace('$','')}"></div>
             <div><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Date</label>
-              <input id="dash-fee-date-${c.id}" class="pf-edit-input" type="date" value="${today}"></div>
+              <input id="dash-fee-date-${f.id}" class="pf-edit-input" type="date" value="${today}"></div>
           </div>
           <div style="margin-bottom:10px;"><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Note</label>
-            <input id="dash-fee-note-${c.id}" class="pf-edit-input" type="text" placeholder="e.g. Deposit, Final payment"></div>
+            <input id="dash-fee-note-${f.id}" class="pf-edit-input" type="text" placeholder="e.g. Deposit, Final payment"></div>
           <div style="display:flex;gap:8px;">
-            <button class="btn-sm" style="background:rgba(189,122,112,0.15);border-color:rgba(189,122,112,0.25);color:#bd7a70;" onclick="dashAddFeePayment('${c.id}')">Save payment</button>
-            <button class="btn-sm" onclick="document.getElementById('dash-fee-form-${c.id}').style.display='none'">Cancel</button>
+            <button class="btn-sm" style="background:rgba(189,122,112,0.15);border-color:rgba(189,122,112,0.25);color:#bd7a70;" onclick="dashAddFeePayment('${c.id}','${f.id}')">Save payment</button>
+            <button class="btn-sm" onclick="document.getElementById('dash-fee-form-${f.id}').style.display='none'">Cancel</button>
           </div>
         </div>
       </div>`;
@@ -2732,19 +2738,23 @@ function renderDashboardFees() {
   `;
 }
 
-async function dashAddFeePayment(clientId) {
+async function dashAddFeePayment(clientId, feeId) {
   const client = clients.find(c => c.id === clientId);
   if (!client) return;
-  const amount = parseFloat(document.getElementById('dash-fee-amt-' + clientId)?.value);
+  const amount = parseFloat(document.getElementById('dash-fee-amt-' + feeId)?.value);
   if (!amount || amount <= 0) return alert('Please enter a valid payment amount.');
-  const dateVal = document.getElementById('dash-fee-date-' + clientId)?.value;
+  const dateVal = document.getElementById('dash-fee-date-' + feeId)?.value;
   const paidAt = dateVal ? new Date(dateVal + 'T00:00:00').toISOString() : new Date().toISOString();
-  const note = document.getElementById('dash-fee-note-' + clientId)?.value?.trim() || '';
-  const existing = client.manualFee || {};
-  const manualFee = { ...existing, payments: [...(existing.payments || []), { id: crypto.randomUUID(), amount, note, paidAt }] };
-  const res = await api('PUT', '/api/admin/clients', { id: clientId, manualFee });
+  const note = document.getElementById('dash-fee-note-' + feeId)?.value?.trim() || '';
+  const fees = getManualFees(client);
+  const manualFees = fees.map(f => f.id === feeId
+    ? { ...f, payments: [...(f.payments || []), { id: crypto.randomUUID(), amount, note, paidAt }] }
+    : f
+  );
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, manualFees });
   if (!res.ok) return alert('Failed to save payment.');
-  client.manualFee = manualFee;
+  client.manualFees = manualFees;
+  client.manualFee = null;
   renderDashboardFees();
   if (crmProfileClientId === clientId) renderEngagementTab();
 }
@@ -6031,209 +6041,241 @@ function renderEngagementTab() {
   `;
 }
 
+function getManualFees(client) {
+  if (client.manualFees?.length) return client.manualFees;
+  if (client.manualFee?.totalFee) {
+    return [{ id: 'fee-1', label: 'Acquisition 1', totalFee: client.manualFee.totalFee, notes: client.manualFee.notes || '', payments: client.manualFee.payments || [], createdAt: '' }];
+  }
+  return [];
+}
+
 function buildManualFeeSection(client) {
-  const fee = client.manualFee;
+  const fees = getManualFees(client);
   const fmt = n => '$' + Number(n || 0).toLocaleString('en-AU', {minimumFractionDigits:2, maximumFractionDigits:2});
   const today = localDateStr(new Date());
   const activePmts = p => !p.refundedAt;
+  const calcPaid = pmts => (pmts || []).filter(activePmts).reduce((s, p) => s + (Number(p.amount) || 0), 0);
 
-  const editForm = (vals, isEdit) => `
-    <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">Fee details</div>
-    <div style="margin-bottom:8px;">
-      <label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Total fee (ex GST)</label>
-      <input id="fee-total-${client.id}" class="pf-edit-input" type="number" step="0.01" min="0" placeholder="e.g. 12500" value="${vals?.totalFee || ''}">
-    </div>
-    <div style="margin-bottom:12px;">
-      <label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Notes (optional)</label>
-      <textarea id="fee-notes-${client.id}" class="pf-edit-input" placeholder="e.g. Full service fee" rows="2" style="resize:vertical;">${esc(vals?.notes || '')}</textarea>
-    </div>
-    <div style="display:flex;gap:8px;margin-bottom:${isEdit ? '16' : '0'}px;">
-      <button class="btn-sm" style="background:rgba(189,122,112,0.15);border-color:rgba(189,122,112,0.25);color:#bd7a70;" onclick="saveFeeDetails('${client.id}')">Save</button>
-      <button class="btn-sm" onclick="toggleFeeEditForm('${client.id}')">Cancel</button>
-    </div>
-    ${isEdit ? `<div style="padding-top:14px;border-top:1px solid rgba(247,243,237,0.07);">
-      <div id="rmf-wrap-${client.id}" style="display:none;margin-bottom:10px;">
-        <label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Reason for removing this fee</label>
-        <input id="rmf-reason-${client.id}" class="pf-edit-input" type="text" placeholder="e.g. Incorrect fee, client withdrew" style="margin-bottom:8px;">
-        <div style="display:flex;gap:8px;">
-          <button class="btn-sm" style="color:#e07070;border-color:rgba(224,112,112,0.25);" onclick="removeFee('${client.id}')">Confirm remove</button>
-          <button class="btn-sm" onclick="document.getElementById('rmf-wrap-${client.id}').style.display='none'">Cancel</button>
+  function feeCard(fee) {
+    const fid = fee.id;
+    const totalFee = fee.totalFee || 0;
+    const payments = fee.payments || [];
+    const paidAmt = calcPaid(payments);
+    const outstanding = Math.max(0, totalFee - paidAmt);
+    const paidPct = totalFee > 0 ? Math.round((paidAmt / totalFee) * 100) : 0;
+    const isPaid = outstanding <= 0;
+
+    const pmtRows = payments.map(p => {
+      const dateStr = new Date(p.paidAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+      if (p.refundedAt) {
+        const refundDate = new Date(p.refundedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+        return `<div style="padding:8px 0;border-bottom:1px solid rgba(247,243,237,0.05);opacity:0.5;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:11px;font-weight:600;text-transform:uppercase;color:#e07070;background:rgba(224,112,112,0.1);border-radius:100px;padding:2px 7px;">Refunded</span>
+            <span style="font-size:13px;color:#f7f3ed;text-decoration:line-through;">${fmt(p.amount)}</span>
+          </div>
+          <div style="font-size:11.5px;color:rgba(247,243,237,0.4);margin-top:3px;">${p.note ? esc(p.note) + ' · ' : ''}Paid ${dateStr} · Refunded ${refundDate}</div>
+          <div style="font-size:11.5px;color:rgba(224,112,112,0.6);margin-top:2px;">Reason: ${esc(p.refundReason)}</div>
+        </div>`;
+      }
+      return `<div style="border-bottom:1px solid rgba(247,243,237,0.05);">
+        <div style="display:flex;align-items:center;padding:8px 0;">
+          <div style="flex:1;"><div style="font-size:13px;color:#f7f3ed;">${fmt(p.amount)}</div>
+            <div style="font-size:11.5px;color:rgba(247,243,237,0.3);">${p.note ? esc(p.note) + ' · ' : ''}${dateStr}</div>
+          </div>
+          <button onclick="document.getElementById('rfm-${p.id}').style.display='block'" style="background:none;border:none;color:rgba(247,243,237,0.2);cursor:pointer;font-size:18px;padding:4px 8px;line-height:1;">&#215;</button>
+        </div>
+        <div id="rfm-${p.id}" style="display:none;background:rgba(224,112,112,0.05);border:1px solid rgba(224,112,112,0.15);border-radius:8px;padding:12px;margin-bottom:8px;">
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#e07070;margin-bottom:8px;">Refund / remove — ${fmt(p.amount)}</div>
+          <label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Reason</label>
+          <input id="rr-${p.id}" class="pf-edit-input" type="text" placeholder="e.g. Client refunded, payment error" style="margin-bottom:8px;">
+          <div style="display:flex;gap:8px;">
+            <button class="btn-sm" style="color:#e07070;border-color:rgba(224,112,112,0.3);" onclick="confirmFeeRefund('${client.id}','${fid}','${p.id}')">Confirm refund</button>
+            <button class="btn-sm" onclick="document.getElementById('rfm-${p.id}').style.display='none'">Cancel</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div style="background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.08);border-radius:12px;padding:16px 18px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="font-size:13.5px;color:#f7f3ed;">${esc(fee.label || 'Fee')}</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          ${isPaid && totalFee ? '<span style="font-size:11px;color:#6dbf7b;background:rgba(109,191,123,0.1);border-radius:100px;padding:2px 8px;">Cleared</span>' : ''}
+          <button class="btn-sm" style="font-size:11.5px;" onclick="(function(w){w.style.display=w.style.display==='none'?'block':'none'})(document.getElementById('fee-edit-wrap-${fid}'))">Edit</button>
         </div>
       </div>
-      <button class="btn-sm" style="color:rgba(224,112,112,0.6);border-color:rgba(224,112,112,0.15);font-size:11.5px;" onclick="document.getElementById('rmf-wrap-${client.id}').style.display='block'">Remove fee</button>
-    </div>` : ''}`;
-
-  const pmtFormHtml = `
-    <div id="fee-pmt-form-${client.id}" style="display:none;background:rgba(247,243,237,0.04);border-radius:10px;padding:14px 16px;margin-bottom:12px;">
-      <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">Record payment</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-        <div><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Amount (ex GST)</label>
-          <input id="fee-pmt-amt-${client.id}" class="pf-edit-input" type="number" step="0.01" min="0" placeholder="e.g. 6250"></div>
-        <div><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Date</label>
-          <input id="fee-pmt-date-${client.id}" class="pf-edit-input" type="date" value="${today}"></div>
+      <div id="fee-edit-wrap-${fid}" style="display:none;background:rgba(247,243,237,0.04);border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">Edit fee</div>
+        <div style="margin-bottom:8px;"><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Label</label>
+          <input id="fee-label-${fid}" class="pf-edit-input" type="text" value="${esc(fee.label || '')}"></div>
+        <div style="margin-bottom:8px;"><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Total fee (ex GST)</label>
+          <input id="fee-total-${fid}" class="pf-edit-input" type="number" step="0.01" min="0" value="${fee.totalFee || ''}"></div>
+        <div style="margin-bottom:12px;"><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Notes (optional)</label>
+          <textarea id="fee-notes-${fid}" class="pf-edit-input" rows="2" style="resize:vertical;">${esc(fee.notes || '')}</textarea></div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <button class="btn-sm" style="background:rgba(189,122,112,0.15);border-color:rgba(189,122,112,0.25);color:#bd7a70;" onclick="saveFeeDetails('${client.id}','${fid}')">Save</button>
+          <button class="btn-sm" onclick="document.getElementById('fee-edit-wrap-${fid}').style.display='none'">Cancel</button>
+        </div>
+        <div style="padding-top:12px;border-top:1px solid rgba(247,243,237,0.07);">
+          <div id="rmf-wrap-${fid}" style="display:none;margin-bottom:10px;">
+            <label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Reason for removing this fee</label>
+            <input id="rmf-reason-${fid}" class="pf-edit-input" type="text" placeholder="e.g. Incorrect fee, client withdrew" style="margin-bottom:8px;">
+            <div style="display:flex;gap:8px;">
+              <button class="btn-sm" style="color:#e07070;border-color:rgba(224,112,112,0.25);" onclick="removeFee('${client.id}','${fid}')">Confirm remove</button>
+              <button class="btn-sm" onclick="document.getElementById('rmf-wrap-${fid}').style.display='none'">Cancel</button>
+            </div>
+          </div>
+          <button class="btn-sm" style="color:rgba(224,112,112,0.6);border-color:rgba(224,112,112,0.15);font-size:11.5px;" onclick="document.getElementById('rmf-wrap-${fid}').style.display='block'">Remove fee</button>
+        </div>
       </div>
-      <div style="margin-bottom:10px;">
-        <label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Note</label>
-        <input id="fee-pmt-note-${client.id}" class="pf-edit-input" type="text" placeholder="e.g. Deposit, Final payment">
+      ${totalFee ? `<div style="background:rgba(247,243,237,0.04);border-radius:10px;padding:12px 14px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(247,243,237,0.06);">
+          <span style="font-size:12px;color:rgba(247,243,237,0.45);">Total (ex GST)</span><span style="font-size:13px;color:#f7f3ed;font-weight:500;">${fmt(totalFee)}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(247,243,237,0.06);">
+          <span style="font-size:11.5px;color:rgba(247,243,237,0.3);">+ GST (10%)</span><span style="font-size:11.5px;color:rgba(247,243,237,0.3);">${fmt(totalFee*0.1)}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(247,243,237,0.06);">
+          <span style="font-size:12px;color:rgba(247,243,237,0.45);">Total inc GST</span><span style="font-size:13px;color:#f7f3ed;">${fmt(totalFee*1.1)}</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(247,243,237,0.06);">
+          <span style="font-size:12px;color:rgba(247,243,237,0.45);">Paid (ex GST)</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:11px;color:${isPaid?'#6dbf7b':'#e8a87c'};background:${isPaid?'rgba(109,191,123,0.1)':'rgba(232,168,124,0.1)'};border-radius:100px;padding:2px 7px;">${paidPct}%</span>
+            <span style="font-size:13px;color:${isPaid?'#6dbf7b':'#f7f3ed'};font-weight:500;">${fmt(paidAmt)}</span>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:5px 0;">
+          <span style="font-size:12px;color:rgba(247,243,237,0.45);">Outstanding (ex GST)</span>
+          <span style="font-size:13px;color:${outstanding>0?'#e8a87c':'#6dbf7b'};font-weight:500;">${fmt(outstanding)}</span>
+        </div>
+      </div>` : '<p style="font-size:13px;color:rgba(247,243,237,0.25);margin:0 0 14px;">Click Edit to set the fee amount.</p>'}
+      ${payments.length ? `<div style="margin-bottom:14px;">
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:8px;">Payment history</div>
+        ${pmtRows}
+      </div>` : ''}
+      <div id="fee-pmt-form-${fid}" style="display:none;background:rgba(247,243,237,0.04);border-radius:10px;padding:14px 16px;margin-bottom:12px;">
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">Record payment</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <div><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Amount (ex GST)</label>
+            <input id="fee-pmt-amt-${fid}" class="pf-edit-input" type="number" step="0.01" min="0" placeholder="e.g. ${Math.round(outstanding)||0}"></div>
+          <div><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Date</label>
+            <input id="fee-pmt-date-${fid}" class="pf-edit-input" type="date" value="${today}"></div>
+        </div>
+        <div style="margin-bottom:10px;"><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Note</label>
+          <input id="fee-pmt-note-${fid}" class="pf-edit-input" type="text" placeholder="e.g. Deposit, Final payment"></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-sm" style="background:rgba(189,122,112,0.15);border-color:rgba(189,122,112,0.25);color:#bd7a70;" onclick="addFeePayment('${client.id}','${fid}')">Save payment</button>
+          <button class="btn-sm" onclick="document.getElementById('fee-pmt-form-${fid}').style.display='none'">Cancel</button>
+        </div>
       </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn-sm" style="background:rgba(189,122,112,0.15);border-color:rgba(189,122,112,0.25);color:#bd7a70;" onclick="addFeePayment('${client.id}')">Save payment</button>
-        <button class="btn-sm" onclick="document.getElementById('fee-pmt-form-${client.id}').style.display='none'">Cancel</button>
-      </div>
-    </div>`;
-
-  if (!fee || !fee.totalFee) {
-    return `<div class="profile-section">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div class="profile-section-title" style="margin-bottom:0;">Fees</div>
-      </div>
-      <div id="fee-edit-wrap-${client.id}" style="display:none;background:rgba(247,243,237,0.04);border-radius:10px;padding:14px 16px;margin-bottom:12px;">${editForm(null, false)}</div>
-      <p style="font-size:13px;color:rgba(247,243,237,0.25);margin:0 0 12px;">No fee assigned yet.</p>
-      <button class="btn-sm" onclick="document.getElementById('fee-edit-wrap-${client.id}').style.display='block';this.style.display='none'">Assign fee</button>
+      ${!isPaid ? `<button class="btn-sm" onclick="document.getElementById('fee-pmt-form-${fid}').style.display='block'">+ Record payment</button>` : ''}
+      ${fee.notes ? `<p style="font-size:12px;color:rgba(247,243,237,0.3);margin-top:10px;margin-bottom:0;">${esc(fee.notes)}</p>` : ''}
     </div>`;
   }
 
-  const totalFee = fee.totalFee || 0;
-  const payments = fee.payments || [];
-  const paidAmt = payments.filter(activePmts).reduce((s, p) => s + (Number(p.amount) || 0), 0);
-  const outstanding = Math.max(0, totalFee - paidAmt);
-  const paidPct = totalFee > 0 ? Math.round((paidAmt / totalFee) * 100) : 0;
-  const isPaid = outstanding <= 0;
-
   return `<div class="profile-section">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <div class="profile-section-title" style="margin-bottom:0;">Fees</div>
-      <button class="btn-sm" onclick="toggleFeeEditForm('${client.id}')">Edit</button>
-    </div>
-    <div id="fee-edit-wrap-${client.id}" style="display:none;background:rgba(247,243,237,0.04);border-radius:10px;padding:14px 16px;margin-bottom:14px;">${editForm(fee, true)}</div>
-    <div style="background:rgba(247,243,237,0.04);border-radius:10px;padding:14px 16px;margin-bottom:14px;">
-      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(247,243,237,0.06);">
-        <span style="font-size:12.5px;color:rgba(247,243,237,0.45);">Total fee (ex GST)</span>
-        <span style="font-size:13px;color:#f7f3ed;font-weight:500;">${fmt(totalFee)}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(247,243,237,0.06);">
-        <span style="font-size:12px;color:rgba(247,243,237,0.3);">+ GST (10%)</span>
-        <span style="font-size:12px;color:rgba(247,243,237,0.3);">${fmt(totalFee * 0.1)}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(247,243,237,0.06);">
-        <span style="font-size:12.5px;color:rgba(247,243,237,0.45);">Total inc GST</span>
-        <span style="font-size:13px;color:#f7f3ed;">${fmt(totalFee * 1.1)}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(247,243,237,0.06);">
-        <span style="font-size:12.5px;color:rgba(247,243,237,0.45);">Paid (ex GST)</span>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:11px;color:${isPaid?'#6dbf7b':'#e8a87c'};background:${isPaid?'rgba(109,191,123,0.1)':'rgba(232,168,124,0.1)'};border-radius:100px;padding:2px 8px;">${paidPct}%</span>
-          <span style="font-size:13px;color:${isPaid?'#6dbf7b':'#f7f3ed'};font-weight:500;">${fmt(paidAmt)}</span>
-        </div>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:6px 0;">
-        <span style="font-size:12.5px;color:rgba(247,243,237,0.45);">Outstanding (ex GST)</span>
-        <span style="font-size:13px;color:${outstanding > 0 ? '#e8a87c' : '#6dbf7b'};font-weight:500;">${fmt(outstanding)}</span>
+    <div class="profile-section-title">Fees</div>
+    ${fees.length ? fees.map(fee => feeCard(fee)).join('') : '<p style="font-size:13px;color:rgba(247,243,237,0.25);margin:0 0 14px;">No fees assigned yet.</p>'}
+    <div id="new-fee-form-${client.id}" style="display:none;background:rgba(247,243,237,0.04);border-radius:10px;padding:14px 16px;margin-bottom:12px;">
+      <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">New fee</div>
+      <div style="margin-bottom:8px;"><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Label</label>
+        <input id="new-fee-label-${client.id}" class="pf-edit-input" type="text" value="Acquisition ${fees.length + 1}" placeholder="e.g. Acquisition 2"></div>
+      <div style="margin-bottom:12px;"><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Total fee (ex GST)</label>
+        <input id="new-fee-total-${client.id}" class="pf-edit-input" type="number" step="0.01" min="0" placeholder="e.g. 13000"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-sm" style="background:rgba(189,122,112,0.15);border-color:rgba(189,122,112,0.25);color:#bd7a70;" onclick="createNewFee('${client.id}')">Create fee</button>
+        <button class="btn-sm" onclick="document.getElementById('new-fee-form-${client.id}').style.display='none';document.getElementById('new-fee-btn-${client.id}').style.display='inline-flex'">Cancel</button>
       </div>
     </div>
-    ${payments.length ? `<div style="margin-bottom:14px;">
-      <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:8px;">Payment history</div>
-      ${payments.map(p => {
-        const dateStr = new Date(p.paidAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
-        if (p.refundedAt) {
-          const refundDate = new Date(p.refundedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
-          return `<div style="padding:8px 0;border-bottom:1px solid rgba(247,243,237,0.05);opacity:0.5;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span style="font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#e07070;background:rgba(224,112,112,0.1);border-radius:100px;padding:2px 7px;">Refunded</span>
-              <div style="font-size:13px;color:#f7f3ed;text-decoration:line-through;">${fmt(p.amount)}</div>
-            </div>
-            <div style="font-size:11.5px;color:rgba(247,243,237,0.4);margin-top:3px;">${p.note ? esc(p.note) + ' · ' : ''}Paid ${dateStr} · Refunded ${refundDate}</div>
-            <div style="font-size:11.5px;color:rgba(224,112,112,0.6);margin-top:2px;">Reason: ${esc(p.refundReason)}</div>
-          </div>`;
-        }
-        return `<div style="border-bottom:1px solid rgba(247,243,237,0.05);">
-          <div style="display:flex;align-items:center;padding:8px 0;">
-            <div style="flex:1;"><div style="font-size:13px;color:#f7f3ed;">${fmt(p.amount)}</div>
-              <div style="font-size:11.5px;color:rgba(247,243,237,0.3);">${p.note ? esc(p.note) + ' · ' : ''}${dateStr}</div>
-            </div>
-            <button onclick="document.getElementById('rfm-${p.id}').style.display='block'" style="background:none;border:none;color:rgba(247,243,237,0.2);cursor:pointer;font-size:18px;padding:4px 8px;line-height:1;" title="Refund / remove">&#215;</button>
-          </div>
-          <div id="rfm-${p.id}" style="display:none;background:rgba(224,112,112,0.05);border:1px solid rgba(224,112,112,0.15);border-radius:8px;padding:12px;margin-bottom:8px;">
-            <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#e07070;margin-bottom:8px;">Refund / remove — ${fmt(p.amount)}</div>
-            <label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Reason</label>
-            <input id="rr-${p.id}" class="pf-edit-input" type="text" placeholder="e.g. Client refunded, payment error" style="margin-bottom:8px;">
-            <div style="display:flex;gap:8px;">
-              <button class="btn-sm" style="color:#e07070;border-color:rgba(224,112,112,0.3);" onclick="confirmFeeRefund('${client.id}','${p.id}')">Confirm refund</button>
-              <button class="btn-sm" onclick="document.getElementById('rfm-${p.id}').style.display='none'">Cancel</button>
-            </div>
-          </div>
-        </div>`;
-      }).join('')}
-    </div>` : ''}
-    ${pmtFormHtml}
-    <button class="btn-sm" onclick="document.getElementById('fee-pmt-form-${client.id}').style.display='block'">+ Record payment</button>
-    ${fee.notes ? `<p style="font-size:12px;color:rgba(247,243,237,0.3);margin-top:10px;margin-bottom:0;">${esc(fee.notes)}</p>` : ''}
+    <button id="new-fee-btn-${client.id}" class="btn-sm" onclick="this.style.display='none';document.getElementById('new-fee-form-${client.id}').style.display='block'">${fees.length ? '+ Add another fee' : 'Assign fee'}</button>
   </div>`;
 }
 
-function toggleFeeEditForm(clientId) {
-  const wrap = document.getElementById('fee-edit-wrap-' + clientId);
-  if (!wrap) return;
-  wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
-}
-
-async function saveFeeDetails(clientId) {
+async function saveFeeDetails(clientId, feeId) {
   const client = clients.find(c => c.id === clientId);
   if (!client) return;
-  const totalFee = parseFloat(document.getElementById('fee-total-' + clientId)?.value) || 0;
-  const notes = document.getElementById('fee-notes-' + clientId)?.value?.trim() || '';
-  const manualFee = { ...(client.manualFee || {}), totalFee, notes };
-  const res = await api('PUT', '/api/admin/clients', { id: clientId, manualFee });
+  const label = document.getElementById('fee-label-' + feeId)?.value?.trim();
+  const totalFee = parseFloat(document.getElementById('fee-total-' + feeId)?.value) || 0;
+  const notes = document.getElementById('fee-notes-' + feeId)?.value?.trim() || '';
+  const fees = getManualFees(client);
+  const manualFees = fees.map(f => f.id === feeId ? { ...f, label: label || f.label, totalFee, notes } : f);
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, manualFees });
   if (!res.ok) return alert('Failed to save fee details.');
-  client.manualFee = manualFee;
+  client.manualFees = manualFees;
+  client.manualFee = null;
   renderEngagementTab();
   renderDashboardFees();
 }
 
-async function addFeePayment(clientId) {
+async function addFeePayment(clientId, feeId) {
   const client = clients.find(c => c.id === clientId);
   if (!client) return;
-  const amount = parseFloat(document.getElementById('fee-pmt-amt-' + clientId)?.value);
+  const amount = parseFloat(document.getElementById('fee-pmt-amt-' + feeId)?.value);
   if (!amount || amount <= 0) return alert('Please enter a valid payment amount.');
-  const dateVal = document.getElementById('fee-pmt-date-' + clientId)?.value;
+  const dateVal = document.getElementById('fee-pmt-date-' + feeId)?.value;
   const paidAt = dateVal ? new Date(dateVal + 'T00:00:00').toISOString() : new Date().toISOString();
-  const note = document.getElementById('fee-pmt-note-' + clientId)?.value?.trim() || '';
-  const existing = client.manualFee || {};
-  const manualFee = { ...existing, payments: [...(existing.payments || []), { id: crypto.randomUUID(), amount, note, paidAt }] };
-  const res = await api('PUT', '/api/admin/clients', { id: clientId, manualFee });
+  const note = document.getElementById('fee-pmt-note-' + feeId)?.value?.trim() || '';
+  const fees = getManualFees(client);
+  const manualFees = fees.map(f => f.id === feeId
+    ? { ...f, payments: [...(f.payments || []), { id: crypto.randomUUID(), amount, note, paidAt }] }
+    : f
+  );
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, manualFees });
   if (!res.ok) return alert('Failed to save payment.');
-  client.manualFee = manualFee;
+  client.manualFees = manualFees;
+  client.manualFee = null;
   renderEngagementTab();
   renderDashboardFees();
 }
 
-async function confirmFeeRefund(clientId, paymentId) {
+async function confirmFeeRefund(clientId, feeId, paymentId) {
   const client = clients.find(c => c.id === clientId);
-  if (!client?.manualFee) return;
+  if (!client) return;
   const reason = document.getElementById('rr-' + paymentId)?.value?.trim();
   if (!reason) return alert('Please enter a reason for the refund.');
-  const payments = (client.manualFee.payments || []).map(p =>
-    p.id === paymentId ? { ...p, refundedAt: new Date().toISOString(), refundReason: reason } : p
+  const fees = getManualFees(client);
+  const manualFees = fees.map(f => f.id === feeId
+    ? { ...f, payments: (f.payments || []).map(p => p.id === paymentId ? { ...p, refundedAt: new Date().toISOString(), refundReason: reason } : p) }
+    : f
   );
-  const manualFee = { ...client.manualFee, payments };
-  const res = await api('PUT', '/api/admin/clients', { id: clientId, manualFee });
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, manualFees });
   if (!res.ok) return alert('Failed to record refund.');
-  client.manualFee = manualFee;
+  client.manualFees = manualFees;
+  client.manualFee = null;
   renderEngagementTab();
   renderDashboardFees();
 }
 
-async function removeFee(clientId) {
+async function removeFee(clientId, feeId) {
   const client = clients.find(c => c.id === clientId);
-  if (!client?.manualFee) return;
-  const reason = document.getElementById('rmf-reason-' + clientId)?.value?.trim();
+  if (!client) return;
+  const reason = document.getElementById('rmf-reason-' + feeId)?.value?.trim();
   if (!reason) return alert('Please enter a reason for removing this fee.');
-  const logEntry = { removedAt: new Date().toISOString(), reason, totalFee: client.manualFee.totalFee, notes: client.manualFee.notes || '', payments: client.manualFee.payments || [] };
+  const fees = getManualFees(client);
+  const feeSnap = fees.find(f => f.id === feeId);
+  const logEntry = { removedAt: new Date().toISOString(), reason, label: feeSnap?.label || '', totalFee: feeSnap?.totalFee, payments: feeSnap?.payments || [] };
+  const manualFees = fees.filter(f => f.id !== feeId);
   const manualFeeDeleteLog = [...(client.manualFeeDeleteLog || []), logEntry];
-  const res = await api('PUT', '/api/admin/clients', { id: clientId, manualFee: null, manualFeeDeleteLog });
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, manualFees, manualFeeDeleteLog });
   if (!res.ok) return alert('Failed to remove fee.');
+  client.manualFees = manualFees;
   client.manualFee = null;
   client.manualFeeDeleteLog = manualFeeDeleteLog;
+  renderEngagementTab();
+  renderDashboardFees();
+}
+
+async function createNewFee(clientId) {
+  const client = clients.find(c => c.id === clientId);
+  if (!client) return;
+  const label = document.getElementById('new-fee-label-' + clientId)?.value?.trim() || 'Fee';
+  const totalFee = parseFloat(document.getElementById('new-fee-total-' + clientId)?.value) || 0;
+  const existing = getManualFees(client);
+  const newFee = { id: crypto.randomUUID(), label, totalFee, notes: '', payments: [], createdAt: new Date().toISOString() };
+  const manualFees = [...existing, newFee];
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, manualFees });
+  if (!res.ok) return alert('Failed to create fee.');
+  client.manualFees = manualFees;
+  client.manualFee = null;
   renderEngagementTab();
   renderDashboardFees();
 }
