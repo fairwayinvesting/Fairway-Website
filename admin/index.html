@@ -1095,8 +1095,9 @@
             </div>
           </div>
           <div style="flex-shrink:0;">
-            <div id="qr-preview-wrap" style="width:148px;height:148px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(247,243,237,0.1);">
-              <span id="qr-preview-placeholder" style="font-size:11.5px;color:rgba(0,0,0,0.22);text-align:center;padding:12px;line-height:1.5;">Enter a URL<br>to preview</span>
+            <div style="font-size:11px;color:rgba(247,243,237,0.3);text-align:center;margin-bottom:8px;letter-spacing:0.04em;text-transform:uppercase;">Preview</div>
+            <div id="qr-preview-wrap" style="width:160px;height:160px;background:#f7f3ed;border-radius:16px;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.25);">
+              <span id="qr-preview-placeholder" style="font-size:11.5px;color:rgba(0,0,0,0.28);text-align:center;padding:14px;line-height:1.6;">Enter a URL<br>to preview</span>
               <img id="qr-preview-img" src="" alt="QR preview" style="display:none;width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none';document.getElementById('qr-preview-placeholder').style.display='block'">
             </div>
           </div>
@@ -7203,7 +7204,7 @@ function updateQrPreview(url) {
   img.style.display = 'none';
   placeholder.style.display = 'block';
   placeholder.textContent = 'Loading…';
-  const src = `/api/admin/qr-image?url=${encodeURIComponent(url)}&size=300`;
+  const src = `/api/admin/qr-image?url=${encodeURIComponent(url)}&size=400&color=0d2137`;
   img.onload = () => { img.style.display = 'block'; placeholder.style.display = 'none'; };
   img.onerror = () => { placeholder.textContent = 'Preview failed'; };
   img.src = src;
@@ -7232,24 +7233,36 @@ async function saveQrCode() {
   }
 }
 
-function downloadQrActive() {
+async function downloadQrActive() {
   const urlEl = document.getElementById('qr-url-input');
+  const dlBtn = document.getElementById('qr-dl-btn');
   const url = urlEl ? urlEl.value.trim() : '';
   if (!url) return;
   const noteEl = document.getElementById('qr-note-input');
   const note = noteEl ? noteEl.value.trim() : '';
-  downloadQrCode(url, note);
+  if (dlBtn) { dlBtn.disabled = true; dlBtn.textContent = 'Downloading…'; }
+  await downloadQrCode(url, note);
+  if (dlBtn) { dlBtn.disabled = false; dlBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3M2 13h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Download PNG'; }
 }
 
-function downloadQrCode(url, note) {
-  const src = `/api/admin/qr-image?url=${encodeURIComponent(url)}&size=2000`;
-  const a = document.createElement('a');
-  const slug = (note || url).replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase().slice(0, 40) || 'qr-code';
-  a.href = src;
-  a.download = `${slug}.png`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+async function downloadQrCode(url, note) {
+  try {
+    const src = `/api/admin/qr-image?url=${encodeURIComponent(url)}&size=2000&color=0d2137`;
+    const res = await fetch(src);
+    if (!res.ok) throw new Error('Failed');
+    const blob = await res.blob();
+    const objUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const slug = (note || url).replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase().slice(0, 40) || 'qr-code';
+    a.href = objUrl;
+    a.download = `${slug}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(objUrl), 10000);
+  } catch {
+    alert('Download failed. Please try again.');
+  }
 }
 
 async function deleteQrCode(id) {
@@ -7268,26 +7281,32 @@ function renderQrCodes() {
   const container = document.getElementById('qr-saved-list');
   if (!container) return;
   if (!qrCodes.length) {
-    container.innerHTML = '<p style="color:rgba(247,243,237,0.4);font-size:13px;">No saved QR codes yet.</p>';
+    container.innerHTML = '<p style="color:rgba(247,243,237,0.35);font-size:13px;margin-top:8px;">No saved QR codes yet.</p>';
     return;
   }
-  container.innerHTML = qrCodes.map(q => {
-    const imgSrc = `/api/admin/qr-image?url=${encodeURIComponent(q.url)}&size=120`;
-    const date = new Date(q.createdAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
-    const noteHtml = q.note ? `<div style="font-size:12px;color:rgba(247,243,237,0.5);margin-top:2px;">${esc(q.note)}</div>` : '';
-    return `<div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid rgba(247,243,237,0.07);">
-      <img src="${imgSrc}" alt="QR" style="width:64px;height:64px;border-radius:8px;background:#fff;flex-shrink:0;" loading="lazy">
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;color:rgba(247,243,237,0.85);word-break:break-all;">${esc(q.url)}</div>
-        ${noteHtml}
-        <div style="font-size:11px;color:rgba(247,243,237,0.3);margin-top:4px;">${date}</div>
-      </div>
-      <div style="display:flex;gap:8px;flex-shrink:0;">
-        <button onclick="downloadQrCode(${JSON.stringify(q.url)},${JSON.stringify(q.note||'')})" class="btn-secondary" style="font-size:12px;padding:7px 14px;">Download</button>
-        <button onclick="deleteQrCode('${q.id}')" style="background:none;border:1px solid rgba(247,243,237,0.15);color:rgba(247,243,237,0.5);border-radius:8px;padding:7px 12px;font-size:12px;cursor:pointer;" onmouseover="this.style.borderColor='rgba(247,243,237,0.4)'" onmouseout="this.style.borderColor='rgba(247,243,237,0.15)'">Delete</button>
-      </div>
-    </div>`;
-  }).join('');
+  container.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:8px;">` +
+    qrCodes.map(q => {
+      const imgSrc = `/api/admin/qr-image?url=${encodeURIComponent(q.url)}&size=300&color=0d2137`;
+      const date = new Date(q.createdAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+      const noteHtml = q.note ? `<div style="font-size:13px;font-weight:500;color:rgba(247,243,237,0.9);margin-bottom:4px;">${esc(q.note)}</div>` : '';
+      return `<div style="background:rgba(255,255,255,0.05);border:1px solid rgba(247,243,237,0.08);border-radius:16px;overflow:hidden;">
+        <div style="background:#f7f3ed;padding:20px;display:flex;justify-content:center;align-items:center;">
+          <img src="${imgSrc}" alt="QR code" style="width:140px;height:140px;display:block;" loading="lazy">
+        </div>
+        <div style="padding:14px 16px 16px;">
+          ${noteHtml}
+          <div style="font-size:11.5px;color:rgba(247,243,237,0.45);word-break:break-all;line-height:1.5;">${esc(q.url)}</div>
+          <div style="font-size:11px;color:rgba(247,243,237,0.25);margin-top:6px;">${date}</div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button onclick="downloadQrCode(${JSON.stringify(q.url)},${JSON.stringify(q.note||'')})" class="btn-primary" style="flex:1;font-size:12px;padding:8px 0;display:flex;align-items:center;justify-content:center;gap:5px;">
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3M2 13h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Download
+            </button>
+            <button onclick="deleteQrCode('${q.id}')" style="background:none;border:1px solid rgba(247,243,237,0.12);color:rgba(247,243,237,0.4);border-radius:8px;padding:8px 12px;font-size:12px;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='rgba(247,243,237,0.35)';this.style.color='rgba(247,243,237,0.7)'" onmouseout="this.style.borderColor='rgba(247,243,237,0.12)';this.style.color='rgba(247,243,237,0.4)'">Delete</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('') + `</div>`;
 }
 </script>
 </body>
