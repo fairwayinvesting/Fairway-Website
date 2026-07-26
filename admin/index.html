@@ -726,6 +726,28 @@
     /* ── Reactivate Modal ────────────────────────────────── */
     .react-info{background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.09);border-radius:10px;padding:14px 16px;font-size:13px;color:rgba(247,243,237,0.6);line-height:1.6;margin-bottom:18px;}
 
+    .task-view-tabs{display:flex;gap:4px;}
+    .task-view-tab{background:none;border:1px solid rgba(247,243,237,0.1);border-radius:100px;padding:6px 16px;font-size:13px;font-family:'Outfit',sans-serif;color:rgba(247,243,237,0.4);cursor:pointer;transition:all .2s;}
+    .task-view-tab.active{background:rgba(247,243,237,0.1);color:rgba(247,243,237,0.85);border-color:rgba(247,243,237,0.22);}
+    .task-date-input{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:100px;padding:9px 14px;font-family:'Outfit',sans-serif;font-size:13.5px;color:rgba(247,243,237,0.6);cursor:pointer;min-width:130px;color-scheme:dark;outline:none;}
+    .task-date-input:focus{border-color:rgba(247,243,237,0.25);}
+    .task-cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+    .task-cal-nav{background:none;border:1px solid rgba(247,243,237,0.1);border-radius:8px;width:34px;height:34px;color:rgba(247,243,237,0.45);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:sans-serif;}
+    .task-cal-nav:hover{border-color:rgba(247,243,237,0.25);color:rgba(247,243,237,0.85);}
+    .task-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+    .task-cal-dow{text-align:center;font-size:10.5px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:rgba(247,243,237,0.22);padding:6px 0;}
+    .task-cal-cell{min-height:62px;background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.06);border-radius:8px;padding:8px 7px 5px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:4px;}
+    .task-cal-cell:hover:not(.empty){background:rgba(247,243,237,0.07);border-color:rgba(247,243,237,0.13);}
+    .task-cal-cell.empty{background:none;border-color:transparent;cursor:default;}
+    .task-cal-cell.today{border-color:rgba(247,243,237,0.28);}
+    .task-cal-cell.selected{background:rgba(247,243,237,0.09);border-color:rgba(247,243,237,0.3);}
+    .task-cal-day-num{font-size:13px;color:rgba(247,243,237,0.5);line-height:1;}
+    .task-cal-cell.today .task-cal-day-num{color:#f7f3ed;font-weight:600;}
+    .task-cal-dots{display:flex;flex-wrap:wrap;gap:3px;align-items:center;margin-top:2px;}
+    .task-cal-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+    .task-cal-done-ct{font-size:9.5px;color:rgba(247,243,237,0.2);line-height:1;}
+    .task-cal-day-detail{margin-top:20px;border-top:1px solid rgba(247,243,237,0.08);padding-top:18px;}
+    .task-cal-day-label{font-size:14px;font-weight:500;color:rgba(247,243,237,0.75);margin-bottom:12px;}
     #sys-status-btn{background:none;border:1px solid rgba(247,243,237,0.1);border-radius:20px;padding:3px 10px 3px 7px;display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11.5px;color:rgba(247,243,237,0.35);font-family:'Outfit',sans-serif;transition:all .2s;margin-right:10px;}
     #sys-status-btn:hover{color:rgba(247,243,237,0.65);border-color:rgba(247,243,237,0.22);}
     #sys-dot{width:7px;height:7px;border-radius:50%;background:rgba(247,243,237,0.18);flex-shrink:0;transition:background .3s;}
@@ -898,43 +920,57 @@
           <h1 id="tasks-date-head" style="font-family:'Fraunces',serif;font-size:28px;font-weight:400;"></h1>
           <p id="tasks-today-sub" style="font-size:13.5px;color:rgba(247,243,237,0.38);margin-top:4px;"></p>
         </div>
+        <div class="task-view-tabs">
+          <button class="task-view-tab active" data-view="list" onclick="switchTaskView('list',this)">List</button>
+          <button class="task-view-tab" data-view="calendar" onclick="switchTaskView('calendar',this)">Calendar</button>
+        </div>
       </div>
 
-      <!-- Add task -->
-      <div class="task-add-row">
-        <input type="text" id="task-add-input" class="task-add-input" placeholder="Add a task for today…" onkeydown="if(event.key==='Enter')addTask()">
-        <div class="task-urg-sel">
-          <button class="task-urg-btn" data-urg="high" onclick="setTaskUrgency('high',this)">High</button>
-          <button class="task-urg-btn active" data-urg="medium" onclick="setTaskUrgency('medium',this)">Medium</button>
-          <button class="task-urg-btn" data-urg="low" onclick="setTaskUrgency('low',this)">Low</button>
+      <!-- List view -->
+      <div id="task-list-view">
+        <!-- Add task -->
+        <div class="task-add-row">
+          <input type="text" id="task-add-input" class="task-add-input" placeholder="Add a task…" onkeydown="if(event.key==='Enter')addTask()">
+          <div class="task-urg-sel" id="task-list-urg-sel">
+            <button class="task-urg-btn" data-urg="high" onclick="setTaskUrgency('high',this)">High</button>
+            <button class="task-urg-btn active" data-urg="medium" onclick="setTaskUrgency('medium',this)">Medium</button>
+            <button class="task-urg-btn" data-urg="low" onclick="setTaskUrgency('low',this)">Low</button>
+          </div>
+          <input type="date" id="task-date-input" class="task-date-input" title="Schedule for a specific date">
+          <button onclick="addTask()" class="btn-primary" style="font-size:13px;padding:10px 20px;white-space:nowrap;flex-shrink:0;">Add task</button>
         </div>
-        <button onclick="addTask()" class="btn-primary" style="font-size:13px;padding:10px 20px;white-space:nowrap;flex-shrink:0;">Add task</button>
+
+        <!-- Active tasks -->
+        <div id="task-list-active"></div>
+
+        <!-- Completed today -->
+        <div id="task-done-section" style="display:none;margin-top:20px;">
+          <div class="task-section-head">
+            <span class="task-section-head-label">Done today</span>
+            <span class="task-section-head-count" id="task-done-count"></span>
+            <div class="task-section-div"></div>
+          </div>
+          <div id="task-list-done"></div>
+        </div>
+
+        <!-- Stats -->
+        <div class="task-stats">
+          <p style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:16px;">Completion stats</p>
+          <div class="task-stats-tabs">
+            <button class="task-stat-tab active" onclick="renderTaskStats('week',this)">Week</button>
+            <button class="task-stat-tab" onclick="renderTaskStats('month',this)">Month</button>
+            <button class="task-stat-tab" onclick="renderTaskStats('quarter',this)">Quarter</button>
+            <button class="task-stat-tab" onclick="renderTaskStats('biannual',this)">6 months</button>
+            <button class="task-stat-tab" onclick="renderTaskStats('year',this)">Year</button>
+          </div>
+          <div class="task-stats-body" id="task-stats-body"></div>
+        </div>
       </div>
 
-      <!-- Active tasks -->
-      <div id="task-list-active"></div>
-
-      <!-- Completed today -->
-      <div id="task-done-section" style="display:none;margin-top:20px;">
-        <div class="task-section-head">
-          <span class="task-section-head-label">Done today</span>
-          <span class="task-section-head-count" id="task-done-count"></span>
-          <div class="task-section-div"></div>
-        </div>
-        <div id="task-list-done"></div>
-      </div>
-
-      <!-- Stats -->
-      <div class="task-stats">
-        <p style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:16px;">Completion stats</p>
-        <div class="task-stats-tabs">
-          <button class="task-stat-tab active" onclick="renderTaskStats('week',this)">Week</button>
-          <button class="task-stat-tab" onclick="renderTaskStats('month',this)">Month</button>
-          <button class="task-stat-tab" onclick="renderTaskStats('quarter',this)">Quarter</button>
-          <button class="task-stat-tab" onclick="renderTaskStats('biannual',this)">6 months</button>
-          <button class="task-stat-tab" onclick="renderTaskStats('year',this)">Year</button>
-        </div>
-        <div class="task-stats-body" id="task-stats-body"></div>
+      <!-- Calendar view -->
+      <div id="task-cal-view" style="display:none;">
+        <div id="task-cal-grid-wrap"></div>
+        <div id="task-cal-day-detail" class="task-cal-day-detail" style="display:none;"></div>
       </div>
     </div>
 
@@ -4987,6 +5023,8 @@ async function loadTasks() {
     const d = new Date();
     dateHead.textContent = d.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   }
+  const dateInput = document.getElementById('task-date-input');
+  if (dateInput && !dateInput.value) dateInput.value = localDateStr();
   try {
     const res = await api('GET', '/api/admin/tasks');
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -5067,9 +5105,141 @@ function taskItemHtml(t, today) {
   </div>`;
 }
 
+// ── Calendar view ──────────────────────────────────────────────────────────
+let _taskView = 'list';
+let _calMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let _calSelectedDate = localDateStr();
+let _calTaskUrgency = 'medium';
+
+function switchTaskView(view, btn) {
+  _taskView = view;
+  document.getElementById('task-list-view').style.display = view === 'list' ? '' : 'none';
+  document.getElementById('task-cal-view').style.display  = view === 'calendar' ? '' : 'none';
+  document.querySelectorAll('.task-view-tab').forEach(b => b.classList.toggle('active', b === btn));
+  if (view === 'calendar') {
+    _calSelectedDate = localDateStr();
+    renderCalendar();
+  }
+}
+
+function renderCalendar() {
+  const year  = _calMonth.getFullYear();
+  const month = _calMonth.getMonth();
+  const today = localDateStr();
+  const monthLabel = _calMonth.toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
+
+  const tasksByDate = {};
+  allTasks.filter(t => !t.deletedAt).forEach(t => {
+    (tasksByDate[t.dueDate] = tasksByDate[t.dueDate] || []).push(t);
+  });
+
+  const firstDow = new Date(year, month, 1).getDay();
+  const padStart = (firstDow === 0) ? 6 : firstDow - 1;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const cells = [];
+  for (let i = 0; i < padStart; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) {
+    cells.push(`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
+  }
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  const urgColor = { high: '#ef4444', medium: '#f59e0b', low: '#22c55e' };
+  const dows = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+  let html = `<div class="task-cal-header">
+    <button class="task-cal-nav" onclick="calPrevMonth()">&#8249;</button>
+    <span style="font-size:15px;font-weight:500;color:rgba(247,243,237,0.8);">${monthLabel}</span>
+    <button class="task-cal-nav" onclick="calNextMonth()">&#8250;</button>
+  </div>
+  <div class="task-cal-grid">
+    ${dows.map(d => `<div class="task-cal-dow">${d}</div>`).join('')}`;
+
+  cells.forEach(ds => {
+    if (!ds) { html += `<div class="task-cal-cell empty"></div>`; return; }
+    const isToday    = ds === today;
+    const isSelected = ds === _calSelectedDate;
+    const tasks      = tasksByDate[ds] || [];
+    const active     = tasks.filter(t => !t.completedAt);
+    const done       = tasks.filter(t => t.completedAt);
+    const dayNum     = parseInt(ds.slice(8));
+    const cls = ['task-cal-cell', isToday ? 'today' : '', isSelected ? 'selected' : ''].filter(Boolean).join(' ');
+    const dots = active.slice(0, 6).map(t => `<span class="task-cal-dot" style="background:${urgColor[t.urgency]||'#f59e0b'}"></span>`).join('');
+    const doneBadge = done.length ? `<span class="task-cal-done-ct">${done.length}✓</span>` : '';
+    html += `<div class="${cls}" onclick="calSelectDay('${ds}')">
+      <span class="task-cal-day-num">${dayNum}</span>
+      ${(dots || doneBadge) ? `<div class="task-cal-dots">${dots}${doneBadge}</div>` : ''}
+    </div>`;
+  });
+
+  html += `</div>`;
+  const wrap = document.getElementById('task-cal-grid-wrap');
+  if (wrap) wrap.innerHTML = html;
+  renderCalDay(_calSelectedDate);
+}
+
+function calSelectDay(ds) {
+  _calSelectedDate = ds;
+  renderCalendar();
+}
+
+function calPrevMonth() {
+  _calMonth = new Date(_calMonth.getFullYear(), _calMonth.getMonth() - 1, 1);
+  renderCalendar();
+}
+
+function calNextMonth() {
+  _calMonth = new Date(_calMonth.getFullYear(), _calMonth.getMonth() + 1, 1);
+  renderCalendar();
+}
+
+function renderCalDay(ds) {
+  const el = document.getElementById('task-cal-day-detail');
+  if (!el) return;
+  const d = new Date(ds + 'T00:00:00');
+  const label = d.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const today = localDateStr();
+  const tasks  = allTasks.filter(t => !t.deletedAt && t.dueDate === ds);
+  const active = tasks.filter(t => !t.completedAt);
+  const done   = tasks.filter(t => t.completedAt);
+
+  el.style.display = '';
+  el.innerHTML = `<p class="task-cal-day-label">${label}</p>
+    ${active.map(t => taskItemHtml(t, today)).join('')}
+    ${done.length ? `<div style="margin-top:10px;font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.2);margin-bottom:6px;">Done</div>${done.map(t => taskItemHtml(t, today)).join('')}` : ''}
+    ${(!active.length && !done.length) ? '<p style="font-size:13px;color:rgba(247,243,237,0.2);padding:8px 0 14px;">No tasks for this day.</p>' : ''}
+    <div class="task-add-row" style="margin-top:14px;">
+      <input type="text" id="cal-task-input" class="task-add-input" placeholder="Add task for this day…" onkeydown="if(event.key==='Enter')addCalTask()">
+      <div class="task-urg-sel" id="cal-urg-sel">
+        <button class="task-urg-btn${_calTaskUrgency==='high'?' active':''}" onclick="setCalUrgency('high',this)">High</button>
+        <button class="task-urg-btn${_calTaskUrgency==='medium'?' active':''}" onclick="setCalUrgency('medium',this)">Medium</button>
+        <button class="task-urg-btn${_calTaskUrgency==='low'?' active':''}" onclick="setCalUrgency('low',this)">Low</button>
+      </div>
+      <button onclick="addCalTask()" class="btn-primary" style="font-size:13px;padding:10px 20px;white-space:nowrap;flex-shrink:0;">Add</button>
+    </div>`;
+}
+
+function setCalUrgency(u, btn) {
+  _calTaskUrgency = u;
+  document.querySelectorAll('#cal-urg-sel .task-urg-btn').forEach(b => b.classList.toggle('active', b === btn));
+}
+
+async function addCalTask() {
+  const input = document.getElementById('cal-task-input');
+  const title = input?.value.trim();
+  if (!title) { input?.focus(); return; }
+  const res = await api('POST', '/api/admin/tasks', { title, urgency: _calTaskUrgency, dueDate: _calSelectedDate });
+  if (!res.ok) return;
+  const task = await res.json();
+  allTasks.push(task);
+  if (input) input.value = '';
+  renderCalendar();
+  renderTaskList();
+  renderTaskStats(_taskStatPeriod);
+}
+
 function setTaskUrgency(urg, btn) {
   taskNewUrgency = urg;
-  document.querySelectorAll('.task-urg-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#task-list-urg-sel .task-urg-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
 }
 
@@ -5077,13 +5247,16 @@ async function addTask() {
   const input = document.getElementById('task-add-input');
   const title = input?.value.trim();
   if (!title) { input?.focus(); return; }
-  const res = await api('POST', '/api/admin/tasks', { title, urgency: taskNewUrgency, dueDate: localDateStr() });
+  const dateInput = document.getElementById('task-date-input');
+  const dueDate = dateInput?.value || localDateStr();
+  const res = await api('POST', '/api/admin/tasks', { title, urgency: taskNewUrgency, dueDate });
   if (!res.ok) return;
   const task = await res.json();
   allTasks.push(task);
   if (input) input.value = '';
   renderTaskList();
   renderTaskStats(_taskStatPeriod);
+  if (_taskView === 'calendar') renderCalendar();
 }
 
 async function toggleTask(id) {
@@ -5095,6 +5268,7 @@ async function toggleTask(id) {
   task.completedAt = completedAt;
   renderTaskList();
   renderTaskStats(_taskStatPeriod);
+  if (_taskView === 'calendar') renderCalendar();
 }
 
 async function deleteTask(id) {
@@ -5104,6 +5278,7 @@ async function deleteTask(id) {
   if (task) task.deletedAt = new Date().toISOString();
   renderTaskList();
   renderTaskStats(_taskStatPeriod);
+  if (_taskView === 'calendar') renderCalendar();
 }
 
 function calcStreak(tasks) {
