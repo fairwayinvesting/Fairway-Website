@@ -145,9 +145,14 @@
     .task-urg-badge[data-urg="medium"]{background:rgba(232,168,124,0.1);color:#e8a87c;}
     .task-urg-badge[data-urg="low"]{background:rgba(109,191,123,0.1);color:#6dbf7b;}
     .task-roll-badge{font-size:10.5px;color:rgba(247,243,237,0.28);background:rgba(247,243,237,0.05);border-radius:100px;padding:2px 8px;}
-    .task-del{background:none;border:none;cursor:pointer;opacity:0;transition:opacity .15s;padding:3px;color:rgba(247,243,237,0.3);flex-shrink:0;border-radius:6px;line-height:1;}
-    .task-item:hover .task-del{opacity:1;}
+    .task-del,.task-edit-btn{background:none;border:none;cursor:pointer;opacity:0;transition:opacity .15s;padding:3px;color:rgba(247,243,237,0.3);flex-shrink:0;border-radius:6px;line-height:1;}
+    .task-item:hover .task-del,.task-item:hover .task-edit-btn{opacity:1;}
     .task-del:hover{color:#e07070;background:rgba(220,80,80,0.08);}
+    .task-edit-btn:hover{color:#7ab8e8;background:rgba(122,184,232,0.08);}
+    .task-date-badge{font-size:11px;color:rgba(247,243,237,0.28);background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.08);border-radius:5px;padding:1px 6px;}
+    .task-edit-form{background:rgba(247,243,237,0.03);border-radius:10px;padding:10px 12px;margin-top:8px;border:1px solid rgba(247,243,237,0.08);}
+    .task-edit-input{width:100%;box-sizing:border-box;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.15);border-radius:8px;padding:8px 12px;font-family:'Outfit',sans-serif;font-size:13.5px;color:#f7f3ed;margin-bottom:10px;outline:none;}
+    .task-edit-input:focus{border-color:rgba(247,243,237,0.3);}
     /* Stats */
     .task-stats{margin-top:36px;padding-top:28px;border-top:1px solid rgba(247,243,237,0.07);}
     .task-stats-tabs{display:flex;gap:3px;background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.07);border-radius:10px;padding:3px;width:fit-content;margin-bottom:28px;}
@@ -5083,26 +5088,95 @@ function renderTaskList() {
 }
 
 function taskItemHtml(t, today) {
-  const done = !!t.completedAt;
+  const done     = !!t.completedAt;
   const daysOver = done ? 0 : Math.round((new Date(today) - new Date(t.dueDate)) / 86400000);
   const rollLabel = !done && daysOver > 0 ? (daysOver === 1 ? 'from yesterday' : `${daysOver}d overdue`) : '';
-  return `<div class="task-item${done?' task-done':''}" data-urg="${t.urgency}">
+  const showDate  = t.dueDate !== today;
+  const dateFmt   = showDate ? new Date(t.dueDate + 'T00:00:00').toLocaleDateString('en-AU', {day:'numeric',month:'short'}) : '';
+  const urgLabel  = {high:'High',medium:'Medium',low:'Low'}[t.urgency] || t.urgency;
+  return `<div class="task-item${done?' task-done':''}" data-urg="${t.urgency}" id="task-item-${t.id}">
     <div class="task-check" onclick="toggleTask('${t.id}')">
       <svg class="task-tick" width="10" height="8" viewBox="0 0 10 8" fill="none">
         <path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
     <div class="task-body">
-      <div class="task-title">${esc(t.title)}</div>
-      <div class="task-meta">
-        <span class="task-urg-badge" data-urg="${t.urgency}">${t.urgency.charAt(0).toUpperCase()+t.urgency.slice(1)}</span>
-        ${rollLabel ? `<span class="task-roll-badge">↑ ${rollLabel}</span>` : ''}
+      <div id="task-view-${t.id}" onclick="toggleTask('${t.id}')" style="cursor:pointer;">
+        <div class="task-title">${esc(t.title)}</div>
+        <div class="task-meta">
+          <span class="task-urg-badge" data-urg="${t.urgency}">${urgLabel}</span>
+          ${showDate && !done ? `<span class="task-date-badge">${dateFmt}</span>` : ''}
+          ${rollLabel ? `<span class="task-roll-badge">↑ ${rollLabel}</span>` : ''}
+        </div>
+      </div>
+      <div id="task-edit-${t.id}" class="task-edit-form" style="display:none;" onclick="event.stopPropagation()">
+        <input id="task-edit-title-${t.id}" type="text" class="task-edit-input" value="${esc(t.title)}"
+          onkeydown="if(event.key==='Enter')saveTaskEdit('${t.id}');else if(event.key==='Escape')closeTaskEdit('${t.id}')">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <div class="task-urg-sel" id="task-edit-urg-${t.id}" style="flex-shrink:0;">
+            <button class="task-urg-btn${t.urgency==='high'?' active':''}" data-urg="high"   onclick="taskEditUrgency('${t.id}','high',this)">High</button>
+            <button class="task-urg-btn${t.urgency==='medium'?' active':''}" data-urg="medium" onclick="taskEditUrgency('${t.id}','medium',this)">Medium</button>
+            <button class="task-urg-btn${t.urgency==='low'?' active':''}" data-urg="low"    onclick="taskEditUrgency('${t.id}','low',this)">Low</button>
+          </div>
+          <input type="date" id="task-edit-date-${t.id}" value="${t.dueDate}" class="task-date-input" style="font-size:12.5px;padding:6px 12px;flex-shrink:0;">
+          <div style="display:flex;gap:6px;margin-left:auto;">
+            <button onclick="saveTaskEdit('${t.id}')" class="btn-primary" style="font-size:12px;padding:7px 14px;">Save</button>
+            <button onclick="closeTaskEdit('${t.id}')" style="font-size:12px;padding:7px 12px;background:none;border:1px solid rgba(247,243,237,0.15);border-radius:100px;cursor:pointer;color:rgba(247,243,237,0.4);font-family:'Outfit',sans-serif;">Cancel</button>
+          </div>
+        </div>
       </div>
     </div>
-    <button class="task-del" onclick="deleteTask('${t.id}')" title="Delete">
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-    </button>
+    <div style="display:flex;gap:2px;flex-shrink:0;align-items:flex-start;">
+      <button class="task-edit-btn" onclick="openTaskEdit('${t.id}')" title="Edit task">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2-7 7H1.5v-2l7-7z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="task-del" onclick="deleteTask('${t.id}')" title="Delete task">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
   </div>`;
+}
+
+// ── Task edit / reschedule ─────────────────────────────────────────────────
+const _taskEditUrgency = {};
+
+function openTaskEdit(id) {
+  const task = allTasks.find(t => t.id === id);
+  if (!task) return;
+  _taskEditUrgency[id] = task.urgency;
+  const viewEl = document.getElementById(`task-view-${id}`);
+  const editEl = document.getElementById(`task-edit-${id}`);
+  if (viewEl) viewEl.style.display = 'none';
+  if (editEl) editEl.style.display = '';
+  document.getElementById(`task-edit-title-${id}`)?.focus();
+}
+
+function closeTaskEdit(id) {
+  const viewEl = document.getElementById(`task-view-${id}`);
+  const editEl = document.getElementById(`task-edit-${id}`);
+  if (viewEl) viewEl.style.display = '';
+  if (editEl) editEl.style.display = 'none';
+}
+
+function taskEditUrgency(id, u, btn) {
+  _taskEditUrgency[id] = u;
+  document.querySelectorAll(`#task-edit-urg-${id} .task-urg-btn`).forEach(b => b.classList.toggle('active', b === btn));
+}
+
+async function saveTaskEdit(id) {
+  const title   = document.getElementById(`task-edit-title-${id}`)?.value.trim();
+  const dueDate = document.getElementById(`task-edit-date-${id}`)?.value;
+  const urgency = _taskEditUrgency[id] || 'medium';
+  if (!title) return;
+  const body = { id, title, urgency };
+  if (dueDate) body.dueDate = dueDate;
+  const res = await api('PUT', '/api/admin/tasks', body);
+  if (!res.ok) return;
+  const task = allTasks.find(t => t.id === id);
+  if (task) { task.title = title; task.urgency = urgency; if (dueDate) task.dueDate = dueDate; }
+  renderTaskList();
+  renderTaskStats(_taskStatPeriod);
+  if (_taskView === 'calendar') renderCalendar();
 }
 
 // ── Calendar view ──────────────────────────────────────────────────────────
@@ -5207,14 +5281,18 @@ function renderCalDay(ds) {
     ${active.map(t => taskItemHtml(t, today)).join('')}
     ${done.length ? `<div style="margin-top:10px;font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.2);margin-bottom:6px;">Done</div>${done.map(t => taskItemHtml(t, today)).join('')}` : ''}
     ${(!active.length && !done.length) ? '<p style="font-size:13px;color:rgba(247,243,237,0.2);padding:8px 0 14px;">No tasks for this day.</p>' : ''}
-    <div class="task-add-row" style="margin-top:14px;">
-      <input type="text" id="cal-task-input" class="task-add-input" placeholder="Add task for this day…" onkeydown="if(event.key==='Enter')addCalTask()">
-      <div class="task-urg-sel" id="cal-urg-sel">
-        <button class="task-urg-btn${_calTaskUrgency==='high'?' active':''}" onclick="setCalUrgency('high',this)">High</button>
-        <button class="task-urg-btn${_calTaskUrgency==='medium'?' active':''}" onclick="setCalUrgency('medium',this)">Medium</button>
-        <button class="task-urg-btn${_calTaskUrgency==='low'?' active':''}" onclick="setCalUrgency('low',this)">Low</button>
+    <div style="margin-top:16px;border-top:1px solid rgba(247,243,237,0.07);padding-top:14px;">
+      <input type="text" id="cal-task-input" class="task-add-input" placeholder="Add task for this day…"
+        onkeydown="if(event.key==='Enter')addCalTask()"
+        style="width:100%;box-sizing:border-box;margin-bottom:10px;border-radius:10px;padding:10px 14px;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <div class="task-urg-sel" id="cal-urg-sel">
+          <button class="task-urg-btn${_calTaskUrgency==='high'?' active':''}" data-urg="high"   onclick="setCalUrgency('high',this)">High</button>
+          <button class="task-urg-btn${_calTaskUrgency==='medium'?' active':''}" data-urg="medium" onclick="setCalUrgency('medium',this)">Medium</button>
+          <button class="task-urg-btn${_calTaskUrgency==='low'?' active':''}" data-urg="low"    onclick="setCalUrgency('low',this)">Low</button>
+        </div>
+        <button onclick="addCalTask()" class="btn-primary" style="font-size:13px;padding:9px 20px;white-space:nowrap;margin-left:auto;">Add task</button>
       </div>
-      <button onclick="addCalTask()" class="btn-primary" style="font-size:13px;padding:10px 20px;white-space:nowrap;flex-shrink:0;">Add</button>
     </div>`;
 }
 

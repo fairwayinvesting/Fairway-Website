@@ -47,6 +47,7 @@ export default async (req) => {
     if ('completedAt' in body) list[idx].completedAt = body.completedAt;
     if (body.title !== undefined) list[idx].title = body.title.trim();
     if (body.urgency !== undefined && ['high', 'medium', 'low'].includes(body.urgency)) list[idx].urgency = body.urgency;
+    if (body.dueDate !== undefined) list[idx].dueDate = body.dueDate;
     await save(list);
     return json(list[idx]);
   }
