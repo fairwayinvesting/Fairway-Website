@@ -726,6 +726,18 @@
     /* ── Reactivate Modal ────────────────────────────────── */
     .react-info{background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.09);border-radius:10px;padding:14px 16px;font-size:13px;color:rgba(247,243,237,0.6);line-height:1.6;margin-bottom:18px;}
 
+    #sys-status-btn{background:none;border:1px solid rgba(247,243,237,0.1);border-radius:20px;padding:3px 10px 3px 7px;display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11.5px;color:rgba(247,243,237,0.35);font-family:'Outfit',sans-serif;transition:all .2s;margin-right:10px;}
+    #sys-status-btn:hover{color:rgba(247,243,237,0.65);border-color:rgba(247,243,237,0.22);}
+    #sys-dot{width:7px;height:7px;border-radius:50%;background:rgba(247,243,237,0.18);flex-shrink:0;transition:background .3s;}
+    #sys-dot.ok{background:#22c55e;}
+    #sys-dot.err{background:#ef4444;}
+    #sys-panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:950;display:none;align-items:center;justify-content:center;padding:24px;}
+    #sys-panel-overlay.open{display:flex;}
+    .sys-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(247,243,237,0.06);font-size:13px;}
+    .sys-row:last-child{border-bottom:none;}
+    .sys-row-icon{width:16px;text-align:center;flex-shrink:0;font-size:14px;}
+    .sys-row-name{flex:1;color:rgba(247,243,237,0.7);}
+    .sys-row-detail{font-size:11.5px;color:rgba(247,243,237,0.35);}
   </style>
 </head>
 <body>
@@ -764,7 +776,13 @@
       <img src="/logo-word.png" alt="Fairway Investing" style="height:16px;width:auto;">
       <span class="badge">Admin</span>
     </div>
-    <a href="/" style="font-size:13px;color:rgba(247,243,237,0.3);transition:color .2s;" onmouseover="this.style.color='rgba(247,243,237,0.6)'" onmouseout="this.style.color='rgba(247,243,237,0.3)'">&larr; Main site</a>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button id="sys-status-btn" onclick="openSysPanel()" title="System status">
+        <span id="sys-dot"></span>
+        <span id="sys-txt">Checking…</span>
+      </button>
+      <a href="/" style="font-size:13px;color:rgba(247,243,237,0.3);transition:color .2s;" onmouseover="this.style.color='rgba(247,243,237,0.6)'" onmouseout="this.style.color='rgba(247,243,237,0.3)'">&larr; Main site</a>
+    </div>
   </div>
 </header>
 
@@ -2403,6 +2421,22 @@
   </div>
 </div>
 
+<!-- System status panel -->
+<div id="sys-panel-overlay" onclick="if(event.target===this)closeSysPanel()">
+  <div style="background:#22201d;border:1px solid rgba(247,243,237,0.1);border-radius:16px;padding:28px;width:100%;max-width:400px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <h3 style="font-family:'Fraunces',serif;font-size:18px;font-weight:400;margin:0;color:#f7f3ed;">System Status</h3>
+      <button onclick="closeSysPanel()" style="background:none;border:none;cursor:pointer;color:rgba(247,243,237,0.3);font-size:22px;line-height:1;padding:0;">&times;</button>
+    </div>
+    <div id="sys-check-list"></div>
+    <p id="sys-last-checked" style="font-size:11px;color:rgba(247,243,237,0.22);margin:14px 0 0;"></p>
+    <div style="margin-top:18px;display:flex;gap:10px;">
+      <button class="btn-primary" onclick="runSysCheck()" style="font-size:13px;padding:8px 18px;">Re-check now</button>
+      <button onclick="closeSysPanel()" style="font-size:13px;padding:8px 16px;background:none;border:1px solid rgba(247,243,237,0.15);border-radius:100px;cursor:pointer;color:rgba(247,243,237,0.45);font-family:'Outfit',sans-serif;">Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- Delete prospect confirmation modal -->
 <div id="del-prospect-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:900;display:none;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)cancelDeleteProspect()">
   <div style="background:#22201d;border:1px solid rgba(220,80,80,0.25);border-radius:18px;padding:32px;width:100%;max-width:400px;">
@@ -2472,6 +2506,76 @@ const PARTNERS = [
   { slug: 'shiv-neel-i8wtg',      name: 'Shiv Lal',         role: 'Tax agent' },
 ];
 
+// ── System status tracking ─────────────────────────────────────────────────
+const _sysChecks = {
+  clients:       { label: 'Clients',            state: 'pending', detail: '' },
+  partners:      { label: 'Referral partners',  state: 'pending', detail: '' },
+  tasks:         { label: 'Tasks',              state: 'pending', detail: '' },
+  presentations: { label: 'Presentations',      state: 'pending', detail: '' },
+};
+
+function _setSysCheck(key, state, detail) {
+  _sysChecks[key] = { ..._sysChecks[key], state, detail, ts: Date.now() };
+  _renderSysIndicator();
+}
+
+function _renderSysIndicator() {
+  const vals = Object.values(_sysChecks);
+  const dot = document.getElementById('sys-dot');
+  const txt = document.getElementById('sys-txt');
+  if (!dot) return;
+  const pending = vals.some(c => c.state === 'pending');
+  const hasErr  = vals.some(c => c.state === 'err');
+  dot.className = pending ? '' : (hasErr ? 'err' : 'ok');
+  txt.textContent = pending ? 'Checking…' : (hasErr ? 'Issue detected — click for details' : 'All systems OK');
+}
+
+function _renderSysPanel() {
+  const list = document.getElementById('sys-check-list');
+  if (!list) return;
+  list.innerHTML = Object.values(_sysChecks).map(c => {
+    const icon   = c.state === 'pending' ? '○' : (c.state === 'ok' ? '✓' : '✕');
+    const color  = c.state === 'pending' ? 'rgba(247,243,237,0.3)' : (c.state === 'ok' ? '#22c55e' : '#ef4444');
+    return `<div class="sys-row">
+      <span class="sys-row-icon" style="color:${color}">${icon}</span>
+      <span class="sys-row-name">${c.label}</span>
+      <span class="sys-row-detail">${c.detail}</span>
+    </div>`;
+  }).join('');
+  const tss = Object.values(_sysChecks).filter(c => c.ts).map(c => c.ts);
+  const lastEl = document.getElementById('sys-last-checked');
+  if (lastEl && tss.length) {
+    const secs = Math.round((Date.now() - Math.max(...tss)) / 1000);
+    lastEl.textContent = `Last checked ${secs < 5 ? 'just now' : secs + 's ago'}`;
+  }
+}
+
+function openSysPanel() { _renderSysPanel(); document.getElementById('sys-panel-overlay').classList.add('open'); }
+function closeSysPanel() { document.getElementById('sys-panel-overlay').classList.remove('open'); }
+
+async function runSysCheck() {
+  Object.keys(_sysChecks).forEach(k => _setSysCheck(k, 'pending', 'Checking…'));
+  _renderSysPanel();
+  const endpoints = [
+    { key: 'clients',       url: '/api/admin/clients',           fmt: d => `${d.filter(c => !c.deleted).length} clients` },
+    { key: 'partners',      url: '/api/admin/referral-partners', fmt: d => `${d.length} partners` },
+    { key: 'tasks',         url: '/api/admin/tasks',             fmt: d => `${d.filter(t => !t.deletedAt).length} tasks` },
+    { key: 'presentations', url: '/api/admin/presentations',     fmt: d => `${d.length} presentations` },
+  ];
+  await Promise.all(endpoints.map(async ({ key, url, fmt }) => {
+    try {
+      const res = await api('GET', url);
+      if (!res.ok) { _setSysCheck(key, 'err', `HTTP ${res.status}`); return; }
+      const data = await res.json();
+      if (!Array.isArray(data)) { _setSysCheck(key, 'err', 'Unexpected response'); return; }
+      _setSysCheck(key, 'ok', fmt(data));
+    } catch (e) {
+      _setSysCheck(key, 'err', e.message);
+    }
+  }));
+  _renderSysPanel();
+}
+
 function renderPartnerList() {
   const grid = document.getElementById('partner-list-grid');
   if (!grid) return;
@@ -2527,13 +2631,13 @@ function dirProfLabel(type) {
 async function loadCrmPartners() {
   try {
     const res = await api('GET', '/api/admin/referral-partners');
-    if (res.ok) {
-      crmPartners = await res.json();
-    } else {
-      console.error('loadCrmPartners: API returned', res.status);
-    }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error('Unexpected response');
+    crmPartners = data;
+    _setSysCheck('partners', 'ok', `${crmPartners.length} partners`);
   } catch (err) {
-    console.error('loadCrmPartners failed:', err);
+    _setSysCheck('partners', 'err', err.message);
     const el = document.getElementById('partners-list');
     if (el) el.innerHTML = '<p style="color:#e07070;font-size:13px;padding:8px 0;">Failed to load partners. Please refresh the page.</p>';
   }
@@ -3175,6 +3279,7 @@ async function completeLogin() {
   loadCrmPartners();
   loadProspects();
   loadQrCodes();
+  loadTasks();
   // Load signature settings for the settings section (non-blocking)
   setTimeout(() => loadAgentSignatureSettings(), 500);
 }
@@ -3250,8 +3355,17 @@ async function api(method, path, body) {
 
 // ── Load clients ──────────────────────────────────────────────────────────────
 async function loadClients() {
-  const res = await api('GET', '/api/admin/clients');
-  clients = await res.json();
+  try {
+    const res = await api('GET', '/api/admin/clients');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error('Unexpected response');
+    clients = data;
+    _setSysCheck('clients', 'ok', `${clients.filter(c => !c.deleted).length} clients`);
+  } catch (e) {
+    _setSysCheck('clients', 'err', e.message);
+    clients = [];
+  }
   renderTable();
   renderPipeline();
   renderBriefs();
@@ -4873,10 +4987,18 @@ async function loadTasks() {
     const d = new Date();
     dateHead.textContent = d.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   }
-  const res = await api('GET', '/api/admin/tasks');
-  if (!res.ok) return;
-  allTasks = await res.json();
-  _tasksLoaded = true;
+  try {
+    const res = await api('GET', '/api/admin/tasks');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error('Unexpected response');
+    allTasks = data;
+    _tasksLoaded = true;
+    _setSysCheck('tasks', 'ok', `${allTasks.filter(t => !t.deletedAt).length} tasks`);
+  } catch (e) {
+    _setSysCheck('tasks', 'err', e.message);
+    return;
+  }
   renderTaskList();
   renderTaskStats(_taskStatPeriod);
 }
@@ -5368,8 +5490,17 @@ let _presImages = [], _presVideos = [], _presSections = [], _presSales = [], _pr
 let _pcpAcquisitions = {}; // { [clientId]: acqId }
 
 async function loadPresentations() {
-  const res = await api('GET', '/api/admin/presentations');
-  presentations = await res.json();
+  try {
+    const res = await api('GET', '/api/admin/presentations');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error('Unexpected response');
+    presentations = data;
+    _setSysCheck('presentations', 'ok', `${presentations.length} presentations`);
+  } catch (e) {
+    _setSysCheck('presentations', 'err', e.message);
+    presentations = [];
+  }
   renderPresentations();
   renderDashboard();
 }
