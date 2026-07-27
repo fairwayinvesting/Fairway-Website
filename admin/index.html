@@ -693,6 +693,21 @@
     .acq-badge.pending{color:rgba(247,243,237,0.35);background:rgba(247,243,237,0.04);border-color:rgba(247,243,237,0.1);}
     .acq-add-btn{display:flex;align-items:center;gap:6px;width:100%;border:1px dashed rgba(247,243,237,0.15);border-radius:10px;padding:10px 14px;background:none;font-family:'Outfit',sans-serif;font-size:13px;color:rgba(247,243,237,0.35);cursor:pointer;transition:all .15s;margin-top:10px;}
     .acq-add-btn:hover{border-color:rgba(247,243,237,0.3);color:rgba(247,243,237,0.6);}
+    .acq-docs-section{margin-top:16px;padding-top:14px;border-top:1px solid rgba(247,243,237,0.07);}
+    .acq-docs-title{font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;}
+    .acq-doc-type{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(247,243,237,0.05);}
+    .acq-doc-type:last-child{border-bottom:none;}
+    .acq-doc-type-label{font-size:12px;color:rgba(247,243,237,0.4);min-width:130px;padding-top:2px;flex-shrink:0;}
+    .acq-doc-files{flex:1;display:flex;flex-direction:column;gap:5px;}
+    .acq-doc-file{display:flex;align-items:center;gap:8px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.07);border-radius:8px;padding:6px 10px;}
+    .acq-doc-link{flex:1;font-size:12.5px;color:rgba(247,243,237,0.7);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .15s;}
+    .acq-doc-link:hover{color:#bd7a70;}
+    .acq-doc-date{font-size:11px;color:rgba(247,243,237,0.25);flex-shrink:0;}
+    .acq-doc-del{background:none;border:none;cursor:pointer;color:rgba(247,243,237,0.2);font-size:16px;line-height:1;padding:0 2px;flex-shrink:0;transition:color .15s;}
+    .acq-doc-del:hover{color:#e07070;}
+    .acq-doc-upload-btn{align-self:flex-start;background:none;border:1px dashed rgba(247,243,237,0.15);border-radius:6px;padding:4px 10px;font-size:11.5px;font-family:'Outfit',sans-serif;color:rgba(247,243,237,0.35);cursor:pointer;transition:all .15s;}
+    .acq-doc-upload-btn:hover{border-color:rgba(247,243,237,0.3);color:rgba(247,243,237,0.65);}
+    .acq-doc-uploading{font-size:11.5px;color:rgba(247,243,237,0.3);font-style:italic;}
 
     .cf-row{display:grid;grid-template-columns:1fr 1fr auto auto;gap:8px;align-items:center;margin-bottom:6px;}
     .cf-row input{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:7px;padding:6px 9px;font-size:13px;font-family:'Outfit',sans-serif;font-weight:300;color:#f7f3ed;outline:none;width:100%;box-sizing:border-box;}
@@ -2462,6 +2477,24 @@
   </div>
 </div>
 
+<!-- Delete document overlay -->
+<div id="del-doc-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:900;display:none;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)cancelDeleteDoc()">
+  <div style="background:#22201d;border:1px solid rgba(220,80,80,0.25);border-radius:18px;padding:32px;width:100%;max-width:400px;">
+    <h2 style="font-family:'Fraunces',serif;font-size:20px;font-weight:400;margin:0 0 6px;color:#f7f3ed;">Delete document</h2>
+    <p id="del-doc-name" style="font-size:13px;color:rgba(247,243,237,0.4);margin:0 0 20px;word-break:break-all;"></p>
+    <p style="font-size:13.5px;color:rgba(247,243,237,0.55);margin:0 0 20px;line-height:1.5;">This cannot be undone. Enter your admin password to confirm.</p>
+    <div style="margin-bottom:24px;">
+      <label style="font-size:12px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:rgba(247,243,237,0.35);display:block;margin-bottom:8px;">Admin password</label>
+      <input id="del-doc-pw" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')confirmDeleteDoc()" style="width:100%;box-sizing:border-box;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:10px 14px;font-family:'Outfit',sans-serif;font-size:15px;color:#f7f3ed;">
+      <p id="del-doc-err" style="font-size:13px;color:#f08080;margin:8px 0 0;display:none;"></p>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn-secondary" onclick="cancelDeleteDoc()">Cancel</button>
+      <button id="del-doc-confirm" style="background:#c0392b;color:#fff;border:none;border-radius:100px;padding:10px 22px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;" onclick="confirmDeleteDoc()">Delete</button>
+    </div>
+  </div>
+</div>
+
 <!-- System status panel -->
 <div id="sys-panel-overlay" onclick="if(event.target===this)closeSysPanel()">
   <div style="background:#22201d;border:1px solid rgba(247,243,237,0.1);border-radius:16px;padding:28px;width:100%;max-width:400px;">
@@ -3230,6 +3263,16 @@ let crmPurchases = [];
 let purchaseEditId = null;
 let crmQuestionnaire = null;
 let crmNotes = [];
+let _clientDocsMap = {};
+let _pendingDocDelete = null;
+
+const DOC_TYPES = [
+  { key: 'bp-report',        label: 'B&P Report' },
+  { key: 'contract',         label: 'Contract of Sale' },
+  { key: 'rental-appraisal', label: 'Rental Appraisal' },
+  { key: 'pre-approval',     label: 'Pre-approval Letter' },
+  { key: 'other',            label: 'Other' },
+];
 
 // ── Section nav ───────────────────────────────────────────────────────────────
 function showSection(id, btn) {
@@ -5840,14 +5883,16 @@ async function openClientProfile(clientId) {
 
   // Load data in parallel then render
   document.getElementById('profile-body').innerHTML = '<div style="text-align:center;padding:40px;color:rgba(247,243,237,0.2);font-size:13px;">Loading…</div>';
-  const [qRes, pRes, nRes] = await Promise.all([
+  const [qRes, pRes, nRes, dRes] = await Promise.all([
     api('GET', `/api/admin/questionnaire?clientId=${clientId}`),
     api('GET', `/api/admin/purchases?clientId=${clientId}`),
     api('GET', `/api/admin/client-notes?clientId=${clientId}`),
+    api('GET', `/api/admin/client-docs?clientId=${encodeURIComponent(clientId)}`),
   ]);
   if (qRes.ok) crmQuestionnaire = await qRes.json();
   if (pRes.ok) crmPurchases = await pRes.json();
   if (nRes.ok) crmNotes = await nRes.json();
+  _clientDocsMap[clientId] = dRes.ok ? (await dRes.json()) : [];
   renderProfileTab();
 }
 
@@ -6363,6 +6408,30 @@ function renderEngagementTab() {
           ${acq.status!=='settled'?`<button class="btn-sm" onclick="markAcqSettled('${client.id}','${acq.id}')">Mark settled</button>`:''}
           ${acqs.length > 1 ? `<button class="btn-sm" style="color:#e07070;border-color:rgba(224,112,112,0.25);" onclick="deleteAcquisition('${client.id}','${acq.id}','${esc(acq.label)}')">Delete</button>` : ''}
         </div>
+        ${(()=>{
+          const acqDocs = (_clientDocsMap[client.id] || []).filter(d => d.acqId === acq.id);
+          const rows = DOC_TYPES.map(dt => {
+            const files = acqDocs.filter(d => d.type === dt.key);
+            const fileHtml = files.map(d => {
+              const date = new Date(d.uploadedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short'});
+              const ext  = d.filename.split('.').pop().toLowerCase();
+              const icon = ext === 'pdf' ? '📄' : ['jpg','jpeg','png','gif','webp'].includes(ext) ? '🖼' : '📎';
+              return `<div class="acq-doc-file">
+                <a class="acq-doc-link" href="/api/admin/client-docs?clientId=${encodeURIComponent(client.id)}&docId=${d.id}" target="_blank" title="${esc(d.filename)}">${icon} ${esc(d.filename)}</a>
+                <span class="acq-doc-date">${date}</span>
+                <button class="acq-doc-del" onclick="deleteClientDoc('${client.id}','${d.id}','${esc(d.filename)}')" title="Delete">&times;</button>
+              </div>`;
+            }).join('');
+            return `<div class="acq-doc-type">
+              <span class="acq-doc-type-label">${dt.label}</span>
+              <div class="acq-doc-files">
+                ${fileHtml}
+                <button class="acq-doc-upload-btn" id="upload-btn-${acq.id}-${dt.key}" onclick="uploadClientDoc('${client.id}','${acq.id}','${dt.key}','${acq.id}-${dt.key}')">+ Upload</button>
+              </div>
+            </div>`;
+          }).join('');
+          return `<div class="acq-docs-section"><div class="acq-docs-title">Documents</div>${rows}</div>`;
+        })()}
       </div>
     </div>`;
   }
@@ -6668,6 +6737,70 @@ async function createNewFee(clientId) {
 function toggleAcqAccordion(acqId) {
   const el = document.getElementById('acq-acc-' + acqId);
   if (el) el.classList.toggle('open');
+}
+
+// ── Client documents ───────────────────────────────────────────────────────
+async function uploadClientDoc(clientId, acqId, type, btnKey) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.webp,.heic';
+  input.onchange = async () => {
+    const file = input.files[0];
+    if (!file) return;
+    const btn = document.getElementById(`upload-btn-${btnKey}`);
+    if (btn) { btn.textContent = 'Uploading…'; btn.disabled = true; }
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('clientId', clientId);
+    fd.append('acqId', acqId);
+    fd.append('type', type);
+    const res = await fetch('/api/admin/client-docs', { method: 'POST', body: fd });
+    if (res.ok) {
+      const doc = await res.json();
+      if (!_clientDocsMap[clientId]) _clientDocsMap[clientId] = [];
+      _clientDocsMap[clientId].push(doc);
+      renderEngagementTab();
+    } else {
+      if (btn) { btn.textContent = '+ Upload'; btn.disabled = false; }
+      alert('Upload failed — please try again.');
+    }
+  };
+  input.click();
+}
+
+function deleteClientDoc(clientId, docId, filename) {
+  _pendingDocDelete = { clientId, docId, filename };
+  document.getElementById('del-doc-name').textContent = filename;
+  document.getElementById('del-doc-pw').value = '';
+  document.getElementById('del-doc-err').style.display = 'none';
+  document.getElementById('del-doc-overlay').style.display = 'flex';
+  setTimeout(() => document.getElementById('del-doc-pw').focus(), 50);
+}
+
+function cancelDeleteDoc() {
+  _pendingDocDelete = null;
+  document.getElementById('del-doc-overlay').style.display = 'none';
+}
+
+async function confirmDeleteDoc() {
+  const password = document.getElementById('del-doc-pw').value;
+  const errEl    = document.getElementById('del-doc-err');
+  const btn      = document.getElementById('del-doc-confirm');
+  if (!password) { errEl.textContent = 'Password is required.'; errEl.style.display = 'block'; return; }
+  btn.disabled = true; btn.textContent = 'Deleting…';
+  errEl.style.display = 'none';
+  const { clientId, docId } = _pendingDocDelete;
+  const res = await api('DELETE', `/api/admin/client-docs?clientId=${encodeURIComponent(clientId)}&docId=${docId}`, { password });
+  if (res.ok) {
+    _clientDocsMap[clientId] = (_clientDocsMap[clientId] || []).filter(d => d.id !== docId);
+    cancelDeleteDoc();
+    renderEngagementTab();
+  } else {
+    const data = await res.json().catch(() => ({}));
+    errEl.textContent = data.error || 'Delete failed.';
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Delete';
+  }
 }
 
 async function addAcquisition(clientId) {
