@@ -1076,7 +1076,11 @@
         <p style="font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:18px;">Add milestones for a client</p>
         <div class="ms-add-field" style="margin-bottom:16px;max-width:280px;">
           <label class="ms-add-label">Client</label>
-          <select id="ms-add-client" class="ms-add-input" onchange="updateSaveBtnLabel()"><option value="">Select client…</option></select>
+          <select id="ms-add-client" class="ms-add-input" onchange="updateSaveBtnLabel();updateAcqSelector()"><option value="">Select client…</option></select>
+        </div>
+        <div id="ms-add-acq-wrap" style="display:none;margin-bottom:16px;max-width:280px;">
+          <label class="ms-add-label">Acquisition</label>
+          <select id="ms-add-acq" class="ms-add-input"><option value="">All acquisitions (client level)</option></select>
         </div>
         <div class="ms-row-header" style="font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);display:grid;grid-template-columns:1.2fr 1fr 1.6fr auto;gap:10px;padding:0 14px;margin-bottom:4px;">
           <span>Milestone type</span><span>Date</span><span>Notes (optional)</span><span></span>
@@ -3747,7 +3751,8 @@ function renderPipeline() {
       : stageCards.map(card => {
           const since = stageSinceDays(card.pipelineStageUpdatedAt);
           const duration = searchDurationLabel(card.createdAt);
-          const clientMs = milestones.filter(m => m.clientId === card.clientId && !m.completed)
+          const clientMs = milestones.filter(m => m.clientId === card.clientId && !m.completed &&
+            (!card.isMultiAcq || !m.acqId || m.acqId === card.acqId))
             .sort((a, b) => new Date(a.date) - new Date(b.date));
           let dateChip = '';
           if (clientMs.length) {
@@ -4557,9 +4562,14 @@ function renderMilestonesDashboard() {
       const rows = group.items.map(m => {
         const days = daysFromToday(m.date);
         const urg = urgencyClass(days);
+        const acqNote = m.acqId ? (() => {
+          const c = clients.find(x => x.id === m.clientId);
+          const acq = (c?.acquisitions || []).find(a => a.id === m.acqId);
+          return acq ? `<span style="font-size:10px;color:rgba(247,243,237,0.25);display:inline-block;margin-top:2px;">${esc(acq.label)}</span> ` : '';
+        })() : '';
         return `<div class="ms-row-item ${urg}">
           <span class="urg-badge">${urgencyLabel(days)}</span>
-          <span class="ms-row-label">${esc(m.label)}${m.notes ? `<span style="font-size:11px;color:rgba(247,243,237,0.3);display:block;margin-top:2px;">${esc(m.notes)}</span>` : ''}
+          <span class="ms-row-label">${acqNote}${esc(m.label)}${m.notes ? `<span style="font-size:11px;color:rgba(247,243,237,0.3);display:block;margin-top:2px;">${esc(m.notes)}</span>` : ''}
             <span class="ms-row-label-date">${formatDate(m.date)}</span>
           </span>
           <span class="ms-row-date">${formatDate(m.date)}</span>
@@ -4715,6 +4725,19 @@ function updateSaveBtnLabel() {
   if (btn) btn.textContent = n > 1 ? `Save ${n} dates` : 'Save date';
 }
 
+function updateAcqSelector() {
+  const clientId = document.getElementById('ms-add-client').value;
+  const wrap = document.getElementById('ms-add-acq-wrap');
+  const sel = document.getElementById('ms-add-acq');
+  if (!clientId) { wrap.style.display = 'none'; return; }
+  const c = clients.find(x => x.id === clientId);
+  const activeAcqs = (c?.acquisitions || []).filter(a => a.status !== 'settled' && a.pipelineStage);
+  if (activeAcqs.length <= 1) { wrap.style.display = 'none'; return; }
+  sel.innerHTML = '<option value="">All acquisitions (client level)</option>' +
+    activeAcqs.map(a => `<option value="${a.id}">${esc(a.label)}</option>`).join('');
+  wrap.style.display = 'block';
+}
+
 function toggleAddDateForm() {
   const panel = document.getElementById('ms-add-panel');
   const isOpen = panel.style.display !== 'none';
@@ -4727,6 +4750,8 @@ function toggleAddDateForm() {
       clients.filter(c => c.active && !c.datesArchived && (c.status || 'active') !== 'completed').map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
     _msRows = [{ type: Object.keys(MS_TYPES)[0], date: '', notes: '' }];
     renderMilestoneRows();
+    const acqWrap = document.getElementById('ms-add-acq-wrap');
+    if (acqWrap) acqWrap.style.display = 'none';
     panel.style.display = 'block';
     document.getElementById('ms-add-btn').textContent = '✕ Cancel';
     sel.focus();
@@ -4736,6 +4761,8 @@ function toggleAddDateForm() {
 async function saveMilestoneBatch() {
   const clientId = document.getElementById('ms-add-client').value;
   if (!clientId) { alert('Please select a client.'); return; }
+  const acqWrap = document.getElementById('ms-add-acq-wrap');
+  const acqId = (acqWrap?.style.display !== 'none') ? (document.getElementById('ms-add-acq')?.value || null) : null;
   const valid = _msRows.filter(r => r.date);
   if (!valid.length) { alert('Please add at least one date.'); return; }
   const btn = document.getElementById('ms-add-submit');
@@ -4744,10 +4771,12 @@ async function saveMilestoneBatch() {
   for (const row of valid) {
     const label = row.type === 'custom' ? (row.notes || 'Custom') : MS_TYPES[row.type];
     try {
-      const res = await api('POST', '/api/admin/milestones', { clientId, clientName: name, type: row.type, label, date: row.date, notes: row.notes });
+      const body = { clientId, clientName: name, type: row.type, label, date: row.date, notes: row.notes };
+      if (acqId) body.acqId = acqId;
+      const res = await api('POST', '/api/admin/milestones', body);
       if (res.ok) {
         const data = await res.json();
-        milestones.push({ id: data.id, clientId, clientName: name, type: row.type, label, date: row.date, notes: row.notes, completed: false, completedAt: null, createdAt: new Date().toISOString() });
+        milestones.push({ id: data.id, clientId, acqId: acqId || null, clientName: name, type: row.type, label, date: row.date, notes: row.notes, completed: false, completedAt: null, createdAt: new Date().toISOString() });
       }
     } catch {}
   }
@@ -4779,9 +4808,11 @@ async function completeMilestone(id, clientId) {
   // clientId is required by the backend for isolated per-client writes
   const cid = clientId || milestones.find(x => x.id === id)?.clientId;
   if (!cid) { console.error('completeMilestone: no clientId for', id); return; }
-  const res = await api('PUT', '/api/admin/milestones', { id, clientId: cid, completed: true });
-  if (!res.ok) return;
   const m = milestones.find(x => x.id === id);
+  const body = { id, clientId: cid, completed: true };
+  if (m?.acqId) body.acqId = m.acqId;
+  const res = await api('PUT', '/api/admin/milestones', body);
+  if (!res.ok) return;
   if (m) { m.completed = true; m.completedAt = new Date().toISOString(); }
   renderMilestonesDashboard();
   updateMilestoneBadges();
@@ -4841,7 +4872,9 @@ async function saveMilestoneEdit() {
   const notes = document.getElementById('ms-edit-notes').value.trim();
   const btn = document.getElementById('ms-edit-save');
   btn.disabled = true; btn.textContent = 'Saving…';
-  const res = await api('PUT', '/api/admin/milestones', { id: m.id, clientId: m.clientId, date, notes });
+  const editBody = { id: m.id, clientId: m.clientId, date, notes };
+  if (m.acqId) editBody.acqId = m.acqId;
+  const res = await api('PUT', '/api/admin/milestones', editBody);
   btn.disabled = false; btn.textContent = 'Save changes';
   if (!res.ok) { alert('Could not save. Please try again.'); return; }
   m.date = date;
@@ -4857,7 +4890,9 @@ async function deleteMilestoneConfirm(id, clientId) {
   // clientId is required by the backend for isolated per-client writes
   const cid = clientId || milestones.find(x => x.id === id)?.clientId;
   if (!cid) { console.error('deleteMilestoneConfirm: no clientId for', id); return; }
-  const res = await api('DELETE', `/api/admin/milestones?id=${encodeURIComponent(id)}&clientId=${encodeURIComponent(cid)}`);
+  const m = milestones.find(x => x.id === id);
+  const acqPart = m?.acqId ? `&acqId=${encodeURIComponent(m.acqId)}` : '';
+  const res = await api('DELETE', `/api/admin/milestones?id=${encodeURIComponent(id)}&clientId=${encodeURIComponent(cid)}${acqPart}`);
   if (!res.ok) return;
   milestones = milestones.filter(x => x.id !== id);
   renderMilestonesDashboard();

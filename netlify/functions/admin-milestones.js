@@ -216,6 +216,7 @@ export default async (req) => {
     const milestone = {
       id: crypto.randomUUID(),
       clientId,
+      acqId: acqId || null,
       clientName: clientName || '',
       type,
       label: label || MILESTONE_LABELS[type] || type,
