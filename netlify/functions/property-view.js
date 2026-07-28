@@ -21,7 +21,8 @@ export default async (req) => {
       const sig = token.slice(lastDot + 1);
       const expected = crypto.createHmac('sha256', process.env.ADMIN_PASSWORD || 'fp-preview')
                              .update(presId).digest('hex').slice(0, 32);
-      if (sig === expected) {
+      const sa = Buffer.from(sig, 'hex'), sb = Buffer.from(expected, 'hex');
+      if (sa.length === sb.length && sa.length > 0 && crypto.timingSafeEqual(sa, sb)) {
         found = presentations.find(p => p.id === presId) || null;
         if (found) clientId = '_preview';
       }

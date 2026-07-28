@@ -45,7 +45,8 @@ function verifyJWT(token, secret) {
   try {
     const [h, b, sig] = token.split('.');
     const expected = crypto.createHmac('sha256', secret).update(`${h}.${b}`).digest('base64url');
-    if (sig !== expected) return null;
+    const sa = Buffer.from(sig, 'base64url'), sb = Buffer.from(expected, 'base64url');
+    if (sa.length !== sb.length || !crypto.timingSafeEqual(sa, sb)) return null;
     const payload = JSON.parse(Buffer.from(b, 'base64url').toString());
     if (payload.exp && payload.exp < Date.now() / 1000) return null;
     return payload;
