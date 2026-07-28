@@ -2967,7 +2967,7 @@ async function dashAddFeePayment(clientId, feeId) {
   client.manualFees = manualFees;
   client.manualFee = null;
   renderDashboardFees();
-  if (crmProfileClientId === clientId) renderEngagementTab();
+  if (crmProfileClientId === clientId) refreshProfileView();
 }
 
 async function openClientEngagementTab(clientId) {
@@ -5949,6 +5949,16 @@ function switchProfileTab(tab, btn) {
   else if (tab === 'docs') renderDocsTab();
 }
 
+function refreshProfileView() {
+  if (!crmProfileClientId) return;
+  if (crmProfileTab === 'profile') renderProfileTab();
+  else if (crmProfileTab === 'properties') renderPropertiesTab();
+  else if (crmProfileTab === 'engagement') renderEngagementTab();
+  else if (crmProfileTab === 'notes') renderNotesTab();
+  else if (crmProfileTab === 'professionals') renderProfessionalsTab();
+  else if (crmProfileTab === 'docs') renderDocsTab();
+}
+
 function pfVal(v) {
   if (!v || v === 'No' || v === '') return `<span class="pf-empty">—</span>`;
   return esc(v);
@@ -6940,6 +6950,7 @@ async function updateAcqStage(clientId, acqId, stage) {
   }
   renderPipeline();
   renderTable();
+  if (crmProfileClientId === clientId) refreshProfileView();
 }
 
 async function markAcqSettled(clientId, acqId) {
@@ -8883,7 +8894,7 @@ async function markPaymentReceived(prospectId, paymentType) {
   if (ppProspectId === prospectId) openProspectPanel(prospectId);
   if (crmProfileClientId) {
     const linkedClient = clients.find(c => c.prospectId === prospectId);
-    if (linkedClient && linkedClient.id === crmProfileClientId) renderProfileTab();
+    if (linkedClient && linkedClient.id === crmProfileClientId) refreshProfileView();
   }
 }
 
