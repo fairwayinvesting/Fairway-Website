@@ -75,6 +75,7 @@
     @media(max-width:520px){.settlement-card{flex-direction:column;align-items:flex-start;gap:12px;}.settlement-days{font-size:42px;}}
 
     .journey-wrap{padding:0 44px 32px;max-width:1060px;margin:0 auto;}
+    .dates-wrap{padding:0 44px 24px;max-width:1060px;margin:0 auto;}
     .journey-bar{display:flex;align-items:flex-start;gap:0;}
     .jstep{display:flex;flex-direction:column;align-items:center;flex:1;min-width:0;position:relative;}
     .jstep:not(:last-child)::after{content:'';position:absolute;top:10px;left:calc(50% + 12px);right:calc(-50% + 12px);height:1.5px;background:rgba(247,243,237,0.1);}
@@ -120,7 +121,7 @@
 
     @media(max-width:800px){
       nav,footer{padding-left:20px;padding-right:20px;}
-      .hero,.grid-wrap,.empty,.loading,.actions-wrap,.portfolio-wrap,.journey-wrap,.settlement-wrap{padding-left:20px;padding-right:20px;}
+      .hero,.grid-wrap,.empty,.loading,.actions-wrap,.portfolio-wrap,.journey-wrap,.settlement-wrap,.dates-wrap{padding-left:20px;padding-right:20px;}
       .grid{grid-template-columns:1fr 1fr;}
       h1{font-size:30px;}
     }
@@ -176,6 +177,14 @@
     <div class="journey-bar" id="journey-bar"></div>
   </div>
 
+  <!-- UPCOMING DATES (populated by JS) -->
+  <div class="dates-wrap" id="dates-section" style="display:none;">
+    <div style="background:#22201d;border:1px solid rgba(247,243,237,0.09);border-radius:18px;padding:20px 24px;">
+      <p class="section-label" style="margin-bottom:14px;">Upcoming dates</p>
+      <div id="dates-list"></div>
+    </div>
+  </div>
+
   <!-- STAGE STATUS BANNER (populated by JS, shown for searching/under_contract/exchanged) -->
   <div class="actions-wrap" id="status-section" style="display:none"></div>
 
@@ -207,6 +216,8 @@
     <p>&copy; 2026 Fairway Investing Pty Ltd &nbsp;&middot;&nbsp; For client use only.</p>
   </footer>
 
+  <div id="toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#22201d;border:1px solid rgba(109,191,123,0.3);color:#6dbf7b;font-size:13.5px;font-weight:400;padding:12px 24px;border-radius:100px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:100;white-space:nowrap;"></div>
+
   <script>
     const MARKET_META = {
       'geelong':       { name: 'Geelong',       state: 'VIC' },
@@ -225,6 +236,65 @@
     };
 
     function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    function dateUrgency(days) {
+      if (days < 0)  return { label: Math.abs(days) + 'd overdue', color: '#f08080', bg: 'rgba(240,80,80,0.12)',     border: 'rgba(240,80,80,0.25)' };
+      if (days === 0) return { label: 'Today',                      color: '#e8a87c', bg: 'rgba(232,168,124,0.15)',   border: 'rgba(232,168,124,0.35)' };
+      if (days <= 7)  return { label: days + 'd',                   color: '#e8a87c', bg: 'rgba(232,168,124,0.12)',   border: 'rgba(232,168,124,0.25)' };
+      if (days <= 14) return { label: days + 'd',                   color: '#f0c060', bg: 'rgba(240,190,100,0.10)',   border: 'rgba(240,190,100,0.20)' };
+      return { label: days + 'd', color: '#6dbf7b', bg: 'rgba(109,191,123,0.08)', border: 'rgba(109,191,123,0.20)' };
+    }
+
+    function dateRowHtml(m, today, isLast) {
+      const days = Math.round((new Date(m.date + 'T00:00:00') - today) / 86400000);
+      const u = dateUrgency(days);
+      const fmt = new Date(m.date + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+      return `<div style="display:flex;align-items:center;gap:12px;padding:12px 0;${isLast ? '' : 'border-bottom:1px solid rgba(247,243,237,0.06);'}">
+        <span style="background:${u.bg};border:1px solid ${u.border};color:${u.color};border-radius:100px;padding:3px 10px;font-size:10.5px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap;flex-shrink:0;">${u.label}</span>
+        <span style="font-size:14px;font-weight:400;color:#f7f3ed;flex:1;min-width:0;">${esc(m.label || m.type || 'Date')}</span>
+        <span style="font-size:13px;color:rgba(247,243,237,0.35);white-space:nowrap;">${fmt}</span>
+      </div>`;
+    }
+
+    function renderDates(milestones) {
+      const sec = document.getElementById('dates-section');
+      const list = document.getElementById('dates-list');
+      if (!sec || !list || !milestones || !milestones.length) return;
+      const today = new Date(); today.setHours(0,0,0,0);
+      list.innerHTML = milestones.map((m, i, arr) => dateRowHtml(m, today, i === arr.length - 1)).join('');
+      sec.style.display = 'block';
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => { t.style.opacity = '0'; }, 2500);
+    }
+
+    function injectMultiAcqMilestones(milestones, acquisitions) {
+      if (!milestones || !milestones.length) return;
+      const today = new Date(); today.setHours(0,0,0,0);
+      const clientMs = milestones.filter(m => !m.acqId).sort((a, b) => new Date(a.date) - new Date(b.date));
+      const acqMs = {};
+      milestones.filter(m => m.acqId).forEach(m => { (acqMs[m.acqId] = acqMs[m.acqId] || []).push(m); });
+      // Per-acquisition milestones: inject into each panel
+      acquisitions.forEach(acq => {
+        const ms = (acqMs[acq.id] || []).sort((a, b) => new Date(a.date) - new Date(b.date));
+        if (!ms.length) return;
+        const body = document.querySelector('#acq-panel-' + acq.id + ' .acq-panel-body');
+        if (!body) return;
+        const html = `<div class="acq-section">
+          <p class="acq-section-label">Upcoming dates</p>
+          ${ms.map((m, i, arr) => dateRowHtml(m, today, i === arr.length - 1)).join('')}
+        </div>`;
+        body.insertAdjacentHTML('afterbegin', html);
+      });
+      // Client-level milestones: show in the top-level dates section
+      if (clientMs.length) renderDates(clientMs);
+    }
 
     const JOURNEY_STAGES = [
       { key: 'onboarding',     label: 'Onboarding' },
@@ -419,7 +489,7 @@
               <div class="action-card-text">
                 <p class="ac-label" style="color:rgba(247,243,237,0.3);">Your buying brief</p>
                 <p class="ac-title" style="font-size:16px;">Being prepared</p>
-                <p class="ac-sub">Luke is reviewing your questionnaire and will publish your brief shortly.</p>
+                <p class="ac-sub">Luke is reviewing your questionnaire and will publish your brief shortly. Questions? <a href="mailto:luke@fairwayinvesting.com.au" style="color:#bd7a70;text-decoration:none;">Email Luke</a></p>
               </div>
             </div>
             <span class="action-btn" style="background:transparent;border:1px solid rgba(247,243,237,0.1);color:rgba(247,243,237,0.3);font-weight:400;cursor:default;">Coming soon</span>
@@ -582,9 +652,9 @@
           body: JSON.stringify(body),
         });
         if (res.ok) {
-          // Re-fetch and re-render portfolio
           const pr = await fetch('/api/client/properties');
           if (pr.ok) { renderPortfolio(await pr.json()); }
+          showToast('✓ Loan details saved');
         } else { alert('Save failed. Please try again.'); }
       } catch { alert('Network error. Please try again.'); }
     }
@@ -757,6 +827,10 @@
         // Active journey mode
         if (multiAcqData) {
           renderMultiAcquisition(multiAcqData.acquisitions, me);
+          // Inject milestone dates per acquisition (non-blocking)
+          fetch('/api/client/milestones').then(r => r.ok ? r.json() : []).then(ms => {
+            injectMultiAcqMilestones(ms, multiAcqData.acquisitions);
+          }).catch(() => {});
           // Show portfolio if applicable
           if (hasPortfolio) {
             try {
@@ -769,16 +843,18 @@
         renderSettlement(me.settlementDate);
         renderJourney(me.pipelineStage, me.settlementDate);
 
-        let qCompleted = false, briefPublished = false, presentations = [];
+        let qCompleted = false, briefPublished = false, presentations = [], milestones = [];
         try {
-          const [qr, br, pr] = await Promise.all([
+          const [qr, br, pr, mr] = await Promise.all([
             fetch('/api/submit-questionnaire'),
             fetch('/api/brief'),
             fetch('/api/presentations'),
+            fetch('/api/client/milestones'),
           ]);
           if (qr.ok) { const qd = await qr.json(); qCompleted = qd.completed === true; }
           if (br.ok) { const bd = await br.json(); briefPublished = bd.published === true; }
           if (pr.ok) { const pd = await pr.json(); presentations = pd.presentations || []; }
+          if (mr.ok) { milestones = await mr.json().catch(() => []); }
         } catch (e) { console.error('[portal] fetch error', e); }
 
         renderQSection(qCompleted);
@@ -786,6 +862,7 @@
         renderBriefSection(qCompleted, briefPublished);
         renderPresentations(presentations);
         renderReports(me.markets);
+        renderDates(milestones);
       }
 
       // Show portfolio for completed clients and re-engaged clients with past purchases
