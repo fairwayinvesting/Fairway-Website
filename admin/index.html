@@ -693,21 +693,21 @@
     .acq-badge.pending{color:rgba(247,243,237,0.35);background:rgba(247,243,237,0.04);border-color:rgba(247,243,237,0.1);}
     .acq-add-btn{display:flex;align-items:center;gap:6px;width:100%;border:1px dashed rgba(247,243,237,0.15);border-radius:10px;padding:10px 14px;background:none;font-family:'Outfit',sans-serif;font-size:13px;color:rgba(247,243,237,0.35);cursor:pointer;transition:all .15s;margin-top:10px;}
     .acq-add-btn:hover{border-color:rgba(247,243,237,0.3);color:rgba(247,243,237,0.6);}
-    .acq-docs-section{margin-top:16px;padding-top:14px;border-top:1px solid rgba(247,243,237,0.07);}
-    .acq-docs-title{font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;}
-    .acq-doc-type{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(247,243,237,0.05);}
-    .acq-doc-type:last-child{border-bottom:none;}
-    .acq-doc-type-label{font-size:12px;color:rgba(247,243,237,0.4);min-width:130px;padding-top:2px;flex-shrink:0;}
-    .acq-doc-files{flex:1;display:flex;flex-direction:column;gap:5px;}
-    .acq-doc-file{display:flex;align-items:center;gap:8px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.07);border-radius:8px;padding:6px 10px;}
-    .acq-doc-link{flex:1;font-size:12.5px;color:rgba(247,243,237,0.7);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .15s;}
-    .acq-doc-link:hover{color:#bd7a70;}
-    .acq-doc-date{font-size:11px;color:rgba(247,243,237,0.25);flex-shrink:0;}
-    .acq-doc-del{background:none;border:none;cursor:pointer;color:rgba(247,243,237,0.2);font-size:16px;line-height:1;padding:0 2px;flex-shrink:0;transition:color .15s;}
-    .acq-doc-del:hover{color:#e07070;}
-    .acq-doc-upload-btn{align-self:flex-start;background:none;border:1px dashed rgba(247,243,237,0.15);border-radius:6px;padding:4px 10px;font-size:11.5px;font-family:'Outfit',sans-serif;color:rgba(247,243,237,0.35);cursor:pointer;transition:all .15s;}
-    .acq-doc-upload-btn:hover{border-color:rgba(247,243,237,0.3);color:rgba(247,243,237,0.65);}
-    .acq-doc-uploading{font-size:11.5px;color:rgba(247,243,237,0.3);font-style:italic;}
+    .doc-section{margin-bottom:28px;}
+    .doc-section-header{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);padding-bottom:10px;border-bottom:1px solid rgba(247,243,237,0.08);margin-bottom:10px;}
+    .doc-empty{font-size:13px;color:rgba(247,243,237,0.2);margin:8px 0;padding:4px 0;}
+    .doc-row{display:flex;align-items:flex-start;gap:12px;padding:11px 14px;background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.07);border-radius:10px;margin-bottom:7px;transition:background .15s;}
+    .doc-row:hover{background:rgba(247,243,237,0.05);}
+    .doc-row-icon{margin-top:2px;flex-shrink:0;}
+    .doc-row-body{flex:1;min-width:0;}
+    .doc-row-name{display:block;font-size:13px;color:rgba(247,243,237,0.8);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;transition:color .15s;}
+    .doc-row-name:hover{color:#bd7a70;}
+    .doc-row-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .doc-row-type{font-size:11px;color:rgba(247,243,237,0.45);background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.08);border-radius:4px;padding:1px 7px;}
+    .doc-row-date{font-size:11px;color:rgba(247,243,237,0.3);}
+    .doc-row-size{font-size:11px;color:rgba(247,243,237,0.22);}
+    .doc-row-del{background:none;border:none;cursor:pointer;color:rgba(247,243,237,0.2);font-size:18px;line-height:1;padding:0 2px;flex-shrink:0;margin-top:1px;transition:color .15s;}
+    .doc-row-del:hover{color:#e07070;}
 
     .cf-row{display:grid;grid-template-columns:1fr 1fr auto auto;gap:8px;align-items:center;margin-bottom:6px;}
     .cf-row input{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:7px;padding:6px 9px;font-size:13px;font-family:'Outfit',sans-serif;font-weight:300;color:#f7f3ed;outline:none;width:100%;box-sizing:border-box;}
@@ -1628,6 +1628,7 @@
     <button class="profile-tab" onclick="switchProfileTab('engagement',this)">Engagement</button>
     <button class="profile-tab" onclick="switchProfileTab('notes',this)">Notes</button>
     <button class="profile-tab" onclick="switchProfileTab('professionals',this)">Professionals</button>
+    <button class="profile-tab" onclick="switchProfileTab('docs',this)">Docs</button>
   </div>
   <div class="profile-body" id="profile-body">
     <div style="text-align:center;padding:40px;color:rgba(247,243,237,0.2);font-size:13px;">Loading…</div>
@@ -2473,6 +2474,38 @@
     <div style="display:flex;gap:10px;justify-content:flex-end;">
       <button class="btn-secondary" onclick="cancelDeleteClient()">Cancel</button>
       <button id="del-client-confirm" style="background:#c0392b;color:#fff;border:none;border-radius:100px;padding:10px 22px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;" onclick="confirmDeleteClient()">Delete client</button>
+    </div>
+  </div>
+</div>
+
+<!-- Upload document modal -->
+<div id="doc-upload-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:910;display:none;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)closeDocUploadModal()">
+  <div style="background:#22201d;border:1px solid rgba(247,243,237,0.1);border-radius:18px;padding:32px;width:100%;max-width:440px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+      <h2 style="font-family:'Fraunces',serif;font-size:20px;font-weight:400;margin:0;color:#f7f3ed;">Upload document</h2>
+      <button onclick="closeDocUploadModal()" style="background:none;border:none;cursor:pointer;color:rgba(247,243,237,0.3);font-size:24px;line-height:1;padding:0;">&times;</button>
+    </div>
+    <div class="field" style="margin-bottom:18px;">
+      <label style="font-size:11.5px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:rgba(247,243,237,0.35);display:block;margin-bottom:8px;">Acquisition</label>
+      <select id="doc-upload-acq" style="width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:10px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#f7f3ed;outline:none;cursor:pointer;"></select>
+    </div>
+    <div class="field" style="margin-bottom:18px;">
+      <label style="font-size:11.5px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:rgba(247,243,237,0.35);display:block;margin-bottom:8px;">Document type</label>
+      <select id="doc-upload-type" style="width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:10px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#f7f3ed;outline:none;cursor:pointer;"></select>
+    </div>
+    <div class="field" style="margin-bottom:6px;">
+      <label style="font-size:11.5px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:rgba(247,243,237,0.35);display:block;margin-bottom:8px;">File</label>
+      <label for="doc-upload-file" style="display:flex;align-items:center;justify-content:center;gap:10px;border:1px dashed rgba(247,243,237,0.2);border-radius:10px;padding:20px;cursor:pointer;transition:all .2s;color:rgba(247,243,237,0.45);font-size:13.5px;" onmouseover="this.style.borderColor='rgba(247,243,237,0.4)'" onmouseout="this.style.borderColor='rgba(247,243,237,0.2)'">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 12V4M9 4l-3 3M9 4l3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 14h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Choose file to upload
+      </label>
+      <input id="doc-upload-file" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.webp,.heic" style="display:none;" onchange="document.getElementById('doc-upload-fname').textContent=this.files[0]?this.files[0].name:''">
+    </div>
+    <p id="doc-upload-fname" style="font-size:12.5px;color:rgba(247,243,237,0.5);margin:6px 0 18px;min-height:18px;word-break:break-all;"></p>
+    <p id="doc-upload-err" style="font-size:13px;color:#f08080;margin:0 0 14px;display:none;"></p>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn-secondary" onclick="closeDocUploadModal()">Cancel</button>
+      <button id="doc-upload-submit" class="btn-primary" onclick="submitDocUpload()" style="padding:10px 22px;">Upload</button>
     </div>
   </div>
 </div>
@@ -5913,6 +5946,7 @@ function switchProfileTab(tab, btn) {
   else if (tab === 'engagement') renderEngagementTab();
   else if (tab === 'notes') renderNotesTab();
   else if (tab === 'professionals') renderProfessionalsTab();
+  else if (tab === 'docs') renderDocsTab();
 }
 
 function pfVal(v) {
@@ -6408,30 +6442,6 @@ function renderEngagementTab() {
           ${acq.status!=='settled'?`<button class="btn-sm" onclick="markAcqSettled('${client.id}','${acq.id}')">Mark settled</button>`:''}
           ${acqs.length > 1 ? `<button class="btn-sm" style="color:#e07070;border-color:rgba(224,112,112,0.25);" onclick="deleteAcquisition('${client.id}','${acq.id}','${esc(acq.label)}')">Delete</button>` : ''}
         </div>
-        ${(()=>{
-          const acqDocs = (_clientDocsMap[client.id] || []).filter(d => d.acqId === acq.id);
-          const rows = DOC_TYPES.map(dt => {
-            const files = acqDocs.filter(d => d.type === dt.key);
-            const fileHtml = files.map(d => {
-              const date = new Date(d.uploadedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short'});
-              const ext  = d.filename.split('.').pop().toLowerCase();
-              const icon = ext === 'pdf' ? '📄' : ['jpg','jpeg','png','gif','webp'].includes(ext) ? '🖼' : '📎';
-              return `<div class="acq-doc-file">
-                <a class="acq-doc-link" href="/api/admin/client-docs?clientId=${encodeURIComponent(client.id)}&docId=${d.id}" target="_blank" title="${esc(d.filename)}">${icon} ${esc(d.filename)}</a>
-                <span class="acq-doc-date">${date}</span>
-                <button class="acq-doc-del" onclick="deleteClientDoc('${client.id}','${d.id}','${esc(d.filename)}')" title="Delete">&times;</button>
-              </div>`;
-            }).join('');
-            return `<div class="acq-doc-type">
-              <span class="acq-doc-type-label">${dt.label}</span>
-              <div class="acq-doc-files">
-                ${fileHtml}
-                <button class="acq-doc-upload-btn" id="upload-btn-${acq.id}-${dt.key}" onclick="uploadClientDoc('${client.id}','${acq.id}','${dt.key}','${acq.id}-${dt.key}')">+ Upload</button>
-              </div>
-            </div>`;
-          }).join('');
-          return `<div class="acq-docs-section"><div class="acq-docs-title">Documents</div>${rows}</div>`;
-        })()}
       </div>
     </div>`;
   }
@@ -6739,33 +6749,116 @@ function toggleAcqAccordion(acqId) {
   if (el) el.classList.toggle('open');
 }
 
-// ── Client documents ───────────────────────────────────────────────────────
-async function uploadClientDoc(clientId, acqId, type, btnKey) {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.webp,.heic';
-  input.onchange = async () => {
-    const file = input.files[0];
-    if (!file) return;
-    const btn = document.getElementById(`upload-btn-${btnKey}`);
-    if (btn) { btn.textContent = 'Uploading…'; btn.disabled = true; }
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('clientId', clientId);
-    fd.append('acqId', acqId);
-    fd.append('type', type);
-    const res = await fetch('/api/admin/client-docs', { method: 'POST', body: fd });
-    if (res.ok) {
-      const doc = await res.json();
-      if (!_clientDocsMap[clientId]) _clientDocsMap[clientId] = [];
-      _clientDocsMap[clientId].push(doc);
-      renderEngagementTab();
-    } else {
-      if (btn) { btn.textContent = '+ Upload'; btn.disabled = false; }
-      alert('Upload failed — please try again.');
-    }
-  };
-  input.click();
+// ── Client documents tab ───────────────────────────────────────────────────
+function renderDocsTab() {
+  const el     = document.getElementById('profile-body');
+  const client = clients.find(c => c.id === crmProfileClientId);
+  if (!client) return;
+
+  const docs = _clientDocsMap[crmProfileClientId] || [];
+  const acqs = client.acquisitions || [];
+
+  function docFileIcon(filename) {
+    const ext = (filename.split('.').pop() || '').toLowerCase();
+    if (ext === 'pdf') return '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;vertical-align:-2px"><rect x="1" y="1" width="12" height="12" rx="2" stroke="rgba(189,122,112,0.7)" stroke-width="1.2"/><path d="M4 5h6M4 7.5h4M4 10h3" stroke="rgba(189,122,112,0.7)" stroke-width="1.1" stroke-linecap="round"/></svg>';
+    if (['jpg','jpeg','png','gif','webp','heic'].includes(ext)) return '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;vertical-align:-2px"><rect x="1" y="1" width="12" height="12" rx="2" stroke="rgba(109,191,123,0.7)" stroke-width="1.2"/><circle cx="5" cy="5" r="1.2" fill="rgba(109,191,123,0.7)"/><path d="M1 10l3-3 2 2 2-3 3 4" stroke="rgba(109,191,123,0.7)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    return '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;vertical-align:-2px"><rect x="1" y="1" width="12" height="12" rx="2" stroke="rgba(247,243,237,0.3)" stroke-width="1.2"/><path d="M4 5h6M4 7.5h6M4 10h4" stroke="rgba(247,243,237,0.3)" stroke-width="1.1" stroke-linecap="round"/></svg>';
+  }
+
+  function acqSection(acqId, acqLabel) {
+    const acqDocs = docs.filter(d => (d.acqId || '') === acqId);
+    const byType  = {};
+    DOC_TYPES.forEach(dt => { byType[dt.key] = acqDocs.filter(d => d.type === dt.key); });
+    const typeRows = DOC_TYPES.filter(dt => byType[dt.key].length).map(dt =>
+      byType[dt.key].map(d => {
+        const date = new Date(d.uploadedAt).toLocaleDateString('en-AU', {day:'numeric',month:'short',year:'numeric'});
+        const sizeKb = d.size ? `${Math.round(d.size/1024)} KB` : '';
+        return `<div class="doc-row">
+          <div class="doc-row-icon">${docFileIcon(d.filename)}</div>
+          <div class="doc-row-body">
+            <a class="doc-row-name" href="/api/admin/client-docs?clientId=${encodeURIComponent(client.id)}&docId=${d.id}" target="_blank" title="${esc(d.filename)}">${esc(d.filename)}</a>
+            <div class="doc-row-meta"><span class="doc-row-type">${DOC_TYPES.find(x=>x.key===d.type)?.label||d.type}</span><span class="doc-row-date">${date}</span>${sizeKb?`<span class="doc-row-size">${sizeKb}</span>`:''}</div>
+          </div>
+          <button class="doc-row-del" onclick="deleteClientDoc('${client.id}','${d.id}','${esc(d.filename)}')" title="Delete">&times;</button>
+        </div>`;
+      }).join('')
+    ).join('');
+
+    return `<div class="doc-section">
+      <div class="doc-section-header">${esc(acqLabel)}</div>
+      ${typeRows || '<p class="doc-empty">No documents uploaded for this acquisition.</p>'}
+    </div>`;
+  }
+
+  const sections = acqs.length
+    ? acqs.map(acq => acqSection(acq.id, acq.label)).join('')
+    : acqSection('', 'Documents');
+
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
+      <span style="font-size:13px;color:rgba(247,243,237,0.35);">${docs.length} document${docs.length!==1?'s':''}</span>
+      <button class="btn-primary" style="font-size:13px;padding:9px 18px;" onclick="openDocUploadModal('${client.id}')">+ Upload document</button>
+    </div>
+    ${docs.length === 0 && acqs.length === 0
+      ? '<div style="text-align:center;padding:48px 0;color:rgba(247,243,237,0.18);font-size:13.5px;">No documents yet — click Upload document to get started.</div>'
+      : sections}`;
+}
+
+function openDocUploadModal(clientId) {
+  const client = clients.find(c => c.id === clientId);
+  if (!client) return;
+  const acqs = client.acquisitions || [];
+  const acqOpts = acqs.length
+    ? acqs.map(a => `<option value="${a.id}">${esc(a.label)}</option>`).join('')
+    : '<option value="">General</option>';
+  const typeOpts = DOC_TYPES.map(dt => `<option value="${dt.key}">${dt.label}</option>`).join('');
+
+  document.getElementById('doc-upload-acq').innerHTML   = acqOpts;
+  document.getElementById('doc-upload-type').innerHTML  = typeOpts;
+  document.getElementById('doc-upload-file').value      = '';
+  document.getElementById('doc-upload-fname').textContent = '';
+  document.getElementById('doc-upload-err').style.display = 'none';
+  document.getElementById('doc-upload-submit').disabled = false;
+  document.getElementById('doc-upload-submit').textContent = 'Upload';
+  document.getElementById('doc-upload-overlay').dataset.clientId = clientId;
+  document.getElementById('doc-upload-overlay').style.display = 'flex';
+}
+
+function closeDocUploadModal() {
+  document.getElementById('doc-upload-overlay').style.display = 'none';
+}
+
+async function submitDocUpload() {
+  const overlay   = document.getElementById('doc-upload-overlay');
+  const clientId  = overlay.dataset.clientId;
+  const acqId     = document.getElementById('doc-upload-acq').value;
+  const type      = document.getElementById('doc-upload-type').value;
+  const fileInput = document.getElementById('doc-upload-file');
+  const errEl     = document.getElementById('doc-upload-err');
+  const btn       = document.getElementById('doc-upload-submit');
+
+  if (!fileInput.files[0]) { errEl.textContent = 'Please choose a file.'; errEl.style.display='block'; return; }
+  btn.disabled = true; btn.textContent = 'Uploading…';
+  errEl.style.display = 'none';
+
+  const fd = new FormData();
+  fd.append('file', fileInput.files[0]);
+  fd.append('clientId', clientId);
+  fd.append('acqId', acqId);
+  fd.append('type', type);
+
+  const res = await fetch('/api/admin/client-docs', { method: 'POST', body: fd });
+  if (res.ok) {
+    const doc = await res.json();
+    if (!_clientDocsMap[clientId]) _clientDocsMap[clientId] = [];
+    _clientDocsMap[clientId].push(doc);
+    closeDocUploadModal();
+    renderDocsTab();
+  } else {
+    errEl.textContent = 'Upload failed — please try again.';
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Upload';
+  }
 }
 
 function deleteClientDoc(clientId, docId, filename) {
@@ -6794,7 +6887,7 @@ async function confirmDeleteDoc() {
   if (res.ok) {
     _clientDocsMap[clientId] = (_clientDocsMap[clientId] || []).filter(d => d.id !== docId);
     cancelDeleteDoc();
-    renderEngagementTab();
+    renderDocsTab();
   } else {
     const data = await res.json().catch(() => ({}));
     errEl.textContent = data.error || 'Delete failed.';
