@@ -4731,10 +4731,10 @@ function updateAcqSelector() {
   const sel = document.getElementById('ms-add-acq');
   if (!clientId) { wrap.style.display = 'none'; return; }
   const c = clients.find(x => x.id === clientId);
-  const activeAcqs = (c?.acquisitions || []).filter(a => a.status !== 'settled' && a.pipelineStage);
-  if (activeAcqs.length <= 1) { wrap.style.display = 'none'; return; }
+  const acqs = c?.acquisitions || [];
+  if (acqs.length <= 1) { wrap.style.display = 'none'; return; }
   sel.innerHTML = '<option value="">All acquisitions (client level)</option>' +
-    activeAcqs.map(a => `<option value="${a.id}">${esc(a.label)}</option>`).join('');
+    acqs.map(a => `<option value="${a.id}">${esc(a.label)}${a.status === 'settled' ? ' (settled)' : ''}</option>`).join('');
   wrap.style.display = 'block';
 }
 
