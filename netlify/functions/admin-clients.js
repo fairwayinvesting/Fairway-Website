@@ -170,6 +170,8 @@ export default async (req) => {
     // If admin sets a password, hash it; otherwise use a random placeholder (client must use setup link)
     const effectivePassword = password || crypto.randomBytes(32).toString('hex');
 
+    const now = new Date().toISOString();
+    const firstAcqId = crypto.randomUUID();
     const client = {
       id: crypto.randomUUID(),
       name: name.trim(),
@@ -178,11 +180,22 @@ export default async (req) => {
       passwordSalt: salt,
       markets: Array.isArray(markets) ? markets : [],
       active: true,
-      createdAt: new Date().toISOString(),
+      createdAt: now,
+      pipelineStage: 'onboarding',
+      pipelineStageUpdatedAt: now,
       referralSource: referralSource || null,
       referrerId: referrerId || null,
       setupToken,
       setupTokenExpiry,
+      acquisitions: [{
+        id: firstAcqId,
+        number: 1,
+        label: 'Acquisition 1',
+        pipelineStage: 'onboarding',
+        pipelineStageUpdatedAt: now,
+        status: 'active',
+        markets: Array.isArray(markets) ? markets : [],
+      }],
     };
     clients.push(client);
     await store.setJSON('all', clients);
@@ -207,7 +220,7 @@ export default async (req) => {
     }
 
     appendAudit('client_created', `Created client ${client.name} <${client.email}>`);
-    return json({ ok: true, id: client.id, emailSent }, 201);
+    return json({ ok: true, id: client.id, emailSent, acquisitions: client.acquisitions }, 201);
   }
 
   if (req.method === 'PUT') {

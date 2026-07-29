@@ -3719,7 +3719,7 @@ function buildKanbanCards(activeClients) {
       const stage = (activeAcqs.length === 1 ? activeAcqs[0].pipelineStage : null) || c.pipelineStage;
       const updatedAt = (activeAcqs.length === 1 ? activeAcqs[0].pipelineStageUpdatedAt : null) || c.pipelineStageUpdatedAt;
       const acqId = activeAcqs.length === 1 ? activeAcqs[0].id : null;
-      if (!stage) continue;
+      if (!stage) stage = 'onboarding';
       cards.push({
         clientId: c.id,
         acqId,
@@ -3997,7 +3997,7 @@ document.getElementById('modal-save').addEventListener('click', async function()
       if (idx !== -1) { clients[idx].name = name; clients[idx].markets = markets; clients[idx].active = active; clients[idx].referralSource = referralSource; clients[idx].referrerId = referrerId; }
     } else {
       // Unshift so the new client appears at the top of the list on page 1
-      clients.unshift({ id: data.id, name, email: email.toLowerCase().trim(), markets, active: true, createdAt: new Date().toISOString(), referralSource: referralSource || null, referrerId: referrerId || null, welcomeEmailSentAt: data.emailSent ? new Date().toISOString() : null, welcomeEmailFailed: sendEmail && !data.emailSent });
+      clients.unshift({ id: data.id, name, email: email.toLowerCase().trim(), markets, active: true, createdAt: new Date().toISOString(), pipelineStage: 'onboarding', pipelineStageUpdatedAt: new Date().toISOString(), acquisitions: data.acquisitions || [], referralSource: referralSource || null, referrerId: referrerId || null, welcomeEmailSentAt: data.emailSent ? new Date().toISOString() : null, welcomeEmailFailed: sendEmail && !data.emailSent });
       clientPage = 0;
     }
     renderTable();
