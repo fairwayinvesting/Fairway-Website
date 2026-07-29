@@ -3716,7 +3716,7 @@ function buildKanbanCards(activeClients) {
       }
     } else {
       // Single acquisition or no acquisitions — use client-level stage
-      const stage = (activeAcqs.length === 1 ? activeAcqs[0].pipelineStage : null) || c.pipelineStage;
+      let stage = (activeAcqs.length === 1 ? activeAcqs[0].pipelineStage : null) || c.pipelineStage;
       const updatedAt = (activeAcqs.length === 1 ? activeAcqs[0].pipelineStageUpdatedAt : null) || c.pipelineStageUpdatedAt;
       const acqId = activeAcqs.length === 1 ? activeAcqs[0].id : null;
       if (!stage) stage = 'onboarding';
