@@ -2192,6 +2192,10 @@
 <div id="assign-prof-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:650;display:none;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)closeAssignProfModal()">
   <div class="modal" style="max-width:440px;">
     <h2>Assign professional</h2>
+    <div id="assign-prof-acq-wrap" style="display:none;margin-bottom:12px;">
+      <label style="font-size:12px;color:rgba(247,243,237,0.5);display:block;margin-bottom:5px;">Acquisition</label>
+      <select id="assign-prof-acq" onchange="renderAssignProfList()" style="width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:8px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:13px;padding:9px 12px;outline:none;"></select>
+    </div>
     <input type="text" id="assign-prof-search" placeholder="Search by name, company or profession…" oninput="renderAssignProfList()" style="width:100%;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.11);border-radius:10px;padding:11px 14px;font-size:13.5px;font-family:'Outfit',sans-serif;color:#f7f3ed;outline:none;box-sizing:border-box;margin-bottom:12px;">
     <div id="assign-prof-list" style="max-height:240px;overflow-y:auto;border:1px solid rgba(247,243,237,0.08);border-radius:10px;margin-bottom:16px;"></div>
     <div id="assign-prof-selected" style="display:none;padding:12px 14px;background:rgba(134,152,124,0.08);border:1px solid rgba(134,152,124,0.2);border-radius:10px;margin-bottom:14px;">
@@ -3151,30 +3155,57 @@ function renderProfessionalsTab() {
   const client = clients.find(c => c.id === crmProfileClientId);
   if (!client) return;
   const profs = client.dealProfessionals || [];
+  const acqs = client.acquisitions || [];
+  const isMultiAcq = acqs.length > 1;
+
+  function profRowHtml(dp, i) {
+    const contact = crmPartners.find(x => x.id === dp.contactId);
+    if (!contact) return '';
+    const profLabel = dirProfLabel(contact.type);
+    return `<div class="dash-row">
+      <div class="dash-row-label">
+        <span style="cursor:pointer;color:#f7f3ed;" onclick="openContactFromProfile('${contact.id}')">${esc(contact.name)}</span>
+        <span style="display:block;font-size:11.5px;color:rgba(247,243,237,0.3);">${esc(dp.role || profLabel || '')}${contact.company ? ` · ${esc(contact.company)}` : ''}</span>
+      </div>
+      <div class="dash-row-meta" style="display:flex;gap:8px;align-items:center;">
+        ${profLabel ? `<span class="dir-prof-badge">${esc(profLabel)}</span>` : ''}
+        <button onclick="removeProfessional(${i})" style="background:none;border:none;color:rgba(240,128,128,0.5);font-size:20px;cursor:pointer;padding:0;line-height:1;" title="Remove">&times;</button>
+      </div>
+    </div>`;
+  }
+
+  let bodyHtml;
+  if (isMultiAcq) {
+    const acqSections = acqs.map(acq => {
+      const acqProfs = profs.map((dp, i) => ({ dp, i })).filter(({ dp }) => dp.acqId === acq.id);
+      return `<div style="margin-bottom:20px;">
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.28);margin-bottom:10px;">${esc(acq.label)}</div>
+        ${acqProfs.length === 0
+          ? '<p style="font-size:13px;color:rgba(247,243,237,0.2);padding:2px 0 8px;">None assigned</p>'
+          : acqProfs.map(({ dp, i }) => profRowHtml(dp, i)).join('')}
+      </div>`;
+    });
+    const legacyProfs = profs.map((dp, i) => ({ dp, i })).filter(({ dp }) => !dp.acqId);
+    if (legacyProfs.length) {
+      acqSections.push(`<div style="margin-bottom:20px;">
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.28);margin-bottom:10px;">General</div>
+        ${legacyProfs.map(({ dp, i }) => profRowHtml(dp, i)).join('')}
+      </div>`);
+    }
+    bodyHtml = acqSections.join('');
+  } else {
+    bodyHtml = profs.length === 0
+      ? '<p style="font-size:13px;color:rgba(247,243,237,0.25);padding:4px 0;">No professionals assigned to this deal yet.</p>'
+      : profs.map((dp, i) => profRowHtml(dp, i)).join('');
+  }
+
   el.innerHTML = `
     <div class="profile-section">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
         <div class="profile-section-title" style="margin:0;">Professionals involved in deal</div>
         <button class="btn-secondary" onclick="openAssignProfModal()" style="font-size:12px;padding:6px 14px;">+ Assign</button>
       </div>
-      ${profs.length === 0
-        ? '<p style="font-size:13px;color:rgba(247,243,237,0.25);padding:4px 0;">No professionals assigned to this deal yet.</p>'
-        : profs.map((dp, i) => {
-            const contact = crmPartners.find(x => x.id === dp.contactId);
-            if (!contact) return '';
-            const profLabel = dirProfLabel(contact.type);
-            return `<div class="dash-row">
-              <div class="dash-row-label">
-                <span style="cursor:pointer;color:#f7f3ed;" onclick="openContactFromProfile('${contact.id}')">${esc(contact.name)}</span>
-                <span style="display:block;font-size:11.5px;color:rgba(247,243,237,0.3);">${esc(dp.role || profLabel || '')}${contact.company ? ` · ${esc(contact.company)}` : ''}</span>
-              </div>
-              <div class="dash-row-meta" style="display:flex;gap:8px;align-items:center;">
-                ${profLabel ? `<span class="dir-prof-badge">${esc(profLabel)}</span>` : ''}
-                <button onclick="removeProfessional(${i})" style="background:none;border:none;color:rgba(240,128,128,0.5);font-size:20px;cursor:pointer;padding:0;line-height:1;" title="Remove">&times;</button>
-              </div>
-            </div>`;
-          }).join('')
-      }
+      ${bodyHtml}
     </div>`;
 }
 
@@ -3185,6 +3216,16 @@ function openAssignProfModal() {
   document.getElementById('assign-prof-selected').style.display = 'none';
   document.getElementById('assign-prof-btn').disabled = true;
   document.getElementById('assign-prof-btn').textContent = 'Assign';
+  const client = clients.find(c => c.id === crmProfileClientId);
+  const acqs = client?.acquisitions || [];
+  const acqWrap = document.getElementById('assign-prof-acq-wrap');
+  const acqSel  = document.getElementById('assign-prof-acq');
+  if (acqs.length > 1) {
+    acqSel.innerHTML = acqs.map(a => `<option value="${esc(a.id)}">${esc(a.label)}</option>`).join('');
+    acqWrap.style.display = 'block';
+  } else {
+    acqWrap.style.display = 'none';
+  }
   renderAssignProfList();
   document.getElementById('assign-prof-overlay').style.display = 'flex';
 }
@@ -3196,7 +3237,14 @@ function closeAssignProfModal() {
 function renderAssignProfList() {
   const q = (document.getElementById('assign-prof-search').value || '').toLowerCase().trim();
   const client = clients.find(c => c.id === crmProfileClientId);
-  const existingIds = new Set((client && client.dealProfessionals || []).map(dp => dp.contactId));
+  const acqs = client?.acquisitions || [];
+  const selectedAcqId = acqs.length > 1
+    ? (document.getElementById('assign-prof-acq')?.value || '')
+    : (acqs[0]?.id || '');
+  // Block duplicates per acquisition only — same pro can work on multiple deals
+  const existingIds = new Set((client?.dealProfessionals || [])
+    .filter(dp => (dp.acqId || '') === selectedAcqId)
+    .map(dp => dp.contactId));
   let list = crmPartners.filter(p => !existingIds.has(p.id));
   if (q) list = list.filter(p =>
     p.name.toLowerCase().includes(q) ||
@@ -3243,7 +3291,11 @@ async function saveAssignProf() {
   const role = document.getElementById('assign-prof-role').value.trim();
   const client = clients.find(c => c.id === crmProfileClientId);
   if (!client) return;
-  const dealProfessionals = [...(client.dealProfessionals || []), { contactId: assignProfSelectedId, role }];
+  const acqs = client.acquisitions || [];
+  const acqId = acqs.length > 1
+    ? (document.getElementById('assign-prof-acq')?.value || null)
+    : (acqs[0]?.id || null);
+  const dealProfessionals = [...(client.dealProfessionals || []), { contactId: assignProfSelectedId, role, acqId }];
   try {
     const res = await api('PUT', '/api/admin/clients', { id: crmProfileClientId, dealProfessionals });
     if (res.ok) {
