@@ -43,9 +43,12 @@ export default async (req) => {
 
   // ── POST: upload file (single or chunked) ──────────────────────────────────
   if (req.method === 'POST') {
-    if (!clientId) return json({ error: 'clientId required' }, 400);
     let formData;
     try { formData = await req.formData(); } catch { return json({ error: 'Invalid form data' }, 400); }
+
+    // clientId from URL param (preferred) or form field (fallback)
+    const resolvedClientId = clientId || formData.get('clientId') || null;
+    if (!resolvedClientId) return json({ error: 'clientId required' }, 400);
 
     const file  = formData.get('file');
     const acqId = formData.get('acqId') || '';
@@ -90,10 +93,10 @@ export default async (req) => {
       );
 
       const totalSize = parseInt(formData.get('totalSize') || '0', 10) || totalBytes;
-      const meta      = await getMeta(clientId);
+      const meta      = await getMeta(resolvedClientId);
       const newDoc    = { id: docId, acqId, type, filename: file.name, size: totalSize, mimeType: file.type || 'application/octet-stream', uploadedAt: new Date().toISOString() };
       meta.push(newDoc);
-      await saveMeta(clientId, meta);
+      await saveMeta(resolvedClientId, meta);
       return json(newDoc, 201);
     }
 
@@ -102,7 +105,7 @@ export default async (req) => {
     const buffer = await file.arrayBuffer();
     await store.set(`file-${docId}`, buffer);
 
-    const meta   = await getMeta(clientId);
+    const meta   = await getMeta(resolvedClientId);
     const newDoc = {
       id: docId,
       acqId,
@@ -113,7 +116,7 @@ export default async (req) => {
       uploadedAt: new Date().toISOString(),
     };
     meta.push(newDoc);
-    await saveMeta(clientId, meta);
+    await saveMeta(resolvedClientId, meta);
 
     return json(newDoc, 201);
   }

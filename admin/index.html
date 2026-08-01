@@ -6942,7 +6942,7 @@ async function submitDocUpload() {
   const CHUNK = 4 * 1024 * 1024; // 4 MB — safely under Netlify's 6 MB function limit
 
   async function doUpload(fd) {
-    const res = await fetch('/api/admin/client-docs', { method: 'POST', body: fd });
+    const res = await fetch(`/api/admin/client-docs?clientId=${encodeURIComponent(clientId)}`, { method: 'POST', body: fd });
     if (!res.ok) throw new Error('Upload failed');
     return res.json();
   }
