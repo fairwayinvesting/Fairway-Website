@@ -6935,23 +6935,57 @@ async function submitDocUpload() {
   const btn       = document.getElementById('doc-upload-submit');
 
   if (!fileInput.files[0]) { errEl.textContent = 'Please choose a file.'; errEl.style.display='block'; return; }
-  btn.disabled = true; btn.textContent = 'Uploading…';
+  const file = fileInput.files[0];
+  btn.disabled = true;
   errEl.style.display = 'none';
 
-  const fd = new FormData();
-  fd.append('file', fileInput.files[0]);
-  fd.append('clientId', clientId);
-  fd.append('acqId', acqId);
-  fd.append('type', type);
+  const CHUNK = 4 * 1024 * 1024; // 4 MB — safely under Netlify's 6 MB function limit
 
-  const res = await fetch('/api/admin/client-docs', { method: 'POST', body: fd });
-  if (res.ok) {
-    const doc = await res.json();
-    if (!_clientDocsMap[clientId]) _clientDocsMap[clientId] = [];
-    _clientDocsMap[clientId].push(doc);
+  async function doUpload(fd) {
+    const res = await fetch('/api/admin/client-docs', { method: 'POST', body: fd });
+    if (!res.ok) throw new Error('Upload failed');
+    return res.json();
+  }
+
+  try {
+    if (file.size <= CHUNK) {
+      // Small file — single request
+      btn.textContent = 'Uploading…';
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('clientId', clientId);
+      fd.append('acqId', acqId);
+      fd.append('type', type);
+      const doc = await doUpload(fd);
+      if (!_clientDocsMap[clientId]) _clientDocsMap[clientId] = [];
+      _clientDocsMap[clientId].push(doc);
+    } else {
+      // Large file — chunked upload
+      const totalChunks = Math.ceil(file.size / CHUNK);
+      let docId = null;
+      for (let i = 0; i < totalChunks; i++) {
+        btn.textContent = `Uploading… ${Math.round(((i + 1) / totalChunks) * 100)}%`;
+        const blob = file.slice(i * CHUNK, Math.min((i + 1) * CHUNK, file.size));
+        const fd = new FormData();
+        fd.append('file', new File([blob], file.name, { type: file.type }));
+        fd.append('clientId', clientId);
+        fd.append('acqId', acqId);
+        fd.append('type', type);
+        fd.append('chunkIndex', String(i));
+        fd.append('totalChunks', String(totalChunks));
+        fd.append('totalSize', String(file.size));
+        if (docId) fd.append('docId', docId);
+        const data = await doUpload(fd);
+        if (!docId) docId = data.docId;
+        if (i === totalChunks - 1) {
+          if (!_clientDocsMap[clientId]) _clientDocsMap[clientId] = [];
+          _clientDocsMap[clientId].push(data);
+        }
+      }
+    }
     closeDocUploadModal();
     renderDocsTab();
-  } else {
+  } catch {
     errEl.textContent = 'Upload failed — please try again.';
     errEl.style.display = 'block';
     btn.disabled = false; btn.textContent = 'Upload';
