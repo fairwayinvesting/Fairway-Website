@@ -1636,6 +1636,7 @@
     <button class="profile-tab" onclick="switchProfileTab('notes',this)">Notes</button>
     <button class="profile-tab" onclick="switchProfileTab('professionals',this)">Professionals</button>
     <button class="profile-tab" onclick="switchProfileTab('docs',this)">Docs</button>
+    <button class="profile-tab" onclick="switchProfileTab('personal',this)">Personal</button>
   </div>
   <div class="profile-body" id="profile-body">
     <div style="text-align:center;padding:40px;color:rgba(247,243,237,0.2);font-size:13px;">Loading…</div>
@@ -6038,6 +6039,7 @@ function switchProfileTab(tab, btn) {
   else if (tab === 'notes') renderNotesTab();
   else if (tab === 'professionals') renderProfessionalsTab();
   else if (tab === 'docs') renderDocsTab();
+  else if (tab === 'personal') renderPersonalTab();
 }
 
 function refreshProfileView() {
@@ -6048,6 +6050,7 @@ function refreshProfileView() {
   else if (crmProfileTab === 'notes') renderNotesTab();
   else if (crmProfileTab === 'professionals') renderProfessionalsTab();
   else if (crmProfileTab === 'docs') renderDocsTab();
+  else if (crmProfileTab === 'personal') renderPersonalTab();
 }
 
 function pfVal(v) {
@@ -7043,6 +7046,111 @@ async function submitDocUpload() {
     errEl.textContent = 'Upload failed — please try again.';
     errEl.style.display = 'block';
     btn.disabled = false; btn.textContent = 'Upload';
+  }
+}
+
+let _personalTabQ = null;
+
+async function renderPersonalTab() {
+  const el = document.getElementById('profile-body');
+  const client = clients.find(c => c.id === crmProfileClientId);
+  if (!client) return;
+  el.innerHTML = '<div style="padding:40px 0;text-align:center;color:rgba(247,243,237,0.2);font-size:13px;">Loading…</div>';
+
+  let q = {};
+  try {
+    const res = await fetch(`/api/admin/questionnaire?clientId=${encodeURIComponent(client.id)}`);
+    if (res.ok) q = (await res.json()) || {};
+  } catch {}
+  _personalTabQ = q;
+
+  const AU_STATES = ['NSW','VIC','QLD','SA','WA','TAS','NT','ACT'];
+  const stateOpts = (cur) => `<option value="">— State —</option>` +
+    AU_STATES.map(s => `<option value="${s}"${cur===s?' selected':''}>${s}</option>`).join('');
+
+  const fld = (label, id, type='text', ph='', val='', cls='') =>
+    `<div class="profile-field${cls?' '+cls:''}">
+      <label>${label}</label>
+      <input id="${id}" class="pf-edit-input" type="${type}" placeholder="${esc(ph)}" value="${esc(val)}">
+    </div>`;
+
+  const sel = (label, id, optsHtml, cls='') =>
+    `<div class="profile-field${cls?' '+cls:''}">
+      <label>${label}</label>
+      <select id="${id}" class="pf-edit-input">${optsHtml}</select>
+    </div>`;
+
+  const hasPartner = q.coInvestor === 'Yes';
+
+  el.innerHTML = `
+    <div class="profile-section">
+      <div class="profile-section-title">Primary contact</div>
+      <div class="profile-fields">
+        ${fld('First name','pq-firstName','text','',q.firstName||'')}
+        ${fld('Middle name','pq-middleName','text','',q.middleName||'')}
+        ${fld('Last name','pq-lastName','text','',q.lastName||'')}
+        ${fld('Date of birth','pq-dob','date','',q.dob||'')}
+        ${fld('Phone','pq-phone','tel','0400 000 000',q.phone||'')}
+        ${sel('State','pq-state',stateOpts(q.state||''))}
+        ${fld('Home address','pq-homeAddress','text','',q.homeAddress||'','full')}
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <div class="profile-section-title" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <span>Co-investor / Partner</span>
+        <select id="pq-coInvestor" class="pf-edit-input" style="width:auto;font-size:12px;padding:4px 10px;"
+          onchange="document.getElementById('pq-partner-fields').style.display=this.value==='Yes'?'':'none'">
+          <option value="No"${!hasPartner?' selected':''}>None</option>
+          <option value="Yes"${hasPartner?' selected':''}>Yes — has co-investor</option>
+        </select>
+      </div>
+      <div id="pq-partner-fields" style="display:${hasPartner?'':'none'};">
+        <div class="profile-fields" style="margin-top:16px;">
+          ${fld('First name','pq-p2FirstName','text','',q.p2FirstName||'')}
+          ${fld('Middle name','pq-p2MiddleName','text','',q.p2MiddleName||'')}
+          ${fld('Last name','pq-p2LastName','text','',q.p2LastName||'')}
+          ${fld('Relationship','pq-p2Relationship','text','e.g. Spouse, Partner',q.p2Relationship||'')}
+          ${fld('Date of birth','pq-p2Dob','date','',q.p2Dob||'')}
+          ${fld('Email','pq-p2Email','email','',q.p2Email||'')}
+          ${fld('Phone','pq-p2Phone','tel','0400 000 000',q.p2Phone||'')}
+          ${sel('State','pq-p2State',stateOpts(q.p2State||''))}
+          ${fld('Home address','pq-p2HomeAddress','text','',q.p2HomeAddress||'','full')}
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:4px 0 24px;">
+      <button class="btn-primary" style="padding:10px 24px;" onclick="savePersonalDetails(this)">Save details</button>
+    </div>`;
+}
+
+async function savePersonalDetails(btn) {
+  const client = clients.find(c => c.id === crmProfileClientId);
+  if (!client) return;
+  const g = id => (document.getElementById(id) || {}).value || '';
+  const updates = {
+    firstName: g('pq-firstName'), middleName: g('pq-middleName'), lastName: g('pq-lastName'),
+    dob: g('pq-dob'), phone: g('pq-phone'), state: g('pq-state'), homeAddress: g('pq-homeAddress'),
+    coInvestor: g('pq-coInvestor'),
+    p2FirstName: g('pq-p2FirstName'), p2MiddleName: g('pq-p2MiddleName'), p2LastName: g('pq-p2LastName'),
+    p2Relationship: g('pq-p2Relationship'), p2Dob: g('pq-p2Dob'),
+    p2Email: g('pq-p2Email'), p2Phone: g('pq-p2Phone'),
+    p2State: g('pq-p2State'), p2HomeAddress: g('pq-p2HomeAddress'),
+  };
+  const merged = { ...(_personalTabQ || {}), ...updates };
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const res = await fetch(`/api/admin/questionnaire?clientId=${encodeURIComponent(client.id)}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(merged),
+    });
+    if (!res.ok) throw new Error();
+    _personalTabQ = merged;
+    showToast('Personal details saved');
+  } catch {
+    showToast('Save failed — please try again.', 'warning');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save details';
   }
 }
 
