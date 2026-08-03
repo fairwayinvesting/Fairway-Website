@@ -2938,14 +2938,14 @@ function renderDashboardFees() {
               <span style="font-size:13px;color:#f7f3ed;">${fmt(p.amount)}</span>
               <span style="font-size:11.5px;color:rgba(247,243,237,0.35);margin-left:6px;">${ds}${p.note?' · '+esc(p.note):''}</span>
             </div>
-            <button onclick="document.getElementById('dash-rfm-${p.id}').style.display='block'" style="background:none;border:none;color:rgba(247,243,237,0.2);cursor:pointer;font-size:18px;padding:2px 6px;line-height:1;flex-shrink:0;" title="Remove payment">&#215;</button>
+            <button onclick="toggleDashFeePanel('dash-rfm-${p.id}')" style="background:none;border:none;color:rgba(247,243,237,0.2);cursor:pointer;font-size:18px;padding:2px 6px;line-height:1;flex-shrink:0;" title="Remove payment">&#215;</button>
           </div>
           <div id="dash-rfm-${p.id}" style="display:none;background:rgba(224,112,112,0.05);border:1px solid rgba(224,112,112,0.15);border-radius:8px;padding:10px 12px;margin-bottom:8px;">
             <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#e07070;margin-bottom:6px;">Remove ${fmt(p.amount)} payment?</div>
             <input id="dash-rr-${p.id}" class="pf-edit-input" type="text" placeholder="Reason (e.g. entered in error)" style="margin-bottom:8px;">
             <div style="display:flex;gap:8px;">
               <button class="btn-sm" style="color:#e07070;border-color:rgba(224,112,112,0.3);" onclick="dashRemovePayment('${c.id}','${f.id}','${p.id}')">Confirm remove</button>
-              <button class="btn-sm" onclick="document.getElementById('dash-rfm-${p.id}').style.display='none'">Cancel</button>
+              <button class="btn-sm" onclick="toggleDashFeePanel('dash-rfm-${p.id}')">Cancel</button>
             </div>
           </div>
         </div>`;
@@ -2960,7 +2960,7 @@ function renderDashboardFees() {
             <div style="font-size:13px;font-weight:500;color:${isPaid?'#6dbf7b':'#e8a87c'};">${isPaid ? 'Cleared' : fmt(outstanding)+' due'}</div>
             ${!isPaid ? `<div style="font-size:11.5px;color:rgba(247,243,237,0.3);margin-top:2px;">${fmt(outstanding*1.1)} inc GST</div>` : ''}
           </div>
-          <button class="btn-sm" style="flex-shrink:0;" onclick="(function(w){w.style.display=w.style.display==='none'?'block':'none'})(document.getElementById('dash-fee-form-${f.id}'))">${isPaid ? 'Manage' : '+ Payment'}</button>
+          <button class="btn-sm" style="flex-shrink:0;" onclick="toggleDashFeePanel('dash-fee-form-${f.id}')">${isPaid ? 'Manage' : '+ Payment'}</button>
         </div>
         <div id="dash-fee-form-${f.id}" style="display:none;background:rgba(247,243,237,0.04);border-radius:10px;padding:14px 16px;margin-bottom:12px;">
           ${activePmts.length ? `<div style="margin-bottom:14px;">
@@ -2979,13 +2979,19 @@ function renderDashboardFees() {
               <input id="dash-fee-note-${f.id}" class="pf-edit-input" type="text" placeholder="e.g. Deposit, Final payment"></div>
             <div style="display:flex;gap:8px;">
               <button class="btn-sm" style="background:rgba(189,122,112,0.15);border-color:rgba(189,122,112,0.25);color:#bd7a70;" onclick="dashAddFeePayment('${c.id}','${f.id}')">Save payment</button>
-              <button class="btn-sm" onclick="document.getElementById('dash-fee-form-${f.id}').style.display='none'">Cancel</button>
+              <button class="btn-sm" onclick="toggleDashFeePanel('dash-fee-form-${f.id}')">Cancel</button>
             </div>
           </div>` : `<div style="font-size:12.5px;color:rgba(109,191,123,0.6);padding-top:${activePmts.length?'10px':'0'};${activePmts.length?'border-top:1px solid rgba(247,243,237,0.06);':''}">Fee fully paid — use × above to remove a payment if needed.</div>`}
         </div>
       </div>`;
     }).join('')}
   `;
+}
+
+function toggleDashFeePanel(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 
 async function dashAddFeePayment(clientId, feeId) {
