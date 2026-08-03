@@ -2950,6 +2950,7 @@ function renderDashboardFees() {
           </div>
         </div>`;
       }).join('');
+      const panelId = `dash-fee-panel-${c.id}-${f.id}`;
       return `<div style="border-bottom:1px solid rgba(247,243,237,0.06);">
         <div style="display:flex;align-items:center;gap:12px;padding:12px 0;">
           <div style="flex:1;min-width:0;cursor:pointer;" onclick="openClientEngagementTab('${c.id}')">
@@ -2960,9 +2961,9 @@ function renderDashboardFees() {
             <div style="font-size:13px;font-weight:500;color:${isPaid?'#6dbf7b':'#e8a87c'};">${isPaid ? 'Cleared' : fmt(outstanding)+' due'}</div>
             ${!isPaid ? `<div style="font-size:11.5px;color:rgba(247,243,237,0.3);margin-top:2px;">${fmt(outstanding*1.1)} inc GST</div>` : ''}
           </div>
-          <button class="btn-sm" style="flex-shrink:0;" onclick="toggleDashFeePanel('dash-fee-form-${f.id}')">${isPaid ? 'Manage' : '+ Payment'}</button>
+          <button class="btn-sm" style="flex-shrink:0;" onclick="toggleDashFeePanel('${panelId}')">${isPaid ? 'Manage' : '+ Payment'}</button>
         </div>
-        <div id="dash-fee-form-${f.id}" style="display:none;background:rgba(247,243,237,0.04);border-radius:10px;padding:14px 16px;margin-bottom:12px;">
+        <div id="${panelId}" style="display:none;background:rgba(247,243,237,0.04);border-radius:10px;padding:14px 16px;margin-bottom:12px;">
           ${activePmts.length ? `<div style="margin-bottom:14px;">
             <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:6px;">Payments recorded</div>
             ${pmtHistoryHtml}
@@ -2971,15 +2972,15 @@ function renderDashboardFees() {
             <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">${activePmts.length ? 'Record another payment' : 'Record payment'} — ${esc(c.name)}${multiPerClient[c.id]>1?' · '+esc(f.label||'Fee'):''}</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
               <div><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Amount (ex GST)</label>
-                <input id="dash-fee-amt-${f.id}" class="pf-edit-input" type="number" step="0.01" min="0" placeholder="${fmt(outstanding).replace('$','')}"></div>
+                <input id="dash-fee-amt-${c.id}-${f.id}" class="pf-edit-input" type="number" step="0.01" min="0" placeholder="${fmt(outstanding).replace('$','')}"></div>
               <div><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Date</label>
-                <input id="dash-fee-date-${f.id}" class="pf-edit-input" type="date" value="${today}"></div>
+                <input id="dash-fee-date-${c.id}-${f.id}" class="pf-edit-input" type="date" value="${today}"></div>
             </div>
             <div style="margin-bottom:10px;"><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Note</label>
-              <input id="dash-fee-note-${f.id}" class="pf-edit-input" type="text" placeholder="e.g. Deposit, Final payment"></div>
+              <input id="dash-fee-note-${c.id}-${f.id}" class="pf-edit-input" type="text" placeholder="e.g. Deposit, Final payment"></div>
             <div style="display:flex;gap:8px;">
               <button class="btn-sm" style="background:rgba(189,122,112,0.15);border-color:rgba(189,122,112,0.25);color:#bd7a70;" onclick="dashAddFeePayment('${c.id}','${f.id}')">Save payment</button>
-              <button class="btn-sm" onclick="toggleDashFeePanel('dash-fee-form-${f.id}')">Cancel</button>
+              <button class="btn-sm" onclick="toggleDashFeePanel('${panelId}')">Cancel</button>
             </div>
           </div>` : `<div style="font-size:12.5px;color:rgba(109,191,123,0.6);padding-top:${activePmts.length?'10px':'0'};${activePmts.length?'border-top:1px solid rgba(247,243,237,0.06);':''}">Fee fully paid — use × above to remove a payment if needed.</div>`}
         </div>
@@ -2997,14 +2998,15 @@ function toggleDashFeePanel(id) {
 async function dashAddFeePayment(clientId, feeId) {
   const client = clients.find(c => c.id === clientId);
   if (!client) return;
-  const amtInput = document.getElementById('dash-fee-amt-' + feeId);
+  const amtInput = document.getElementById(`dash-fee-amt-${clientId}-${feeId}`);
   const amount = parseFloat(amtInput?.value);
   if (!amount || amount <= 0) { showToast('Please enter a valid payment amount.', 'warning'); return; }
-  const saveBtn = document.querySelector(`#dash-fee-form-${feeId} .btn-sm`);
+  const panelId = `dash-fee-panel-${clientId}-${feeId}`;
+  const saveBtn = document.querySelector(`#${panelId} .btn-sm`);
   if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; }
-  const dateVal = document.getElementById('dash-fee-date-' + feeId)?.value;
+  const dateVal = document.getElementById(`dash-fee-date-${clientId}-${feeId}`)?.value;
   const paidAt = dateVal ? new Date(dateVal + 'T00:00:00').toISOString() : new Date().toISOString();
-  const note = document.getElementById('dash-fee-note-' + feeId)?.value?.trim() || '';
+  const note = document.getElementById(`dash-fee-note-${clientId}-${feeId}`)?.value?.trim() || '';
   const fees = getManualFees(client);
   const manualFees = fees.map(f => f.id === feeId
     ? { ...f, payments: [...(f.payments || []), { id: crypto.randomUUID(), amount, note, paidAt }] }
