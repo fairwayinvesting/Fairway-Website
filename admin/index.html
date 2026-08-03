@@ -2929,6 +2929,27 @@ function renderDashboardFees() {
       const isPaid = outstanding <= 0;
       const paidPct = f.totalFee > 0 ? Math.round((paid/f.totalFee)*100) : 0;
       const nameLabel = multiPerClient[c.id] > 1 ? esc(c.name) + ' <span style="color:rgba(247,243,237,0.35);">· ' + esc(f.label||'Fee') + '</span>' : esc(c.name);
+      const activePmts = (f.payments || []).filter(p => !p.refundedAt);
+      const pmtHistoryHtml = activePmts.map(p => {
+        const ds = new Date(p.paidAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+        return `<div style="border-bottom:1px solid rgba(247,243,237,0.05);">
+          <div style="display:flex;align-items:center;padding:7px 0;gap:8px;">
+            <div style="flex:1;min-width:0;">
+              <span style="font-size:13px;color:#f7f3ed;">${fmt(p.amount)}</span>
+              <span style="font-size:11.5px;color:rgba(247,243,237,0.35);margin-left:6px;">${ds}${p.note?' · '+esc(p.note):''}</span>
+            </div>
+            <button onclick="document.getElementById('dash-rfm-${p.id}').style.display='block'" style="background:none;border:none;color:rgba(247,243,237,0.2);cursor:pointer;font-size:18px;padding:2px 6px;line-height:1;flex-shrink:0;" title="Remove payment">&#215;</button>
+          </div>
+          <div id="dash-rfm-${p.id}" style="display:none;background:rgba(224,112,112,0.05);border:1px solid rgba(224,112,112,0.15);border-radius:8px;padding:10px 12px;margin-bottom:8px;">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#e07070;margin-bottom:6px;">Remove ${fmt(p.amount)} payment?</div>
+            <input id="dash-rr-${p.id}" class="pf-edit-input" type="text" placeholder="Reason (e.g. entered in error)" style="margin-bottom:8px;">
+            <div style="display:flex;gap:8px;">
+              <button class="btn-sm" style="color:#e07070;border-color:rgba(224,112,112,0.3);" onclick="dashRemovePayment('${c.id}','${f.id}','${p.id}')">Confirm remove</button>
+              <button class="btn-sm" onclick="document.getElementById('dash-rfm-${p.id}').style.display='none'">Cancel</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
       return `<div style="border-bottom:1px solid rgba(247,243,237,0.06);">
         <div style="display:flex;align-items:center;gap:12px;padding:12px 0;">
           <div style="flex:1;min-width:0;cursor:pointer;" onclick="openClientEngagementTab('${c.id}')">
@@ -2939,22 +2960,28 @@ function renderDashboardFees() {
             <div style="font-size:13px;font-weight:500;color:${isPaid?'#6dbf7b':'#e8a87c'};">${isPaid ? 'Cleared' : fmt(outstanding)+' due'}</div>
             ${!isPaid ? `<div style="font-size:11.5px;color:rgba(247,243,237,0.3);margin-top:2px;">${fmt(outstanding*1.1)} inc GST</div>` : ''}
           </div>
-          ${isPaid ? `<span style="font-size:18px;color:#6dbf7b;flex-shrink:0;">&#10003;</span>` : `<button class="btn-sm" style="flex-shrink:0;" onclick="(function(w){w.style.display=w.style.display==='none'?'block':'none'})(document.getElementById('dash-fee-form-${f.id}'))">+ Payment</button>`}
+          <button class="btn-sm" style="flex-shrink:0;" onclick="(function(w){w.style.display=w.style.display==='none'?'block':'none'})(document.getElementById('dash-fee-form-${f.id}'))">${isPaid ? 'Manage' : '+ Payment'}</button>
         </div>
         <div id="dash-fee-form-${f.id}" style="display:none;background:rgba(247,243,237,0.04);border-radius:10px;padding:14px 16px;margin-bottom:12px;">
-          <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">Record payment — ${esc(c.name)}${multiPerClient[c.id]>1?' · '+esc(f.label||'Fee'):''}</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-            <div><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Amount (ex GST)</label>
-              <input id="dash-fee-amt-${f.id}" class="pf-edit-input" type="number" step="0.01" min="0" placeholder="${fmt(outstanding).replace('$','')}"></div>
-            <div><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Date</label>
-              <input id="dash-fee-date-${f.id}" class="pf-edit-input" type="date" value="${today}"></div>
-          </div>
-          <div style="margin-bottom:10px;"><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Note</label>
-            <input id="dash-fee-note-${f.id}" class="pf-edit-input" type="text" placeholder="e.g. Deposit, Final payment"></div>
-          <div style="display:flex;gap:8px;">
-            <button class="btn-sm" style="background:rgba(189,122,112,0.15);border-color:rgba(189,122,112,0.25);color:#bd7a70;" onclick="dashAddFeePayment('${c.id}','${f.id}')">Save payment</button>
-            <button class="btn-sm" onclick="document.getElementById('dash-fee-form-${f.id}').style.display='none'">Cancel</button>
-          </div>
+          ${activePmts.length ? `<div style="margin-bottom:14px;">
+            <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:6px;">Payments recorded</div>
+            ${pmtHistoryHtml}
+          </div>` : ''}
+          ${!isPaid ? `<div>
+            <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">${activePmts.length ? 'Record another payment' : 'Record payment'} — ${esc(c.name)}${multiPerClient[c.id]>1?' · '+esc(f.label||'Fee'):''}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+              <div><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Amount (ex GST)</label>
+                <input id="dash-fee-amt-${f.id}" class="pf-edit-input" type="number" step="0.01" min="0" placeholder="${fmt(outstanding).replace('$','')}"></div>
+              <div><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Date</label>
+                <input id="dash-fee-date-${f.id}" class="pf-edit-input" type="date" value="${today}"></div>
+            </div>
+            <div style="margin-bottom:10px;"><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Note</label>
+              <input id="dash-fee-note-${f.id}" class="pf-edit-input" type="text" placeholder="e.g. Deposit, Final payment"></div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn-sm" style="background:rgba(189,122,112,0.15);border-color:rgba(189,122,112,0.25);color:#bd7a70;" onclick="dashAddFeePayment('${c.id}','${f.id}')">Save payment</button>
+              <button class="btn-sm" onclick="document.getElementById('dash-fee-form-${f.id}').style.display='none'">Cancel</button>
+            </div>
+          </div>` : `<div style="font-size:12.5px;color:rgba(109,191,123,0.6);padding-top:${activePmts.length?'10px':'0'};${activePmts.length?'border-top:1px solid rgba(247,243,237,0.06);':''}">Fee fully paid — use × above to remove a payment if needed.</div>`}
         </div>
       </div>`;
     }).join('')}
@@ -6808,18 +6835,38 @@ async function confirmFeeRefund(clientId, feeId, paymentId) {
   const client = clients.find(c => c.id === clientId);
   if (!client) return;
   const reason = document.getElementById('rr-' + paymentId)?.value?.trim();
-  if (!reason) return alert('Please enter a reason for the refund.');
+  if (!reason) { showToast('Please enter a reason for the refund.', 'warning'); return; }
   const fees = getManualFees(client);
   const manualFees = fees.map(f => f.id === feeId
     ? { ...f, payments: (f.payments || []).map(p => p.id === paymentId ? { ...p, refundedAt: new Date().toISOString(), refundReason: reason } : p) }
     : f
   );
   const res = await api('PUT', '/api/admin/clients', { id: clientId, manualFees });
-  if (!res.ok) return alert('Failed to record refund.');
+  if (!res.ok) { showToast('Failed to record refund.', 'warning'); return; }
   client.manualFees = manualFees;
   client.manualFee = null;
   renderEngagementTab();
   renderDashboardFees();
+  showToast('Payment removed');
+}
+
+async function dashRemovePayment(clientId, feeId, paymentId) {
+  const client = clients.find(c => c.id === clientId);
+  if (!client) return;
+  const reason = document.getElementById('dash-rr-' + paymentId)?.value?.trim();
+  if (!reason) { showToast('Please enter a reason.', 'warning'); return; }
+  const fees = getManualFees(client);
+  const manualFees = fees.map(f => f.id === feeId
+    ? { ...f, payments: (f.payments || []).map(p => p.id === paymentId ? { ...p, refundedAt: new Date().toISOString(), refundReason: reason } : p) }
+    : f
+  );
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, manualFees });
+  if (!res.ok) { showToast('Failed to remove payment.', 'warning'); return; }
+  client.manualFees = manualFees;
+  client.manualFee = null;
+  renderDashboardFees();
+  if (crmProfileClientId === clientId) refreshProfileView();
+  showToast('Payment removed');
 }
 
 async function removeFee(clientId, feeId) {
