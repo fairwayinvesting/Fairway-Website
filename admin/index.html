@@ -2964,8 +2964,11 @@ function renderDashboardFees() {
 async function dashAddFeePayment(clientId, feeId) {
   const client = clients.find(c => c.id === clientId);
   if (!client) return;
-  const amount = parseFloat(document.getElementById('dash-fee-amt-' + feeId)?.value);
-  if (!amount || amount <= 0) return alert('Please enter a valid payment amount.');
+  const amtInput = document.getElementById('dash-fee-amt-' + feeId);
+  const amount = parseFloat(amtInput?.value);
+  if (!amount || amount <= 0) { showToast('Please enter a valid payment amount.', 'warning'); return; }
+  const saveBtn = document.querySelector(`#dash-fee-form-${feeId} .btn-sm`);
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; }
   const dateVal = document.getElementById('dash-fee-date-' + feeId)?.value;
   const paidAt = dateVal ? new Date(dateVal + 'T00:00:00').toISOString() : new Date().toISOString();
   const note = document.getElementById('dash-fee-note-' + feeId)?.value?.trim() || '';
@@ -2974,12 +2977,18 @@ async function dashAddFeePayment(clientId, feeId) {
     ? { ...f, payments: [...(f.payments || []), { id: crypto.randomUUID(), amount, note, paidAt }] }
     : f
   );
-  const res = await api('PUT', '/api/admin/clients', { id: clientId, manualFees });
-  if (!res.ok) return alert('Failed to save payment.');
-  client.manualFees = manualFees;
-  client.manualFee = null;
-  renderDashboardFees();
-  if (crmProfileClientId === clientId) refreshProfileView();
+  try {
+    const res = await api('PUT', '/api/admin/clients', { id: clientId, manualFees });
+    if (!res.ok) throw new Error('Server error');
+    client.manualFees = manualFees;
+    client.manualFee = null;
+    renderDashboardFees();
+    if (crmProfileClientId === clientId) refreshProfileView();
+    showToast('Payment recorded');
+  } catch {
+    showToast('Failed to save payment — please try again.', 'warning');
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save payment'; }
+  }
 }
 
 async function openClientEngagementTab(clientId) {
