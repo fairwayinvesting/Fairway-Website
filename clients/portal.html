@@ -280,20 +280,20 @@
       const clientMs = milestones.filter(m => !m.acqId).sort((a, b) => new Date(a.date) - new Date(b.date));
       const acqMs = {};
       milestones.filter(m => m.acqId).forEach(m => { (acqMs[m.acqId] = acqMs[m.acqId] || []).push(m); });
-      // Per-acquisition milestones: inject into each panel
-      acquisitions.forEach(acq => {
-        const ms = (acqMs[acq.id] || []).sort((a, b) => new Date(a.date) - new Date(b.date));
+      // Inject into each acquisition panel; client-level milestones merge into first acquisition
+      acquisitions.forEach((acq, idx) => {
+        const tagged = (acqMs[acq.id] || []).sort((a, b) => new Date(a.date) - new Date(b.date));
+        const ms = idx === 0
+          ? [...clientMs, ...tagged].sort((a, b) => new Date(a.date) - new Date(b.date))
+          : tagged;
         if (!ms.length) return;
         const body = document.querySelector('#acq-panel-' + acq.id + ' .acq-panel-body');
         if (!body) return;
-        const html = `<div class="acq-section">
+        body.insertAdjacentHTML('afterbegin', `<div class="acq-section">
           <p class="acq-section-label">Upcoming dates</p>
           ${ms.map((m, i, arr) => dateRowHtml(m, today, i === arr.length - 1)).join('')}
-        </div>`;
-        body.insertAdjacentHTML('afterbegin', html);
+        </div>`);
       });
-      // Client-level milestones: show in the top-level dates section
-      if (clientMs.length) renderDates(clientMs);
     }
 
     const JOURNEY_STAGES = [
