@@ -6545,9 +6545,38 @@ function renderEngagementTab() {
   const client = clients.find(c => c.id === crmProfileClientId);
   if (!client) return;
   const STAGE_LABELS = { onboarding:'Onboarding', searching:'Searching', under_contract:'Under contract', exchanged:'Unconditional', settlement:'Settled' };
-  const clientMilestones = milestones.filter(m => m.clientId === client.id && !m.completed).slice(0,5);
+  const allUpcoming = milestones.filter(m => m.clientId === client.id && !m.completed).sort((a,b) => new Date(a.date) - new Date(b.date));
   const acqs = client.acquisitions || [];
   const hasMultiAcq = acqs.length > 1;
+
+  const upcomingMilestoneHtml = (() => {
+    if (!allUpcoming.length) return '';
+    const today0 = new Date(); today0.setHours(0,0,0,0);
+    const msRow = m => {
+      const d = new Date(m.date + 'T00:00:00');
+      const days = Math.round((d - today0) / 86400000);
+      const color = days < 0 ? '#f08080' : days <= 7 ? '#e8a87c' : '#6dbf7b';
+      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(247,243,237,0.05);">
+        <span style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:${color};min-width:60px;">${days < 0 ? 'Overdue' : days === 0 ? 'Today' : days + 'd'}</span>
+        <span style="font-size:13px;color:#f7f3ed;flex:1;">${esc(m.label || m.type)}</span>
+        <span style="font-size:12px;color:rgba(247,243,237,0.3);">${d.toLocaleDateString('en-AU',{day:'numeric',month:'short'})}</span>
+      </div>`;
+    };
+    if (!hasMultiAcq) {
+      return `<div class="profile-section"><div class="profile-section-title">Upcoming milestones</div>${allUpcoming.slice(0,5).map(msRow).join('')}</div>`;
+    }
+    const clientLevel = allUpcoming.filter(m => !m.acqId);
+    const byAcqId = {};
+    allUpcoming.filter(m => m.acqId).forEach(m => { (byAcqId[m.acqId] = byAcqId[m.acqId] || []).push(m); });
+    const sections = acqs.map((acq, idx) => {
+      const ms = idx === 0
+        ? [...clientLevel, ...(byAcqId[acq.id] || [])].sort((a,b) => new Date(a.date) - new Date(b.date))
+        : (byAcqId[acq.id] || []);
+      if (!ms.length) return '';
+      return `<div style="margin-bottom:16px;"><div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.4);margin:0 0 8px;">${esc(acq.label)}</div>${ms.map(msRow).join('')}</div>`;
+    }).join('');
+    return sections ? `<div class="profile-section"><div class="profile-section-title">Upcoming milestones</div>${sections}</div>` : '';
+  })();
 
   // Acquisition accordion HTML
   function acqAccordion(acq, expanded) {
@@ -6636,19 +6665,7 @@ function renderEngagementTab() {
       </button>
     </div>`}
 
-    ${clientMilestones.length ? `<div class="profile-section">
-      <div class="profile-section-title">Upcoming milestones</div>
-      ${clientMilestones.map(m => {
-        const d = new Date(m.date + 'T00:00:00');
-        const days = Math.round((d - new Date().setHours(0,0,0,0)) / 86400000);
-        const color = days < 0 ? '#f08080' : days <= 7 ? '#e8a87c' : '#6dbf7b';
-        return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(247,243,237,0.05);">
-          <span style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:${color};min-width:60px;">${days < 0 ? 'Overdue' : days === 0 ? 'Today' : days + 'd'}</span>
-          <span style="font-size:13px;color:#f7f3ed;flex:1;">${esc(m.label || m.type)}</span>
-          <span style="font-size:12px;color:rgba(247,243,237,0.3);">${d.toLocaleDateString('en-AU',{day:'numeric',month:'short'})}</span>
-        </div>`;
-      }).join('')}
-    </div>` : ''}
+    ${upcomingMilestoneHtml}
     ${buildManualFeeSection(client)}
   `;
 }
