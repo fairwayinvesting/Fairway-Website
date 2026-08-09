@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Content — Fairway</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#181614;color:#f7f3ed;font-family:'Outfit',sans-serif;font-weight:300;min-height:100vh;}
+  a{color:inherit;}
+  button{font-family:'Outfit',sans-serif;}
+  input,select,textarea{font-family:'Outfit',sans-serif;color:#f7f3ed;}
+  input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5);}
+
+  /* Layout */
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:200px;flex-shrink:0;background:#111010;border-right:1px solid rgba(247,243,237,0.07);display:flex;flex-direction:column;padding:20px 0;}
+  .sidebar-logo{padding:12px 20px 24px;border-bottom:1px solid rgba(247,243,237,0.07);margin-bottom:12px;}
+  .sidebar-logo img{height:22px;}
+  .snav-item{display:flex;align-items:center;gap:10px;width:100%;padding:9px 20px;background:none;border:none;color:rgba(247,243,237,0.42);font-size:13px;font-weight:400;cursor:pointer;transition:all .15s;text-align:left;text-decoration:none;}
+  .snav-item:hover{color:#f7f3ed;background:rgba(247,243,237,0.04);}
+  .snav-item.active{color:#f7f3ed;background:rgba(247,243,237,0.07);}
+  .snav-spacer{flex:1;}
+  .snav-back{margin-top:auto;padding:12px 20px 0;border-top:1px solid rgba(247,243,237,0.07);}
+  .snav-back a{display:flex;align-items:center;gap:8px;font-size:12.5px;color:rgba(247,243,237,0.35);text-decoration:none;transition:color .15s;}
+  .snav-back a:hover{color:#f7f3ed;}
+  .main{flex:1;min-width:0;padding:32px 36px;overflow:auto;}
+
+  /* Header */
+  .page-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:28px;}
+  .page-title{font-family:'Fraunces',serif;font-size:28px;font-weight:400;}
+  .header-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .view-tabs{display:flex;gap:2px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.08);border-radius:9px;padding:3px;}
+  .view-tab{padding:6px 14px;border-radius:7px;border:none;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .15s;background:transparent;color:rgba(247,243,237,0.38);}
+  .view-tab.active{background:rgba(247,243,237,0.08);color:#f7f3ed;}
+  .type-tabs{display:flex;gap:3px;}
+  .type-tab{padding:6px 14px;border-radius:100px;border:1px solid rgba(247,243,237,0.1);font-size:12px;font-weight:500;cursor:pointer;background:transparent;color:rgba(247,243,237,0.38);transition:all .15s;}
+  .type-tab.active{background:rgba(189,122,112,0.12);border-color:rgba(189,122,112,0.35);color:#bd7a70;}
+  .btn-primary{background:#bd7a70;color:#fff;border:none;border-radius:100px;padding:9px 20px;font-size:13px;font-weight:500;cursor:pointer;transition:opacity .15s;white-space:nowrap;}
+  .btn-primary:hover{opacity:.88;}
+  .btn-secondary{background:none;border:1px solid rgba(247,243,237,0.15);border-radius:100px;color:rgba(247,243,237,0.55);font-size:12.5px;padding:7px 14px;cursor:pointer;transition:all .15s;}
+  .btn-secondary:hover{border-color:rgba(247,243,237,0.3);color:#f7f3ed;}
+
+  /* Kanban */
+  .kanban{display:flex;gap:14px;overflow-x:auto;padding-bottom:20px;align-items:flex-start;}
+  .kanban-col{flex-shrink:0;width:230px;background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.07);border-radius:14px;padding:14px;}
+  .kanban-col.drag-over{border-color:rgba(189,122,112,0.45);background:rgba(189,122,112,0.04);}
+  .kanban-col-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .kanban-col-label{font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.35);}
+  .kanban-col-count{font-size:11px;color:rgba(247,243,237,0.2);background:rgba(247,243,237,0.06);border-radius:100px;padding:1px 7px;}
+  .kanban-card{background:#22201d;border:1px solid rgba(247,243,237,0.09);border-radius:10px;padding:12px;margin-bottom:8px;cursor:grab;transition:border-color .15s,box-shadow .15s;user-select:none;}
+  .kanban-card:hover{border-color:rgba(247,243,237,0.2);box-shadow:0 4px 16px rgba(0,0,0,.3);}
+  .kanban-card.dragging{opacity:.5;cursor:grabbing;}
+  .kanban-card-title{font-size:13.5px;color:#f7f3ed;font-weight:400;line-height:1.4;margin-bottom:6px;}
+  .kanban-card-meta{display:flex;flex-wrap:wrap;gap:4px;align-items:center;}
+  .kc-badge{font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;border-radius:100px;padding:2px 7px;}
+  .kc-long{background:rgba(189,122,112,0.12);color:#bd7a70;border:1px solid rgba(189,122,112,0.2);}
+  .kc-short{background:rgba(109,191,123,0.1);color:#6dbf7b;border:1px solid rgba(109,191,123,0.2);}
+  .kc-date{font-size:11px;color:rgba(247,243,237,0.3);}
+  .kc-guest{font-size:11px;color:rgba(247,243,237,0.35);margin-top:4px;display:block;}
+
+  /* Calendar */
+  .cal-wrap{display:none;}
+  .cal-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+  .cal-month-label{font-family:'Fraunces',serif;font-size:20px;font-weight:400;min-width:180px;}
+  .cal-nav{background:none;border:1px solid rgba(247,243,237,0.1);border-radius:100px;color:rgba(247,243,237,0.5);width:32px;height:32px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+  .cal-nav:hover{border-color:rgba(247,243,237,0.3);color:#f7f3ed;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:rgba(247,243,237,0.07);border-radius:12px;overflow:hidden;}
+  .cal-dow{background:#181614;padding:8px 0;text-align:center;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);}
+  .cal-cell{background:#1a1816;min-height:110px;padding:8px;position:relative;vertical-align:top;transition:background .15s;}
+  .cal-cell.other-month{opacity:.4;}
+  .cal-cell.today{background:#1e1b18;}
+  .cal-cell.drag-over{background:rgba(189,122,112,0.08);}
+  .cal-day-num{font-size:11.5px;color:rgba(247,243,237,0.3);margin-bottom:4px;}
+  .cal-cell.today .cal-day-num{color:#bd7a70;font-weight:600;}
+  .cal-event{font-size:11px;padding:3px 6px;border-radius:5px;margin-bottom:3px;cursor:pointer;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity .15s;}
+  .cal-event:hover{opacity:.8;}
+  .cal-event.long-form{background:rgba(189,122,112,0.2);color:#e8a090;border-left:2px solid #bd7a70;}
+  .cal-event.short-form{background:rgba(109,191,123,0.15);color:#7dd48a;border-left:2px solid #6dbf7b;}
+  .cal-event.dragging{opacity:.4;}
+
+  /* Detail panel */
+  .panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:400;display:none;opacity:0;transition:opacity .2s;}
+  .panel-overlay.open{display:block;opacity:1;}
+  .detail-panel{position:fixed;top:0;right:0;bottom:0;width:480px;max-width:100vw;background:#1a1816;border-left:1px solid rgba(247,243,237,0.1);z-index:401;transform:translateX(100%);transition:transform .25s ease;overflow-y:auto;padding:28px;}
+  .detail-panel.open{transform:translateX(0);}
+  .panel-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:24px;}
+  .panel-close{background:none;border:none;color:rgba(247,243,237,0.4);font-size:22px;cursor:pointer;line-height:1;flex-shrink:0;margin-top:2px;}
+  .panel-close:hover{color:#f7f3ed;}
+  .panel-title{font-family:'Fraunces',serif;font-size:22px;font-weight:400;line-height:1.3;flex:1;}
+  .panel-section{margin-bottom:20px;}
+  .panel-label{font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:6px;}
+  .panel-input{width:100%;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.1);border-radius:9px;padding:10px 13px;font-size:13.5px;color:#f7f3ed;outline:none;transition:border-color .15s;}
+  .panel-input:focus{border-color:rgba(189,122,112,0.5);}
+  .panel-textarea{width:100%;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.1);border-radius:9px;padding:10px 13px;font-size:13.5px;color:#f7f3ed;outline:none;resize:vertical;transition:border-color .15s;}
+  .panel-textarea:focus{border-color:rgba(189,122,112,0.5);}
+  .stage-sel{display:flex;flex-wrap:wrap;gap:5px;}
+  .stage-btn{padding:5px 11px;border-radius:100px;border:1px solid rgba(247,243,237,0.1);font-size:11.5px;cursor:pointer;background:transparent;color:rgba(247,243,237,0.38);transition:all .15s;white-space:nowrap;}
+  .stage-btn.active{background:rgba(189,122,112,0.15);border-color:rgba(189,122,112,0.4);color:#bd7a70;font-weight:500;}
+  .guest-chip{display:inline-flex;align-items:center;gap:5px;background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.1);border-radius:100px;padding:4px 10px;font-size:12px;color:rgba(247,243,237,0.7);margin:2px;}
+  .guest-chip button{background:none;border:none;color:rgba(247,243,237,0.3);cursor:pointer;font-size:14px;line-height:1;padding:0;}
+  .platform-cb{display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(247,243,237,0.6);cursor:pointer;margin:3px 0;}
+  .platform-cb input{accent-color:#bd7a70;}
+  .guest-search{position:relative;}
+  .guest-dropdown{position:absolute;top:100%;left:0;right:0;background:#22201d;border:1px solid rgba(247,243,237,0.12);border-radius:9px;z-index:10;max-height:180px;overflow-y:auto;margin-top:4px;display:none;}
+  .guest-option{padding:9px 13px;cursor:pointer;font-size:13px;color:rgba(247,243,237,0.7);transition:background .1s;}
+  .guest-option:hover{background:rgba(247,243,237,0.05);}
+  .warning-banner{background:rgba(232,168,124,0.1);border:1px solid rgba(232,168,124,0.25);border-radius:8px;padding:8px 12px;font-size:12.5px;color:#e8a87c;margin-top:6px;display:none;}
+  .panel-actions{display:flex;gap:8px;margin-top:24px;padding-top:20px;border-top:1px solid rgba(247,243,237,0.07);}
+
+  /* Create modal */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;display:none;align-items:center;justify-content:center;padding:24px;}
+  .modal{background:#1e1b18;border:1px solid rgba(247,243,237,0.1);border-radius:18px;padding:28px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;}
+  .modal h2{font-family:'Fraunces',serif;font-size:22px;font-weight:400;margin-bottom:20px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:5px;}
+  .field input,.field select,.field textarea{width:100%;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.11);border-radius:10px;padding:11px 13px;font-size:13.5px;color:#f7f3ed;outline:none;transition:border-color .15s;}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(189,122,112,0.45);}
+  .field select option{background:#22201d;}
+  .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid rgba(247,243,237,0.07);}
+  .error-msg{font-size:12.5px;color:#e07070;margin-bottom:10px;display:none;}
+  .error-msg.visible{display:block;}
+
+  /* Toast */
+  .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#22201d;border:1px solid rgba(247,243,237,0.12);border-radius:100px;padding:10px 20px;font-size:13.5px;color:#f7f3ed;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;}
+
+  /* Empty */
+  .empty-state{text-align:center;padding:60px 0;color:rgba(247,243,237,0.2);font-size:14px;}
+
+  /* Scrollbar */
+  ::-webkit-scrollbar{width:5px;height:5px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:rgba(247,243,237,0.1);border-radius:10px;}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="/logo-word.png" alt="Fairway" onerror="this.style.display='none'">
+    </div>
+    <a class="snav-item" href="/admin/">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6.5" height="6.5" rx="1.5" fill="currentColor" opacity=".8"/><rect x="8.5" y="1" width="6.5" height="6.5" rx="1.5" fill="currentColor" opacity=".8"/><rect x="1" y="8.5" width="6.5" height="6.5" rx="1.5" fill="currentColor" opacity=".8"/><rect x="8.5" y="8.5" width="6.5" height="6.5" rx="1.5" fill="currentColor" opacity=".8"/></svg>
+      Dashboard
+    </a>
+    <a class="snav-item active" href="/admin/content.html">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2" fill="currentColor" opacity=".7"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Content
+    </a>
+    <div class="snav-spacer"></div>
+    <div class="snav-back">
+      <a href="/admin/">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M8 2L4 6.5 8 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back to admin
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="page-header">
+      <h1 class="page-title">Content</h1>
+      <div class="header-controls">
+        <div class="type-tabs">
+          <button class="type-tab active" onclick="setTypeFilter('all',this)">All</button>
+          <button class="type-tab" onclick="setTypeFilter('long_form',this)">Long-form</button>
+          <button class="type-tab" onclick="setTypeFilter('short_form',this)">Short-form</button>
+        </div>
+        <div class="view-tabs">
+          <button class="view-tab active" onclick="setView('kanban',this)">Kanban</button>
+          <button class="view-tab" onclick="setView('calendar',this)">Calendar</button>
+        </div>
+        <button class="btn-primary" onclick="openCreateModal()">+ Create</button>
+      </div>
+    </div>
+
+    <!-- Kanban -->
+    <div id="kanban-wrap"></div>
+
+    <!-- Calendar -->
+    <div class="cal-wrap" id="cal-wrap">
+      <div class="cal-header">
+        <button class="cal-nav" onclick="calNav(-1)">&#8249;</button>
+        <span class="cal-month-label" id="cal-month-label"></span>
+        <button class="cal-nav" onclick="calNav(1)">&#8250;</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Detail panel -->
+<div class="panel-overlay" id="panel-overlay" onclick="closePanel()"></div>
+<div class="detail-panel" id="detail-panel">
+  <div class="panel-header">
+    <div class="panel-title" id="panel-title">—</div>
+    <button class="panel-close" onclick="closePanel()">×</button>
+  </div>
+  <div id="panel-body"></div>
+</div>
+
+<!-- Create modal -->
+<div class="modal-overlay" id="create-overlay" onclick="if(event.target===this)closeCreateModal()">
+  <div class="modal">
+    <h2>New content item</h2>
+    <div class="field">
+      <label>Type</label>
+      <select id="cm-type" onchange="updateCreateStages()">
+        <option value="long_form">Long-form episode</option>
+        <option value="short_form">Short-form piece</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Title</label>
+      <input type="text" id="cm-title" placeholder="Episode title or topic…">
+    </div>
+    <div class="field">
+      <label>Stage</label>
+      <select id="cm-stage"></select>
+    </div>
+    <div class="field">
+      <label>Scheduled date</label>
+      <input type="date" id="cm-date">
+    </div>
+    <div class="field" id="cm-guest-field">
+      <label>Guest (long-form)</label>
+      <div class="guest-search">
+        <input type="text" id="cm-guest-search" placeholder="Search directory…" oninput="searchGuests(this.value,'cm')" autocomplete="off">
+        <div class="guest-dropdown" id="cm-guest-dropdown"></div>
+      </div>
+      <div id="cm-guest-chips" style="margin-top:6px;"></div>
+    </div>
+    <div class="field">
+      <label>Platforms</label>
+      <div id="cm-platforms" style="display:flex;flex-wrap:wrap;gap:8px;">
+        <label class="platform-cb"><input type="checkbox" value="youtube"> YouTube</label>
+        <label class="platform-cb"><input type="checkbox" value="instagram"> Instagram</label>
+        <label class="platform-cb"><input type="checkbox" value="linkedin"> LinkedIn</label>
+        <label class="platform-cb"><input type="checkbox" value="tiktok"> TikTok</label>
+        <label class="platform-cb"><input type="checkbox" value="facebook"> Facebook</label>
+        <label class="platform-cb"><input type="checkbox" value="podcast"> Podcast</label>
+      </div>
+    </div>
+    <div class="error-msg" id="cm-error"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeCreateModal()">Cancel</button>
+      <button class="btn-primary" id="cm-save" onclick="createContent()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const LONG_STAGES = [
+  {key:'idea',label:'Idea'},{key:'guest_invited',label:'Guest invited'},{key:'confirmed',label:'Confirmed'},
+  {key:'pre_production',label:'Pre-production'},{key:'recorded',label:'Recorded'},{key:'editing',label:'Editing'},
+  {key:'approved',label:'Approved'},{key:'published',label:'Published'},{key:'repurposed',label:'Repurposed'},
+];
+const SHORT_STAGES = [
+  {key:'idea',label:'Idea'},{key:'scripted',label:'Scripted'},{key:'filmed',label:'Filmed'},
+  {key:'edited',label:'Edited'},{key:'scheduled',label:'Scheduled'},{key:'published',label:'Published'},
+];
+
+let allContent = [];
+let allPartners = [];
+let _view = 'kanban';
+let _typeFilter = 'all';
+let _calMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let _panelId = null;
+let _cmGuests = [];
+let _panelGuests = [];
+let _dragId = null;
+
+// ── Auth + init ───────────────────────────────────────────────────────────────
+async function api(method, path, body) {
+  const res = await fetch(path, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (res.status === 401) { window.location.href = '/admin/'; }
+  return res;
+}
+
+(async function init() {
+  const verify = await fetch('/api/admin/verify', { method: 'POST' });
+  if (!verify.ok) { window.location.href = '/admin/'; return; }
+  const [contentRes, partnersRes] = await Promise.all([
+    api('GET', '/api/admin/content'),
+    api('GET', '/api/admin/referral-partners'),
+  ]);
+  if (contentRes.ok) allContent = await contentRes.json();
+  if (partnersRes.ok) allPartners = await partnersRes.json();
+  updateCreateStages();
+  render();
+})();
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.opacity = '1';
+  clearTimeout(t._t); t._t = setTimeout(() => t.style.opacity = '0', 3000);
+}
+
+function localDateStr(d) {
+  const dt = d || new Date();
+  return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+}
+
+// ── View / filter ─────────────────────────────────────────────────────────────
+function setView(v, btn) {
+  _view = v;
+  document.querySelectorAll('.view-tab').forEach(b => b.classList.toggle('active', b === btn));
+  document.getElementById('kanban-wrap').style.display = v === 'kanban' ? '' : 'none';
+  document.getElementById('cal-wrap').style.display = v === 'calendar' ? '' : 'none';
+  if (v === 'calendar') renderCalendar();
+}
+
+function setTypeFilter(t, btn) {
+  _typeFilter = t;
+  document.querySelectorAll('.type-tab').forEach(b => b.classList.toggle('active', b === btn));
+  render();
+}
+
+function filteredContent() {
+  return allContent.filter(c => !c.deletedAt && (_typeFilter === 'all' || c.type === _typeFilter));
+}
+
+function render() {
+  renderKanban();
+  if (_view === 'calendar') renderCalendar();
+}
+
+// ── Kanban ────────────────────────────────────────────────────────────────────
+function stagesForFilter() {
+  if (_typeFilter === 'short_form') return SHORT_STAGES;
+  if (_typeFilter === 'long_form') return LONG_STAGES;
+  // All: merge unique stage keys preserving long_form order
+  const seen = new Set();
+  return [...LONG_STAGES, ...SHORT_STAGES].filter(s => seen.has(s.key) ? false : seen.add(s.key));
+}
+
+function renderKanban() {
+  const items = filteredContent();
+  const stages = stagesForFilter();
+  const wrap = document.getElementById('kanban-wrap');
+  if (!wrap) return;
+
+  const byStage = {};
+  stages.forEach(s => byStage[s.key] = []);
+  items.forEach(c => {
+    if (byStage[c.stage] !== undefined) byStage[c.stage].push(c);
+    else byStage[stages[0].key].push(c);
+  });
+
+  wrap.innerHTML = `<div class="kanban">${stages.map(s => `
+    <div class="kanban-col" id="kcol-${s.key}" data-stage="${s.key}"
+      ondragover="event.preventDefault();this.classList.add('drag-over')"
+      ondragleave="this.classList.remove('drag-over')"
+      ondrop="dropOnStage(event,'${s.key}')">
+      <div class="kanban-col-head">
+        <span class="kanban-col-label">${esc(s.label)}</span>
+        <span class="kanban-col-count">${byStage[s.key].length}</span>
+      </div>
+      ${byStage[s.key].map(c => kanbanCard(c)).join('')}
+    </div>`).join('')}
+  </div>`;
+}
+
+function kanbanCard(c) {
+  const guests = c.guestIds.map(gid => allPartners.find(p => p.id === gid)).filter(Boolean);
+  const guestNames = guests.map(g => g.name).join(', ');
+  const dateLabel = c.scheduledDate ? new Date(c.scheduledDate+'T00:00:00').toLocaleDateString('en-AU',{day:'numeric',month:'short'}) : '';
+  return `<div class="kanban-card" id="kcard-${c.id}" draggable="true"
+    ondragstart="dragStart(event,'${c.id}')"
+    ondragend="dragEnd(event)"
+    onclick="openPanel('${c.id}')">
+    <div class="kanban-card-title">${esc(c.title)}</div>
+    <div class="kanban-card-meta">
+      <span class="kc-badge ${c.type==='long_form'?'kc-long':'kc-short'}">${c.type==='long_form'?'Long':'Short'}</span>
+      ${dateLabel ? `<span class="kc-date">${dateLabel}</span>` : ''}
+    </div>
+    ${guestNames ? `<span class="kc-guest">👤 ${esc(guestNames)}</span>` : ''}
+  </div>`;
+}
+
+// ── Drag & drop (kanban) ───────────────────────────────────────────────────────
+function dragStart(e, id) {
+  _dragId = id;
+  e.dataTransfer.effectAllowed = 'move';
+  document.getElementById(`kcard-${id}`)?.classList.add('dragging');
+}
+
+function dragEnd(e) {
+  if (_dragId) document.getElementById(`kcard-${_dragId}`)?.classList.remove('dragging');
+}
+
+async function dropOnStage(e, stage) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (!_dragId) return;
+  const item = allContent.find(c => c.id === _dragId);
+  _dragId = null;
+  if (!item || item.stage === stage) return;
+  const res = await api('PUT', '/api/admin/content', { id: item.id, stage });
+  if (!res.ok) { showToast('Failed to move — please try again.'); return; }
+  const updated = await res.json();
+  const idx = allContent.findIndex(c => c.id === updated.id);
+  if (idx !== -1) allContent[idx] = updated;
+  render();
+}
+
+// ── Calendar ──────────────────────────────────────────────────────────────────
+function calNav(dir) {
+  _calMonth = new Date(_calMonth.getFullYear(), _calMonth.getMonth() + dir, 1);
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const year = _calMonth.getFullYear(), month = _calMonth.getMonth();
+  const today = localDateStr();
+  document.getElementById('cal-month-label').textContent = _calMonth.toLocaleDateString('en-AU',{month:'long',year:'numeric'});
+
+  const items = filteredContent().filter(c => c.scheduledDate);
+  const byDate = {};
+  items.forEach(c => { (byDate[c.scheduledDate] = byDate[c.scheduledDate] || []).push(c); });
+
+  const firstDow = new Date(year, month, 1).getDay();
+  const padStart = firstDow === 0 ? 6 : firstDow - 1;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const prevDays = new Date(year, month, 0).getDate();
+
+  let cells = '';
+  const dows = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  cells += dows.map(d => `<div class="cal-dow">${d}</div>`).join('');
+
+  for (let i = 0; i < padStart; i++) {
+    const d = prevDays - padStart + 1 + i;
+    cells += `<div class="cal-cell other-month"><div class="cal-day-num">${d}</div></div>`;
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = ds === today;
+    const events = (byDate[ds] || []).map(c =>
+      `<div class="cal-event ${c.type==='long_form'?'long-form':'short-form'}" id="cevent-${c.id}"
+        draggable="true"
+        ondragstart="calDragStart(event,'${c.id}')"
+        onclick="event.stopPropagation();openPanel('${c.id}')">${esc(c.title)}</div>`
+    ).join('');
+    cells += `<div class="cal-cell${isToday?' today':''}" data-date="${ds}"
+      ondragover="event.preventDefault();this.classList.add('drag-over')"
+      ondragleave="this.classList.remove('drag-over')"
+      ondrop="calDrop(event,'${ds}')">
+      <div class="cal-day-num">${d}</div>
+      ${events}
+    </div>`;
+  }
+
+  const totalCells = padStart + daysInMonth;
+  const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (let i = 1; i <= remaining; i++) {
+    cells += `<div class="cal-cell other-month"><div class="cal-day-num">${i}</div></div>`;
+  }
+
+  document.getElementById('cal-grid').innerHTML = cells;
+}
+
+let _calDragId = null;
+function calDragStart(e, id) {
+  _calDragId = id;
+  e.dataTransfer.effectAllowed = 'move';
+  document.getElementById(`cevent-${id}`)?.classList.add('dragging');
+  e.stopPropagation();
+}
+
+async function calDrop(e, date) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  const id = _calDragId;
+  _calDragId = null;
+  if (!id) return;
+  const item = allContent.find(c => c.id === id);
+  if (!item || item.scheduledDate === date) return;
+  const res = await api('PUT', '/api/admin/content', { id, scheduledDate: date });
+  if (!res.ok) { showToast('Failed to reschedule.'); return; }
+  const updated = await res.json();
+  const idx = allContent.findIndex(c => c.id === updated.id);
+  if (idx !== -1) allContent[idx] = updated;
+  const warn = shortNoticeDays(updated);
+  render();
+  if (warn !== null && warn < 7) showToast(`⚠️ Less than 1 week notice for guest — confirm with them.`);
+  else showToast('Rescheduled');
+}
+
+function shortNoticeDays(item) {
+  if (item.type !== 'long_form' || !item.scheduledDate || !item.guestIds.length) return null;
+  return Math.round((new Date(item.scheduledDate) - new Date()) / 86400000);
+}
+
+// ── Detail panel ──────────────────────────────────────────────────────────────
+function openPanel(id) {
+  const item = allContent.find(c => c.id === id);
+  if (!item) return;
+  _panelId = id;
+  _panelGuests = [...item.guestIds];
+  document.getElementById('panel-title').textContent = item.title;
+  renderPanelBody(item);
+  document.getElementById('panel-overlay').classList.add('open');
+  document.getElementById('detail-panel').classList.add('open');
+}
+
+function closePanel() {
+  document.getElementById('panel-overlay').classList.remove('open');
+  document.getElementById('detail-panel').classList.remove('open');
+  _panelId = null;
+}
+
+function renderPanelBody(item) {
+  const stages = item.type === 'long_form' ? LONG_STAGES : SHORT_STAGES;
+  const guestChips = _panelGuests.map(gid => {
+    const p = allPartners.find(x => x.id === gid);
+    return p ? `<span class="guest-chip">${esc(p.name)}<button onclick="removePanelGuest('${gid}')">×</button></span>` : '';
+  }).join('');
+  const platforms = ['youtube','instagram','linkedin','tiktok','facebook','podcast'];
+  const warnDays = shortNoticeDays(item);
+  const warnHtml = warnDays !== null && warnDays < 7
+    ? `<div class="warning-banner" style="display:block;">⚠️ Less than 1 week notice — confirm this with your guest.</div>` : '';
+  const repurposedFrom = item.repurposedFromId ? allContent.find(c => c.id === item.repurposedFromId) : null;
+  const longFormItems = allContent.filter(c => !c.deletedAt && c.type === 'long_form' && c.id !== item.id);
+
+  document.getElementById('panel-body').innerHTML = `
+    <div class="panel-section">
+      <div class="panel-label">Type</div>
+      <div style="font-size:13px;color:rgba(247,243,237,0.55);">${item.type === 'long_form' ? 'Long-form episode' : 'Short-form piece'}</div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-label">Title</div>
+      <input class="panel-input" id="pn-title" value="${esc(item.title)}" onblur="panelSave()">
+    </div>
+    <div class="panel-section">
+      <div class="panel-label">Stage</div>
+      <div class="stage-sel">
+        ${stages.map(s => `<button class="stage-btn${item.stage===s.key?' active':''}" onclick="panelSetStage('${s.key}',this)">${esc(s.label)}</button>`).join('')}
+      </div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-label">Scheduled date</div>
+      <input class="panel-input" type="date" id="pn-date" value="${item.scheduledDate||''}" onchange="panelSave()">
+      ${warnHtml}
+    </div>
+    ${item.type === 'long_form' ? `<div class="panel-section">
+      <div class="panel-label">Guests</div>
+      <div id="pn-guest-chips" style="margin-bottom:6px;">${guestChips}</div>
+      <div class="guest-search">
+        <input class="panel-input" id="pn-guest-search" placeholder="Add guest from directory…" oninput="searchGuests(this.value,'pn')" autocomplete="off">
+        <div class="guest-dropdown" id="pn-guest-dropdown"></div>
+      </div>
+    </div>` : ''}
+    ${item.type === 'short_form' ? `<div class="panel-section">
+      <div class="panel-label">Repurposed from</div>
+      <select class="panel-input" id="pn-repurposed" onchange="panelSave()">
+        <option value="">— None —</option>
+        ${longFormItems.map(lf => `<option value="${lf.id}"${item.repurposedFromId===lf.id?' selected':''}>${esc(lf.title)}</option>`).join('')}
+      </select>
+      ${repurposedFrom ? `<div style="font-size:11.5px;color:rgba(247,243,237,0.3);margin-top:4px;">Cut from: ${esc(repurposedFrom.title)}</div>` : ''}
+    </div>` : ''}
+    <div class="panel-section">
+      <div class="panel-label">Platforms</div>
+      <div>${platforms.map(pl => `<label class="platform-cb"><input type="checkbox" value="${pl}" ${item.platforms.includes(pl)?'checked':''} onchange="panelSave()"> ${pl.charAt(0).toUpperCase()+pl.slice(1)}</label>`).join('')}</div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-label">Notes</div>
+      <textarea class="panel-textarea" id="pn-notes" rows="3" onblur="panelSave()">${esc(item.notes||'')}</textarea>
+    </div>
+    <div class="panel-actions">
+      <button class="btn-secondary" onclick="deleteContent('${item.id}')" style="color:#e07070;border-color:rgba(220,80,80,0.2);">Delete</button>
+    </div>
+  `;
+}
+
+async function panelSave() {
+  const item = allContent.find(c => c.id === _panelId);
+  if (!item) return;
+  const title = document.getElementById('pn-title')?.value.trim() || item.title;
+  const scheduledDate = document.getElementById('pn-date')?.value || null;
+  const notes = document.getElementById('pn-notes')?.value.trim() || null;
+  const platforms = Array.from(document.querySelectorAll('#panel-body input[type=checkbox]:checked')).map(cb => cb.value);
+  const repurposedFromId = document.getElementById('pn-repurposed')?.value || null;
+  const body = { id: item.id, title, scheduledDate, notes, platforms, guestIds: _panelGuests };
+  if (item.type === 'short_form') body.repurposedFromId = repurposedFromId;
+  const res = await api('PUT', '/api/admin/content', body);
+  if (!res.ok) { showToast('Save failed.'); return; }
+  const updated = await res.json();
+  const idx = allContent.findIndex(c => c.id === updated.id);
+  if (idx !== -1) allContent[idx] = updated;
+  document.getElementById('panel-title').textContent = updated.title;
+  render();
+  const warnDays = shortNoticeDays(updated);
+  const warnEl = document.querySelector('.warning-banner');
+  if (warnEl) warnEl.style.display = warnDays !== null && warnDays < 7 ? 'block' : 'none';
+}
+
+async function panelSetStage(stage, btn) {
+  const item = allContent.find(c => c.id === _panelId);
+  if (!item) return;
+  document.querySelectorAll('.stage-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const res = await api('PUT', '/api/admin/content', { id: item.id, stage });
+  if (!res.ok) { showToast('Failed to update stage.'); return; }
+  const updated = await res.json();
+  const idx = allContent.findIndex(c => c.id === updated.id);
+  if (idx !== -1) allContent[idx] = updated;
+  render();
+}
+
+function removePanelGuest(gid) {
+  _panelGuests = _panelGuests.filter(id => id !== gid);
+  const item = allContent.find(c => c.id === _panelId);
+  if (item) {
+    const chips = _panelGuests.map(id => {
+      const p = allPartners.find(x => x.id === id);
+      return p ? `<span class="guest-chip">${esc(p.name)}<button onclick="removePanelGuest('${id}')">×</button></span>` : '';
+    }).join('');
+    const el = document.getElementById('pn-guest-chips');
+    if (el) el.innerHTML = chips;
+  }
+  panelSave();
+}
+
+// ── Guest search (shared for create modal + panel) ────────────────────────────
+function searchGuests(q, prefix) {
+  const dd = document.getElementById(`${prefix}-guest-dropdown`);
+  if (!q.trim()) { dd.style.display = 'none'; return; }
+  const currentGuests = prefix === 'cm' ? _cmGuests : _panelGuests;
+  const results = allPartners.filter(p =>
+    !currentGuests.includes(p.id) &&
+    (p.name.toLowerCase().includes(q.toLowerCase()) || (p.company||'').toLowerCase().includes(q.toLowerCase()))
+  ).slice(0, 8);
+  if (!results.length) { dd.style.display = 'none'; return; }
+  dd.innerHTML = results.map(p =>
+    `<div class="guest-option" onclick="addGuest('${p.id}','${prefix}')">${esc(p.name)}${p.company?`<span style="color:rgba(247,243,237,0.3);font-size:11px;"> · ${esc(p.company)}</span>`:''}</div>`
+  ).join('');
+  dd.style.display = 'block';
+}
+
+function addGuest(gid, prefix) {
+  const dd = document.getElementById(`${prefix}-guest-dropdown`);
+  const input = document.getElementById(`${prefix}-guest-search`);
+  dd.style.display = 'none';
+  if (input) input.value = '';
+  const p = allPartners.find(x => x.id === gid);
+  if (!p) return;
+  if (prefix === 'cm') {
+    if (_cmGuests.includes(gid)) return;
+    _cmGuests.push(gid);
+    renderCmGuestChips();
+  } else {
+    if (_panelGuests.includes(gid)) return;
+    _panelGuests.push(gid);
+    const chips = _panelGuests.map(id => {
+      const pg = allPartners.find(x => x.id === id);
+      return pg ? `<span class="guest-chip">${esc(pg.name)}<button onclick="removePanelGuest('${id}')">×</button></span>` : '';
+    }).join('');
+    const el = document.getElementById('pn-guest-chips');
+    if (el) el.innerHTML = chips;
+    panelSave();
+  }
+}
+
+function renderCmGuestChips() {
+  const el = document.getElementById('cm-guest-chips');
+  if (!el) return;
+  el.innerHTML = _cmGuests.map(gid => {
+    const p = allPartners.find(x => x.id === gid);
+    return p ? `<span class="guest-chip">${esc(p.name)}<button onclick="removeCmGuest('${gid}')">×</button></span>` : '';
+  }).join('');
+}
+
+function removeCmGuest(gid) {
+  _cmGuests = _cmGuests.filter(id => id !== gid);
+  renderCmGuestChips();
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.guest-search')) {
+    document.querySelectorAll('.guest-dropdown').forEach(d => d.style.display = 'none');
+  }
+});
+
+// ── Create modal ──────────────────────────────────────────────────────────────
+function updateCreateStages() {
+  const type = document.getElementById('cm-type')?.value || 'long_form';
+  const stages = type === 'long_form' ? LONG_STAGES : SHORT_STAGES;
+  const sel = document.getElementById('cm-stage');
+  if (sel) sel.innerHTML = stages.map(s => `<option value="${s.key}">${s.label}</option>`).join('');
+  const guestField = document.getElementById('cm-guest-field');
+  if (guestField) guestField.style.display = type === 'long_form' ? '' : 'none';
+}
+
+function openCreateModal() {
+  _cmGuests = [];
+  renderCmGuestChips();
+  document.getElementById('cm-title').value = '';
+  document.getElementById('cm-date').value = '';
+  document.getElementById('cm-type').value = 'long_form';
+  document.getElementById('cm-error').classList.remove('visible');
+  document.getElementById('cm-save').disabled = false;
+  document.getElementById('cm-save').textContent = 'Create';
+  document.querySelectorAll('#cm-platforms input').forEach(cb => cb.checked = false);
+  updateCreateStages();
+  document.getElementById('create-overlay').style.display = 'flex';
+  setTimeout(() => document.getElementById('cm-title').focus(), 100);
+}
+
+function closeCreateModal() {
+  document.getElementById('create-overlay').style.display = 'none';
+}
+
+async function createContent() {
+  const title = document.getElementById('cm-title').value.trim();
+  const errEl = document.getElementById('cm-error');
+  if (!title) { errEl.textContent = 'Title is required.'; errEl.classList.add('visible'); return; }
+  const type = document.getElementById('cm-type').value;
+  const stage = document.getElementById('cm-stage').value;
+  const scheduledDate = document.getElementById('cm-date').value || null;
+  const platforms = Array.from(document.querySelectorAll('#cm-platforms input:checked')).map(cb => cb.value);
+  const saveBtn = document.getElementById('cm-save');
+  saveBtn.disabled = true; saveBtn.textContent = 'Creating…';
+  const body = { title, type, stage, scheduledDate, guestIds: _cmGuests, platforms };
+  const res = await api('POST', '/api/admin/content', body);
+  if (!res.ok) {
+    errEl.textContent = 'Failed to create — please try again.'; errEl.classList.add('visible');
+    saveBtn.disabled = false; saveBtn.textContent = 'Create'; return;
+  }
+  const item = await res.json();
+  allContent.push(item);
+  closeCreateModal();
+  render();
+  showToast('Created');
+  const warnDays = shortNoticeDays(item);
+  if (warnDays !== null && warnDays < 7) showToast('⚠️ Less than 1 week notice — confirm with your guest.');
+}
+
+async function deleteContent(id) {
+  if (!confirm('Delete this content item?')) return;
+  const res = await api('DELETE', `/api/admin/content?id=${id}`);
+  if (!res.ok) { showToast('Failed to delete.'); return; }
+  const item = allContent.find(c => c.id === id);
+  if (item) item.deletedAt = new Date().toISOString();
+  closePanel();
+  render();
+  showToast('Deleted');
+}
+</script>
+</body>
+</html>
