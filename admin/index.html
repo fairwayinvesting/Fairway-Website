@@ -153,6 +153,14 @@
     .task-edit-form{background:rgba(247,243,237,0.03);border-radius:10px;padding:10px 12px;margin-top:8px;border:1px solid rgba(247,243,237,0.08);}
     .task-edit-input{width:100%;box-sizing:border-box;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.15);border-radius:8px;padding:8px 12px;font-family:'Outfit',sans-serif;font-size:13.5px;color:#f7f3ed;margin-bottom:10px;outline:none;}
     .task-edit-input:focus{border-color:rgba(247,243,237,0.3);}
+    /* Domain / stream tabs */
+    .task-domain-tabs{display:flex;gap:3px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.07);border-radius:10px;padding:3px;width:fit-content;margin-bottom:16px;}
+    .task-domain-tab{padding:7px 16px;border-radius:8px;border:none;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;background:transparent;color:rgba(247,243,237,0.38);}
+    .task-domain-tab.active{background:rgba(247,243,237,0.08);color:#f7f3ed;}
+    .task-stream-tabs{display:flex;gap:3px;margin-bottom:18px;flex-wrap:wrap;}
+    .task-stream-tab{padding:5px 13px;border-radius:100px;border:1px solid rgba(247,243,237,0.1);font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;background:transparent;color:rgba(247,243,237,0.35);}
+    .task-stream-tab.active{background:rgba(189,122,112,0.12);border-color:rgba(189,122,112,0.35);color:#bd7a70;}
+    .task-recur-badge{font-size:10px;color:rgba(247,243,237,0.3);background:rgba(247,243,237,0.05);border-radius:100px;padding:2px 7px;letter-spacing:0.04em;}
     /* Stats */
     .task-stats{margin-top:36px;padding-top:28px;border-top:1px solid rgba(247,243,237,0.07);}
     .task-stats-tabs{display:flex;gap:3px;background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.07);border-radius:10px;padding:3px;width:fit-content;margin-bottom:28px;}
@@ -951,16 +959,48 @@
 
       <!-- List view -->
       <div id="task-list-view">
+        <!-- Domain toggle -->
+        <div class="task-domain-tabs">
+          <button class="task-domain-tab active" onclick="setTaskDomain('today',this)">Today</button>
+          <button class="task-domain-tab" onclick="setTaskDomain('health',this)">Health</button>
+          <button class="task-domain-tab" onclick="setTaskDomain('business',this)">Business</button>
+        </div>
+        <!-- Stream sub-tabs (shown only when a domain is selected) -->
+        <div id="task-stream-tabs" style="display:none;">
+          <div class="task-stream-tabs" id="task-stream-tab-list"></div>
+        </div>
+
         <!-- Add task -->
-        <div class="task-add-row">
-          <input type="text" id="task-add-input" class="task-add-input" placeholder="Add a task…" onkeydown="if(event.key==='Enter')addTask()">
+        <div class="task-add-row" style="flex-wrap:wrap;gap:8px;">
+          <input type="text" id="task-add-input" class="task-add-input" placeholder="Add a task…" onkeydown="if(event.key==='Enter')addTask()" style="flex:1;min-width:180px;">
           <div class="task-urg-sel" id="task-list-urg-sel">
             <button class="task-urg-btn" data-urg="high" onclick="setTaskUrgency('high',this)">High</button>
             <button class="task-urg-btn active" data-urg="medium" onclick="setTaskUrgency('medium',this)">Medium</button>
             <button class="task-urg-btn" data-urg="low" onclick="setTaskUrgency('low',this)">Low</button>
           </div>
-          <input type="date" id="task-date-input" class="task-date-input" title="Schedule for a specific date">
+          <select id="task-new-domain" onchange="updateTaskNewStreamOptions()" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;color:rgba(247,243,237,0.7);font-family:'Outfit',sans-serif;font-size:12.5px;padding:8px 12px;cursor:pointer;outline:none;">
+            <option value="business">Business</option>
+            <option value="health">Health</option>
+          </select>
+          <select id="task-new-stream" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;color:rgba(247,243,237,0.7);font-family:'Outfit',sans-serif;font-size:12.5px;padding:8px 12px;cursor:pointer;outline:none;">
+            <option value="clients">Clients</option>
+            <option value="prospecting">Prospecting</option>
+            <option value="content">Content</option>
+          </select>
+          <select id="task-new-recurrence" onchange="updateTaskNewRecurrenceDays()" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;color:rgba(247,243,237,0.7);font-family:'Outfit',sans-serif;font-size:12.5px;padding:8px 12px;cursor:pointer;outline:none;">
+            <option value="none">One-off</option>
+            <option value="daily">Daily</option>
+            <option value="weekdays">Weekdays</option>
+            <option value="custom_days">Custom days…</option>
+          </select>
+          <input type="date" id="task-date-input" class="task-date-input" title="Due date (one-off tasks)" style="font-size:12.5px;padding:8px 12px;">
           <button onclick="addTask()" class="btn-primary" style="font-size:13px;padding:10px 20px;white-space:nowrap;flex-shrink:0;">Add task</button>
+        </div>
+        <!-- Custom days picker (shown when recurrence = custom_days) -->
+        <div id="task-custom-days-row" style="display:none;margin-bottom:12px;display:none;">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;padding:8px 0;">
+            ${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d,i)=>`<label style="display:flex;align-items:center;gap:4px;font-size:12px;color:rgba(247,243,237,0.5);cursor:pointer;"><input type="checkbox" class="task-day-cb" value="${[1,2,3,4,5,6,0][i]}" style="accent-color:#bd7a70;"> ${d}</label>`).join('')}
+          </div>
         </div>
 
         <!-- Active tasks -->
@@ -5241,6 +5281,102 @@ let allTasks = [];
 let taskNewUrgency = 'medium';
 let _taskStatPeriod = 'week';
 let _tasksLoaded = false;
+let _taskDomain = 'today';   // 'today' | 'health' | 'business'
+let _taskStream = null;      // null = all streams within domain
+
+const TASK_STREAMS = {
+  health: [{ key:'fitness',label:'Fitness' },{ key:'luna',label:'Luna' },{ key:'self',label:'Self' }],
+  business: [{ key:'clients',label:'Clients' },{ key:'prospecting',label:'Prospecting' },{ key:'content',label:'Content' }],
+};
+
+function setTaskDomain(domain, btn) {
+  _taskDomain = domain;
+  _taskStream = null;
+  document.querySelectorAll('.task-domain-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const streamWrap = document.getElementById('task-stream-tabs');
+  const streamList = document.getElementById('task-stream-tab-list');
+  if (domain === 'today') {
+    streamWrap.style.display = 'none';
+  } else {
+    const streams = TASK_STREAMS[domain] || [];
+    streamList.innerHTML = `<button class="task-stream-tab active" onclick="setTaskStream(null,this)">All</button>` +
+      streams.map(s => `<button class="task-stream-tab" onclick="setTaskStream('${s.key}',this)">${s.label}</button>`).join('');
+    streamWrap.style.display = '';
+  }
+  renderTaskList();
+}
+
+function setTaskStream(stream, btn) {
+  _taskStream = stream;
+  document.querySelectorAll('#task-stream-tab-list .task-stream-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderTaskList();
+}
+
+function updateTaskNewStreamOptions() {
+  const domain = document.getElementById('task-new-domain')?.value || 'business';
+  const streamSel = document.getElementById('task-new-stream');
+  if (!streamSel) return;
+  const opts = { health: ['fitness','luna','self'], business: ['clients','prospecting','content'] };
+  const labels = { fitness:'Fitness', luna:'Luna', self:'Self', clients:'Clients', prospecting:'Prospecting', content:'Content' };
+  streamSel.innerHTML = (opts[domain] || []).map(v => `<option value="${v}">${labels[v]}</option>`).join('');
+}
+
+function updateTaskNewRecurrenceDays() {
+  const val = document.getElementById('task-new-recurrence')?.value;
+  const dateInput = document.getElementById('task-date-input');
+  const daysRow = document.getElementById('task-custom-days-row');
+  if (dateInput) dateInput.style.display = (val === 'none') ? '' : 'none';
+  if (daysRow) daysRow.style.display = (val === 'custom_days') ? '' : 'none';
+}
+
+// Recurring task helpers
+function taskDowIndex() {
+  return new Date().getDay(); // 0=Sun,1=Mon,...,6=Sat
+}
+
+function recurringFiresToday(t) {
+  if (!t.recurrence || t.recurrence === 'none') return false;
+  const dow = taskDowIndex();
+  if (t.recurrence === 'daily') return true;
+  if (t.recurrence === 'weekdays') return dow >= 1 && dow <= 5;
+  if (t.recurrence === 'custom_days') return Array.isArray(t.recurrenceDays) && t.recurrenceDays.includes(dow);
+  return false;
+}
+
+function recurringDoneToday(t) {
+  const today = localDateStr();
+  return Array.isArray(t.completedOn) && t.completedOn.includes(today);
+}
+
+function recurringLabel(t) {
+  if (!t.recurrence || t.recurrence === 'none') return '';
+  if (t.recurrence === 'daily') return 'Daily';
+  if (t.recurrence === 'weekdays') return 'Weekdays';
+  if (t.recurrence === 'custom_days' && Array.isArray(t.recurrenceDays)) {
+    const names = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    return t.recurrenceDays.map(d => names[d]).join(', ');
+  }
+  return '';
+}
+
+async function migrateTasksIfNeeded() {
+  const needsMigration = allTasks.filter(t => !t.deletedAt && !t.domain);
+  if (!needsMigration.length) return;
+  // Apply defaults to local state immediately so UI works
+  allTasks = allTasks.map(t => {
+    if (t.domain) return t;
+    return { ...t, domain:'business', stream:'clients', recurrence:'none', recurrenceDays:[], recurrenceTime:null, completedOn:[] };
+  });
+  // Persist each migrated task in the background (fire-and-forget, idempotent)
+  for (const t of needsMigration) {
+    api('PUT', '/api/admin/tasks', {
+      id: t.id, domain:'business', stream:'clients',
+      recurrence:'none', recurrenceDays:[], recurrenceTime:null,
+    }).catch(() => {});
+  }
+}
 
 function localDateStr(d) {
   const dt = d || new Date();
@@ -5263,6 +5399,7 @@ async function loadTasks() {
     allTasks = data;
     _tasksLoaded = true;
     _setSysCheck('tasks', 'ok', `${allTasks.filter(t => !t.deletedAt).length} tasks`);
+    await migrateTasksIfNeeded();
   } catch (e) {
     _setSysCheck('tasks', 'err', e.message);
     return;
@@ -5273,16 +5410,82 @@ async function loadTasks() {
 
 function renderTaskList() {
   const today = localDateStr();
-  const active = allTasks.filter(t => !t.deletedAt && !t.completedAt && t.dueDate <= today);
-  const doneToday = allTasks.filter(t => !t.deletedAt && t.completedAt && localDateStr(new Date(t.completedAt)) === today);
-
   const urgOrder = { high: 0, medium: 1, low: 2 };
-  active.sort((a, b) => (urgOrder[a.urgency] ?? 1) - (urgOrder[b.urgency] ?? 1) || a.dueDate.localeCompare(b.dueDate));
 
+  // Filter helper
+  function matchesDomainStream(t) {
+    if (_taskDomain === 'today') return true;
+    if (t.domain !== _taskDomain) return false;
+    if (_taskStream && t.stream !== _taskStream) return false;
+    return true;
+  }
+
+  // Non-recurring active tasks (due today or overdue, not completed)
+  const nonRecurActive = allTasks.filter(t =>
+    !t.deletedAt && !t.completedAt &&
+    (!t.recurrence || t.recurrence === 'none') &&
+    t.dueDate <= today &&
+    matchesDomainStream(t)
+  );
+
+  // Recurring tasks that fire today and haven't been checked off
+  const recurActive = allTasks.filter(t =>
+    !t.deletedAt &&
+    recurringFiresToday(t) &&
+    !recurringDoneToday(t) &&
+    matchesDomainStream(t)
+  );
+
+  // Recurring tasks done today
+  const recurDoneToday = allTasks.filter(t =>
+    !t.deletedAt &&
+    recurringFiresToday(t) &&
+    recurringDoneToday(t) &&
+    matchesDomainStream(t)
+  );
+
+  // Non-recurring done today
+  const nonRecurDoneToday = allTasks.filter(t =>
+    !t.deletedAt && t.completedAt &&
+    (!t.recurrence || t.recurrence === 'none') &&
+    localDateStr(new Date(t.completedAt)) === today &&
+    matchesDomainStream(t)
+  );
+
+  const active = [...recurActive, ...nonRecurActive];
+  active.sort((a, b) => (urgOrder[a.urgency] ?? 1) - (urgOrder[b.urgency] ?? 1));
+
+  const doneToday = [...recurDoneToday, ...nonRecurDoneToday];
+
+  // Group active by stream when in Today view
   const activeEl = document.getElementById('task-list-active');
   if (activeEl) {
     if (active.length === 0) {
-      activeEl.innerHTML = `<div style="padding:24px 0;text-align:center;color:rgba(247,243,237,0.18);font-size:13.5px;">No active tasks — add one above.</div>`;
+      activeEl.innerHTML = `<div style="padding:24px 0;text-align:center;color:rgba(247,243,237,0.18);font-size:13.5px;">No active tasks for today.</div>`;
+    } else if (_taskDomain === 'today') {
+      // Group by domain → stream
+      const groups = {};
+      active.forEach(t => {
+        const key = `${t.domain || 'business'}:${t.stream || 'clients'}`;
+        if (!groups[key]) groups[key] = { domain: t.domain || 'business', stream: t.stream || 'clients', items: [] };
+        groups[key].items.push(t);
+      });
+      const domainOrder = ['health','business'];
+      const streamOrder = ['fitness','luna','self','clients','prospecting','content'];
+      const streamLabels = { fitness:'Fitness', luna:'Luna', self:'Self', clients:'Clients', prospecting:'Prospecting', content:'Content' };
+      const sorted = Object.values(groups).sort((a,b) =>
+        domainOrder.indexOf(a.domain) - domainOrder.indexOf(b.domain) ||
+        streamOrder.indexOf(a.stream) - streamOrder.indexOf(b.stream)
+      );
+      activeEl.innerHTML = sorted.map(g => `
+        <div style="margin-bottom:20px;">
+          <div class="task-section-head">
+            <span class="task-section-head-label">${streamLabels[g.stream] || g.stream}</span>
+            <span class="task-section-head-count">${g.items.length}</span>
+            <div class="task-section-div"></div>
+          </div>
+          ${g.items.map(t => taskItemHtml(t, today)).join('')}
+        </div>`).join('');
     } else {
       activeEl.innerHTML = `<div class="task-section-head">
         <span class="task-section-head-label">Active</span>
@@ -5313,12 +5516,14 @@ function renderTaskList() {
 }
 
 function taskItemHtml(t, today) {
-  const done     = !!t.completedAt;
-  const daysOver = done ? 0 : Math.round((new Date(today) - new Date(t.dueDate)) / 86400000);
+  const isRecurring = t.recurrence && t.recurrence !== 'none';
+  const done = isRecurring ? recurringDoneToday(t) : !!t.completedAt;
+  const daysOver = (!done && !isRecurring) ? Math.round((new Date(today) - new Date(t.dueDate)) / 86400000) : 0;
   const rollLabel = !done && daysOver > 0 ? (daysOver === 1 ? 'from yesterday' : `${daysOver}d overdue`) : '';
-  const showDate  = t.dueDate !== today;
+  const showDate  = !isRecurring && t.dueDate !== today;
   const dateFmt   = showDate ? new Date(t.dueDate + 'T00:00:00').toLocaleDateString('en-AU', {day:'numeric',month:'short'}) : '';
   const urgLabel  = {high:'High',medium:'Medium',low:'Low'}[t.urgency] || t.urgency;
+  const recurLabel = isRecurring ? recurringLabel(t) : '';
   return `<div class="task-item${done?' task-done':''}" data-urg="${t.urgency}" id="task-item-${t.id}">
     <div class="task-check" onclick="toggleTask('${t.id}')">
       <svg class="task-tick" width="10" height="8" viewBox="0 0 10 8" fill="none">
@@ -5330,6 +5535,7 @@ function taskItemHtml(t, today) {
         <div class="task-title">${esc(t.title)}</div>
         <div class="task-meta">
           <span class="task-urg-badge" data-urg="${t.urgency}">${urgLabel}</span>
+          ${recurLabel ? `<span class="task-recur-badge">↻ ${recurLabel}</span>` : ''}
           ${showDate && !done ? `<span class="task-date-badge">${dateFmt}</span>` : ''}
           ${rollLabel ? `<span class="task-roll-badge">↑ ${rollLabel}</span>` : ''}
         </div>
@@ -5343,7 +5549,7 @@ function taskItemHtml(t, today) {
             <button class="task-urg-btn${t.urgency==='medium'?' active':''}" data-urg="medium" onclick="taskEditUrgency('${t.id}','medium',this)">Medium</button>
             <button class="task-urg-btn${t.urgency==='low'?' active':''}" data-urg="low"    onclick="taskEditUrgency('${t.id}','low',this)">Low</button>
           </div>
-          <input type="date" id="task-edit-date-${t.id}" value="${t.dueDate}" class="task-date-input" style="font-size:12.5px;padding:6px 12px;flex-shrink:0;">
+          ${!isRecurring ? `<input type="date" id="task-edit-date-${t.id}" value="${t.dueDate}" class="task-date-input" style="font-size:12.5px;padding:6px 12px;flex-shrink:0;">` : ''}
           <div style="display:flex;gap:6px;margin-left:auto;">
             <button onclick="saveTaskEdit('${t.id}')" class="btn-primary" style="font-size:12px;padding:7px 14px;">Save</button>
             <button onclick="closeTaskEdit('${t.id}')" style="font-size:12px;padding:7px 12px;background:none;border:1px solid rgba(247,243,237,0.15);border-radius:100px;cursor:pointer;color:rgba(247,243,237,0.4);font-family:'Outfit',sans-serif;">Cancel</button>
@@ -5551,12 +5757,24 @@ async function addTask() {
   const title = input?.value.trim();
   if (!title) { input?.focus(); return; }
   const dateInput = document.getElementById('task-date-input');
-  const dueDate = dateInput?.value || localDateStr();
-  const res = await api('POST', '/api/admin/tasks', { title, urgency: taskNewUrgency, dueDate });
+  const recurrence = document.getElementById('task-new-recurrence')?.value || 'none';
+  const dueDate = (recurrence === 'none' ? dateInput?.value : null) || localDateStr();
+  const domain = document.getElementById('task-new-domain')?.value || 'business';
+  const stream = document.getElementById('task-new-stream')?.value || 'clients';
+  let recurrenceDays = [];
+  if (recurrence === 'custom_days') {
+    recurrenceDays = Array.from(document.querySelectorAll('.task-day-cb:checked')).map(cb => parseInt(cb.value, 10));
+  }
+  const body = { title, urgency: taskNewUrgency, dueDate, domain, stream, recurrence, recurrenceDays };
+  const res = await api('POST', '/api/admin/tasks', body);
   if (!res.ok) return;
   const task = await res.json();
   allTasks.push(task);
   if (input) input.value = '';
+  // Reset recurrence to one-off after adding
+  const recurrenceSel = document.getElementById('task-new-recurrence');
+  if (recurrenceSel) { recurrenceSel.value = 'none'; updateTaskNewRecurrenceDays(); }
+  document.querySelectorAll('.task-day-cb').forEach(cb => cb.checked = false);
   renderTaskList();
   renderTaskStats(_taskStatPeriod);
   if (_taskView === 'calendar') renderCalendar();
@@ -5565,10 +5783,27 @@ async function addTask() {
 async function toggleTask(id) {
   const task = allTasks.find(t => t.id === id);
   if (!task) return;
-  const completedAt = task.completedAt ? null : new Date().toISOString();
-  const res = await api('PUT', '/api/admin/tasks', { id, completedAt });
-  if (!res.ok) return;
-  task.completedAt = completedAt;
+  const isRecurring = task.recurrence && task.recurrence !== 'none';
+  if (isRecurring) {
+    const today = localDateStr();
+    const alreadyDone = recurringDoneToday(task);
+    const body = alreadyDone
+      ? { id, removeCompletedOnDate: today }
+      : { id, completedOnDate: today };
+    const res = await api('PUT', '/api/admin/tasks', body);
+    if (!res.ok) return;
+    if (!Array.isArray(task.completedOn)) task.completedOn = [];
+    if (alreadyDone) {
+      task.completedOn = task.completedOn.filter(d => d !== today);
+    } else {
+      task.completedOn.push(today);
+    }
+  } else {
+    const completedAt = task.completedAt ? null : new Date().toISOString();
+    const res = await api('PUT', '/api/admin/tasks', { id, completedAt });
+    if (!res.ok) return;
+    task.completedAt = completedAt;
+  }
   renderTaskList();
   renderTaskStats(_taskStatPeriod);
   if (_taskView === 'calendar') renderCalendar();
