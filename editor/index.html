@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Editor Portal — Fairway</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#181614;color:#f7f3ed;font-family:'Outfit',sans-serif;font-weight:300;min-height:100vh;}
+  button,input{font-family:'Outfit',sans-serif;}
+
+  /* Login screen */
+  .login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;}
+  .login-box{width:100%;max-width:360px;}
+  .login-logo{font-family:'Fraunces',serif;font-size:26px;font-weight:400;margin-bottom:36px;text-align:center;}
+  .login-title{font-size:14px;color:rgba(247,243,237,0.4);text-align:center;margin-bottom:24px;letter-spacing:0.04em;}
+  .login-input{width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:12px;padding:14px 16px;font-size:15px;color:#f7f3ed;outline:none;transition:border-color .15s;margin-bottom:12px;}
+  .login-input:focus{border-color:rgba(189,122,112,0.5);}
+  .login-btn{width:100%;background:#bd7a70;color:#fff;border:none;border-radius:100px;padding:14px;font-size:14px;font-weight:500;cursor:pointer;transition:opacity .15s;margin-top:4px;}
+  .login-btn:hover{opacity:.88;}
+  .login-btn:disabled{opacity:.5;cursor:not-allowed;}
+  .login-error{font-size:13px;color:#e07070;text-align:center;margin-top:12px;min-height:18px;}
+
+  /* Main portal */
+  .portal{display:none;padding:28px 24px;max-width:900px;margin:0 auto;}
+  .portal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:12px;}
+  .portal-title{font-family:'Fraunces',serif;font-size:26px;font-weight:400;}
+  .portal-sub{font-size:13px;color:rgba(247,243,237,0.35);margin-top:2px;}
+  .logout-btn{background:none;border:1px solid rgba(247,243,237,0.1);border-radius:100px;color:rgba(247,243,237,0.4);font-size:12.5px;padding:7px 14px;cursor:pointer;transition:all .15s;}
+  .logout-btn:hover{border-color:rgba(247,243,237,0.25);color:#f7f3ed;}
+
+  /* Stage tabs */
+  .stage-tabs{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;}
+  .stage-tab{padding:7px 16px;border-radius:100px;border:1px solid rgba(247,243,237,0.1);font-size:12.5px;font-weight:500;cursor:pointer;background:transparent;color:rgba(247,243,237,0.38);transition:all .15s;}
+  .stage-tab.active{background:rgba(189,122,112,0.12);border-color:rgba(189,122,112,0.35);color:#bd7a70;}
+
+  /* Content list */
+  .content-list{display:flex;flex-direction:column;gap:12px;}
+  .content-card{background:#22201d;border:1px solid rgba(247,243,237,0.09);border-radius:14px;padding:18px 20px;}
+  .content-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .content-card-title{font-size:16px;font-weight:400;color:#f7f3ed;line-height:1.4;}
+  .content-card-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;}
+  .badge{font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;border-radius:100px;padding:3px 9px;}
+  .badge-stage{background:rgba(247,243,237,0.07);color:rgba(247,243,237,0.5);}
+  .badge-long{background:rgba(189,122,112,0.12);color:#bd7a70;border:1px solid rgba(189,122,112,0.2);}
+  .badge-short{background:rgba(109,191,123,0.1);color:#6dbf7b;border:1px solid rgba(109,191,123,0.2);}
+  .meta-date{font-size:12px;color:rgba(247,243,237,0.3);}
+  .card-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid rgba(247,243,237,0.06);}
+  .btn-action{padding:8px 16px;border-radius:100px;border:1px solid rgba(247,243,237,0.12);font-size:12.5px;font-weight:500;cursor:pointer;background:transparent;color:rgba(247,243,237,0.6);transition:all .15s;}
+  .btn-action:hover{border-color:rgba(247,243,237,0.3);color:#f7f3ed;}
+  .btn-action.primary{background:#bd7a70;color:#fff;border-color:#bd7a70;}
+  .btn-action.primary:hover{opacity:.88;}
+  .btn-action:disabled{opacity:.4;cursor:not-allowed;}
+  .video-status{font-size:12px;margin-top:10px;padding:8px 12px;border-radius:8px;display:flex;align-items:center;gap:8px;}
+  .video-status.has-video{background:rgba(109,191,123,0.08);color:#6dbf7b;border:1px solid rgba(109,191,123,0.15);}
+  .video-status.no-video{background:rgba(247,243,237,0.03);color:rgba(247,243,237,0.3);border:1px solid rgba(247,243,237,0.06);}
+  .upload-progress{width:100%;height:4px;background:rgba(247,243,237,0.08);border-radius:100px;overflow:hidden;margin-top:10px;display:none;}
+  .upload-progress-bar{height:100%;background:#bd7a70;border-radius:100px;width:0%;transition:width .3s;}
+
+  /* Stage move */
+  .stage-move{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .stage-move span{font-size:12px;color:rgba(247,243,237,0.3);}
+
+  /* Empty */
+  .empty{text-align:center;padding:60px 0;color:rgba(247,243,237,0.2);font-size:14px;}
+
+  /* Toast */
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#22201d;border:1px solid rgba(247,243,237,0.12);border-radius:100px;padding:10px 20px;font-size:13.5px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;}
+
+  ::-webkit-scrollbar{width:5px;} ::-webkit-scrollbar-track{background:transparent;} ::-webkit-scrollbar-thumb{background:rgba(247,243,237,0.1);border-radius:10px;}
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Fairway</div>
+    <div class="login-title">Editor portal</div>
+    <input type="password" class="login-input" id="login-pw" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Sign in</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- Portal -->
+<div class="portal" id="portal">
+  <div class="portal-header">
+    <div>
+      <div class="portal-title">Editor workspace</div>
+      <div class="portal-sub">Download, edit, and upload video content</div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">Sign out</button>
+  </div>
+
+  <div class="stage-tabs" id="stage-tabs">
+    <button class="stage-tab active" onclick="setStageFilter('all',this)">All</button>
+    <button class="stage-tab" onclick="setStageFilter('recorded',this)">Recorded</button>
+    <button class="stage-tab" onclick="setStageFilter('editing',this)">Editing</button>
+    <button class="stage-tab" onclick="setStageFilter('approved',this)">Approved</button>
+    <button class="stage-tab" onclick="setStageFilter('published',this)">Published</button>
+  </div>
+
+  <div class="content-list" id="content-list"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STAGE_LABELS = {
+  recorded:'Recorded', editing:'Editing', approved:'Approved', published:'Published',
+};
+const NEXT_STAGE = { recorded:'editing', editing:'approved', approved:'published' };
+
+let allContent = [];
+let _stageFilter = 'all';
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.opacity = '1';
+  clearTimeout(t._t); t._t = setTimeout(() => t.style.opacity = '0', 3000);
+}
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+async function doLogin() {
+  const pw = document.getElementById('login-pw').value;
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-error');
+  err.textContent = '';
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  const res = await fetch('/api/editor/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pw }),
+  });
+  if (!res.ok) {
+    err.textContent = 'Incorrect password.';
+    btn.disabled = false; btn.textContent = 'Sign in';
+    return;
+  }
+  showPortal();
+}
+
+async function doLogout() {
+  document.cookie = 'fw_editor=; Max-Age=0; Path=/';
+  document.getElementById('portal').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+function showPortal() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('portal').style.display = 'block';
+  loadContent();
+}
+
+(async function init() {
+  const res = await fetch('/api/editor/verify', { method: 'POST' });
+  if (res.ok) { showPortal(); }
+})();
+
+// ── Content ───────────────────────────────────────────────────────────────────
+async function loadContent() {
+  const res = await fetch('/api/editor/content');
+  if (!res.ok) { if (res.status === 401) doLogout(); return; }
+  allContent = await res.json();
+  render();
+}
+
+function setStageFilter(stage, btn) {
+  _stageFilter = stage;
+  document.querySelectorAll('.stage-tab').forEach(b => b.classList.toggle('active', b === btn));
+  render();
+}
+
+function filtered() {
+  if (_stageFilter === 'all') return allContent;
+  return allContent.filter(c => c.stage === _stageFilter);
+}
+
+function render() {
+  const items = filtered();
+  const list = document.getElementById('content-list');
+  if (!items.length) {
+    list.innerHTML = '<div class="empty">No items in this stage.</div>';
+    return;
+  }
+  list.innerHTML = items.map(c => cardHtml(c)).join('');
+}
+
+function cardHtml(c) {
+  const stageLabel = STAGE_LABELS[c.stage] || c.stage;
+  const nextStage = NEXT_STAGE[c.stage];
+  const dateLabel = c.scheduledDate
+    ? new Date(c.scheduledDate+'T00:00:00').toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})
+    : '';
+  const videoStatus = c.videoKey
+    ? `<div class="video-status has-video">✓ Video uploaded · ${esc(c.videoFilename || 'video')}</div>`
+    : `<div class="video-status no-video">No video uploaded yet</div>`;
+  const stageActions = nextStage
+    ? `<button class="btn-action primary" onclick="advanceStage('${c.id}','${nextStage}')">Mark as ${STAGE_LABELS[nextStage]}</button>`
+    : '';
+  return `<div class="content-card" id="card-${c.id}">
+    <div class="content-card-top">
+      <div>
+        <div class="content-card-title">${esc(c.title)}</div>
+        <div class="content-card-meta">
+          <span class="badge ${c.type==='long_form'?'badge-long':'badge-short'}">${c.type==='long_form'?'Long-form':'Short-form'}</span>
+          <span class="badge badge-stage">${esc(stageLabel)}</span>
+          ${dateLabel?`<span class="meta-date">${esc(dateLabel)}</span>`:''}
+        </div>
+      </div>
+    </div>
+    ${videoStatus}
+    <div class="upload-progress" id="prog-${c.id}"><div class="upload-progress-bar" id="progbar-${c.id}"></div></div>
+    <div class="card-actions">
+      ${c.videoKey ? `<button class="btn-action" onclick="downloadVideo('${c.id}')">⬇ Download video</button>` : ''}
+      <label class="btn-action" style="cursor:pointer;">
+        ⬆ Upload video
+        <input type="file" accept="video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/x-ms-wmv,video/webm,video/x-m4v,video/mp2t" style="display:none" onchange="uploadVideo('${c.id}',this)">
+      </label>
+      ${stageActions}
+    </div>
+  </div>`;
+}
+
+// ── Video download ────────────────────────────────────────────────────────────
+async function downloadVideo(contentId) {
+  const res = await fetch(`/api/content-video/download-url?contentId=${contentId}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    showToast(err.error || 'Could not get download link.'); return;
+  }
+  const { downloadUrl, filename } = await res.json();
+  const a = document.createElement('a');
+  a.href = downloadUrl;
+  a.download = filename || 'video';
+  a.click();
+}
+
+// ── Video upload ──────────────────────────────────────────────────────────────
+async function uploadVideo(contentId, input) {
+  const file = input.files[0];
+  if (!file) return;
+  input.value = '';
+
+  const prog = document.getElementById(`prog-${contentId}`);
+  const bar = document.getElementById(`progbar-${contentId}`);
+  prog.style.display = 'block';
+  bar.style.width = '5%';
+
+  // Get presigned URL
+  const urlRes = await fetch(`/api/content-video/upload-url?contentId=${contentId}&filename=${encodeURIComponent(file.name)}`);
+  if (!urlRes.ok) {
+    const err = await urlRes.json().catch(() => ({}));
+    showToast(err.error || 'Upload failed.'); prog.style.display = 'none'; return;
+  }
+  const { uploadUrl, key, contentType, filename } = await urlRes.json();
+
+  bar.style.width = '20%';
+
+  // Upload directly to R2
+  const xhr = new XMLHttpRequest();
+  xhr.open('PUT', uploadUrl);
+  xhr.setRequestHeader('Content-Type', contentType);
+  xhr.upload.onprogress = (e) => {
+    if (e.lengthComputable) bar.style.width = 20 + Math.round(e.loaded / e.total * 70) + '%';
+  };
+  xhr.onload = async () => {
+    if (xhr.status < 200 || xhr.status >= 300) {
+      showToast('Upload to storage failed. Try again.'); prog.style.display = 'none'; return;
+    }
+    bar.style.width = '95%';
+    // Confirm with server
+    const confirmRes = await fetch('/api/content-video/confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contentId, key, filename }),
+    });
+    if (!confirmRes.ok) { showToast('Upload saved but metadata failed — contact Luke.'); prog.style.display = 'none'; return; }
+    const updated = await confirmRes.json();
+    const idx = allContent.findIndex(c => c.id === contentId);
+    if (idx !== -1) allContent[idx] = updated;
+    bar.style.width = '100%';
+    setTimeout(() => { prog.style.display = 'none'; bar.style.width = '0'; render(); showToast('Video uploaded ✓'); }, 600);
+  };
+  xhr.onerror = () => { showToast('Upload failed — check your connection.'); prog.style.display = 'none'; };
+  xhr.send(file);
+}
+
+// ── Stage advance ─────────────────────────────────────────────────────────────
+async function advanceStage(contentId, stage) {
+  const res = await fetch('/api/editor/content', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: contentId, stage }),
+  });
+  if (!res.ok) { const e = await res.json().catch(() => ({})); showToast(e.error || 'Failed to update stage.'); return; }
+  const updated = await res.json();
+  const idx = allContent.findIndex(c => c.id === contentId);
+  if (idx !== -1) allContent[idx] = updated;
+  render();
+  showToast(`Moved to ${STAGE_LABELS[stage]}`);
+}
+</script>
+</body>
+</html>

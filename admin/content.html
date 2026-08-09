@@ -129,6 +129,26 @@
   /* Empty */
   .empty-state{text-align:center;padding:60px 0;color:rgba(247,243,237,0.2);font-size:14px;}
 
+  /* Video section in panel */
+  .video-section{background:rgba(247,243,237,0.02);border:1px solid rgba(247,243,237,0.08);border-radius:10px;padding:14px;margin-bottom:20px;}
+  .video-filename{font-size:13px;color:rgba(247,243,237,0.55);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+  .video-filename svg{opacity:.4;}
+  .video-actions{display:flex;gap:6px;flex-wrap:wrap;}
+  .btn-video{padding:7px 14px;border-radius:100px;border:1px solid rgba(247,243,237,0.12);font-size:12px;font-weight:500;cursor:pointer;background:transparent;color:rgba(247,243,237,0.55);transition:all .15s;}
+  .btn-video:hover{border-color:rgba(247,243,237,0.3);color:#f7f3ed;}
+  .btn-video:disabled{opacity:.35;cursor:not-allowed;}
+  .upload-prog-wrap{width:100%;height:3px;background:rgba(247,243,237,0.07);border-radius:100px;overflow:hidden;margin-top:10px;display:none;}
+  .upload-prog-bar{height:100%;background:#bd7a70;border-radius:100px;width:0%;transition:width .3s;}
+
+  /* Ideas modal */
+  .ideas-list{display:flex;flex-direction:column;gap:10px;margin-top:16px;}
+  .idea-card{background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.08);border-radius:10px;padding:14px;cursor:pointer;transition:border-color .15s;}
+  .idea-card:hover{border-color:rgba(189,122,112,0.35);}
+  .idea-title{font-size:14px;color:#f7f3ed;font-weight:400;margin-bottom:4px;}
+  .idea-hook{font-size:12.5px;color:rgba(247,243,237,0.4);line-height:1.5;}
+  .idea-type{font-size:10.5px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:rgba(189,122,112,0.7);margin-bottom:6px;}
+  .ideas-loading{text-align:center;padding:32px;color:rgba(247,243,237,0.3);font-size:13.5px;}
+
   /* Scrollbar */
   ::-webkit-scrollbar{width:5px;height:5px;}
   ::-webkit-scrollbar-track{background:transparent;}
@@ -174,6 +194,7 @@
           <button class="view-tab active" onclick="setView('kanban',this)">Kanban</button>
           <button class="view-tab" onclick="setView('calendar',this)">Calendar</button>
         </div>
+        <button class="btn-secondary" onclick="openIdeasModal()">💡 Ideas</button>
         <button class="btn-primary" onclick="openCreateModal()">+ Create</button>
       </div>
     </div>
@@ -250,6 +271,35 @@
       <button class="btn-secondary" onclick="closeCreateModal()">Cancel</button>
       <button class="btn-primary" id="cm-save" onclick="createContent()">Create</button>
     </div>
+  </div>
+</div>
+
+<!-- Ideas modal -->
+<div class="modal-overlay" id="ideas-overlay" onclick="if(event.target===this)closeIdeasModal()">
+  <div class="modal" style="max-width:560px;">
+    <h2>Content ideas</h2>
+    <div class="field">
+      <label>Topic or theme (optional)</label>
+      <input type="text" id="ideas-topic" placeholder="e.g. first home buyers, depreciation, interest rates…">
+    </div>
+    <div class="field">
+      <label>Guest name (optional)</label>
+      <input type="text" id="ideas-guest" placeholder="e.g. Jane Smith — mortgage broker">
+    </div>
+    <div class="field">
+      <label>Content type</label>
+      <select id="ideas-type">
+        <option value="both">Both long-form and short-form</option>
+        <option value="long_form">Long-form episodes only</option>
+        <option value="short_form">Short-form clips only</option>
+      </select>
+    </div>
+    <div class="error-msg" id="ideas-error"></div>
+    <div class="modal-footer" style="justify-content:space-between;align-items:center;">
+      <button class="btn-secondary" onclick="closeIdeasModal()">Close</button>
+      <button class="btn-primary" id="ideas-generate-btn" onclick="generateIdeas()">Generate ideas</button>
+    </div>
+    <div id="ideas-results"></div>
   </div>
 </div>
 
@@ -579,6 +629,23 @@ function renderPanelBody(item) {
       <div class="panel-label">Notes</div>
       <textarea class="panel-textarea" id="pn-notes" rows="3" onblur="panelSave()">${esc(item.notes||'')}</textarea>
     </div>
+    <div class="panel-section">
+      <div class="panel-label">Video file</div>
+      <div class="video-section">
+        ${item.videoKey
+          ? `<div class="video-filename"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 5l4 2-4 2V5z" fill="currentColor"/></svg>${esc(item.videoFilename||'video')}</div>`
+          : `<div style="font-size:12.5px;color:rgba(247,243,237,0.28);margin-bottom:10px;">No video uploaded yet</div>`
+        }
+        <div class="video-actions">
+          ${item.videoKey ? `<button class="btn-video" onclick="downloadPanelVideo('${item.id}')">⬇ Download</button>` : ''}
+          <label class="btn-video" style="cursor:pointer;">
+            ⬆ ${item.videoKey ? 'Replace video' : 'Upload video'}
+            <input type="file" accept="video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/x-ms-wmv,video/webm,video/x-m4v,video/mp2t" style="display:none" onchange="uploadPanelVideo('${item.id}',this)">
+          </label>
+        </div>
+        <div class="upload-prog-wrap" id="pn-prog-wrap"><div class="upload-prog-bar" id="pn-prog-bar"></div></div>
+      </div>
+    </div>
     <div class="panel-actions">
       <button class="btn-secondary" onclick="deleteContent('${item.id}')" style="color:#e07070;border-color:rgba(220,80,80,0.2);">Delete</button>
     </div>
@@ -757,6 +824,133 @@ async function deleteContent(id) {
   closePanel();
   render();
   showToast('Deleted');
+}
+
+// ── Video upload / download ───────────────────────────────────────────────────
+async function downloadPanelVideo(contentId) {
+  const res = await fetch(`/api/content-video/download-url?contentId=${contentId}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    showToast(err.error || 'Could not get download link.'); return;
+  }
+  const { downloadUrl, filename } = await res.json();
+  const a = document.createElement('a');
+  a.href = downloadUrl; a.download = filename || 'video'; a.click();
+}
+
+async function uploadPanelVideo(contentId, input) {
+  const file = input.files[0];
+  if (!file) return;
+  input.value = '';
+  const progWrap = document.getElementById('pn-prog-wrap');
+  const progBar = document.getElementById('pn-prog-bar');
+  if (progWrap) { progWrap.style.display = 'block'; progBar.style.width = '5%'; }
+
+  const urlRes = await fetch(`/api/content-video/upload-url?contentId=${contentId}&filename=${encodeURIComponent(file.name)}`);
+  if (!urlRes.ok) {
+    const err = await urlRes.json().catch(() => ({}));
+    showToast(err.error || 'Upload failed.');
+    if (progWrap) progWrap.style.display = 'none'; return;
+  }
+  const { uploadUrl, key, contentType, filename } = await urlRes.json();
+  if (progBar) progBar.style.width = '20%';
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('PUT', uploadUrl);
+  xhr.setRequestHeader('Content-Type', contentType);
+  xhr.upload.onprogress = (e) => {
+    if (e.lengthComputable && progBar) progBar.style.width = (20 + Math.round(e.loaded / e.total * 70)) + '%';
+  };
+  xhr.onload = async () => {
+    if (xhr.status < 200 || xhr.status >= 300) {
+      showToast('Upload to storage failed. Try again.');
+      if (progWrap) progWrap.style.display = 'none'; return;
+    }
+    if (progBar) progBar.style.width = '95%';
+    const confirmRes = await fetch('/api/content-video/confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contentId, key, filename }),
+    });
+    if (!confirmRes.ok) { showToast('Upload saved but metadata failed.'); if (progWrap) progWrap.style.display = 'none'; return; }
+    const updated = await confirmRes.json();
+    const idx = allContent.findIndex(c => c.id === contentId);
+    if (idx !== -1) allContent[idx] = updated;
+    if (progBar) progBar.style.width = '100%';
+    setTimeout(() => {
+      if (progWrap) { progWrap.style.display = 'none'; progBar.style.width = '0'; }
+      renderPanelBody(updated);
+      render();
+      showToast('Video uploaded ✓');
+    }, 600);
+  };
+  xhr.onerror = () => { showToast('Upload failed — check connection.'); if (progWrap) progWrap.style.display = 'none'; };
+  xhr.send(file);
+}
+
+// ── AI Ideas ──────────────────────────────────────────────────────────────────
+function openIdeasModal() {
+  document.getElementById('ideas-overlay').style.display = 'flex';
+  document.getElementById('ideas-results').innerHTML = '';
+  document.getElementById('ideas-error').classList.remove('visible');
+  document.getElementById('ideas-generate-btn').disabled = false;
+  document.getElementById('ideas-generate-btn').textContent = 'Generate ideas';
+}
+
+function closeIdeasModal() {
+  document.getElementById('ideas-overlay').style.display = 'none';
+}
+
+async function generateIdeas() {
+  const topic = document.getElementById('ideas-topic').value.trim();
+  const guestName = document.getElementById('ideas-guest').value.trim();
+  const type = document.getElementById('ideas-type').value;
+  const btn = document.getElementById('ideas-generate-btn');
+  const errEl = document.getElementById('ideas-error');
+  const resultsEl = document.getElementById('ideas-results');
+
+  errEl.classList.remove('visible');
+  btn.disabled = true; btn.textContent = 'Generating…';
+  resultsEl.innerHTML = '<div class="ideas-loading">Thinking up ideas for you…</div>';
+
+  // Pass recent titles so Claude avoids repeating them
+  const recentTitles = allContent.filter(c => !c.deletedAt).slice(0, 20).map(c => c.title);
+
+  const res = await api('POST', '/api/admin/content-ideas', { topic, guestName, type, recentTitles });
+  btn.disabled = false; btn.textContent = 'Generate again';
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    errEl.textContent = err.error || 'Failed to generate ideas.';
+    errEl.classList.add('visible');
+    resultsEl.innerHTML = '';
+    return;
+  }
+
+  const { ideas } = await res.json();
+  if (!ideas || !ideas.length) { resultsEl.innerHTML = '<div class="ideas-loading">No ideas returned — try again.</div>'; return; }
+
+  resultsEl.innerHTML = `<div class="ideas-list">${ideas.map((idea, i) => `
+    <div class="idea-card" onclick="useIdea(${i})">
+      <div class="idea-type">${idea.type === 'long_form' ? 'Long-form' : idea.type === 'short_form' ? 'Short-form' : 'Flexible'}</div>
+      <div class="idea-title">${esc(idea.title)}</div>
+      <div class="idea-hook">${esc(idea.hook)}</div>
+    </div>`).join('')}
+  </div>`;
+
+  window._lastIdeas = ideas;
+}
+
+function useIdea(idx) {
+  const idea = window._lastIdeas?.[idx];
+  if (!idea) return;
+  closeIdeasModal();
+  openCreateModal();
+  document.getElementById('cm-title').value = idea.title;
+  if (idea.type === 'long_form' || idea.type === 'short_form') {
+    document.getElementById('cm-type').value = idea.type;
+    updateCreateStages();
+  }
 }
 </script>
 </body>
