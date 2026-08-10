@@ -134,7 +134,7 @@ const json = (data, status = 200) =>
 export default async (req) => {
   if (!(await checkAdmin(req))) return json({ error: 'Unauthorized' }, 401);
 
-  const store = getStore('fairway-clients');
+  const store = getStore({ name: 'fairway-clients', consistency: 'strong' });
   const clients = (await store.get('all', { type: 'json' })) || [];
 
   if (req.method === 'GET') {

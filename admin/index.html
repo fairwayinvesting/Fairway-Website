@@ -5116,6 +5116,7 @@ async function saveMilestoneBatch() {
   toggleAddDateForm();
   renderMilestonesDashboard();
   updateMilestoneBadges();
+  renderPipeline();
 }
 
 async function archiveClient(clientId) {
@@ -5148,6 +5149,7 @@ async function completeMilestone(id, clientId) {
   if (m) { m.completed = true; m.completedAt = new Date().toISOString(); }
   renderMilestonesDashboard();
   updateMilestoneBadges();
+  renderPipeline();
   if (cid) renderClientMilestones(cid);
 }
 
@@ -5215,6 +5217,7 @@ async function saveMilestoneEdit() {
   renderMilestonesDashboard();
   renderClientMilestones(m.clientId);
   updateMilestoneBadges();
+  renderPipeline();
 }
 
 async function deleteMilestoneConfirm(id, clientId) {
@@ -5229,6 +5232,7 @@ async function deleteMilestoneConfirm(id, clientId) {
   milestones = milestones.filter(x => x.id !== id);
   renderMilestonesDashboard();
   updateMilestoneBadges();
+  renderPipeline();
   if (cid) renderClientMilestones(cid);
 }
 
