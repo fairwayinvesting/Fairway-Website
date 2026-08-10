@@ -897,6 +897,10 @@
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2" fill="currentColor" opacity=".7"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         Content
       </a>
+      <a class="snav-item" href="/admin/life.html" style="text-decoration:none;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2C5.8 2 4 3.8 4 6c0 3 4 8 4 8s4-5 4-8c0-2.2-1.8-4-4-4z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="8" cy="6" r="1.3" fill="currentColor"/></svg>
+        Life
+      </a>
       <a class="snav-item" href="/proposal.html" target="_blank" style="text-decoration:none;">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="10" height="13" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 5h5M4.5 8h5M4.5 11h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M12 9l2.5 2.5-2.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Proposal
@@ -972,15 +976,12 @@
 
       <!-- List view -->
       <div id="task-list-view">
-        <!-- Domain toggle -->
+        <!-- View toggle -->
         <div class="task-domain-tabs">
-          <button class="task-domain-tab active" onclick="setTaskDomain('today',this)">Today</button>
-          <button class="task-domain-tab" onclick="setTaskDomain('health',this)">Health</button>
-          <button class="task-domain-tab" onclick="setTaskDomain('business',this)">Business</button>
-        </div>
-        <!-- Stream sub-tabs (shown only when a domain is selected) -->
-        <div id="task-stream-tabs" style="display:none;">
-          <div class="task-stream-tabs" id="task-stream-tab-list"></div>
+          <button class="task-domain-tab active" onclick="setTaskView('today',this)">Today</button>
+          <button class="task-domain-tab" onclick="setTaskView('clients',this)">Clients</button>
+          <button class="task-domain-tab" onclick="setTaskView('prospecting',this)">Prospecting</button>
+          <button class="task-domain-tab" onclick="setTaskView('content',this)">Content</button>
         </div>
 
         <!-- Add task -->
@@ -991,10 +992,6 @@
             <button class="task-urg-btn active" data-urg="medium" onclick="setTaskUrgency('medium',this)">Medium</button>
             <button class="task-urg-btn" data-urg="low" onclick="setTaskUrgency('low',this)">Low</button>
           </div>
-          <select id="task-new-domain" onchange="updateTaskNewStreamOptions()" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;color:rgba(247,243,237,0.7);font-family:'Outfit',sans-serif;font-size:12.5px;padding:8px 12px;cursor:pointer;outline:none;">
-            <option value="business">Business</option>
-            <option value="health">Health</option>
-          </select>
           <select id="task-new-stream" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;color:rgba(247,243,237,0.7);font-family:'Outfit',sans-serif;font-size:12.5px;padding:8px 12px;cursor:pointer;outline:none;">
             <option value="clients">Clients</option>
             <option value="prospecting">Prospecting</option>
@@ -1250,6 +1247,7 @@
             <button class="settings-nav-item" onclick="showSettingsPanel('branding',this)">Branding</button>
             <button class="settings-nav-item" onclick="showSettingsPanel('booking-links',this)">Booking links</button>
             <button class="settings-nav-item" onclick="showSettingsPanel('compliance',this)">Compliance</button>
+            <button class="settings-nav-item" onclick="showSettingsPanel('bas-dates',this)">BAS &amp; Tax dates</button>
           </div>
           <div class="settings-nav-group">
             <p class="settings-nav-label">Tools</p>
@@ -1334,6 +1332,15 @@
                 <div class="cpd-bar-wrap"><div class="cpd-bar" id="cpd-bar"></div></div>
                 <div id="cpd-sub" style="font-size:12px;color:rgba(247,243,237,0.35);margin-top:6px;"></div>
               </div>
+            </div>
+          </div>
+
+          <!-- BAS & Tax dates -->
+          <div id="settings-panel-bas-dates" class="settings-panel">
+            <div class="settings-block">
+              <h2>BAS &amp; Tax dates</h2>
+              <p style="font-size:13px;color:rgba(247,243,237,0.45);margin-bottom:24px;line-height:1.6;">Quarterly BAS lodgement deadlines (standard due dates — not via tax agent). Mark each quarter lodged once submitted.</p>
+              <div id="bas-quarters-list" style="display:flex;flex-direction:column;gap:10px;"></div>
             </div>
           </div>
 
@@ -3327,6 +3334,27 @@ function renderCrmPartnerPanel() {
           <div class="dash-row-meta">${c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '—'}</div>
         </div>`).join('') : '<p style="font-size:13px;color:rgba(247,243,237,0.25);padding:4px 0;">No clients referred yet.</p>'}
     </div>` : ''}
+    ${(p.roles||[]).includes('prospect') ? (()=>{
+      const linkedClient = clients.find(c => c.crmContactId === p.id);
+      return `<div class="profile-section">
+        <div class="profile-section-title">Linked client</div>
+        ${linkedClient
+          ? `<div class="dash-row" style="cursor:pointer;" onclick="closeCrmPartnerPanel();openClientProfile('${linkedClient.id}')">
+              <div class="dash-row-label">${esc(linkedClient.name)}<span style="display:block;font-size:11.5px;color:rgba(247,243,237,0.3);">${esc(linkedClient.email)}</span></div>
+              <div class="dash-row-meta" style="color:#6dbf7b;">Linked</div>
+            </div>
+            <button onclick="unlinkCrmClient('${linkedClient.id}')" style="margin-top:8px;font-size:12px;padding:5px 12px;background:none;border:1px solid rgba(247,243,237,0.1);border-radius:100px;color:rgba(247,243,237,0.35);font-family:'Outfit',sans-serif;cursor:pointer;">Unlink</button>`
+          : `<p style="font-size:13px;color:rgba(247,243,237,0.25);margin-bottom:10px;">Not yet linked to a client record.</p>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+              <select id="crm-link-client-sel-${p.id}" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:8px;padding:7px 10px;color:rgba(247,243,237,0.7);font-family:'Outfit',sans-serif;font-size:12.5px;outline:none;flex:1;min-width:120px;max-width:220px;">
+                <option value="">Select client…</option>
+                ${clients.filter(c=>!c.crmContactId).map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}
+              </select>
+              <button onclick="linkCrmContact('${p.id}')" class="btn-primary" style="font-size:12px;padding:7px 14px;">Link</button>
+            </div>`
+        }
+      </div>`;
+    })() : ''}
     <div class="profile-section">
       <div class="profile-section-title">Deals involved (${dealsClients.length})</div>
       ${dealsClients.length ? dealsClients.map(c => {
@@ -3338,6 +3366,27 @@ function renderCrmPartnerPanel() {
       }).join('') : '<p style="font-size:13px;color:rgba(247,243,237,0.25);padding:4px 0;">Not assigned to any client deals yet.</p>'}
     </div>
   `;
+}
+
+async function linkCrmContact(partnerId) {
+  const sel = document.getElementById(`crm-link-client-sel-${partnerId}`);
+  const clientId = sel?.value;
+  if (!clientId) { showToast('Select a client first.'); return; }
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, crmContactId: partnerId });
+  if (!res.ok) { showToast('Failed to link.'); return; }
+  const idx = clients.findIndex(c => c.id === clientId);
+  if (idx !== -1) clients[idx].crmContactId = partnerId;
+  renderCrmPartnerPanel();
+  showToast('Linked to client ✓');
+}
+
+async function unlinkCrmClient(clientId) {
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, crmContactId: '' });
+  if (!res.ok) { showToast('Failed to unlink.'); return; }
+  const idx = clients.findIndex(c => c.id === clientId);
+  if (idx !== -1) clients[idx].crmContactId = null;
+  renderCrmPartnerPanel();
+  showToast('Unlinked');
 }
 
 function openLogContactForm(id) {
@@ -5410,46 +5459,21 @@ let allTasks = [];
 let taskNewUrgency = 'medium';
 let _taskStatPeriod = 'week';
 let _tasksLoaded = false;
-let _taskDomain = 'today';   // 'today' | 'health' | 'business'
-let _taskStream = null;      // null = all streams within domain
+// 'today' | 'clients' | 'prospecting' | 'content'
+let _taskView = 'today';
 
-const TASK_STREAMS = {
-  health: [{ key:'fitness',label:'Fitness' },{ key:'luna',label:'Luna' },{ key:'self',label:'Self' }],
-  business: [{ key:'clients',label:'Clients' },{ key:'prospecting',label:'Prospecting' },{ key:'content',label:'Content' }],
-};
-
-function setTaskDomain(domain, btn) {
-  _taskDomain = domain;
-  _taskStream = null;
+function setTaskView(view, btn) {
+  _taskView = view;
   document.querySelectorAll('.task-domain-tab').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  const streamWrap = document.getElementById('task-stream-tabs');
-  const streamList = document.getElementById('task-stream-tab-list');
-  if (domain === 'today') {
-    streamWrap.style.display = 'none';
-  } else {
-    const streams = TASK_STREAMS[domain] || [];
-    streamList.innerHTML = `<button class="task-stream-tab active" onclick="setTaskStream(null,this)">All</button>` +
-      streams.map(s => `<button class="task-stream-tab" onclick="setTaskStream('${s.key}',this)">${s.label}</button>`).join('');
-    streamWrap.style.display = '';
-  }
-  renderTaskList();
-}
-
-function setTaskStream(stream, btn) {
-  _taskStream = stream;
-  document.querySelectorAll('#task-stream-tab-list .task-stream-tab').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
+  // Pre-select matching stream in add form
+  const streamSel = document.getElementById('task-new-stream');
+  if (streamSel && view !== 'today') streamSel.value = view;
   renderTaskList();
 }
 
 function updateTaskNewStreamOptions() {
-  const domain = document.getElementById('task-new-domain')?.value || 'business';
-  const streamSel = document.getElementById('task-new-stream');
-  if (!streamSel) return;
-  const opts = { health: ['fitness','luna','self'], business: ['clients','prospecting','content'] };
-  const labels = { fitness:'Fitness', luna:'Luna', self:'Self', clients:'Clients', prospecting:'Prospecting', content:'Content' };
-  streamSel.innerHTML = (opts[domain] || []).map(v => `<option value="${v}">${labels[v]}</option>`).join('');
+  // Business-only now — no-op, stream select is always business streams
 }
 
 function updateTaskNewRecurrenceDays() {
@@ -5542,19 +5566,19 @@ function renderTaskList() {
   const urgOrder = { high: 0, medium: 1, low: 2 };
 
   // Filter helper
-  function matchesDomainStream(t) {
-    if (_taskDomain === 'today') return true;
-    if (t.domain !== _taskDomain) return false;
-    if (_taskStream && t.stream !== _taskStream) return false;
-    return true;
+  function matchesView(t) {
+    // Never show health tasks on the business admin page
+    if (t.domain === 'health') return false;
+    if (_taskView === 'today') return true;
+    return t.stream === _taskView;
   }
 
-  // Non-recurring active tasks (due today or overdue, not completed)
+  // Non-recurring active tasks (due today or overdue for Today; all active for stream views)
   const nonRecurActive = allTasks.filter(t =>
     !t.deletedAt && !t.completedAt &&
     (!t.recurrence || t.recurrence === 'none') &&
-    t.dueDate <= today &&
-    matchesDomainStream(t)
+    (_taskView === 'today' ? t.dueDate <= today : true) &&
+    matchesView(t)
   );
 
   // Recurring tasks that fire today and haven't been checked off
@@ -5562,7 +5586,7 @@ function renderTaskList() {
     !t.deletedAt &&
     recurringFiresToday(t) &&
     !recurringDoneToday(t) &&
-    matchesDomainStream(t)
+    matchesView(t)
   );
 
   // Recurring tasks done today
@@ -5570,7 +5594,7 @@ function renderTaskList() {
     !t.deletedAt &&
     recurringFiresToday(t) &&
     recurringDoneToday(t) &&
-    matchesDomainStream(t)
+    matchesView(t)
   );
 
   // Non-recurring done today
@@ -5578,7 +5602,7 @@ function renderTaskList() {
     !t.deletedAt && t.completedAt &&
     (!t.recurrence || t.recurrence === 'none') &&
     localDateStr(new Date(t.completedAt)) === today &&
-    matchesDomainStream(t)
+    matchesView(t)
   );
 
   const active = [...recurActive, ...nonRecurActive];
@@ -5591,19 +5615,17 @@ function renderTaskList() {
   if (activeEl) {
     if (active.length === 0) {
       activeEl.innerHTML = `<div style="padding:24px 0;text-align:center;color:rgba(247,243,237,0.18);font-size:13.5px;">No active tasks for today.</div>`;
-    } else if (_taskDomain === 'today') {
-      // Group by domain → stream
+    } else if (_taskView === 'today') {
+      // Group by stream
       const groups = {};
       active.forEach(t => {
-        const key = `${t.domain || 'business'}:${t.stream || 'clients'}`;
-        if (!groups[key]) groups[key] = { domain: t.domain || 'business', stream: t.stream || 'clients', items: [] };
+        const key = t.stream || 'clients';
+        if (!groups[key]) groups[key] = { stream: key, items: [] };
         groups[key].items.push(t);
       });
-      const domainOrder = ['health','business'];
-      const streamOrder = ['fitness','luna','self','clients','prospecting','content'];
-      const streamLabels = { fitness:'Fitness', luna:'Luna', self:'Self', clients:'Clients', prospecting:'Prospecting', content:'Content' };
+      const streamOrder = ['clients','prospecting','content'];
+      const streamLabels = { clients:'Clients', prospecting:'Prospecting', content:'Content' };
       const sorted = Object.values(groups).sort((a,b) =>
-        domainOrder.indexOf(a.domain) - domainOrder.indexOf(b.domain) ||
         streamOrder.indexOf(a.stream) - streamOrder.indexOf(b.stream)
       );
       activeEl.innerHTML = sorted.map(g => `
@@ -5736,17 +5758,17 @@ async function saveTaskEdit(id) {
   if (task) { task.title = title; task.urgency = urgency; if (dueDate) task.dueDate = dueDate; }
   renderTaskList();
   renderTaskStats(_taskStatPeriod);
-  if (_taskView === 'calendar') renderCalendar();
+  if (_calListView === 'calendar') renderCalendar();
 }
 
 // ── Calendar view ──────────────────────────────────────────────────────────
-let _taskView = 'list';
+let _calListView = 'list';
 let _calMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 let _calSelectedDate = localDateStr();
 let _calTaskUrgency = 'medium';
 
 function switchTaskView(view, btn) {
-  _taskView = view;
+  _calListView = view;
   document.getElementById('task-list-view').style.display = view === 'list' ? '' : 'none';
   document.getElementById('task-cal-view').style.display  = view === 'calendar' ? '' : 'none';
   document.querySelectorAll('.task-view-tab').forEach(b => b.classList.toggle('active', b === btn));
@@ -5865,7 +5887,7 @@ async function addCalTask() {
   const input = document.getElementById('cal-task-input');
   const title = input?.value.trim();
   if (!title) { input?.focus(); return; }
-  const res = await api('POST', '/api/admin/tasks', { title, urgency: _calTaskUrgency, dueDate: _calSelectedDate });
+  const res = await api('POST', '/api/admin/tasks', { title, urgency: _calTaskUrgency, dueDate: _calSelectedDate, domain: 'business', stream: 'clients' });
   if (!res.ok) return;
   const task = await res.json();
   allTasks.push(task);
@@ -5888,7 +5910,7 @@ async function addTask() {
   const dateInput = document.getElementById('task-date-input');
   const recurrence = document.getElementById('task-new-recurrence')?.value || 'none';
   const dueDate = (recurrence === 'none' ? dateInput?.value : null) || localDateStr();
-  const domain = document.getElementById('task-new-domain')?.value || 'business';
+  const domain = 'business';
   const stream = document.getElementById('task-new-stream')?.value || 'clients';
   let recurrenceDays = [];
   if (recurrence === 'custom_days') {
@@ -5906,7 +5928,7 @@ async function addTask() {
   document.querySelectorAll('.task-day-cb').forEach(cb => cb.checked = false);
   renderTaskList();
   renderTaskStats(_taskStatPeriod);
-  if (_taskView === 'calendar') renderCalendar();
+  if (_calListView === 'calendar') renderCalendar();
 }
 
 async function toggleTask(id) {
@@ -5935,7 +5957,7 @@ async function toggleTask(id) {
   }
   renderTaskList();
   renderTaskStats(_taskStatPeriod);
-  if (_taskView === 'calendar') renderCalendar();
+  if (_calListView === 'calendar') renderCalendar();
 }
 
 async function deleteTask(id) {
@@ -5945,7 +5967,7 @@ async function deleteTask(id) {
   if (task) task.deletedAt = new Date().toISOString();
   renderTaskList();
   renderTaskStats(_taskStatPeriod);
-  if (_taskView === 'calendar') renderCalendar();
+  if (_calListView === 'calendar') renderCalendar();
 }
 
 function calcStreak(tasks) {
@@ -6088,7 +6110,79 @@ function showSettingsPanel(id, btn) {
     if (id === 'notifications') loadNotificationSettings();
     if (id === 'email-templates') loadEmailTemplates();
     if (id === 'agreement-terms') loadAgreementTerms();
+    if (id === 'bas-dates') loadBasDates();
   }
+}
+
+// ── BAS dates ─────────────────────────────────────────────────────────────
+function basQuarters() {
+  // Returns the 4 BAS quarters covering approx the last 6 months + next 6 months
+  const now = new Date();
+  const y = now.getFullYear();
+  // Australian financial year quarters with standard (non-agent) due dates
+  // Q1=Jul-Sep due 28 Oct, Q2=Oct-Dec due 28 Feb, Q3=Jan-Mar due 28 Apr, Q4=Apr-Jun due 28 Jul
+  const quarters = [];
+  for (let fy = y - 1; fy <= y + 1; fy++) {
+    quarters.push(
+      { key:`Q1-FY${String(fy).slice(2)}${String(fy+1).slice(2)}`, label:`Q1 ${fy}–${fy+1}`, period:`Jul–Sep ${fy}`, due:new Date(`${fy+1}-01-28`) },
+      { key:`Q2-FY${String(fy).slice(2)}${String(fy+1).slice(2)}`, label:`Q2 ${fy}–${fy+1}`, period:`Oct–Dec ${fy}`, due:new Date(`${fy+1}-02-28`) },
+      { key:`Q3-FY${String(fy).slice(2)}${String(fy+1).slice(2)}`, label:`Q3 ${fy}–${fy+1}`, period:`Jan–Mar ${fy+1}`, due:new Date(`${fy+1}-04-28`) },
+      { key:`Q4-FY${String(fy).slice(2)}${String(fy+1).slice(2)}`, label:`Q4 ${fy}–${fy+1}`, period:`Apr–Jun ${fy+1}`, due:new Date(`${fy+1}-07-28`) },
+    );
+  }
+  const cutoff = new Date(now.getTime() - 180 * 86400000);
+  return quarters.filter(q => q.due >= cutoff && q.due <= new Date(now.getTime() + 400 * 86400000));
+}
+
+let _basLodged = {};
+
+async function loadBasDates() {
+  const res = await api('GET', '/api/admin/settings?key=bas-dates');
+  if (res.ok) { const d = await res.json(); _basLodged = d.lodged || {}; }
+  renderBasDates();
+}
+
+function renderBasDates() {
+  const el = document.getElementById('bas-quarters-list');
+  if (!el) return;
+  const now = new Date();
+  const quarters = basQuarters();
+  el.innerHTML = quarters.map(q => {
+    const lodgedDate = _basLodged[q.key];
+    const daysUntil = Math.round((q.due - now) / 86400000);
+    const overdue = !lodgedDate && daysUntil < 0;
+    const soon = !lodgedDate && daysUntil >= 0 && daysUntil <= 14;
+    const statusColor = lodgedDate ? '#6dbf7b' : overdue ? '#e07070' : soon ? '#e8a87c' : 'rgba(247,243,237,0.35)';
+    const statusText = lodgedDate
+      ? `Lodged ${new Date(lodgedDate).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}`
+      : overdue ? `Overdue by ${Math.abs(daysUntil)} day${Math.abs(daysUntil)!==1?'s':''}`
+      : soon ? `Due in ${daysUntil} day${daysUntil!==1?'s':''}`
+      : `Due ${q.due.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}`;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.07);border-radius:10px;gap:12px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:14px;font-weight:400;color:#f7f3ed;margin-bottom:3px;">${esc(q.label)} <span style="font-size:12px;color:rgba(247,243,237,0.35);">${esc(q.period)}</span></div>
+        <div style="font-size:12.5px;color:${statusColor};">${statusText}</div>
+      </div>
+      <div>
+        ${lodgedDate
+          ? `<button onclick="unmarkBasLodged('${q.key}')" style="background:none;border:1px solid rgba(247,243,237,0.1);border-radius:100px;color:rgba(247,243,237,0.35);font-family:'Outfit',sans-serif;font-size:12px;padding:6px 14px;cursor:pointer;">Unmark</button>`
+          : `<button onclick="markBasLodged('${q.key}')" style="background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.25);border-radius:100px;color:#6dbf7b;font-family:'Outfit',sans-serif;font-size:12px;padding:6px 14px;cursor:pointer;font-weight:500;">Mark lodged</button>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function markBasLodged(key) {
+  _basLodged[key] = new Date().toISOString().slice(0,10);
+  renderBasDates();
+  await api('PUT', '/api/admin/settings', { key: 'bas-dates', data: { lodged: _basLodged } });
+}
+
+async function unmarkBasLodged(key) {
+  delete _basLodged[key];
+  renderBasDates();
+  await api('PUT', '/api/admin/settings', { key: 'bas-dates', data: { lodged: _basLodged } });
 }
 
 // ── Generic settings helpers ───────────────────────────────────────────────
@@ -7011,8 +7105,22 @@ function renderEngagementTab() {
         <div class="profile-field"><label>Total properties</label><div class="pf-val">${crmPurchases.length}</div></div>
         <div class="profile-field"><label>Discovery channel</label><div class="pf-val">${client.referralSource || '<span class="pf-empty">—</span>'}</div></div>
         ${(()=>{ const p = crmPartners.find(x => x.id === client.referrerId); return p ? `<div class="profile-field"><label>Referred by</label><div class="pf-val" style="cursor:pointer;color:#bd7a70;" onclick="closeCrmPartnerPanel();closeClientProfile();setTimeout(()=>openCrmPartnerPanel('${p.id}'),50)">${esc(p.name)}</div></div>` : ''; })()}
+        ${(()=>{ const p = crmPartners.find(x => x.id === client.crmContactId); return p ? `<div class="profile-field"><label>Directory contact</label><div class="pf-val" style="cursor:pointer;color:#bd7a70;" onclick="closeCrmPartnerPanel();closeClientProfile();setTimeout(()=>openCrmPartnerPanel('${p.id}'),50)">${esc(p.name)}</div></div>` : ''; })()}
       </div>
     </div>
+    ${(()=>{
+      const p = crmPartners.find(x => x.id === client.crmContactId);
+      if (!p || !p.outreach_history?.length) return '';
+      return `<div class="profile-section" style="margin-top:0;">
+        <div class="profile-section-head" style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.28);padding:14px 0 8px;">Directory outreach history</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${p.outreach_history.slice(0,10).map(h => `<div style="background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.07);border-radius:8px;padding:10px 12px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-size:12px;color:rgba(247,243,237,0.5);">${esc(h.date)}</span><span style="font-size:11px;color:rgba(247,243,237,0.3);text-transform:capitalize;">${esc(h.channel||'')}</span></div>
+            <div style="font-size:13px;color:rgba(247,243,237,0.75);">${esc(h.note||'')}</div>
+          </div>`).join('')}
+        </div>
+      </div>`;
+    })()}
 
     ${hasMultiAcq ? `
     <div class="profile-section">

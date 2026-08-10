@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Life — Fairway</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#181614;color:#f7f3ed;font-family:'Outfit',sans-serif;font-weight:300;min-height:100vh;}
+  a{color:inherit;}
+  button{font-family:'Outfit',sans-serif;}
+  input,select,textarea{font-family:'Outfit',sans-serif;color:#f7f3ed;}
+  input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5);}
+
+  /* Layout */
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:200px;flex-shrink:0;background:#111010;border-right:1px solid rgba(247,243,237,0.07);display:flex;flex-direction:column;padding:20px 0;}
+  .sidebar-logo{padding:12px 20px 24px;border-bottom:1px solid rgba(247,243,237,0.07);margin-bottom:12px;}
+  .sidebar-logo img{height:22px;}
+  .snav-item{display:flex;align-items:center;gap:10px;width:100%;padding:9px 20px;background:none;border:none;color:rgba(247,243,237,0.42);font-size:13px;font-weight:400;cursor:pointer;transition:all .15s;text-align:left;text-decoration:none;}
+  .snav-item:hover{color:#f7f3ed;background:rgba(247,243,237,0.04);}
+  .snav-item.active{color:#f7f3ed;background:rgba(247,243,237,0.07);}
+  .snav-spacer{flex:1;}
+  .snav-back{margin-top:auto;padding:12px 20px 0;border-top:1px solid rgba(247,243,237,0.07);}
+  .snav-back a{display:flex;align-items:center;gap:8px;font-size:12.5px;color:rgba(247,243,237,0.35);text-decoration:none;transition:color .15s;}
+  .snav-back a:hover{color:#f7f3ed;}
+  .main{flex:1;min-width:0;padding:32px 36px;overflow:auto;}
+
+  /* Header */
+  .page-header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:28px;}
+  .page-title{font-family:'Fraunces',serif;font-size:28px;font-weight:400;}
+  .page-date{font-size:13.5px;color:rgba(247,243,237,0.28);margin-top:4px;}
+
+  /* View tabs */
+  .view-tabs{display:flex;gap:3px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.07);border-radius:10px;padding:3px;width:fit-content;margin-bottom:20px;}
+  .view-tab{padding:7px 16px;border-radius:8px;border:none;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;background:transparent;color:rgba(247,243,237,0.38);}
+  .view-tab.active{background:rgba(247,243,237,0.08);color:#f7f3ed;}
+
+  /* Add task */
+  .task-add-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+  .task-add-input{flex:1;min-width:180px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.1);border-radius:10px;padding:11px 14px;font-size:14px;color:#f7f3ed;outline:none;transition:border-color .15s;}
+  .task-add-input:focus{border-color:rgba(189,122,112,0.4);}
+  .task-add-input::placeholder{color:rgba(247,243,237,0.22);}
+  .task-urg-sel{display:flex;gap:3px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.08);border-radius:8px;padding:3px;}
+  .task-urg-btn{padding:6px 11px;border-radius:6px;border:none;font-size:12px;font-weight:500;cursor:pointer;background:transparent;color:rgba(247,243,237,0.32);transition:all .15s;}
+  .task-urg-btn.active[data-urg="high"]{background:rgba(224,112,112,0.15);color:#e07070;}
+  .task-urg-btn.active[data-urg="medium"]{background:rgba(232,168,124,0.15);color:#e8a87c;}
+  .task-urg-btn.active[data-urg="low"]{background:rgba(109,191,123,0.15);color:#6dbf7b;}
+  .btn-primary{background:#bd7a70;color:#fff;border:none;border-radius:100px;padding:9px 20px;font-size:13px;font-weight:500;cursor:pointer;transition:opacity .15s;white-space:nowrap;}
+  .btn-primary:hover{opacity:.88;}
+
+  /* Task items */
+  .task-section-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-top:4px;}
+  .task-section-head-label{font-size:10.5px;font-weight:600;letter-spacing:0.13em;text-transform:uppercase;color:rgba(247,243,237,0.28);}
+  .task-section-head-count{font-size:10.5px;color:rgba(247,243,237,0.2);background:rgba(247,243,237,0.05);border-radius:100px;padding:1px 7px;}
+  .task-section-div{flex:1;height:1px;background:rgba(247,243,237,0.06);}
+  .task-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid rgba(247,243,237,0.05);}
+  .task-item.task-done .task-title{opacity:.35;text-decoration:line-through;}
+  .task-check{width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(247,243,237,0.2);background:transparent;cursor:pointer;flex-shrink:0;margin-top:2px;transition:all .15s;display:flex;align-items:center;justify-content:center;}
+  .task-check:hover{border-color:#bd7a70;}
+  .task-done .task-check{background:rgba(109,191,123,0.15);border-color:#6dbf7b;}
+  .task-done .task-check::after{content:'✓';font-size:11px;color:#6dbf7b;}
+  .task-body{flex:1;min-width:0;}
+  .task-title{font-size:14px;color:#f7f3ed;line-height:1.4;margin-bottom:4px;}
+  .task-meta{display:flex;flex-wrap:wrap;gap:5px;align-items:center;}
+  .task-urg-badge{font-size:10.5px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;border-radius:100px;padding:2px 8px;}
+  .task-urg-badge[data-urg="high"]{background:rgba(224,112,112,0.1);color:#e07070;}
+  .task-urg-badge[data-urg="medium"]{background:rgba(232,168,124,0.1);color:#e8a87c;}
+  .task-urg-badge[data-urg="low"]{background:rgba(109,191,123,0.1);color:#6dbf7b;}
+  .task-recur-badge{font-size:10px;color:rgba(247,243,237,0.3);background:rgba(247,243,237,0.05);border-radius:100px;padding:2px 7px;}
+  .task-date-badge{font-size:11px;color:rgba(247,243,237,0.28);}
+  .task-actions{display:flex;gap:4px;margin-top:8px;}
+  .task-edit-row{margin-top:10px;display:none;flex-direction:column;gap:6px;}
+  .task-edit-row.visible{display:flex;}
+  .task-edit-input{background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:8px 12px;font-size:13.5px;color:#f7f3ed;outline:none;width:100%;}
+  .task-urg-btns{display:flex;gap:3px;}
+  .task-urg-btn2{padding:5px 10px;border-radius:6px;border:1px solid rgba(247,243,237,0.1);font-size:11.5px;font-weight:500;cursor:pointer;background:transparent;color:rgba(247,243,237,0.3);transition:all .15s;}
+  .task-urg-btn2.active[data-urg="high"]{background:rgba(224,112,112,0.12);color:#e07070;border-color:rgba(224,112,112,0.25);}
+  .task-urg-btn2.active[data-urg="medium"]{background:rgba(232,168,124,0.12);color:#e8a87c;border-color:rgba(232,168,124,0.25);}
+  .task-urg-btn2.active[data-urg="low"]{background:rgba(109,191,123,0.12);color:#6dbf7b;border-color:rgba(109,191,123,0.25);}
+  .task-act-btn{background:none;border:none;font-size:12px;color:rgba(247,243,237,0.3);cursor:pointer;padding:3px 6px;border-radius:5px;transition:all .15s;}
+  .task-act-btn:hover{color:#f7f3ed;background:rgba(247,243,237,0.05);}
+  .task-done-section{margin-top:24px;}
+
+  /* Stats */
+  .task-stats{margin-top:36px;padding-top:24px;border-top:1px solid rgba(247,243,237,0.07);}
+  .task-stats-tabs{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap;}
+  .task-stat-tab{padding:6px 14px;border-radius:100px;border:1px solid rgba(247,243,237,0.1);font-size:12px;font-weight:500;cursor:pointer;background:transparent;color:rgba(247,243,237,0.38);transition:all .15s;}
+  .task-stat-tab.active{background:rgba(247,243,237,0.08);border-color:rgba(247,243,237,0.2);color:#f7f3ed;}
+  .task-stats-body{display:flex;flex-wrap:wrap;gap:12px;}
+  .stat-card{background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.07);border-radius:12px;padding:14px 18px;min-width:120px;}
+  .stat-card-num{font-family:'Fraunces',serif;font-size:28px;font-weight:400;color:#f7f3ed;line-height:1;}
+  .stat-card-label{font-size:11.5px;color:rgba(247,243,237,0.35);margin-top:4px;}
+  .stat-bar-wrap{width:100%;height:4px;background:rgba(247,243,237,0.07);border-radius:100px;overflow:hidden;margin-top:8px;}
+  .stat-bar{height:100%;background:#bd7a70;border-radius:100px;transition:width .4s;}
+
+  /* Custom days picker */
+  #life-custom-days-row{display:none;margin-bottom:8px;}
+
+  /* Toast */
+  .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#22201d;border:1px solid rgba(247,243,237,0.12);border-radius:100px;padding:10px 20px;font-size:13.5px;color:#f7f3ed;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;}
+  ::-webkit-scrollbar{width:5px;} ::-webkit-scrollbar-track{background:transparent;} ::-webkit-scrollbar-thumb{background:rgba(247,243,237,0.1);border-radius:10px;}
+
+  @media(max-width:700px){.layout{flex-direction:column;} .sidebar{width:100%;flex-direction:row;padding:12px 16px;overflow-x:auto;gap:4px;} .sidebar-logo{padding:0 12px 0 0;border-bottom:none;margin-bottom:0;border-right:1px solid rgba(247,243,237,0.07);} .snav-spacer,.snav-back,.snav-divider{display:none;} .main{padding:20px 16px;}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="/logo-word.png" alt="Fairway" onerror="this.style.display='none'">
+    </div>
+    <a class="snav-item active" href="/admin/life.html" style="text-decoration:none;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2C5.8 2 4 3.8 4 6c0 3 4 8 4 8s4-5 4-8c0-2.2-1.8-4-4-4z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="8" cy="6" r="1.3" fill="currentColor"/></svg>
+      Life
+    </a>
+    <div class="snav-spacer"></div>
+    <div class="snav-back">
+      <a href="/admin/">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M8 2L4 6.5 8 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back to admin
+      </a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Life</h1>
+        <div class="page-date" id="life-date-head"></div>
+      </div>
+    </div>
+
+    <!-- View tabs -->
+    <div class="view-tabs">
+      <button class="view-tab active" onclick="setLifeView('today',this)">Today</button>
+      <button class="view-tab" onclick="setLifeView('fitness',this)">Fitness</button>
+      <button class="view-tab" onclick="setLifeView('luna',this)">Luna</button>
+      <button class="view-tab" onclick="setLifeView('self',this)">Self</button>
+    </div>
+
+    <!-- Add task row -->
+    <div class="task-add-row">
+      <input type="text" class="task-add-input" id="life-task-input" placeholder="Add a task…" onkeydown="if(event.key==='Enter')addLifeTask()">
+      <div class="task-urg-sel">
+        <button class="task-urg-btn" data-urg="high" onclick="setLifeUrgency('high',this)">High</button>
+        <button class="task-urg-btn active" data-urg="medium" onclick="setLifeUrgency('medium',this)">Med</button>
+        <button class="task-urg-btn" data-urg="low" onclick="setLifeUrgency('low',this)">Low</button>
+      </div>
+      <select id="life-stream-sel" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;color:rgba(247,243,237,0.7);font-size:12.5px;padding:8px 12px;cursor:pointer;outline:none;">
+        <option value="fitness">Fitness</option>
+        <option value="luna">Luna</option>
+        <option value="self">Self</option>
+      </select>
+      <select id="life-recurrence-sel" onchange="updateLifeRecurrenceDays()" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;color:rgba(247,243,237,0.7);font-size:12.5px;padding:8px 12px;cursor:pointer;outline:none;">
+        <option value="none">One-off</option>
+        <option value="daily">Daily</option>
+        <option value="weekdays">Weekdays</option>
+        <option value="custom_days">Custom days…</option>
+      </select>
+      <input type="date" id="life-date-input" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;color:rgba(247,243,237,0.7);font-size:12.5px;padding:8px 12px;outline:none;">
+      <button class="btn-primary" onclick="addLifeTask()">Add</button>
+    </div>
+    <!-- Custom days picker -->
+    <div id="life-custom-days-row" style="margin-bottom:12px;">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;padding:6px 0;">
+        ${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d,i)=>`<label style="display:flex;align-items:center;gap:4px;font-size:12px;color:rgba(247,243,237,0.5);cursor:pointer;"><input type="checkbox" class="life-day-cb" value="${[1,2,3,4,5,6,0][i]}" style="accent-color:#bd7a70;"> ${d}</label>`).join('')}
+      </div>
+    </div>
+
+    <!-- Task lists -->
+    <div id="life-active-list"></div>
+    <div id="life-done-section" style="display:none;margin-top:24px;">
+      <div class="task-section-head">
+        <span class="task-section-head-label">Done today</span>
+        <span class="task-section-head-count" id="life-done-count"></span>
+        <div class="task-section-div"></div>
+      </div>
+      <div id="life-done-list"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="task-stats">
+      <p style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:16px;">Completion stats</p>
+      <div class="task-stats-tabs">
+        <button class="task-stat-tab active" onclick="renderLifeStats('week',this)">Week</button>
+        <button class="task-stat-tab" onclick="renderLifeStats('month',this)">Month</button>
+        <button class="task-stat-tab" onclick="renderLifeStats('quarter',this)">Quarter</button>
+      </div>
+      <div class="task-stats-body" id="life-stats-body"></div>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+let allTasks = [];
+let _lifeView = 'today';
+let _lifeUrgency = 'medium';
+let _lifeStatPeriod = 'week';
+let _lifeEditUrgency = {};
+
+const STREAM_LABELS = { fitness:'Fitness', luna:'Luna', self:'Self' };
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function showToast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.style.opacity='1';
+  clearTimeout(t._t); t._t=setTimeout(()=>t.style.opacity='0',3000);
+}
+
+function localDateStr(d){
+  const dt=d||new Date();
+  return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+}
+
+// ── Auth + init ───────────────────────────────────────────────────────────────
+async function api(method, path, body) {
+  const res = await fetch(path, {
+    method, headers: {'Content-Type':'application/json'},
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (res.status === 401) window.location.href = '/admin/';
+  return res;
+}
+
+(async function init() {
+  const v = await fetch('/api/admin/verify', { method: 'POST' });
+  if (!v.ok) { window.location.href = '/admin/'; return; }
+  const d = new Date();
+  const dateEl = document.getElementById('life-date-head');
+  if (dateEl) dateEl.textContent = d.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const dateInput = document.getElementById('life-date-input');
+  if (dateInput) dateInput.value = localDateStr();
+  const res = await api('GET', '/api/admin/tasks');
+  if (res.ok) allTasks = await res.json();
+  renderLifeList();
+  renderLifeStats(_lifeStatPeriod);
+})();
+
+// ── View ─────────────────────────────────────────────────────────────────────
+function setLifeView(view, btn) {
+  _lifeView = view;
+  document.querySelectorAll('.view-tab').forEach(b=>b.classList.toggle('active',b===btn));
+  const streamSel = document.getElementById('life-stream-sel');
+  if (streamSel && view !== 'today') streamSel.value = view;
+  renderLifeList();
+}
+
+function setLifeUrgency(urg, btn) {
+  _lifeUrgency = urg;
+  document.querySelectorAll('.task-urg-sel .task-urg-btn').forEach(b=>b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+function updateLifeRecurrenceDays() {
+  const val = document.getElementById('life-recurrence-sel')?.value;
+  const dateInput = document.getElementById('life-date-input');
+  const daysRow = document.getElementById('life-custom-days-row');
+  if (dateInput) dateInput.style.display = val === 'none' ? '' : 'none';
+  if (daysRow) daysRow.style.display = val === 'custom_days' ? '' : 'none';
+}
+
+// ── Recurring helpers ─────────────────────────────────────────────────────────
+function recurringFiresToday(t) {
+  if (!t.recurrence || t.recurrence === 'none') return false;
+  const dow = new Date().getDay();
+  if (t.recurrence === 'daily') return true;
+  if (t.recurrence === 'weekdays') return dow >= 1 && dow <= 5;
+  if (t.recurrence === 'custom_days') return Array.isArray(t.recurrenceDays) && t.recurrenceDays.includes(dow);
+  return false;
+}
+
+function recurringDoneToday(t) {
+  const today = localDateStr();
+  return Array.isArray(t.completedOn) && t.completedOn.includes(today);
+}
+
+function recurringLabel(t) {
+  if (!t.recurrence || t.recurrence === 'none') return '';
+  if (t.recurrence === 'daily') return 'Daily';
+  if (t.recurrence === 'weekdays') return 'Weekdays';
+  if (t.recurrence === 'custom_days' && Array.isArray(t.recurrenceDays)) {
+    const names = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    return t.recurrenceDays.map(d => names[d]).join(', ');
+  }
+  return '';
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+function matchesLifeView(t) {
+  if (t.domain !== 'health') return false;
+  if (_lifeView === 'today') return true;
+  return t.stream === _lifeView;
+}
+
+function renderLifeList() {
+  const today = localDateStr();
+  const urgOrder = { high:0, medium:1, low:2 };
+
+  const nonRecurActive = allTasks.filter(t =>
+    !t.deletedAt && !t.completedAt &&
+    (!t.recurrence || t.recurrence === 'none') &&
+    (_lifeView === 'today' ? t.dueDate <= today : true) &&
+    matchesLifeView(t)
+  );
+  const recurActive = allTasks.filter(t =>
+    !t.deletedAt && recurringFiresToday(t) && !recurringDoneToday(t) && matchesLifeView(t)
+  );
+  const recurDone = allTasks.filter(t =>
+    !t.deletedAt && recurringFiresToday(t) && recurringDoneToday(t) && matchesLifeView(t)
+  );
+  const nonRecurDone = allTasks.filter(t =>
+    !t.deletedAt && t.completedAt &&
+    (!t.recurrence || t.recurrence === 'none') &&
+    localDateStr(new Date(t.completedAt)) === today &&
+    matchesLifeView(t)
+  );
+
+  const active = [...recurActive, ...nonRecurActive];
+  active.sort((a,b) => (urgOrder[a.urgency]??1)-(urgOrder[b.urgency]??1));
+  const done = [...recurDone, ...nonRecurDone];
+
+  const activeEl = document.getElementById('life-active-list');
+  if (activeEl) {
+    if (!active.length) {
+      activeEl.innerHTML = '<div style="padding:24px 0;text-align:center;color:rgba(247,243,237,0.18);font-size:13.5px;">No active tasks.</div>';
+    } else if (_lifeView === 'today') {
+      // Group by stream
+      const groups = {};
+      active.forEach(t => {
+        const k = t.stream || 'fitness';
+        if (!groups[k]) groups[k] = { stream:k, items:[] };
+        groups[k].items.push(t);
+      });
+      const order = ['fitness','luna','self'];
+      const sorted = Object.values(groups).sort((a,b)=>order.indexOf(a.stream)-order.indexOf(b.stream));
+      activeEl.innerHTML = sorted.map(g => `<div style="margin-bottom:20px;">
+        <div class="task-section-head">
+          <span class="task-section-head-label">${STREAM_LABELS[g.stream]||g.stream}</span>
+          <span class="task-section-head-count">${g.items.length}</span>
+          <div class="task-section-div"></div>
+        </div>
+        ${g.items.map(t=>taskHtml(t,today)).join('')}
+      </div>`).join('');
+    } else {
+      activeEl.innerHTML = `<div class="task-section-head">
+        <span class="task-section-head-label">Active</span>
+        <span class="task-section-head-count">${active.length}</span>
+        <div class="task-section-div"></div>
+      </div>` + active.map(t=>taskHtml(t,today)).join('');
+    }
+  }
+
+  const doneSec = document.getElementById('life-done-section');
+  const doneEl = document.getElementById('life-done-list');
+  const doneCount = document.getElementById('life-done-count');
+  if (doneSec && doneEl) {
+    if (done.length) {
+      doneSec.style.display = 'block';
+      if (doneCount) doneCount.textContent = done.length;
+      doneEl.innerHTML = done.map(t=>taskHtml(t,today)).join('');
+    } else {
+      doneSec.style.display = 'none';
+    }
+  }
+}
+
+function taskHtml(t, today) {
+  const isRec = t.recurrence && t.recurrence !== 'none';
+  const done = isRec ? recurringDoneToday(t) : !!t.completedAt;
+  const recLabel = isRec ? recurringLabel(t) : '';
+  const urgLabel = {high:'High',medium:'Med',low:'Low'}[t.urgency] || '';
+  const editUrg = _lifeEditUrgency[t.id] || t.urgency;
+  const daysOver = (!done && !isRec && t.dueDate < today)
+    ? Math.round((new Date(today)-new Date(t.dueDate))/86400000) : 0;
+  return `<div class="task-item${done?' task-done':''}" id="life-task-${t.id}">
+    <div class="task-check" onclick="toggleLifeTask('${t.id}')"></div>
+    <div class="task-body">
+      <div class="task-title">${esc(t.title)}</div>
+      <div class="task-meta">
+        <span class="task-urg-badge" data-urg="${t.urgency}">${urgLabel}</span>
+        ${recLabel ? `<span class="task-recur-badge">↻ ${recLabel}</span>` : ''}
+        ${daysOver > 0 ? `<span class="task-date-badge" style="color:#e07070;">${daysOver}d overdue</span>` : ''}
+        ${!isRec && t.dueDate === today && !done ? `<span class="task-date-badge">Due today</span>` : ''}
+      </div>
+      <div class="task-edit-row" id="life-edit-${t.id}">
+        <input class="task-edit-input" id="life-edit-input-${t.id}" value="${esc(t.title)}" onkeydown="if(event.key==='Enter')saveLifeEdit('${t.id}')">
+        <div class="task-urg-btns">
+          ${['high','medium','low'].map(u=>`<button class="task-urg-btn2${editUrg===u?' active':''}" data-urg="${u}" onclick="setLifeEditUrg('${t.id}','${u}',this)">${u.charAt(0).toUpperCase()+u.slice(1)}</button>`).join('')}
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button onclick="saveLifeEdit('${t.id}')" class="btn-primary" style="font-size:12px;padding:6px 14px;">Save</button>
+          <button onclick="cancelLifeEdit('${t.id}')" style="background:none;border:1px solid rgba(247,243,237,0.12);border-radius:100px;color:rgba(247,243,237,0.4);font-size:12px;padding:6px 12px;cursor:pointer;">Cancel</button>
+        </div>
+      </div>
+      <div class="task-actions">
+        <button class="task-act-btn" onclick="toggleLifeEdit('${t.id}')">Edit</button>
+        <button class="task-act-btn" onclick="deleteLifeTask('${t.id}')" style="color:rgba(220,80,80,0.5);">Delete</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── Add task ──────────────────────────────────────────────────────────────────
+async function addLifeTask() {
+  const input = document.getElementById('life-task-input');
+  const title = input?.value.trim();
+  if (!title) { input?.focus(); return; }
+  const stream = document.getElementById('life-stream-sel')?.value || 'fitness';
+  const recurrence = document.getElementById('life-recurrence-sel')?.value || 'none';
+  const dateInput = document.getElementById('life-date-input');
+  const dueDate = (recurrence === 'none' ? dateInput?.value : null) || localDateStr();
+  let recurrenceDays = [];
+  if (recurrence === 'custom_days') {
+    recurrenceDays = Array.from(document.querySelectorAll('.life-day-cb:checked')).map(cb=>parseInt(cb.value,10));
+  }
+  const res = await api('POST', '/api/admin/tasks', { title, urgency: _lifeUrgency, dueDate, domain: 'health', stream, recurrence, recurrenceDays });
+  if (!res.ok) return;
+  const task = await res.json();
+  allTasks.push(task);
+  if (input) input.value = '';
+  const recSel = document.getElementById('life-recurrence-sel');
+  if (recSel) { recSel.value = 'none'; updateLifeRecurrenceDays(); }
+  document.querySelectorAll('.life-day-cb').forEach(cb=>cb.checked=false);
+  renderLifeList();
+  renderLifeStats(_lifeStatPeriod);
+}
+
+// ── Toggle ────────────────────────────────────────────────────────────────────
+async function toggleLifeTask(id) {
+  const t = allTasks.find(x=>x.id===id);
+  if (!t) return;
+  const isRec = t.recurrence && t.recurrence !== 'none';
+  if (isRec) {
+    const today = localDateStr();
+    const done = recurringDoneToday(t);
+    const body = done ? {id, removeCompletedOnDate:today} : {id, completedOnDate:today};
+    const res = await api('PUT', '/api/admin/tasks', body);
+    if (!res.ok) return;
+    if (!Array.isArray(t.completedOn)) t.completedOn = [];
+    if (done) t.completedOn = t.completedOn.filter(d=>d!==today);
+    else t.completedOn.push(today);
+  } else {
+    const completedAt = t.completedAt ? null : new Date().toISOString();
+    const res = await api('PUT', '/api/admin/tasks', {id, completedAt});
+    if (!res.ok) return;
+    t.completedAt = completedAt;
+  }
+  renderLifeList();
+  renderLifeStats(_lifeStatPeriod);
+}
+
+// ── Edit ──────────────────────────────────────────────────────────────────────
+function toggleLifeEdit(id) {
+  const row = document.getElementById(`life-edit-${id}`);
+  if (!row) return;
+  const visible = row.classList.toggle('visible');
+  if (visible) setTimeout(()=>document.getElementById(`life-edit-input-${id}`)?.focus(),50);
+}
+
+function cancelLifeEdit(id) {
+  document.getElementById(`life-edit-${id}`)?.classList.remove('visible');
+}
+
+function setLifeEditUrg(id, urg, btn) {
+  _lifeEditUrgency[id] = urg;
+  document.querySelectorAll(`#life-edit-${id} .task-urg-btn2`).forEach(b=>b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+async function saveLifeEdit(id) {
+  const t = allTasks.find(x=>x.id===id);
+  if (!t) return;
+  const title = document.getElementById(`life-edit-input-${id}`)?.value.trim() || t.title;
+  const urgency = _lifeEditUrgency[id] || t.urgency;
+  const res = await api('PUT', '/api/admin/tasks', {id, title, urgency});
+  if (!res.ok) return;
+  t.title = title; t.urgency = urgency;
+  cancelLifeEdit(id);
+  renderLifeList();
+}
+
+// ── Delete ────────────────────────────────────────────────────────────────────
+async function deleteLifeTask(id) {
+  const res = await api('DELETE', `/api/admin/tasks?id=${id}`);
+  if (!res.ok) return;
+  const t = allTasks.find(x=>x.id===id);
+  if (t) t.deletedAt = new Date().toISOString();
+  renderLifeList();
+  renderLifeStats(_lifeStatPeriod);
+  showToast('Task deleted');
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+function renderLifeStats(period, btn) {
+  if (btn) {
+    _lifeStatPeriod = period;
+    document.querySelectorAll('.task-stat-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  const now = new Date();
+  const today = localDateStr();
+  const cutoffs = {
+    week: new Date(now.getTime()-7*86400000),
+    month: new Date(now.getTime()-30*86400000),
+    quarter: new Date(now.getTime()-90*86400000),
+  };
+  const cutoff = cutoffs[period] || cutoffs.week;
+  const cutoffStr = localDateStr(cutoff);
+
+  const healthTasks = allTasks.filter(t => !t.deletedAt && t.domain === 'health');
+
+  const completed = healthTasks.filter(t => {
+    const isRec = t.recurrence && t.recurrence !== 'none';
+    if (isRec) return (t.completedOn||[]).some(d => d >= cutoffStr && d <= today);
+    return t.completedAt && localDateStr(new Date(t.completedAt)) >= cutoffStr;
+  });
+
+  const byStream = {};
+  ['fitness','luna','self'].forEach(s => {
+    const tasks = healthTasks.filter(t => t.stream === s);
+    const done = completed.filter(t => t.stream === s);
+    byStream[s] = { total: tasks.length, done: done.length };
+  });
+
+  const el = document.getElementById('life-stats-body');
+  if (!el) return;
+  el.innerHTML = ['fitness','luna','self'].map(s => {
+    const { total, done } = byStream[s];
+    const pct = total > 0 ? Math.round(done/total*100) : 0;
+    return `<div class="stat-card">
+      <div class="stat-card-num">${done}</div>
+      <div class="stat-card-label">${STREAM_LABELS[s]} — ${pct}%</div>
+      <div class="stat-bar-wrap"><div class="stat-bar" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>

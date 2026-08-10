@@ -7,6 +7,7 @@ const json = (data, status = 200) =>
 const SETTING_KEYS = new Set([
   'business-details', 'booking-links', 'branding',
   'notifications', 'email-templates', 'agreement-terms',
+  'bas-dates',
 ]);
 
 export default async (req) => {
