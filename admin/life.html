@@ -13,6 +13,9 @@
   button{font-family:'Outfit',sans-serif;}
   input,select,textarea{font-family:'Outfit',sans-serif;color:#f7f3ed;}
   input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5);}
+  input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(.5);}
+  .task-time-badge{font-size:11.5px;font-weight:500;color:rgba(247,243,237,0.5);background:rgba(247,243,237,0.05);border-radius:6px;padding:2px 7px;font-variant-numeric:tabular-nums;}
+  .task-streak-badge{font-size:11.5px;font-weight:600;color:#e8a87c;background:rgba(232,168,124,0.08);border-radius:6px;padding:2px 7px;}
 
   /* Layout */
   .layout{display:flex;min-height:100vh;}
@@ -166,6 +169,7 @@
         <option value="custom_days">Custom days…</option>
       </select>
       <input type="date" id="life-date-input" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;color:rgba(247,243,237,0.7);font-size:12.5px;padding:8px 12px;outline:none;">
+      <input type="time" id="life-time-input" placeholder="Time" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;color:rgba(247,243,237,0.7);font-size:12.5px;padding:8px 12px;outline:none;width:110px;">
       <button class="btn-primary" onclick="addLifeTask()">Add</button>
     </div>
     <!-- Custom days picker -->
@@ -294,6 +298,41 @@ function recurringLabel(t) {
   return '';
 }
 
+// ── Streak ────────────────────────────────────────────────────────────────────
+function calcStreak(t) {
+  if (!t.recurrence || t.recurrence === 'none') return 0;
+  if (!Array.isArray(t.completedOn) || !t.completedOn.length) return 0;
+  const doneSet = new Set(t.completedOn);
+  const today = localDateStr();
+  function firesOn(dateStr) {
+    const d = new Date(dateStr + 'T12:00:00');
+    const dow = d.getDay();
+    if (t.recurrence === 'daily') return true;
+    if (t.recurrence === 'weekdays') return dow >= 1 && dow <= 5;
+    if (t.recurrence === 'custom_days') return Array.isArray(t.recurrenceDays) && t.recurrenceDays.includes(dow);
+    return false;
+  }
+  let streak = 0;
+  const cur = new Date(today + 'T12:00:00');
+  for (let i = 0; i < 400; i++) {
+    const ds = cur.getFullYear() + '-' + String(cur.getMonth()+1).padStart(2,'0') + '-' + String(cur.getDate()).padStart(2,'0');
+    if (firesOn(ds)) {
+      if (doneSet.has(ds)) streak++;
+      else if (ds !== today) break; // missed a scheduled day
+    }
+    cur.setDate(cur.getDate() - 1);
+  }
+  return streak;
+}
+
+function fmtTime(t) {
+  if (!t) return '';
+  const [h, m] = t.split(':').map(Number);
+  const ampm = h >= 12 ? 'pm' : 'am';
+  const hh = h % 12 || 12;
+  return `${hh}:${String(m).padStart(2,'0')}${ampm}`;
+}
+
 // ── Render ───────────────────────────────────────────────────────────────────
 function matchesLifeView(t) {
   if (t.domain !== 'health') return false;
@@ -325,7 +364,11 @@ function renderLifeList() {
   );
 
   const active = [...recurActive, ...nonRecurActive];
-  active.sort((a,b) => (urgOrder[a.urgency]??1)-(urgOrder[b.urgency]??1));
+  active.sort((a,b) => {
+    const ta = a.scheduledTime || '99:99', tb = b.scheduledTime || '99:99';
+    if (ta !== tb) return ta < tb ? -1 : 1;
+    return (urgOrder[a.urgency]??1)-(urgOrder[b.urgency]??1);
+  });
   const done = [...recurDone, ...nonRecurDone];
 
   const activeEl = document.getElementById('life-active-list');
@@ -381,20 +424,27 @@ function taskHtml(t, today) {
   const editUrg = _lifeEditUrgency[t.id] || t.urgency;
   const daysOver = (!done && !isRec && t.dueDate < today)
     ? Math.round((new Date(today)-new Date(t.dueDate))/86400000) : 0;
+  const streak = isRec ? calcStreak(t) : 0;
+  const timeStr = t.scheduledTime ? fmtTime(t.scheduledTime) : '';
   return `<div class="task-item${done?' task-done':''}" id="life-task-${t.id}">
     <div class="task-check" onclick="toggleLifeTask('${t.id}')"></div>
     <div class="task-body">
       <div class="task-title">${esc(t.title)}</div>
       <div class="task-meta">
+        ${timeStr ? `<span class="task-time-badge">${timeStr}</span>` : ''}
         <span class="task-urg-badge" data-urg="${t.urgency}">${urgLabel}</span>
         ${recLabel ? `<span class="task-recur-badge">↻ ${recLabel}</span>` : ''}
+        ${streak > 0 ? `<span class="task-streak-badge">🔥 ${streak}</span>` : ''}
         ${daysOver > 0 ? `<span class="task-date-badge" style="color:#e07070;">${daysOver}d overdue</span>` : ''}
         ${!isRec && t.dueDate === today && !done ? `<span class="task-date-badge">Due today</span>` : ''}
       </div>
       <div class="task-edit-row" id="life-edit-${t.id}">
         <input class="task-edit-input" id="life-edit-input-${t.id}" value="${esc(t.title)}" onkeydown="if(event.key==='Enter')saveLifeEdit('${t.id}')">
-        <div class="task-urg-btns">
-          ${['high','medium','low'].map(u=>`<button class="task-urg-btn2${editUrg===u?' active':''}" data-urg="${u}" onclick="setLifeEditUrg('${t.id}','${u}',this)">${u.charAt(0).toUpperCase()+u.slice(1)}</button>`).join('')}
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <div class="task-urg-btns">
+            ${['high','medium','low'].map(u=>`<button class="task-urg-btn2${editUrg===u?' active':''}" data-urg="${u}" onclick="setLifeEditUrg('${t.id}','${u}',this)">${u.charAt(0).toUpperCase()+u.slice(1)}</button>`).join('')}
+          </div>
+          <input type="time" id="life-edit-time-${t.id}" value="${esc(t.scheduledTime||'')}" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:7px;color:rgba(247,243,237,0.7);font-size:12px;padding:5px 9px;outline:none;width:110px;">
         </div>
         <div style="display:flex;gap:6px;">
           <button onclick="saveLifeEdit('${t.id}')" class="btn-primary" style="font-size:12px;padding:6px 14px;">Save</button>
@@ -422,11 +472,14 @@ async function addLifeTask() {
   if (recurrence === 'custom_days') {
     recurrenceDays = Array.from(document.querySelectorAll('.life-day-cb:checked')).map(cb=>parseInt(cb.value,10));
   }
-  const res = await api('POST', '/api/admin/tasks', { title, urgency: _lifeUrgency, dueDate, domain: 'health', stream, recurrence, recurrenceDays });
+  const scheduledTime = document.getElementById('life-time-input')?.value || null;
+  const res = await api('POST', '/api/admin/tasks', { title, urgency: _lifeUrgency, dueDate, domain: 'health', stream, recurrence, recurrenceDays, scheduledTime });
   if (!res.ok) return;
   const task = await res.json();
   allTasks.push(task);
   if (input) input.value = '';
+  const timeInput = document.getElementById('life-time-input');
+  if (timeInput) timeInput.value = '';
   const recSel = document.getElementById('life-recurrence-sel');
   if (recSel) { recSel.value = 'none'; updateLifeRecurrenceDays(); }
   document.querySelectorAll('.life-day-cb').forEach(cb=>cb.checked=false);
@@ -481,9 +534,10 @@ async function saveLifeEdit(id) {
   if (!t) return;
   const title = document.getElementById(`life-edit-input-${id}`)?.value.trim() || t.title;
   const urgency = _lifeEditUrgency[id] || t.urgency;
-  const res = await api('PUT', '/api/admin/tasks', {id, title, urgency});
+  const scheduledTime = document.getElementById(`life-edit-time-${id}`)?.value || null;
+  const res = await api('PUT', '/api/admin/tasks', {id, title, urgency, scheduledTime});
   if (!res.ok) return;
-  t.title = title; t.urgency = urgency;
+  t.title = title; t.urgency = urgency; t.scheduledTime = scheduledTime;
   cancelLifeEdit(id);
   renderLifeList();
 }

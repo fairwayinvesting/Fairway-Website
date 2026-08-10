@@ -24,7 +24,7 @@ export default async (req) => {
   if (req.method === 'POST') {
     let body;
     try { body = await req.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
-    const { title, urgency, dueDate, domain, stream, recurrence, recurrenceDays, recurrenceTime } = body;
+    const { title, urgency, dueDate, domain, stream, recurrence, recurrenceDays, recurrenceTime, scheduledTime } = body;
     if (!title?.trim()) return json({ error: 'title required' }, 400);
     const list = await load();
     const item = {
@@ -40,6 +40,7 @@ export default async (req) => {
       recurrence: VALID_RECURRENCE.includes(recurrence) ? recurrence : 'none',
       recurrenceDays: Array.isArray(recurrenceDays) ? recurrenceDays.filter(d => Number.isInteger(d) && d >= 0 && d <= 6) : [],
       recurrenceTime: recurrenceTime || null,
+      scheduledTime: scheduledTime || null,
       completedOn: [],
     };
     list.push(item);
@@ -67,6 +68,7 @@ export default async (req) => {
       list[idx].recurrenceDays = body.recurrenceDays.filter(d => Number.isInteger(d) && d >= 0 && d <= 6);
     }
     if (body.recurrenceTime !== undefined) list[idx].recurrenceTime = body.recurrenceTime || null;
+    if (body.scheduledTime !== undefined) list[idx].scheduledTime = body.scheduledTime || null;
 
     // Append a completed date for a recurring task check-off
     if (body.completedOnDate) {
