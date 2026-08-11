@@ -1339,7 +1339,17 @@
           <div id="settings-panel-bas-dates" class="settings-panel">
             <div class="settings-block">
               <h2>BAS &amp; Tax dates</h2>
-              <p style="font-size:13px;color:rgba(247,243,237,0.45);margin-bottom:24px;line-height:1.6;">Quarterly BAS lodgement deadlines (standard due dates — not via tax agent). Mark each quarter lodged once submitted.</p>
+              <p style="font-size:13px;color:rgba(247,243,237,0.45);margin-bottom:20px;line-height:1.6;">Quarterly BAS lodgement deadlines (standard due dates — not via tax agent). Tax periods end 30 Sep, 31 Dec, 31 Mar and 30 Jun. BAS is due 28 days after each quarter closes.</p>
+              <div style="margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid rgba(247,243,237,0.07);">
+                <label style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#bd7a70;display:block;margin-bottom:8px;">Tax File Number (TFN) — Business</label>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                  <input type="text" id="bas-tfn" placeholder="123 456 789" maxlength="11" style="background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.1);border-radius:10px;padding:10px 14px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:14px;outline:none;width:180px;letter-spacing:0.05em;">
+                  <button onclick="saveBasTfn()" style="background:#bd7a70;color:#fff;border:none;border-radius:100px;padding:9px 20px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;">Save</button>
+                  <span id="bas-tfn-status" style="font-size:13px;color:rgba(247,243,237,0.4);"></span>
+                </div>
+                <p style="font-size:11.5px;color:rgba(247,243,237,0.28);margin-top:7px;">Stored in your Fairway account only. Not shared externally.</p>
+              </div>
+              <p style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">BAS quarters</p>
               <div id="bas-quarters-list" style="display:flex;flex-direction:column;gap:10px;"></div>
             </div>
           </div>
@@ -6126,18 +6136,17 @@ function showSettingsPanel(id, btn) {
 
 // ── BAS dates ─────────────────────────────────────────────────────────────
 function basQuarters() {
-  // Returns the 4 BAS quarters covering approx the last 6 months + next 6 months
   const now = new Date();
   const y = now.getFullYear();
-  // Australian financial year quarters with standard (non-agent) due dates
-  // Q1=Jul-Sep due 28 Oct, Q2=Oct-Dec due 28 Feb, Q3=Jan-Mar due 28 Apr, Q4=Apr-Jun due 28 Jul
+  // ATO quarterly periods: Q1=Jul-Sep (due 28 Oct), Q2=Oct-Dec (due 28 Feb),
+  // Q3=Jan-Mar (due 28 Apr), Q4=Apr-Jun (due 28 Jul)
   const quarters = [];
   for (let fy = y - 1; fy <= y + 1; fy++) {
     quarters.push(
-      { key:`Q1-FY${String(fy).slice(2)}${String(fy+1).slice(2)}`, label:`Q1 ${fy}–${fy+1}`, period:`Jul–Sep ${fy}`, due:new Date(`${fy+1}-01-28`) },
-      { key:`Q2-FY${String(fy).slice(2)}${String(fy+1).slice(2)}`, label:`Q2 ${fy}–${fy+1}`, period:`Oct–Dec ${fy}`, due:new Date(`${fy+1}-02-28`) },
-      { key:`Q3-FY${String(fy).slice(2)}${String(fy+1).slice(2)}`, label:`Q3 ${fy}–${fy+1}`, period:`Jan–Mar ${fy+1}`, due:new Date(`${fy+1}-04-28`) },
-      { key:`Q4-FY${String(fy).slice(2)}${String(fy+1).slice(2)}`, label:`Q4 ${fy}–${fy+1}`, period:`Apr–Jun ${fy+1}`, due:new Date(`${fy+1}-07-28`) },
+      { key:`Q1-FY${String(fy).slice(2)}${String(fy+1).slice(2)}`, label:`Q1 ${fy}–${fy+1}`, period:`1 Jul – 30 Sep ${fy}`, due:new Date(`${fy}-10-28`) },
+      { key:`Q2-FY${String(fy).slice(2)}${String(fy+1).slice(2)}`, label:`Q2 ${fy}–${fy+1}`, period:`1 Oct – 31 Dec ${fy}`, due:new Date(`${fy+1}-02-28`) },
+      { key:`Q3-FY${String(fy).slice(2)}${String(fy+1).slice(2)}`, label:`Q3 ${fy}–${fy+1}`, period:`1 Jan – 31 Mar ${fy+1}`, due:new Date(`${fy+1}-04-28`) },
+      { key:`Q4-FY${String(fy).slice(2)}${String(fy+1).slice(2)}`, label:`Q4 ${fy}–${fy+1}`, period:`1 Apr – 30 Jun ${fy+1}`, due:new Date(`${fy+1}-07-28`) },
     );
   }
   const cutoff = new Date(now.getTime() - 180 * 86400000);
@@ -6145,11 +6154,25 @@ function basQuarters() {
 }
 
 let _basLodged = {};
+let _basTfn = '';
 
 async function loadBasDates() {
   const res = await api('GET', '/api/admin/settings?key=bas-dates');
-  if (res.ok) { const d = await res.json(); _basLodged = d.lodged || {}; }
+  if (res.ok) {
+    const d = await res.json();
+    _basLodged = d.lodged || {};
+    _basTfn = d.tfn || '';
+    const tfnEl = document.getElementById('bas-tfn');
+    if (tfnEl) tfnEl.value = _basTfn;
+  }
   renderBasDates();
+}
+
+async function saveBasTfn() {
+  _basTfn = (document.getElementById('bas-tfn')?.value || '').trim();
+  settingsStatus('bas-tfn-status', 'Saving…', false);
+  const res = await api('PUT', '/api/admin/settings', { key: 'bas-dates', data: { lodged: _basLodged, tfn: _basTfn } });
+  res.ok ? settingsStatus('bas-tfn-status', 'Saved!', false) : settingsStatus('bas-tfn-status', 'Error.', true);
 }
 
 function renderBasDates() {
@@ -6186,13 +6209,13 @@ function renderBasDates() {
 async function markBasLodged(key) {
   _basLodged[key] = new Date().toISOString().slice(0,10);
   renderBasDates();
-  await api('PUT', '/api/admin/settings', { key: 'bas-dates', data: { lodged: _basLodged } });
+  await api('PUT', '/api/admin/settings', { key: 'bas-dates', data: { lodged: _basLodged, tfn: _basTfn } });
 }
 
 async function unmarkBasLodged(key) {
   delete _basLodged[key];
   renderBasDates();
-  await api('PUT', '/api/admin/settings', { key: 'bas-dates', data: { lodged: _basLodged } });
+  await api('PUT', '/api/admin/settings', { key: 'bas-dates', data: { lodged: _basLodged, tfn: _basTfn } });
 }
 
 // ── Generic settings helpers ───────────────────────────────────────────────
