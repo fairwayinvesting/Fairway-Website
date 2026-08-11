@@ -312,11 +312,12 @@ window.MARKETS = {
 
   // ── LAUNCESTON ────────────────────────────────────────────────────────────
   launceston: {
-    heroPrice: '~$623k', heroYield: '4.0–4.4%', heroPopulation: '80k', heroVacancy: '0.6%', // SQM Research May 2026
-    houseMedian: 623000, unitMedian: 490000,  // City of Launceston LGA; house: Picki 2026; unit: CoreLogic/YIP 2025
-    houseRentRange: '$495–$525', unitRentRange: '$380–$415',
-    houseYieldRange: '4.1–4.4%', unitYieldRange: '4.0–4.3%',
-    vacancyRate: 0.6, daysOnMarket: 42, clearanceRate: 60, propertiesListed: 420,
+    // ── Monthly update fields ── Source: HtAG Analytics TAS91, period ending July 2026
+    heroPrice: '~$732k', heroYield: '4.0–4.7%', heroPopulation: '80k', heroVacancy: '1.2%',
+    houseMedian: 732439, unitMedian: 518801,
+    houseRentRange: '$555–$570', unitRentRange: '$460–$475',
+    houseYieldRange: '3.9–4.1%', unitYieldRange: '4.6–4.8%',
+    vacancyRate: 1.2, daysOnMarket: 22, clearanceRate: 60, propertiesListed: 248,
     popTotal: 80000, popGrowth: 1.2, medianAge: 40, ownerOccupier: 62, employed: 60, unemployment: 5.0,
     conditions: {
       rentalDemand:  { label: 'Very High', pct: 85 },
@@ -325,17 +326,17 @@ window.MARKETS = {
       infraPipeline: { label: 'Moderate',  pct: 58 },
       popMomentum:   { label: 'Moderate',  pct: 55 },
     },
-    housePerf: { yr1:{val:15.7,bar:100}, yr3:{val:7.8,bar:78}, yr5:{val:10.2,bar:100}, yr10:{val:8.8,bar:88} },
-    unitPerf:  { yr1:{val:2.8,bar:28}, yr3:{val:6.5,bar:65}, yr5:{val:8.5,bar:85},   yr10:{val:7.2,bar:72} },
+    housePerf: { yr1:{val:12.2,bar:100}, yr3:{val:5.5,bar:45}, yr5:{val:6.3,bar:52}, yr10:{val:8.0,bar:66} },
+    unitPerf:  { yr1:{val:7.0,bar:80},   yr3:{val:8.0,bar:92}, yr5:{val:8.7,bar:100}, yr10:{val:5.6,bar:64} },
     population:  [70000,71000,72000,73000,74000,75500,76800,78000,79200,80000],
     popYears:    [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
-    housePrice:  [310000,335000,360000,380000,425000,490000,530000,515000,490000,505000],
-    unitPrice:   [195000,210000,225000,240000,268000,308000,335000,325000,310000,320000],
+    housePrice:  [310000,335000,360000,380000,425000,490000,530000,515000,655000,732439],
+    unitPrice:   [195000,210000,225000,240000,268000,308000,335000,325000,495000,518801],
     priceYears:  [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
-    yieldHouse:  [6.5,6.3,6.1,5.9,5.6,5.2,5.5,5.7,5.8,5.8],
-    yieldUnit:   [7.2,7.0,6.8,6.6,6.3,5.9,6.2,6.5,6.7,6.7],
+    yieldHouse:  [6.5,6.3,6.1,5.9,5.6,5.2,5.5,5.7,4.0,4.0],
+    yieldUnit:   [7.2,7.0,6.8,6.6,6.3,5.9,6.2,6.5,4.5,4.7],
     yieldYears:  [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
-    vacancy:     [2.8,2.4,2.0,1.6,1.2,0.8,0.7,0.7,0.7,0.7],
+    vacancy:     [2.8,2.4,2.0,1.6,1.2,0.8,0.7,0.7,0.9,1.2],
     vacYears:    [2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
     stockMonths: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
     stockVals:   [510,488,468,450,432,415,428,445,436,420,410,420],
