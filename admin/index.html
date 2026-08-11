@@ -2256,13 +2256,11 @@
       <label>Location <span style="font-size:11px;color:rgba(247,243,237,0.35);">(city / suburb)</span></label>
       <input type="text" id="pm-location" placeholder="e.g. Crows Nest, St Leonards">
     </div>
-    <div class="field">
-      <label>Roles</label>
-      <div style="display:flex;flex-wrap:wrap;gap:10px;padding:4px 0;">
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(247,243,237,0.6);cursor:pointer;"><input type="checkbox" class="pm-role-cb" value="referral_partner" style="accent-color:#bd7a70;"> Referral Partner</label>
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(247,243,237,0.6);cursor:pointer;"><input type="checkbox" class="pm-role-cb" value="prospect" style="accent-color:#bd7a70;"> Prospect</label>
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(247,243,237,0.6);cursor:pointer;"><input type="checkbox" class="pm-role-cb" value="past_guest" style="accent-color:#bd7a70;"> Past Guest</label>
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(247,243,237,0.6);cursor:pointer;"><input type="checkbox" class="pm-role-cb" value="client_contact" style="accent-color:#bd7a70;"> Client Contact</label>
+    <div class="field" style="display:flex;align-items:flex-start;gap:12px;padding:6px 0;">
+      <input type="checkbox" class="pm-role-cb" value="referral_partner" id="pm-role-ref" style="margin-top:3px;accent-color:#bd7a70;width:15px;height:15px;flex-shrink:0;cursor:pointer;">
+      <div>
+        <div style="font-size:13.5px;color:#f7f3ed;cursor:pointer;" onclick="document.getElementById('pm-role-ref').click()">Referral partner</div>
+        <div style="font-size:12px;color:rgba(247,243,237,0.4);margin-top:2px;">Shows under the Partners filter in the directory.</div>
       </div>
     </div>
     <div class="field">
@@ -2889,8 +2887,6 @@ function renderPartnersSection() {
     <div class="dir-pills" style="margin-bottom:8px;">
       <button class="dir-pill ${dirRoleFilter==='all'?'active':''}" onclick="dirRoleFilter='all';renderPartnersSection()">All</button>
       <button class="dir-pill ${dirRoleFilter==='referral_partner'?'active':''}" onclick="dirRoleFilter='referral_partner';renderPartnersSection()">Partners</button>
-      <button class="dir-pill ${dirRoleFilter==='prospect'?'active':''}" onclick="dirRoleFilter='prospect';renderPartnersSection()">Prospects</button>
-      <button class="dir-pill ${dirRoleFilter==='past_guest'?'active':''}" onclick="dirRoleFilter='past_guest';renderPartnersSection()">Past Guests</button>
     </div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
       <div class="dir-pills" style="margin-bottom:0;">
@@ -3293,8 +3289,8 @@ function renderCrmPartnerPanel() {
   const pf = (label, val) => val ? `<div class="profile-field"><label>${label}</label><div class="pf-val">${esc(val)}</div></div>` : '';
   const warmthHtml = p.warmth
     ? `<span class="dir-warmth-${p.warmth}" style="margin-left:8px;">● ${p.warmth.charAt(0).toUpperCase()+p.warmth.slice(1)}</span>` : '';
-  const roleLabels = { referral_partner:'Referral Partner', prospect:'Prospect', past_guest:'Past Guest', client_contact:'Client Contact' };
-  const rolesHtml = (p.roles||[]).map(r => `<span class="dir-role-badge">${roleLabels[r]||r}</span>`).join('');
+  const roleLabels = { referral_partner:'Referral Partner' };
+  const rolesHtml = (p.roles||[]).filter(r => roleLabels[r]).map(r => `<span class="dir-role-badge">${roleLabels[r]}</span>`).join('');
   const history = (p.outreach_history || []).slice(0, 10);
   const lastContactFmt = p.last_contact
     ? new Date(p.last_contact+'T00:00:00').toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : null;
