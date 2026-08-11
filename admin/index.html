@@ -73,9 +73,6 @@
     .dir-state-badge{display:inline-block;font-size:11px;background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.1);border-radius:100px;padding:2px 9px;color:rgba(247,243,237,0.45);white-space:nowrap;}
     .dir-ref-badge{display:inline-block;font-size:11px;background:rgba(189,122,112,0.12);border:1px solid rgba(189,122,112,0.22);border-radius:100px;padding:2px 9px;color:rgba(189,122,112,0.85);white-space:nowrap;}
     .dir-role-badge{display:inline-block;font-size:11px;background:rgba(122,184,232,0.1);border:1px solid rgba(122,184,232,0.2);border-radius:100px;padding:2px 9px;color:rgba(122,184,232,0.8);white-space:nowrap;margin:2px 2px 0 0;}
-    .dir-warmth-cold{color:rgba(122,184,232,0.8);font-size:11px;font-weight:600;}
-    .dir-warmth-warm{color:#e8a87c;font-size:11px;font-weight:600;}
-    .dir-warmth-hot{color:#e07070;font-size:11px;font-weight:600;}
     .outreach-item{padding:10px 0;border-bottom:1px solid rgba(247,243,237,0.05);display:flex;gap:10px;align-items:flex-start;}
     .outreach-item:last-child{border-bottom:none;}
     .outreach-date{font-size:11px;color:rgba(247,243,237,0.3);white-space:nowrap;min-width:80px;}
@@ -2263,16 +2260,6 @@
         <div style="font-size:12px;color:rgba(247,243,237,0.4);margin-top:2px;">Shows under the Partners filter in the directory.</div>
       </div>
     </div>
-    <div class="field">
-      <label>Warmth</label>
-      <div style="display:flex;gap:6px;">
-        <button type="button" class="pm-warmth-btn" data-warmth="cold" onclick="setPmWarmth('cold',this)" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(122,184,232,0.2);background:rgba(122,184,232,0.05);color:rgba(122,184,232,0.7);font-family:'Outfit',sans-serif;font-size:12.5px;cursor:pointer;transition:all .15s;">Cold</button>
-        <button type="button" class="pm-warmth-btn" data-warmth="warm" onclick="setPmWarmth('warm',this)" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(232,168,124,0.2);background:rgba(232,168,124,0.05);color:rgba(232,168,124,0.7);font-family:'Outfit',sans-serif;font-size:12.5px;cursor:pointer;transition:all .15s;">Warm</button>
-        <button type="button" class="pm-warmth-btn" data-warmth="hot" onclick="setPmWarmth('hot',this)" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(220,80,80,0.2);background:rgba(220,80,80,0.05);color:rgba(220,80,80,0.7);font-family:'Outfit',sans-serif;font-size:12.5px;cursor:pointer;transition:all .15s;">Hot</button>
-        <button type="button" class="pm-warmth-btn" data-warmth="" onclick="setPmWarmth('',this)" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(247,243,237,0.1);background:none;color:rgba(247,243,237,0.3);font-family:'Outfit',sans-serif;font-size:12.5px;cursor:pointer;transition:all .15s;">None</button>
-      </div>
-      <input type="hidden" id="pm-warmth">
-    </div>
     <div class="field" style="display:flex;align-items:flex-start;gap:12px;padding:6px 0;">
       <input type="checkbox" id="pm-is-referral" style="margin-top:3px;accent-color:#bd7a70;width:15px;height:15px;flex-shrink:0;cursor:pointer;">
       <div>
@@ -3138,21 +3125,6 @@ async function openClientEngagementTab(clientId) {
 }
 
 
-let _pmWarmth = '';
-
-function setPmWarmth(val, btn) {
-  _pmWarmth = val;
-  document.getElementById('pm-warmth').value = val;
-  document.querySelectorAll('.pm-warmth-btn').forEach(b => {
-    const bw = b.dataset.warmth;
-    const active = bw === val;
-    const styles = { cold:'rgba(122,184,232,', warm:'rgba(232,168,124,', hot:'rgba(220,80,80,', '':'rgba(247,243,237,' };
-    const base = styles[bw] || styles[''];
-    b.style.background = active ? `${base}0.15)` : `${base}0.05)`;
-    b.style.borderColor = active ? `${base}0.4)` : `${base}0.2)`;
-    b.style.fontWeight = active ? '600' : '400';
-  });
-}
 
 function openPartnerModal(id) {
   document.getElementById('pm-id').value = id || '';
@@ -3175,13 +3147,11 @@ function openPartnerModal(id) {
     document.getElementById('pm-phone').value = p.phone || '';
     document.getElementById('pm-is-referral').checked = p.isReferralPartner !== false;
     document.getElementById('pm-notes').value = p.notes || '';
-    setPmWarmth(p.warmth || '', null);
   } else {
     ['pm-name','pm-company','pm-region','pm-location','pm-email','pm-phone','pm-notes'].forEach(fid => { document.getElementById(fid).value = ''; });
     document.getElementById('pm-type').value = '';
     document.getElementById('pm-state').value = '';
     document.getElementById('pm-is-referral').checked = true;
-    setPmWarmth('', null);
   }
   document.getElementById('partner-modal-overlay').style.display = 'flex';
 }
@@ -3212,7 +3182,6 @@ async function savePartner() {
     isReferralPartner: document.getElementById('pm-is-referral').checked,
     notes: document.getElementById('pm-notes').value.trim() || null,
     roles,
-    warmth: document.getElementById('pm-warmth').value || null,
   };
   try {
     const res = await api(id ? 'PUT' : 'POST', '/api/admin/referral-partners', body);
@@ -3287,8 +3256,6 @@ function renderCrmPartnerPanel() {
   const referred = isRef ? clients.filter(c => c.referrerId === p.id) : [];
   const dealsClients = clients.filter(c => (c.dealProfessionals || []).some(dp => dp.contactId === p.id));
   const pf = (label, val) => val ? `<div class="profile-field"><label>${label}</label><div class="pf-val">${esc(val)}</div></div>` : '';
-  const warmthHtml = p.warmth
-    ? `<span class="dir-warmth-${p.warmth}" style="margin-left:8px;">● ${p.warmth.charAt(0).toUpperCase()+p.warmth.slice(1)}</span>` : '';
   const roleLabels = { referral_partner:'Referral Partner' };
   const rolesHtml = (p.roles||[]).filter(r => roleLabels[r]).map(r => `<span class="dir-role-badge">${roleLabels[r]}</span>`).join('');
   const history = (p.outreach_history || []).slice(0, 10);
@@ -3304,7 +3271,7 @@ function renderCrmPartnerPanel() {
         ${p.location || p.state || p.region ? `<div class="profile-field"><label>Location</label><div class="pf-val">${[p.location, p.region, p.state].filter(Boolean).join(', ')}</div></div>` : ''}
         ${pf('Email', p.email)}
         ${pf('Phone', p.phone)}
-        ${lastContactFmt ? `<div class="profile-field"><label>Last contact</label><div class="pf-val">${lastContactFmt}${warmthHtml}</div></div>` : (p.warmth ? `<div class="profile-field"><label>Warmth</label><div class="pf-val">${warmthHtml.trim()}</div></div>` : '')}
+        ${lastContactFmt ? `<div class="profile-field"><label>Last contact</label><div class="pf-val">${lastContactFmt}</div></div>` : ''}
       </div>
       ${rolesHtml ? `<div style="margin-top:10px;display:flex;flex-wrap:wrap;">${rolesHtml}</div>` : ''}
       ${isRef ? `<div style="margin-top:8px;"><span class="dir-ref-badge">Tracks referrals</span></div>` : ''}
