@@ -1349,6 +1349,15 @@
                 </div>
                 <p style="font-size:11.5px;color:rgba(247,243,237,0.28);margin-top:7px;">Stored in your Fairway account only. Not shared externally.</p>
               </div>
+              <div style="margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid rgba(247,243,237,0.07);">
+                <label style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#bd7a70;display:block;margin-bottom:8px;">Business BAS start</label>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                  <select id="bas-start-key" style="background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.1);border-radius:10px;padding:10px 14px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:13px;outline:none;cursor:pointer;"></select>
+                  <button onclick="saveBasStartKey()" style="background:#bd7a70;color:#fff;border:none;border-radius:100px;padding:9px 20px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;">Save</button>
+                  <span id="bas-start-status" style="font-size:13px;color:rgba(247,243,237,0.4);"></span>
+                </div>
+                <p style="font-size:11.5px;color:rgba(247,243,237,0.28);margin-top:7px;">Only show quarters from this one onwards — hides any periods before the business started.</p>
+              </div>
               <p style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">BAS quarters</p>
               <div id="bas-quarters-list" style="display:flex;flex-direction:column;gap:10px;"></div>
             </div>
@@ -6135,6 +6144,12 @@ function showSettingsPanel(id, btn) {
 }
 
 // ── BAS dates ─────────────────────────────────────────────────────────────
+function quarterSortKey(key) {
+  const m = key && key.match(/Q(\d)-FY(\d{2})(\d{2})/);
+  if (!m) return 0;
+  return (2000 + parseInt(m[2])) * 4 + parseInt(m[1]) - 1;
+}
+
 function basQuarters() {
   const now = new Date();
   const y = now.getFullYear();
@@ -6150,11 +6165,39 @@ function basQuarters() {
     );
   }
   const cutoff = new Date(now.getTime() - 180 * 86400000);
-  return quarters.filter(q => q.due >= cutoff && q.due <= new Date(now.getTime() + 400 * 86400000));
+  let result = quarters.filter(q => q.due >= cutoff && q.due <= new Date(now.getTime() + 400 * 86400000));
+  if (_basStartKey) {
+    const startN = quarterSortKey(_basStartKey);
+    result = result.filter(q => quarterSortKey(q.key) >= startN);
+  }
+  return result;
 }
 
 let _basLodged = {};
 let _basTfn = '';
+let _basStartKey = '';
+
+function populateBasStartDropdown() {
+  const sel = document.getElementById('bas-start-key');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Show all quarters —</option>';
+  const now = new Date();
+  const y = now.getFullYear();
+  for (let fy = 2022; fy <= y + 1; fy++) {
+    [
+      { key:`Q1-FY${String(fy).slice(2)}${String(fy+1).slice(2)}`, label:`Q1 ${fy}–${fy+1} · 1 Jul – 30 Sep ${fy}` },
+      { key:`Q2-FY${String(fy).slice(2)}${String(fy+1).slice(2)}`, label:`Q2 ${fy}–${fy+1} · 1 Oct – 31 Dec ${fy}` },
+      { key:`Q3-FY${String(fy).slice(2)}${String(fy+1).slice(2)}`, label:`Q3 ${fy}–${fy+1} · 1 Jan – 31 Mar ${fy+1}` },
+      { key:`Q4-FY${String(fy).slice(2)}${String(fy+1).slice(2)}`, label:`Q4 ${fy}–${fy+1} · 1 Apr – 30 Jun ${fy+1}` },
+    ].forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.key;
+      opt.textContent = p.label;
+      if (p.key === _basStartKey) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+}
 
 async function loadBasDates() {
   const res = await api('GET', '/api/admin/settings?key=bas-dates');
@@ -6162,8 +6205,10 @@ async function loadBasDates() {
     const d = await res.json();
     _basLodged = d.lodged || {};
     _basTfn = d.tfn || '';
+    _basStartKey = d.startKey || '';
     const tfnEl = document.getElementById('bas-tfn');
     if (tfnEl) tfnEl.value = _basTfn;
+    populateBasStartDropdown();
   }
   renderBasDates();
 }
@@ -6171,8 +6216,16 @@ async function loadBasDates() {
 async function saveBasTfn() {
   _basTfn = (document.getElementById('bas-tfn')?.value || '').trim();
   settingsStatus('bas-tfn-status', 'Saving…', false);
-  const res = await api('PUT', '/api/admin/settings', { key: 'bas-dates', data: { lodged: _basLodged, tfn: _basTfn } });
+  const res = await api('PUT', '/api/admin/settings', { key: 'bas-dates', data: { lodged: _basLodged, tfn: _basTfn, startKey: _basStartKey } });
   res.ok ? settingsStatus('bas-tfn-status', 'Saved!', false) : settingsStatus('bas-tfn-status', 'Error.', true);
+}
+
+async function saveBasStartKey() {
+  _basStartKey = document.getElementById('bas-start-key')?.value || '';
+  settingsStatus('bas-start-status', 'Saving…', false);
+  const res = await api('PUT', '/api/admin/settings', { key: 'bas-dates', data: { lodged: _basLodged, tfn: _basTfn, startKey: _basStartKey } });
+  res.ok ? settingsStatus('bas-start-status', 'Saved!', false) : settingsStatus('bas-start-status', 'Error.', true);
+  renderBasDates();
 }
 
 function renderBasDates() {
@@ -6209,13 +6262,13 @@ function renderBasDates() {
 async function markBasLodged(key) {
   _basLodged[key] = new Date().toISOString().slice(0,10);
   renderBasDates();
-  await api('PUT', '/api/admin/settings', { key: 'bas-dates', data: { lodged: _basLodged, tfn: _basTfn } });
+  await api('PUT', '/api/admin/settings', { key: 'bas-dates', data: { lodged: _basLodged, tfn: _basTfn, startKey: _basStartKey } });
 }
 
 async function unmarkBasLodged(key) {
   delete _basLodged[key];
   renderBasDates();
-  await api('PUT', '/api/admin/settings', { key: 'bas-dates', data: { lodged: _basLodged, tfn: _basTfn } });
+  await api('PUT', '/api/admin/settings', { key: 'bas-dates', data: { lodged: _basLodged, tfn: _basTfn, startKey: _basStartKey } });
 }
 
 // ── Generic settings helpers ───────────────────────────────────────────────
