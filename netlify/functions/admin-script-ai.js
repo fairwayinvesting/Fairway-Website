@@ -44,7 +44,11 @@ ${scriptContext}`;
   if (mode === 'draft_section') {
     messages = [{
       role: 'user',
-      content: `Write the "${sectionLabel}" section of Luke's script.
+      content: `${systemPrompt}
+
+---
+
+Write the "${sectionLabel}" section of Luke's script.
 
 Rules:
 - Output ONLY the words Luke speaks — no headings, labels, or meta-commentary
@@ -55,8 +59,11 @@ Rules:
 - Never start with "I" as the first word${filledSections.length ? '\n- Maintain tonal consistency with the sections already written' : ''}`,
     }];
   } else if (mode === 'chat') {
+    const chatSystem = `${systemPrompt}\n\nYou are helping Luke refine his script. Answer concisely. If you suggest replacement text for a section, write it plainly so he can copy it in.`;
     messages = [
-      ...history.slice(-10).map(h => ({ role: h.role, content: h.content })),
+      { role: 'user', content: chatSystem + '\n\n(Acknowledged — ready to help with the script.)' },
+      { role: 'assistant', content: 'Got it. What would you like to change?' },
+      ...history.slice(-8).map(h => ({ role: h.role, content: h.content })),
       { role: 'user', content: message },
     ];
   } else {
@@ -75,7 +82,6 @@ Rules:
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 512,
-        system: systemPrompt,
         messages,
       }),
     });
@@ -87,7 +93,9 @@ Rules:
   if (!apiRes.ok) {
     const errText = await apiRes.text().catch(() => '');
     console.error('Anthropic API error:', apiRes.status, errText);
-    return json({ error: `AI service error (${apiRes.status})` }, 502);
+    let detail = '';
+    try { detail = JSON.parse(errText)?.error?.message || errText; } catch { detail = errText; }
+    return json({ error: `Anthropic ${apiRes.status}: ${detail.slice(0, 200)}` }, 502);
   }
 
   let aiData;
