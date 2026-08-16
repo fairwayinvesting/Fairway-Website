@@ -99,6 +99,20 @@
   .stat-bar-wrap{width:100%;height:4px;background:rgba(247,243,237,0.07);border-radius:100px;overflow:hidden;margin-top:8px;}
   .stat-bar{height:100%;background:#bd7a70;border-radius:100px;transition:width .4s;}
 
+  /* Health Log */
+  .hl-panel{background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.07);border-radius:14px;padding:20px 22px;margin-bottom:14px;}
+  .hl-panel-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .hl-panel-title{font-size:10.5px;font-weight:600;letter-spacing:0.13em;text-transform:uppercase;color:rgba(247,243,237,0.28);}
+  .hl-input{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:9px;padding:8px 12px;font-size:13px;color:#f7f3ed;outline:none;transition:border-color .15s;font-family:'Outfit',sans-serif;}
+  .hl-input:focus{border-color:rgba(189,122,112,0.4);}
+  .hl-input::placeholder{color:rgba(247,243,237,0.22);}
+  .hl-btn{background:rgba(189,122,112,0.1);border:1px solid rgba(189,122,112,0.18);border-radius:8px;color:#bd7a70;font-size:12.5px;font-weight:500;padding:7px 14px;cursor:pointer;white-space:nowrap;transition:all .15s;font-family:'Outfit',sans-serif;}
+  .hl-btn:hover{background:rgba(189,122,112,0.2);}
+  .hl-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(247,243,237,0.05);}
+  .hl-row:last-child{border-bottom:none;}
+  .hl-bar-wrap{height:5px;background:rgba(247,243,237,0.07);border-radius:100px;overflow:hidden;margin-top:10px;}
+  .hl-bar{height:100%;border-radius:100px;transition:width .4s,background .4s;}
+
   /* Custom days picker */
   #life-custom-days-row{display:none;margin-bottom:8px;}
 
@@ -147,6 +161,92 @@
       <button class="view-tab" onclick="setLifeView('fitness',this)">Fitness</button>
       <button class="view-tab" onclick="setLifeView('luna',this)">Luna</button>
       <button class="view-tab" onclick="setLifeView('self',this)">Self</button>
+    </div>
+
+    <!-- Health Log (Fitness tab only) -->
+    <div id="health-log-section" style="display:none;margin-bottom:28px;">
+
+      <!-- Date selector -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+        <p style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.25);">Daily log</p>
+        <input type="date" id="hl-date" class="hl-input" style="font-size:12.5px;padding:6px 10px;" onchange="renderHealthLog()">
+      </div>
+
+      <!-- Weight -->
+      <div class="hl-panel">
+        <div class="hl-panel-hd">
+          <span class="hl-panel-title">Weight</span>
+          <span id="hl-weight-display"></span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <input type="number" id="hl-weight-input" class="hl-input" placeholder="e.g. 74.5" step="0.1" min="20" max="300" style="width:110px;" onkeydown="if(event.key==='Enter')logWeight()">
+          <span style="font-size:13px;color:rgba(247,243,237,0.35);">kg</span>
+          <button class="hl-btn" onclick="logWeight()">Save</button>
+        </div>
+        <div id="hl-weight-history" style="margin-top:12px;"></div>
+      </div>
+
+      <!-- Nutrition -->
+      <div class="hl-panel">
+        <div class="hl-panel-hd">
+          <span class="hl-panel-title">Nutrition</span>
+          <span style="display:flex;align-items:center;gap:8px;">
+            <span id="hl-cal-total" style="font-family:'Fraunces',serif;font-size:22px;color:#f7f3ed;">0</span>
+            <span style="font-size:12.5px;color:rgba(247,243,237,0.3);">/ <span id="hl-cal-target-disp">2,000</span> kcal</span>
+            <button onclick="toggleCalTarget()" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.08);border-radius:6px;color:rgba(247,243,237,0.3);font-size:11px;font-weight:500;padding:3px 8px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .15s;" onmouseover="this.style.color='#f7f3ed'" onmouseout="this.style.color='rgba(247,243,237,0.3)'">Set target</button>
+          </span>
+        </div>
+        <div id="hl-cal-target-row" style="display:none;margin-bottom:12px;">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="number" id="hl-cal-target-input" class="hl-input" placeholder="2000" style="width:100px;" onkeydown="if(event.key==='Enter')saveCalTarget()">
+            <span style="font-size:13px;color:rgba(247,243,237,0.35);">kcal daily target</span>
+            <button class="hl-btn" onclick="saveCalTarget()">Save</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+          <select id="hl-food-meal" class="hl-input" style="padding:7px 10px;cursor:pointer;font-size:12.5px;">
+            <option value="breakfast">Breakfast</option>
+            <option value="lunch">Lunch</option>
+            <option value="dinner">Dinner</option>
+            <option value="snack">Snack</option>
+            <option value="other">Other</option>
+          </select>
+          <input type="text" id="hl-food-name" class="hl-input" placeholder="Food item…" style="flex:1;min-width:130px;" onkeydown="if(event.key==='Enter')addFood()">
+          <input type="number" id="hl-food-cals" class="hl-input" placeholder="kcal" style="width:80px;" onkeydown="if(event.key==='Enter')addFood()">
+          <button class="hl-btn" onclick="addFood()">Add</button>
+        </div>
+        <div id="hl-food-list"></div>
+        <div class="hl-bar-wrap">
+          <div class="hl-bar" id="hl-cal-bar" style="width:0%;background:#6dbf7b;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:5px;">
+          <span style="font-size:11.5px;color:rgba(247,243,237,0.3);" id="hl-cal-pct">0%</span>
+          <span style="font-size:11.5px;color:rgba(247,243,237,0.25);">of daily target</span>
+        </div>
+      </div>
+
+      <!-- Exercise -->
+      <div class="hl-panel">
+        <div class="hl-panel-hd">
+          <span class="hl-panel-title">Exercise</span>
+          <span id="hl-ex-total" style="font-size:12.5px;color:rgba(247,243,237,0.35);"></span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+          <select id="hl-ex-type" class="hl-input" style="padding:7px 10px;cursor:pointer;font-size:12.5px;">
+            <option value="cardio">Cardio</option>
+            <option value="weights">Weights</option>
+            <option value="yoga">Yoga / Stretch</option>
+            <option value="sport">Sport</option>
+            <option value="other">Other</option>
+          </select>
+          <input type="text" id="hl-ex-name" class="hl-input" placeholder="e.g. Morning run 5km" style="flex:1;min-width:130px;" onkeydown="if(event.key==='Enter')addExercise()">
+          <input type="number" id="hl-ex-mins" class="hl-input" placeholder="min" style="width:70px;" onkeydown="if(event.key==='Enter')addExercise()">
+          <button class="hl-btn" onclick="addExercise()">Add</button>
+        </div>
+        <div id="hl-ex-list"></div>
+      </div>
+
+      <div style="padding-top:4px;border-top:1px solid rgba(247,243,237,0.07);margin-bottom:20px;"></div>
     </div>
 
     <!-- Add task row -->
@@ -245,6 +345,9 @@ async function api(method, path, body) {
   if (dateInput) dateInput.value = localDateStr();
   const res = await api('GET', '/api/admin/tasks');
   if (res.ok) allTasks = await res.json();
+  const hlDate = document.getElementById('hl-date');
+  if (hlDate) hlDate.value = localDateStr();
+  renderHealthLog();
   renderLifeList();
   renderLifeStats(_lifeStatPeriod);
 })();
@@ -255,6 +358,8 @@ function setLifeView(view, btn) {
   document.querySelectorAll('.view-tab').forEach(b=>b.classList.toggle('active',b===btn));
   const streamSel = document.getElementById('life-stream-sel');
   if (streamSel && view !== 'today') streamSel.value = view;
+  const hlSec = document.getElementById('health-log-section');
+  if (hlSec) hlSec.style.display = view === 'fitness' ? '' : 'none';
   renderLifeList();
 }
 
@@ -551,6 +656,192 @@ async function deleteLifeTask(id) {
   renderLifeList();
   renderLifeStats(_lifeStatPeriod);
   showToast('Task deleted');
+}
+
+// ── Health Log ────────────────────────────────────────────────────────────────
+const HL_KEY = 'fw_health_log';
+
+function getHealthLog() {
+  try { return JSON.parse(localStorage.getItem(HL_KEY)) || {}; } catch { return {}; }
+}
+function saveHealthLog(log) { localStorage.setItem(HL_KEY, JSON.stringify(log)); }
+function getHlDate() { return document.getElementById('hl-date')?.value || localDateStr(); }
+
+function toggleCalTarget() {
+  const r = document.getElementById('hl-cal-target-row');
+  if (!r) return;
+  const showing = r.style.display !== 'none';
+  r.style.display = showing ? 'none' : 'flex';
+  if (!showing) {
+    const inp = document.getElementById('hl-cal-target-input');
+    if (inp) { inp.value = localStorage.getItem('fw_cal_target') || '2000'; inp.focus(); }
+  }
+}
+
+function saveCalTarget() {
+  const val = parseInt(document.getElementById('hl-cal-target-input')?.value, 10);
+  if (!val || val < 500 || val > 10000) { showToast('Enter a target between 500–10,000 kcal'); return; }
+  localStorage.setItem('fw_cal_target', String(val));
+  const r = document.getElementById('hl-cal-target-row');
+  if (r) r.style.display = 'none';
+  renderHealthLog();
+  showToast('Calorie target updated');
+}
+
+function logWeight() {
+  const val = parseFloat(document.getElementById('hl-weight-input')?.value);
+  if (!val || val < 20 || val > 300) { showToast('Enter a valid weight (20–300 kg)'); return; }
+  const log = getHealthLog();
+  if (!log.weight) log.weight = {};
+  log.weight[getHlDate()] = Math.round(val * 10) / 10;
+  saveHealthLog(log);
+  renderHealthLog();
+  showToast('Weight saved');
+}
+
+function addFood() {
+  const nameEl = document.getElementById('hl-food-name');
+  const name = nameEl?.value.trim();
+  if (!name) { nameEl?.focus(); return; }
+  const cals = parseInt(document.getElementById('hl-food-cals')?.value, 10) || 0;
+  const meal = document.getElementById('hl-food-meal')?.value || 'other';
+  const log = getHealthLog();
+  if (!log.food) log.food = {};
+  const date = getHlDate();
+  if (!log.food[date]) log.food[date] = [];
+  log.food[date].push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,5), name, cals, meal });
+  saveHealthLog(log);
+  nameEl.value = '';
+  const calsEl = document.getElementById('hl-food-cals');
+  if (calsEl) calsEl.value = '';
+  nameEl.focus();
+  renderHealthLog();
+}
+
+function removeFood(id) {
+  const date = getHlDate();
+  const log = getHealthLog();
+  if (log.food?.[date]) {
+    log.food[date] = log.food[date].filter(f => f.id !== id);
+    saveHealthLog(log);
+    renderHealthLog();
+  }
+}
+
+function addExercise() {
+  const nameEl = document.getElementById('hl-ex-name');
+  const name = nameEl?.value.trim();
+  if (!name) { nameEl?.focus(); return; }
+  const mins = parseInt(document.getElementById('hl-ex-mins')?.value, 10) || 0;
+  const type = document.getElementById('hl-ex-type')?.value || 'other';
+  const log = getHealthLog();
+  if (!log.exercise) log.exercise = {};
+  const date = getHlDate();
+  if (!log.exercise[date]) log.exercise[date] = [];
+  log.exercise[date].push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,5), name, mins, type });
+  saveHealthLog(log);
+  nameEl.value = '';
+  const minsEl = document.getElementById('hl-ex-mins');
+  if (minsEl) minsEl.value = '';
+  nameEl.focus();
+  renderHealthLog();
+}
+
+function removeExercise(id) {
+  const date = getHlDate();
+  const log = getHealthLog();
+  if (log.exercise?.[date]) {
+    log.exercise[date] = log.exercise[date].filter(e => e.id !== id);
+    saveHealthLog(log);
+    renderHealthLog();
+  }
+}
+
+function renderHealthLog() {
+  const date = getHlDate();
+  const log = getHealthLog();
+  const calTarget = parseInt(localStorage.getItem('fw_cal_target') || '2000', 10);
+
+  // Weight
+  const todayW = log.weight?.[date];
+  const wDisp = document.getElementById('hl-weight-display');
+  if (wDisp) wDisp.innerHTML = todayW
+    ? `<span style="font-family:'Fraunces',serif;font-size:24px;font-weight:400;color:#f7f3ed;">${todayW}</span><span style="font-size:12px;color:rgba(247,243,237,0.4);margin-left:4px;">kg</span>`
+    : `<span style="font-size:12.5px;color:rgba(247,243,237,0.2);">Not logged</span>`;
+  const wInp = document.getElementById('hl-weight-input');
+  if (wInp) wInp.value = todayW || '';
+  const histEl = document.getElementById('hl-weight-history');
+  if (histEl) {
+    const hist = Object.entries(log.weight || {}).filter(([d])=>d!==date&&d<=date).sort(([a],[b])=>b.localeCompare(a)).slice(0,5);
+    histEl.innerHTML = hist.length ? `<div style="margin-top:4px;">${hist.map(([d,w])=>{
+      const lbl = new Date(d+'T12:00:00').toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short'});
+      return `<div class="hl-row"><span style="flex:1;font-size:12.5px;color:rgba(247,243,237,0.35);">${lbl}</span><span style="font-size:13px;color:rgba(247,243,237,0.55);">${w} kg</span></div>`;
+    }).join('')}</div>` : '';
+  }
+
+  // Nutrition
+  const foods = log.food?.[date] || [];
+  const totalCals = foods.reduce((s,f)=>s+(f.cals||0), 0);
+  const calPct = Math.min(110, Math.round(totalCals/calTarget*100));
+  const calColor = calPct > 100 ? '#e07070' : calPct > 85 ? '#e8a87c' : '#6dbf7b';
+  const calTotalEl = document.getElementById('hl-cal-total');
+  if (calTotalEl) calTotalEl.textContent = totalCals.toLocaleString();
+  const calTargDispEl = document.getElementById('hl-cal-target-disp');
+  if (calTargDispEl) calTargDispEl.textContent = calTarget.toLocaleString();
+  const calPctEl = document.getElementById('hl-cal-pct');
+  if (calPctEl) calPctEl.textContent = calPct + '%';
+  const calBarEl = document.getElementById('hl-cal-bar');
+  if (calBarEl) { calBarEl.style.width = calPct + '%'; calBarEl.style.background = calColor; }
+
+  const MEALS = { breakfast:'Breakfast', lunch:'Lunch', dinner:'Dinner', snack:'Snack', other:'Other' };
+  const MEAL_ORDER = ['breakfast','lunch','dinner','snack','other'];
+  const mealGroups = {};
+  foods.forEach(f => { const m=f.meal||'other'; if(!mealGroups[m])mealGroups[m]=[]; mealGroups[m].push(f); });
+  const foodEl = document.getElementById('hl-food-list');
+  if (foodEl) {
+    if (!foods.length) {
+      foodEl.innerHTML = '<div style="font-size:13px;color:rgba(247,243,237,0.2);padding:6px 0 4px;">Nothing logged yet.</div>';
+    } else {
+      foodEl.innerHTML = MEAL_ORDER.filter(m=>mealGroups[m]).map(m=>{
+        const mCals = mealGroups[m].reduce((s,f)=>s+(f.cals||0),0);
+        return `<div style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.22);">${MEALS[m]}</span>
+            ${mCals ? `<span style="font-size:11px;color:rgba(247,243,237,0.25);">${mCals.toLocaleString()} kcal</span>` : ''}
+          </div>
+          ${mealGroups[m].map(f=>`<div class="hl-row">
+            <span style="flex:1;font-size:13.5px;color:rgba(247,243,237,0.78);">${esc(f.name)}</span>
+            <span style="font-size:12.5px;color:rgba(247,243,237,0.35);min-width:64px;text-align:right;">${f.cals?f.cals.toLocaleString()+' kcal':'—'}</span>
+            <button onclick="removeFood('${f.id}')" style="background:none;border:none;color:rgba(247,243,237,0.18);cursor:pointer;font-size:18px;padding:0 0 0 10px;line-height:1;flex-shrink:0;" title="Remove">&#215;</button>
+          </div>`).join('')}
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // Exercise
+  const exercises = log.exercise?.[date] || [];
+  const totalMins = exercises.reduce((s,e)=>s+(e.mins||0),0);
+  const exTotalEl = document.getElementById('hl-ex-total');
+  if (exTotalEl) exTotalEl.textContent = totalMins ? `${totalMins} min total` : '';
+  const EX_COLORS = { cardio:'#6dbf7b', weights:'#bd7a70', yoga:'#cf9b92', sport:'#e8a87c', other:'rgba(247,243,237,0.35)' };
+  const EX_LABELS = { cardio:'Cardio', weights:'Weights', yoga:'Yoga', sport:'Sport', other:'Other' };
+  const exEl = document.getElementById('hl-ex-list');
+  if (exEl) {
+    if (!exercises.length) {
+      exEl.innerHTML = '<div style="font-size:13px;color:rgba(247,243,237,0.2);padding:6px 0 4px;">No exercise logged.</div>';
+    } else {
+      exEl.innerHTML = exercises.map(e=>{
+        const col = EX_COLORS[e.type]||EX_COLORS.other;
+        return `<div class="hl-row">
+          <span style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:${col};background:${col.startsWith('rgba')?col.replace('0.35)','0.1)'):col+'1a'};border-radius:100px;padding:2px 9px;white-space:nowrap;flex-shrink:0;">${EX_LABELS[e.type]||'Other'}</span>
+          <span style="flex:1;font-size:13.5px;color:rgba(247,243,237,0.78);padding:0 6px;">${esc(e.name)}</span>
+          <span style="font-size:12.5px;color:rgba(247,243,237,0.35);white-space:nowrap;">${e.mins?e.mins+' min':''}</span>
+          <button onclick="removeExercise('${e.id}')" style="background:none;border:none;color:rgba(247,243,237,0.18);cursor:pointer;font-size:18px;padding:0 0 0 10px;line-height:1;flex-shrink:0;" title="Remove">&#215;</button>
+        </div>`;
+      }).join('');
+    }
+  }
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
