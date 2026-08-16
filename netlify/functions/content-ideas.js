@@ -29,7 +29,11 @@ export default async (req) => {
     ? `Guest/collaborator: ${guestName}.`
     : 'No specific guest — could be solo or with a guest.';
 
+  const today = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+
   const prompt = `You are a content strategist for Fairway Investing, an Australian property investment advisory firm. Generate content ideas for ${typeContext}.
+
+Today's date: ${today}. All content must be accurate and current for ${new Date().getFullYear()}. Never reference past years as "current" or use phrases like "in 2024" or "this year" unless the year is actually ${new Date().getFullYear()}. If referencing market conditions, rates, or trends, keep them grounded in what is actually true right now in Australia.
 
 ${guestContext}
 ${topic ? `Topic/theme focus: ${topic}` : 'Open topic — what would resonate with aspiring Australian property investors?'}
