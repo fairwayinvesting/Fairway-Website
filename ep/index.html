@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Episode Structure — Fairway Investing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;1,300&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body { background: #0e0c0a; color: #f0ece6; font-family: 'Outfit', sans-serif; font-weight: 300; min-height: 100vh; }
+
+    .page { max-width: 720px; margin: 0 auto; padding: 56px 28px 80px; }
+
+    .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 48px; }
+    .brand-name { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 300; color: rgba(240,236,230,0.55); letter-spacing: .01em; }
+
+    .ep-type { font-size: 10.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: rgba(189,122,112,0.7); margin-bottom: 10px; }
+    .ep-title { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 300; line-height: 1.25; color: #f0ece6; margin-bottom: 8px; }
+    .ep-guest { font-size: 14px; color: rgba(240,236,230,0.45); margin-bottom: 10px; }
+    .ep-meta { font-size: 11.5px; color: rgba(240,236,230,0.25); margin-bottom: 40px; }
+
+    .hook-box { background: rgba(189,122,112,0.07); border-left: 2px solid rgba(189,122,112,0.4); border-radius: 0 8px 8px 0; padding: 14px 18px; margin-bottom: 40px; font-size: 14.5px; color: rgba(240,236,230,0.75); line-height: 1.6; font-style: italic; }
+
+    .section-label { font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: rgba(240,236,230,0.28); margin-bottom: 14px; }
+
+    .topic-block { margin-bottom: 24px; }
+    .topic-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+    .topic-num { font-size: 11px; color: rgba(189,122,112,0.5); font-weight: 600; min-width: 16px; flex-shrink: 0; }
+    .topic-title { font-size: 15px; font-weight: 500; color: #f0ece6; }
+    .topic-questions { list-style: none; padding-left: 26px; }
+    .topic-questions li { font-size: 13.5px; color: rgba(240,236,230,0.6); line-height: 1.55; padding: 5px 0; border-bottom: 1px solid rgba(240,236,230,0.05); display: flex; gap: 10px; }
+    .topic-questions li:last-child { border-bottom: none; }
+    .topic-questions li::before { content: 'Q'; font-size: 9.5px; font-weight: 700; color: rgba(189,122,112,0.45); margin-top: 4px; flex-shrink: 0; }
+
+    .divider { border: none; border-top: 1px solid rgba(240,236,230,0.07); margin: 32px 0; }
+
+    .talking-points { list-style: none; }
+    .talking-points li { font-size: 13.5px; color: rgba(240,236,230,0.6); line-height: 1.55; padding: 5px 0; display: flex; gap: 10px; }
+    .talking-points li::before { content: '·'; color: rgba(189,122,112,0.5); font-size: 18px; line-height: 1; margin-top: 1px; flex-shrink: 0; }
+
+    .cta-box { background: rgba(240,236,230,0.03); border: 1px solid rgba(240,236,230,0.08); border-radius: 10px; padding: 14px 18px; margin-top: 32px; }
+    .cta-label { font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: rgba(240,236,230,0.28); margin-bottom: 6px; }
+    .cta-text { font-size: 13.5px; color: rgba(240,236,230,0.6); line-height: 1.55; }
+
+    .print-btn { position: fixed; bottom: 28px; right: 28px; background: rgba(189,122,112,0.12); border: 1px solid rgba(189,122,112,0.25); border-radius: 10px; color: #bd7a70; font-size: 13px; font-weight: 500; padding: 10px 18px; cursor: pointer; font-family: 'Outfit', sans-serif; transition: all .15s; }
+    .print-btn:hover { background: rgba(189,122,112,0.22); }
+
+    .loading { text-align: center; padding: 80px 28px; color: rgba(240,236,230,0.3); font-size: 14px; }
+    .error-msg { text-align: center; padding: 80px 28px; color: rgba(240,236,230,0.35); }
+    .error-msg h2 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 300; margin-bottom: 10px; }
+
+    @media print {
+      .print-btn { display: none; }
+      body { background: #fff; color: #111; }
+      .brand-name { color: #555; }
+      .ep-type, .section-label, .cta-label { color: #888; }
+      .ep-title { color: #111; }
+      .ep-guest, .ep-meta { color: #666; }
+      .hook-box { background: #f5f0eb; border-left-color: #bd7a70; color: #444; }
+      .topic-title { color: #111; }
+      .topic-questions li, .talking-points li { color: #444; }
+      .cta-box { background: #f8f5f2; border-color: #ddd; }
+      .cta-text { color: #444; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page" id="page">
+    <div class="loading">Loading episode…</div>
+  </div>
+  <button class="print-btn" onclick="window.print()" style="display:none;" id="print-btn">Print / PDF</button>
+
+  <script>
+    const shareId = window.location.pathname.split('/').filter(Boolean).pop();
+
+    async function load() {
+      const page = document.getElementById('page');
+      if (!shareId) { renderError('No episode ID in URL.'); return; }
+
+      try {
+        const res = await fetch(`/api/ep/view?id=${encodeURIComponent(shareId)}`);
+        if (res.status === 404) { renderError('This episode structure doesn't exist or the link has expired.'); return; }
+        if (!res.ok) throw new Error('Server error');
+        const data = await res.json();
+        render(data);
+      } catch (err) {
+        renderError('Could not load episode. Please try again.');
+      }
+    }
+
+    function esc(s) {
+      return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function fmtDate(iso) {
+      try {
+        return new Date(iso).toLocaleDateString('en-AU', { day:'numeric', month:'long', year:'numeric' });
+      } catch { return ''; }
+    }
+
+    function render(d) {
+      const page = document.getElementById('page');
+      const topicBlocksHtml = (d.topicBlocks || []).filter(b => b.title || b.questions?.length).map((blk, i) => `
+        <div class="topic-block">
+          <div class="topic-header">
+            <span class="topic-num">${i + 1}</span>
+            <span class="topic-title">${esc(blk.title)}</span>
+          </div>
+          ${blk.questions?.length ? `<ul class="topic-questions">${blk.questions.filter(q => q.text).map(q => `<li>${esc(q.text)}</li>`).join('')}</ul>` : ''}
+        </div>`).join('');
+
+      const talkingPointsHtml = (d.talkingPoints || []).filter(t => t.text).length ? `
+        <hr class="divider">
+        <div class="section-label">Talking points</div>
+        <ul class="talking-points">
+          ${(d.talkingPoints || []).filter(t => t.text).map(t => `<li>${esc(t.text)}</li>`).join('')}
+        </ul>` : '';
+
+      const ctaHtml = d.cta ? `
+        <div class="cta-box">
+          <div class="cta-label">Call to action</div>
+          <div class="cta-text">${esc(d.cta)}</div>
+        </div>` : '';
+
+      page.innerHTML = `
+        <div class="brand">
+          <span class="brand-name">Fairway Investing</span>
+        </div>
+        <div class="ep-type">Episode Structure</div>
+        <h1 class="ep-title">${esc(d.title)}</h1>
+        ${d.guestName ? `<div class="ep-guest">with ${esc(d.guestName)}</div>` : ''}
+        <div class="ep-meta">Last updated ${fmtDate(d.updatedAt)}</div>
+        ${d.hook ? `<div class="hook-box">${esc(d.hook)}</div>` : ''}
+        ${topicBlocksHtml ? `<div class="section-label">Topic flow</div>${topicBlocksHtml}` : ''}
+        ${talkingPointsHtml}
+        ${ctaHtml}
+      `;
+
+      document.title = `${d.title} — Fairway Investing`;
+      document.getElementById('print-btn').style.display = '';
+    }
+
+    function renderError(msg) {
+      document.getElementById('page').innerHTML = `
+        <div class="brand"><span class="brand-name">Fairway Investing</span></div>
+        <div class="error-msg"><h2>Episode not found</h2><p>${msg}</p></div>`;
+    }
+
+    load();
+  </script>
+</body>
+</html>
