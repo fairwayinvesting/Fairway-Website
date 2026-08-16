@@ -209,6 +209,32 @@
   .prep-rm:hover{color:rgba(247,243,237,0.45);}
   .prep-add{background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.1);border-radius:8px;color:rgba(247,243,237,0.4);font-size:12px;padding:7px 12px;cursor:pointer;transition:all .15s;width:100%;text-align:left;font-family:'Outfit',sans-serif;margin-top:2px;}
   .prep-add:hover{border-color:rgba(247,243,237,0.2);color:#f7f3ed;}
+
+  /* Script builder */
+  .script-tmpl-btn{padding:5px 11px;border-radius:100px;border:1px solid rgba(247,243,237,0.1);font-size:11.5px;cursor:pointer;background:transparent;color:rgba(247,243,237,0.35);transition:all .15s;white-space:nowrap;font-family:'Outfit',sans-serif;}
+  .script-tmpl-btn:hover{border-color:rgba(247,243,237,0.25);color:#f7f3ed;}
+  .script-tmpl-btn.active{background:rgba(189,122,112,0.14);border-color:rgba(189,122,112,0.4);color:#bd7a70;font-weight:500;}
+  .tp-launch-btn{background:rgba(189,122,112,0.12);border:1px solid rgba(189,122,112,0.25);border-radius:8px;color:#bd7a70;font-size:12.5px;font-weight:500;padding:7px 14px;cursor:pointer;transition:all .15s;font-family:'Outfit',sans-serif;}
+  .tp-launch-btn:hover{background:rgba(189,122,112,0.22);}
+
+  /* Teleprompter overlay */
+  #teleprompter-overlay{position:fixed;inset:0;background:#060504;z-index:9999;display:none;flex-direction:column;}
+  .tp-ctrl-bar{background:#0d0b09;border-bottom:1px solid rgba(247,243,237,0.06);padding:11px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0;flex-wrap:wrap;}
+  .tp-btn{background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.1);border-radius:7px;color:rgba(247,243,237,0.6);font-size:12.5px;font-weight:500;padding:6px 12px;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:'Outfit',sans-serif;}
+  .tp-btn:hover{background:rgba(247,243,237,0.1);color:#f7f3ed;}
+  .tp-btn.tp-on{background:rgba(189,122,112,0.18);border-color:rgba(189,122,112,0.4);color:#bd7a70;}
+  .tp-play-btn{background:rgba(189,122,112,0.14);border:1px solid rgba(189,122,112,0.3);border-radius:8px;color:#bd7a70;font-size:14px;font-weight:600;padding:7px 22px;cursor:pointer;transition:all .15s;font-family:'Outfit',sans-serif;margin-left:auto;}
+  .tp-play-btn:hover{background:rgba(189,122,112,0.25);}
+  .tp-size-group{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+  .tp-size-btn{background:none;border:1px solid rgba(247,243,237,0.1);border-radius:6px;color:rgba(247,243,237,0.5);width:27px;height:27px;cursor:pointer;font-size:15px;font-family:'Outfit',sans-serif;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+  .tp-size-btn:hover{border-color:rgba(247,243,237,0.25);color:#f7f3ed;}
+  .tp-size-val{font-size:12px;color:rgba(247,243,237,0.32);min-width:34px;text-align:center;}
+  .tp-speed-group{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+  .tp-speed-label{font-size:11.5px;color:rgba(247,243,237,0.3);white-space:nowrap;}
+  input[type=range].tp-speed{-webkit-appearance:none;appearance:none;width:80px;height:3px;background:rgba(247,243,237,0.15);border-radius:100px;outline:none;cursor:pointer;}
+  input[type=range].tp-speed::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:13px;height:13px;border-radius:50%;background:#bd7a70;cursor:pointer;}
+  .tp-scroll-area{flex:1;overflow-y:scroll;padding:80px 0 200px;}
+  #tp-text{max-width:780px;margin:0 auto;padding:0 48px;font-family:'Outfit',sans-serif;font-weight:300;color:#edeae6;line-height:1.7;white-space:pre-wrap;word-break:break-word;transition:transform .15s;}
 </style>
 </head>
 <body>
@@ -369,6 +395,28 @@
       <button class="btn-primary" id="ideas-generate-btn" onclick="generateIdeas()">Generate ideas</button>
     </div>
     <div id="ideas-results"></div>
+  </div>
+</div>
+
+<!-- Teleprompter overlay -->
+<div id="teleprompter-overlay">
+  <div class="tp-ctrl-bar">
+    <span style="font-size:13px;font-weight:500;color:rgba(247,243,237,0.45);margin-right:4px;">TELEPROMPTER</span>
+    <div class="tp-size-group">
+      <button class="tp-size-btn" onclick="tpFontSize(-4)">−</button>
+      <span class="tp-size-val" id="tp-size-val">48px</span>
+      <button class="tp-size-btn" onclick="tpFontSize(4)">+</button>
+    </div>
+    <div class="tp-speed-group">
+      <span class="tp-speed-label">Speed</span>
+      <input type="range" class="tp-speed" id="tp-speed-range" min="10" max="120" value="40" oninput="tpSetSpeed(this.value)">
+    </div>
+    <button class="tp-btn" id="tp-mirror-btn" onclick="tpToggleMirror()">⇄ Mirror</button>
+    <button class="tp-btn" onclick="closeTeleprompter()">✕ Close &nbsp;<span style="opacity:.4;font-size:10.5px;">ESC</span></button>
+    <button class="tp-play-btn" id="tp-play-btn" onclick="tpTogglePlay()">▶ Play</button>
+  </div>
+  <div class="tp-scroll-area" id="tp-scroll-area">
+    <div id="tp-text"></div>
   </div>
 </div>
 
@@ -662,15 +710,21 @@ function renderPanelBody(item) {
     ? `<div class="warning-banner" style="display:block;">⚠️ Less than 1 week notice — confirm this with your guest.</div>` : '';
   const repurposedFrom = item.repurposedFromId ? allContent.find(c => c.id === item.repurposedFromId) : null;
   const longFormItems = allContent.filter(c => !c.deletedAt && c.type === 'long_form' && c.id !== item.id);
+  const isShort = item.type === 'short_form';
   const inPrep = _panelTab === 'prep';
+  const inScript = _panelTab === 'script';
+  const hideDetails = inPrep || inScript;
 
   document.getElementById('panel-body').innerHTML = `
     <div class="ptabs">
-      <button class="ptab${!inPrep?' active':''}" onclick="setPanelTab('details',this)">Details</button>
-      <button class="ptab${inPrep?' active':''}" onclick="setPanelTab('prep',this)">Episode Prep</button>
+      <button class="ptab${!hideDetails?' active':''}" onclick="setPanelTab('details',this)">Details</button>
+      ${isShort
+        ? `<button class="ptab${inScript?' active':''}" onclick="setPanelTab('script',this)">Script</button>`
+        : `<button class="ptab${inPrep?' active':''}" onclick="setPanelTab('prep',this)">Episode Prep</button>`
+      }
     </div>
 
-    <div id="panel-details-section"${inPrep?' style="display:none;"':''}>
+    <div id="panel-details-section"${hideDetails?' style="display:none;"':''}>
       <div class="panel-section">
         <div class="panel-label">Type</div>
         <div style="font-size:13px;color:rgba(247,243,237,0.55);">${item.type === 'long_form' ? 'Long-form episode' : 'Short-form piece'}</div>
@@ -736,9 +790,13 @@ function renderPanelBody(item) {
       </div>
     </div>
 
-    <div id="panel-prep-section"${!inPrep?' style="display:none;"':''}>
+    ${!isShort ? `<div id="panel-prep-section"${!inPrep?' style="display:none;"':''}>
       ${renderPrepSection(item)}
-    </div>
+    </div>` : ''}
+
+    ${isShort ? `<div id="panel-script-section"${!inScript?' style="display:none;"':''}>
+      ${renderScriptSection(item)}
+    </div>` : ''}
   `;
 }
 
@@ -1105,7 +1163,10 @@ function setPanelTab(tab, btn) {
   _panelTab = tab;
   document.querySelectorAll('.ptab').forEach(b => b.classList.toggle('active', b === btn));
   document.getElementById('panel-details-section').style.display = tab === 'details' ? '' : 'none';
-  document.getElementById('panel-prep-section').style.display = tab === 'prep' ? '' : 'none';
+  const prepSec = document.getElementById('panel-prep-section');
+  if (prepSec) prepSec.style.display = tab === 'prep' ? '' : 'none';
+  const scriptSec = document.getElementById('panel-script-section');
+  if (scriptSec) scriptSec.style.display = tab === 'script' ? '' : 'none';
 }
 
 function renderPrepSection(contentItem) {
@@ -1383,6 +1444,234 @@ function savePartnerNotes(partnerId) {
   ps[partnerId].notes = val.trim();
   savePartnerSeries(ps);
 }
+
+// ── Script Builder ─────────────────────────────────────────────────────────────
+
+const SCRIPT_TEMPLATES = {
+  tip: {
+    label: 'Quick Tip',
+    sections: [
+      { key: 'hook',       label: 'Hook (0–5s)', placeholder: 'One sentence that stops the scroll. State the tip outcome directly.' },
+      { key: 'setup',      label: 'Setup (5–15s)', placeholder: "Here's why this matters / most people don't know this…" },
+      { key: 'tip',        label: 'The Tip (15–40s)', placeholder: 'The actual insight. Specific, actionable, no fluff.' },
+      { key: 'example',   label: 'Example (40–55s)', placeholder: 'Real scenario or client outcome that proves the point.' },
+      { key: 'cta',       label: 'CTA (55–60s)', placeholder: 'One clear next step — follow, comment, DM, link in bio.' },
+    ]
+  },
+  myth_bust: {
+    label: 'Myth-Bust',
+    sections: [
+      { key: 'hook',      label: 'Hook (0–5s)', placeholder: 'State the myth boldly. "Everyone thinks X — they\'re wrong."' },
+      { key: 'myth',      label: 'The Myth (5–20s)', placeholder: 'Describe what most people believe and why it sounds reasonable.' },
+      { key: 'bust',      label: 'The Truth (20–45s)', placeholder: 'Flip it. The real picture, with specifics.' },
+      { key: 'proof',     label: 'Proof (45–55s)', placeholder: 'Data point, client story, or market evidence.' },
+      { key: 'cta',       label: 'CTA (55–60s)', placeholder: 'Follow for more truths the industry won\'t tell you.' },
+    ]
+  },
+  case_study: {
+    label: 'Case Study',
+    sections: [
+      { key: 'hook',      label: 'Hook (0–5s)', placeholder: 'Lead with the result. "My client bought X for $Y — here\'s how."' },
+      { key: 'context',   label: 'Situation (5–20s)', placeholder: 'Who they were, what they wanted, what stood in their way.' },
+      { key: 'strategy',  label: 'Strategy (20–45s)', placeholder: 'What we did differently and why. The insight others miss.' },
+      { key: 'outcome',   label: 'Outcome (45–55s)', placeholder: 'The result — be specific with numbers if possible.' },
+      { key: 'cta',       label: 'CTA (55–60s)', placeholder: 'DM me or book a call if you want the same outcome.' },
+    ]
+  },
+  stat_hook: {
+    label: 'Stat Hook',
+    sections: [
+      { key: 'hook',      label: 'Stat (0–5s)', placeholder: 'Drop the surprising number cold. No wind-up.' },
+      { key: 'explain',   label: 'What it means (5–25s)', placeholder: 'Why that stat matters in the current market.' },
+      { key: 'implication', label: 'Implication (25–45s)', placeholder: 'What buyers/investors should do differently because of it.' },
+      { key: 'spin',      label: 'Your Angle (45–55s)', placeholder: 'Your contrarian or nuanced take that others miss.' },
+      { key: 'cta',       label: 'CTA (55–60s)', placeholder: 'Follow to stay ahead of the data.' },
+    ]
+  },
+  raw: {
+    label: 'Freewrite',
+    sections: [
+      { key: 'script',    label: 'Full Script', placeholder: 'Write your script in full — no structure enforced. Let it flow.' },
+    ]
+  },
+};
+
+function getAllScripts() {
+  try { return JSON.parse(localStorage.getItem('fw_scripts') || '{}'); } catch { return {}; }
+}
+function getScript(cid) {
+  const all = getAllScripts();
+  return all[cid] || { template: 'tip', sections: {} };
+}
+function saveScript(cid, data) {
+  const all = getAllScripts();
+  all[cid] = data;
+  localStorage.setItem('fw_scripts', JSON.stringify(all));
+}
+
+function renderScriptSection(item) {
+  const s = getScript(item.id);
+  const tmpl = SCRIPT_TEMPLATES[s.template] || SCRIPT_TEMPLATES.tip;
+  const tmplBtns = Object.entries(SCRIPT_TEMPLATES).map(([k, t]) =>
+    `<button class="script-tmpl-btn${s.template===k?' active':''}" onclick="changeTemplate('${item.id}','${k}',this)">${t.label}</button>`
+  ).join('');
+
+  const totalWords = tmpl.sections.reduce((sum, sec) => {
+    const txt = (s.sections[sec.key] || '').trim();
+    return sum + (txt ? txt.split(/\s+/).length : 0);
+  }, 0);
+  const durSec = Math.round((totalWords / 130) * 60);
+  const durStr = totalWords > 0 ? `~${totalWords}w · ${durSec}s` : '0w';
+
+  const sectionsHtml = tmpl.sections.map(sec => `
+    <div class="prep-row" style="flex-direction:column;align-items:flex-start;gap:5px;margin-bottom:14px;">
+      <div style="font-size:11.5px;color:rgba(247,243,237,0.35);font-weight:500;text-transform:uppercase;letter-spacing:.04em;">${sec.label}</div>
+      <textarea class="panel-textarea" rows="3" style="width:100%;box-sizing:border-box;"
+        placeholder="${sec.placeholder.replace(/"/g,'&quot;')}"
+        onblur="saveScriptField('${item.id}','${sec.key}',this.value)"
+        oninput="updateScriptStats('${item.id}')"
+      >${esc(s.sections[sec.key] || '')}</textarea>
+    </div>
+  `).join('');
+
+  return `
+    <div style="padding-bottom:6px;">
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">${tmplBtns}</div>
+      <div style="font-size:11.5px;color:rgba(247,243,237,0.28);margin-bottom:16px;" id="script-stats-${item.id}">${durStr}</div>
+      ${sectionsHtml}
+      <button class="tp-launch-btn" onclick="openTeleprompter('${item.id}')">▶ Open Teleprompter</button>
+    </div>
+  `;
+}
+
+function changeTemplate(cid, tmplKey, btn) {
+  const s = getScript(cid);
+  s.template = tmplKey;
+  saveScript(cid, s);
+  const scriptSec = document.getElementById('panel-script-section');
+  if (scriptSec) {
+    const item = allContent.find(c => c.id === cid);
+    if (item) scriptSec.innerHTML = renderScriptSection(item);
+  }
+}
+
+function saveScriptField(cid, field, value) {
+  const s = getScript(cid);
+  s.sections[field] = value;
+  saveScript(cid, s);
+}
+
+function updateScriptStats(cid) {
+  const s = getScript(cid);
+  const tmpl = SCRIPT_TEMPLATES[s.template] || SCRIPT_TEMPLATES.tip;
+  const textareas = document.querySelectorAll('#panel-script-section textarea');
+  let totalWords = 0;
+  textareas.forEach(ta => {
+    const txt = ta.value.trim();
+    if (txt) totalWords += txt.split(/\s+/).length;
+  });
+  const durSec = Math.round((totalWords / 130) * 60);
+  const statsEl = document.getElementById(`script-stats-${cid}`);
+  if (statsEl) statsEl.textContent = totalWords > 0 ? `~${totalWords}w · ${durSec}s` : '0w';
+}
+
+function assembleScriptText(cid) {
+  const s = getScript(cid);
+  const tmpl = SCRIPT_TEMPLATES[s.template] || SCRIPT_TEMPLATES.tip;
+  const parts = [];
+  tmpl.sections.forEach(sec => {
+    const txt = (s.sections[sec.key] || '').trim();
+    if (txt) parts.push(txt);
+  });
+  return parts.join('\n\n');
+}
+
+// ── Teleprompter ───────────────────────────────────────────────────────────────
+
+let _tpPlaying = false;
+let _tpRafId = null;
+let _tpLastTs = null;
+let _tpPxPerSec = 40;
+let _tpFontSize = 48;
+let _tpMirrored = false;
+let _tpContentId = null;
+
+function openTeleprompter(cid) {
+  _tpContentId = cid;
+  _tpPlaying = false;
+  _tpLastTs = null;
+
+  const text = assembleScriptText(cid);
+  document.getElementById('tp-text').textContent = text || '(No script written yet)';
+  document.getElementById('tp-text').style.fontSize = _tpFontSize + 'px';
+  document.getElementById('tp-size-val').textContent = _tpFontSize + 'px';
+  document.getElementById('tp-scroll-area').scrollTop = 0;
+  document.getElementById('tp-play-btn').textContent = '▶ Play';
+
+  const overlay = document.getElementById('teleprompter-overlay');
+  overlay.style.display = 'flex';
+}
+
+function closeTeleprompter() {
+  tpPause();
+  document.getElementById('teleprompter-overlay').style.display = 'none';
+  _tpContentId = null;
+}
+
+function tpTogglePlay() {
+  _tpPlaying ? tpPause() : tpPlay();
+}
+
+function tpPlay() {
+  _tpPlaying = true;
+  _tpLastTs = null;
+  document.getElementById('tp-play-btn').textContent = '⏸ Pause';
+  _tpRafId = requestAnimationFrame(tpTick);
+}
+
+function tpPause() {
+  _tpPlaying = false;
+  document.getElementById('tp-play-btn').textContent = '▶ Play';
+  if (_tpRafId) { cancelAnimationFrame(_tpRafId); _tpRafId = null; }
+  _tpLastTs = null;
+}
+
+function tpTick(ts) {
+  if (!_tpPlaying) return;
+  if (_tpLastTs !== null) {
+    const elapsed = (ts - _tpLastTs) / 1000;
+    const area = document.getElementById('tp-scroll-area');
+    area.scrollTop += _tpPxPerSec * elapsed;
+    const maxScroll = area.scrollHeight - area.clientHeight;
+    if (area.scrollTop >= maxScroll) { tpPause(); return; }
+  }
+  _tpLastTs = ts;
+  _tpRafId = requestAnimationFrame(tpTick);
+}
+
+function tpFontSize(delta) {
+  _tpFontSize = Math.max(20, Math.min(120, _tpFontSize + delta));
+  document.getElementById('tp-text').style.fontSize = _tpFontSize + 'px';
+  document.getElementById('tp-size-val').textContent = _tpFontSize + 'px';
+}
+
+function tpSetSpeed(val) {
+  _tpPxPerSec = Number(val);
+}
+
+function tpToggleMirror() {
+  _tpMirrored = !_tpMirrored;
+  document.getElementById('tp-text').style.transform = _tpMirrored ? 'scaleX(-1)' : '';
+  const btn = document.getElementById('tp-mirror-btn');
+  btn.classList.toggle('tp-on', _tpMirrored);
+}
+
+document.addEventListener('keydown', e => {
+  const overlay = document.getElementById('teleprompter-overlay');
+  if (overlay.style.display === 'none' || !overlay.style.display) return;
+  if (e.key === 'Escape') { closeTeleprompter(); }
+  if (e.key === ' ') { e.preventDefault(); tpTogglePlay(); }
+});
 </script>
 </body>
 </html>
