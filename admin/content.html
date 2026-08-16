@@ -219,7 +219,7 @@
   .ai-draft-btn{background:none;border:none;color:rgba(189,122,112,0.45);font-size:11px;cursor:pointer;padding:0;transition:color .15s;font-family:'Outfit',sans-serif;letter-spacing:.02em;}
   .ai-draft-btn:hover{color:#bd7a70;}
   .ai-draft-btn:disabled{opacity:.4;cursor:wait;}
-  .script-chat{margin-top:18px;border-top:1px solid rgba(247,243,237,0.07);padding-top:14px;}
+  .script-chat{margin-top:20px;background:rgba(189,122,112,0.05);border:1px solid rgba(189,122,112,0.15);border-radius:12px;padding:14px;}
   .script-chat-history{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;max-height:300px;overflow-y:auto;}
   .chat-msg{padding:10px 13px;border-radius:10px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;}
   .chat-msg.user{background:rgba(247,243,237,0.06);color:rgba(247,243,237,0.8);align-self:flex-end;max-width:90%;}
@@ -1563,7 +1563,7 @@ function renderScriptSection(item) {
       <div style="font-size:11.5px;color:rgba(247,243,237,0.28);margin-bottom:16px;" id="script-stats-${item.id}">${durStr}</div>
       ${sectionsHtml}
       <div class="script-chat">
-        <div style="font-size:11px;color:rgba(247,243,237,0.25);font-weight:500;letter-spacing:.06em;margin-bottom:10px;">AI ASSISTANT</div>
+        <div style="font-size:11px;color:rgba(189,122,112,0.7);font-weight:600;letter-spacing:.08em;margin-bottom:10px;">✦ AI ASSISTANT</div>
         <div class="script-chat-history" id="script-chat-history-${item.id}">${existingChat}</div>
         <div class="script-chat-input-row">
           <textarea class="script-chat-input" id="script-chat-input-${item.id}" placeholder="Ask AI to refine your script, adjust the tone, make it punchier…" rows="2"
@@ -1623,36 +1623,18 @@ function assembleScriptText(cid) {
 
 const _scriptChatHistory = {};
 
-async function aiStreamFetch(body, onChunk, onDone, onError) {
-  try {
-    const res = await fetch('/api/admin/script-ai', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) { onError('AI request failed (' + res.status + ')'); return; }
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop() ?? '';
-      for (const line of lines) {
-        if (!line.startsWith('data: ')) continue;
-        try {
-          const data = JSON.parse(line.slice(6));
-          if (data.done) { onDone(); return; }
-          if (data.t) onChunk(data.t);
-        } catch {}
-      }
-    }
-    onDone();
-  } catch (err) {
-    onError(err.message || 'Network error');
+async function aiPost(body) {
+  const res = await fetch('/api/admin/script-ai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    let msg = `request failed (${res.status})`;
+    try { const d = await res.json(); if (d.error) msg = d.error; } catch {}
+    throw new Error(msg);
   }
+  return res.json();
 }
 
 function getScriptContext(cid) {
@@ -1679,18 +1661,20 @@ async function aiDraftSection(cid, sectionKey) {
   if (!ta) return;
 
   if (btn) { btn.textContent = '…'; btn.disabled = true; }
-  ta.value = '';
 
   const ctx = getScriptContext(cid);
   const cleanLabel = sec.label.replace(/\s*\(.*?\)/, '').trim();
-  let accumulated = '';
 
-  await aiStreamFetch(
-    { mode: 'draft_section', contentTitle: item.title, templateName: ctx.templateName, sectionKey, sectionLabel: cleanLabel, currentSections: ctx.currentSections },
-    chunk => { accumulated += chunk; ta.value = accumulated; updateScriptStats(cid); },
-    () => { saveScriptField(cid, sectionKey, accumulated); if (btn) { btn.textContent = '✦ Draft'; btn.disabled = false; } },
-    err => { if (btn) { btn.textContent = '✦ Draft'; btn.disabled = false; } showToast('Draft failed: ' + err); }
-  );
+  try {
+    const data = await aiPost({ mode: 'draft_section', contentTitle: item.title, templateName: ctx.templateName, sectionKey, sectionLabel: cleanLabel, currentSections: ctx.currentSections });
+    ta.value = data.text || '';
+    saveScriptField(cid, sectionKey, ta.value);
+    updateScriptStats(cid);
+  } catch (err) {
+    showToast('Draft failed: ' + err.message);
+  } finally {
+    if (btn) { btn.textContent = '✦ Draft'; btn.disabled = false; }
+  }
 }
 
 async function aiChatSend(cid) {
@@ -1714,29 +1698,23 @@ async function aiChatSend(cid) {
   aiEl.classList.add('ai-loading');
 
   const ctx = getScriptContext(cid);
-  let accumulated = '';
 
-  await aiStreamFetch(
-    { mode: 'chat', contentTitle: item.title, templateName: ctx.templateName, currentSections: ctx.currentSections, message, history: _scriptChatHistory[cid].slice(0, -1) },
-    chunk => {
-      accumulated += chunk;
-      aiEl.textContent = accumulated;
-      aiEl.classList.remove('ai-loading');
-      const histEl = document.getElementById(`script-chat-history-${cid}`);
-      if (histEl) histEl.scrollTop = histEl.scrollHeight;
-    },
-    () => {
-      _scriptChatHistory[cid].push({ role: 'assistant', content: accumulated });
-      inputEl.disabled = false;
-      if (sendBtn) sendBtn.disabled = false;
-      inputEl.focus();
-    },
-    err => {
-      aiEl.textContent = 'Error: ' + err;
-      inputEl.disabled = false;
-      if (sendBtn) sendBtn.disabled = false;
-    }
-  );
+  try {
+    const data = await aiPost({ mode: 'chat', contentTitle: item.title, templateName: ctx.templateName, currentSections: ctx.currentSections, message, history: _scriptChatHistory[cid].slice(0, -1) });
+    const reply = data.text || '';
+    aiEl.textContent = reply;
+    aiEl.classList.remove('ai-loading');
+    _scriptChatHistory[cid].push({ role: 'assistant', content: reply });
+    const histEl = document.getElementById(`script-chat-history-${cid}`);
+    if (histEl) histEl.scrollTop = histEl.scrollHeight;
+  } catch (err) {
+    aiEl.textContent = 'Error: ' + err.message;
+    aiEl.classList.remove('ai-loading');
+  } finally {
+    inputEl.disabled = false;
+    if (sendBtn) sendBtn.disabled = false;
+    inputEl.focus();
+  }
 }
 
 function appendChatMessage(cid, role, text) {

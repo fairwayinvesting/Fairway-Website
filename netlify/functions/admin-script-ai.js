@@ -52,7 +52,7 @@ Rules:
 - Be punchy and specific — no generic property clichés
 - This section should take around 10-15 seconds to say out loud (roughly 30-40 words)
 - Make it flow naturally with whatever else is already written
-- Never start with "I" as the first word${filledSections.length ? '\n- Maintain tonal consistency with the sections already written' : ''}`
+- Never start with "I" as the first word${filledSections.length ? '\n- Maintain tonal consistency with the sections already written' : ''}`,
     }];
   } else if (mode === 'chat') {
     messages = [
@@ -76,57 +76,25 @@ Rules:
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 512,
         system: systemPrompt,
-        stream: true,
         messages,
       }),
     });
-  } catch {
+  } catch (err) {
+    console.error('Fetch to Anthropic failed:', err);
     return json({ error: 'Failed to reach AI service' }, 502);
   }
 
   if (!apiRes.ok) {
     const errText = await apiRes.text().catch(() => '');
     console.error('Anthropic API error:', apiRes.status, errText);
-    return json({ error: 'AI service error' }, 502);
+    return json({ error: `AI service error (${apiRes.status})` }, 502);
   }
 
-  const encoder = new TextEncoder();
-  const readable = new ReadableStream({
-    async start(controller) {
-      const reader = apiRes.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() ?? '';
-          for (const line of lines) {
-            if (!line.startsWith('data: ')) continue;
-            const data = line.slice(6).trim();
-            if (data === '[DONE]') continue;
-            try {
-              const parsed = JSON.parse(data);
-              const text = parsed?.delta?.text ?? '';
-              if (text) controller.enqueue(encoder.encode(`data: ${JSON.stringify({ t: text })}\n\n`));
-            } catch {}
-          }
-        }
-      } catch {}
-      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`));
-      controller.close();
-    },
-  });
+  let aiData;
+  try { aiData = await apiRes.json(); } catch { return json({ error: 'Could not parse AI response' }, 502); }
 
-  return new Response(readable, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'X-Accel-Buffering': 'no',
-    },
-  });
+  const text = aiData?.content?.[0]?.text?.trim() || '';
+  return json({ text });
 };
 
 export const config = {
