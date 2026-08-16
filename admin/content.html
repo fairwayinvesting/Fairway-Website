@@ -153,6 +153,39 @@
   ::-webkit-scrollbar{width:5px;height:5px;}
   ::-webkit-scrollbar-track{background:transparent;}
   ::-webkit-scrollbar-thumb{background:rgba(247,243,237,0.1);border-radius:10px;}
+
+  /* Partner series planner */
+  .partners-search{width:100%;max-width:300px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.1);border-radius:9px;padding:9px 14px;font-size:13px;color:#f7f3ed;outline:none;transition:border-color .15s;}
+  .partners-search:focus{border-color:rgba(189,122,112,0.4);}
+  .partners-search::placeholder{color:rgba(247,243,237,0.22);}
+  .partners-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:12px;}
+  .partner-card{background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:18px 20px;cursor:pointer;transition:border-color .15s,box-shadow .15s;}
+  .partner-card:hover{border-color:rgba(189,122,112,0.35);box-shadow:0 4px 16px rgba(0,0,0,.25);}
+  .partner-card-name{font-size:14.5px;color:#f7f3ed;font-weight:400;margin-bottom:2px;}
+  .partner-card-role{font-size:11.5px;color:rgba(247,243,237,0.32);margin-bottom:14px;}
+  .ep-track{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;min-height:26px;align-items:center;}
+  .ep-dot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;flex-shrink:0;}
+  .ep-dot-planned{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);color:rgba(247,243,237,0.3);}
+  .ep-dot-outreach_sent{background:rgba(232,168,124,0.12);border:1px solid rgba(232,168,124,0.3);color:#e8a87c;}
+  .ep-dot-confirmed{background:rgba(189,122,112,0.15);border:1px solid rgba(189,122,112,0.4);color:#bd7a70;}
+  .ep-dot-recorded{background:rgba(109,191,123,0.12);border:1px solid rgba(109,191,123,0.3);color:#6dbf7b;}
+  .ep-dot-published{background:rgba(109,191,123,0.22);border:1px solid #6dbf7b;color:#6dbf7b;}
+  .partner-card-stats{font-size:11.5px;color:rgba(247,243,237,0.28);}
+  .partner-panel-ep{background:rgba(247,243,237,0.02);border:1px solid rgba(247,243,237,0.07);border-radius:11px;padding:14px 16px;margin-bottom:10px;}
+  .ep-status-pill{font-size:10px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;border-radius:100px;padding:2px 8px;}
+  .ep-status-pill.ep-s-planned{background:rgba(247,243,237,0.06);color:rgba(247,243,237,0.38);}
+  .ep-status-pill.ep-s-outreach_sent{background:rgba(232,168,124,0.12);color:#e8a87c;}
+  .ep-status-pill.ep-s-confirmed{background:rgba(189,122,112,0.15);color:#bd7a70;}
+  .ep-status-pill.ep-s-recorded{background:rgba(109,191,123,0.12);color:#6dbf7b;}
+  .ep-status-pill.ep-s-published{background:rgba(109,191,123,0.22);color:#6dbf7b;}
+  .ep-status-sel{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px;}
+  .ep-status-btn{padding:4px 10px;border-radius:100px;border:1px solid rgba(247,243,237,0.1);font-size:11px;cursor:pointer;background:transparent;color:rgba(247,243,237,0.35);transition:all .15s;white-space:nowrap;}
+  .ep-status-btn:hover{border-color:rgba(247,243,237,0.25);color:#f7f3ed;}
+  .ep-status-btn.sa-planned{background:rgba(247,243,237,0.07);border-color:rgba(247,243,237,0.2);color:#f7f3ed;}
+  .ep-status-btn.sa-outreach_sent{background:rgba(232,168,124,0.12);border-color:rgba(232,168,124,0.4);color:#e8a87c;}
+  .ep-status-btn.sa-confirmed{background:rgba(189,122,112,0.14);border-color:rgba(189,122,112,0.4);color:#bd7a70;}
+  .ep-status-btn.sa-recorded{background:rgba(109,191,123,0.12);border-color:rgba(109,191,123,0.35);color:#6dbf7b;}
+  .ep-status-btn.sa-published{background:rgba(109,191,123,0.2);border-color:#6dbf7b;color:#6dbf7b;}
 </style>
 </head>
 <body>
@@ -193,6 +226,7 @@
         <div class="view-tabs">
           <button class="view-tab active" onclick="setView('kanban',this)">Kanban</button>
           <button class="view-tab" onclick="setView('calendar',this)">Calendar</button>
+          <button class="view-tab" onclick="setView('partners',this)">Partners</button>
         </div>
         <button class="btn-secondary" onclick="openIdeasModal()">💡 Ideas</button>
         <button class="btn-primary" onclick="openCreateModal()">+ Create</button>
@@ -201,6 +235,15 @@
 
     <!-- Kanban -->
     <div id="kanban-wrap"></div>
+
+    <!-- Partners planner -->
+    <div id="partners-wrap" style="display:none;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+        <input class="partners-search" id="partners-search-input" placeholder="Search partners…" oninput="filterPartners(this.value)">
+        <div id="partners-summary" style="font-size:12.5px;color:rgba(247,243,237,0.28);"></div>
+      </div>
+      <div id="partners-grid" class="partners-grid"></div>
+    </div>
 
     <!-- Calendar -->
     <div class="cal-wrap" id="cal-wrap">
@@ -370,7 +413,11 @@ function setView(v, btn) {
   document.querySelectorAll('.view-tab').forEach(b => b.classList.toggle('active', b === btn));
   document.getElementById('kanban-wrap').style.display = v === 'kanban' ? '' : 'none';
   document.getElementById('cal-wrap').style.display = v === 'calendar' ? '' : 'none';
+  document.getElementById('partners-wrap').style.display = v === 'partners' ? '' : 'none';
+  const typeTabs = document.querySelector('.type-tabs');
+  if (typeTabs) typeTabs.style.display = v === 'partners' ? 'none' : '';
   if (v === 'calendar') renderCalendar();
+  if (v === 'partners') renderPartners();
 }
 
 function setTypeFilter(t, btn) {
@@ -570,6 +617,7 @@ function closePanel() {
   document.getElementById('panel-overlay').classList.remove('open');
   document.getElementById('detail-panel').classList.remove('open');
   _panelId = null;
+  _partnerPanelId = null;
 }
 
 function renderPanelBody(item) {
@@ -951,6 +999,204 @@ function useIdea(idx) {
     document.getElementById('cm-type').value = idea.type;
     updateCreateStages();
   }
+}
+
+// ── Partner Series Planner ─────────────────────────────────────────────────────
+const PS_KEY = 'fw_partner_series';
+const EP_STATUSES = [
+  { key: 'planned',       label: 'Planned' },
+  { key: 'outreach_sent', label: 'Outreach sent' },
+  { key: 'confirmed',     label: 'Confirmed' },
+  { key: 'recorded',      label: 'Recorded' },
+  { key: 'published',     label: 'Published' },
+];
+const EP_STATUS_LABELS = { planned:'Planned', outreach_sent:'Outreach sent', confirmed:'Confirmed', recorded:'Recorded', published:'Published' };
+
+let _partnerPanelId = null;
+let _partnerSearch = '';
+
+function getPartnerSeries() {
+  try { return JSON.parse(localStorage.getItem(PS_KEY)) || {}; } catch { return {}; }
+}
+function savePartnerSeries(data) { localStorage.setItem(PS_KEY, JSON.stringify(data)); }
+
+function filterPartners(q) {
+  _partnerSearch = q;
+  renderPartners();
+}
+
+function renderPartners() {
+  const wrap = document.getElementById('partners-grid');
+  const summaryEl = document.getElementById('partners-summary');
+  if (!wrap) return;
+
+  const ps = getPartnerSeries();
+
+  // Summary stats across all partners
+  const allEps = Object.values(ps).flatMap(v => v.episodes || []);
+  const allDone = allEps.filter(e => e.status === 'recorded' || e.status === 'published').length;
+  if (summaryEl) summaryEl.textContent = `${allPartners.length} partner${allPartners.length!==1?'s':''} · ${allEps.length} episode${allEps.length!==1?'s':''} planned · ${allDone} done`;
+
+  const q = _partnerSearch.toLowerCase();
+  const partners = q
+    ? allPartners.filter(p => p.name.toLowerCase().includes(q) || (p.company||'').toLowerCase().includes(q) || (p.role||'').toLowerCase().includes(q))
+    : [...allPartners];
+
+  if (!partners.length) {
+    wrap.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">${q ? 'No partners match that search.' : 'No partners in directory yet.'}</div>`;
+    return;
+  }
+
+  // Sort: partners with episodes first, then alphabetical
+  partners.sort((a, b) => {
+    const aLen = ps[a.id]?.episodes?.length || 0;
+    const bLen = ps[b.id]?.episodes?.length || 0;
+    return bLen - aLen || a.name.localeCompare(b.name);
+  });
+
+  wrap.innerHTML = partners.map(p => {
+    const episodes = ps[p.id]?.episodes || [];
+    const done = episodes.filter(e => e.status === 'recorded' || e.status === 'published').length;
+    const dots = episodes.length
+      ? episodes.map((e, i) => `<div class="ep-dot ep-dot-${e.status}" title="Ep ${i+1}: ${EP_STATUS_LABELS[e.status]||e.status}">${i+1}</div>`).join('')
+      : `<span style="font-size:12px;color:rgba(247,243,237,0.18);">No episodes planned</span>`;
+    const statsStr = episodes.length
+      ? `${episodes.length} episode${episodes.length!==1?'s':''} · ${done} done`
+      : 'Start the arc →';
+    return `<div class="partner-card" onclick="openPartnerPanel('${p.id}')">
+      <div class="partner-card-name">${esc(p.name)}</div>
+      <div class="partner-card-role">${esc(p.role||p.company||'Partner')}</div>
+      <div class="ep-track">${dots}</div>
+      <div class="partner-card-stats">${statsStr}</div>
+    </div>`;
+  }).join('');
+}
+
+function openPartnerPanel(partnerId) {
+  _partnerPanelId = partnerId;
+  _panelId = null;
+  const partner = allPartners.find(p => p.id === partnerId);
+  if (!partner) return;
+  document.getElementById('panel-title').textContent = partner.name;
+  renderPartnerPanelBody(partnerId);
+  document.getElementById('panel-overlay').classList.add('open');
+  document.getElementById('detail-panel').classList.add('open');
+}
+
+function renderPartnerPanelBody(partnerId) {
+  const partner = allPartners.find(p => p.id === partnerId);
+  if (!partner) return;
+  const ps = getPartnerSeries();
+  const episodes = ps[partnerId]?.episodes || [];
+  const generalNotes = ps[partnerId]?.notes || '';
+  const done = episodes.filter(e => e.status === 'recorded' || e.status === 'published').length;
+
+  document.getElementById('panel-body').innerHTML = `
+    <div style="font-size:12.5px;color:rgba(247,243,237,0.35);margin-bottom:20px;">${esc(partner.role||partner.company||'')}</div>
+
+    <div class="panel-section">
+      <div class="panel-label">Planning notes</div>
+      <textarea class="panel-textarea" id="pp-notes" rows="2" placeholder="Topics they're strong on, relationship notes, preferred format…" onblur="savePartnerNotes('${partnerId}')">${esc(generalNotes)}</textarea>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div>
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.28);">Episode arc</div>
+        ${episodes.length ? `<div style="font-size:11.5px;color:rgba(247,243,237,0.25);margin-top:2px;">${episodes.length} episode${episodes.length!==1?'s':''} · ${done} done</div>` : ''}
+      </div>
+      <button class="btn-secondary" style="font-size:12px;padding:6px 14px;" onclick="addPartnerEpisode('${partnerId}')">+ Add episode</button>
+    </div>
+
+    <div id="pp-episodes">
+      ${episodes.length ? renderEpisodesHtml(partnerId, episodes) : `<div style="font-size:13px;color:rgba(247,243,237,0.2);padding:8px 0 4px;">No episodes planned yet. Click "Add episode" to start building the arc.</div>`}
+    </div>
+  `;
+}
+
+function renderEpisodesHtml(partnerId, episodes) {
+  return episodes.map((ep, idx) => `
+    <div class="partner-panel-ep" id="ep-block-${ep.id}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;color:rgba(247,243,237,0.22);">EP ${idx+1}</span>
+          <span class="ep-status-pill ep-s-${ep.status}">${EP_STATUS_LABELS[ep.status]||ep.status}</span>
+        </div>
+        <button onclick="removePartnerEpisode('${partnerId}','${ep.id}')" style="background:none;border:none;color:rgba(247,243,237,0.2);cursor:pointer;font-size:18px;line-height:1;padding:0;" title="Remove">×</button>
+      </div>
+      <div style="margin-bottom:8px;">
+        <div class="panel-label" style="font-size:9.5px;margin-bottom:4px;">Title</div>
+        <input class="panel-input" style="font-size:13px;" value="${esc(ep.title||'')}" placeholder="Episode title…" onblur="saveEpField('${partnerId}','${ep.id}','title',this.value)">
+      </div>
+      <div style="margin-bottom:6px;">
+        <div class="panel-label" style="font-size:9.5px;margin-bottom:4px;">Angle / hook</div>
+        <textarea class="panel-textarea" style="font-size:12.5px;" rows="2" placeholder="Core angle and what the audience will take away…" onblur="saveEpField('${partnerId}','${ep.id}','angle',this.value)">${esc(ep.angle||'')}</textarea>
+      </div>
+      <div class="ep-status-sel">
+        ${EP_STATUSES.map(s => `<button class="ep-status-btn${ep.status===s.key?' sa-'+s.key:''}" data-status="${s.key}" onclick="setEpStatus('${partnerId}','${ep.id}','${s.key}',this)">${s.label}</button>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function addPartnerEpisode(partnerId) {
+  const ps = getPartnerSeries();
+  if (!ps[partnerId]) ps[partnerId] = { episodes: [], notes: '' };
+  const ep = { id: Date.now().toString(36) + Math.random().toString(36).slice(2,5), title: '', angle: '', status: 'planned' };
+  ps[partnerId].episodes.push(ep);
+  savePartnerSeries(ps);
+  renderPartnerPanelBody(partnerId);
+  renderPartners();
+  setTimeout(() => document.getElementById(`ep-block-${ep.id}`)?.querySelector('.panel-input')?.focus(), 60);
+}
+
+function removePartnerEpisode(partnerId, epId) {
+  const ps = getPartnerSeries();
+  if (!ps[partnerId]) return;
+  ps[partnerId].episodes = ps[partnerId].episodes.filter(e => e.id !== epId);
+  savePartnerSeries(ps);
+  renderPartnerPanelBody(partnerId);
+  renderPartners();
+}
+
+function saveEpField(partnerId, epId, field, value) {
+  const ps = getPartnerSeries();
+  const ep = ps[partnerId]?.episodes?.find(e => e.id === epId);
+  if (!ep) return;
+  ep[field] = value.trim();
+  savePartnerSeries(ps);
+  renderPartners();
+}
+
+function setEpStatus(partnerId, epId, status, btn) {
+  const ps = getPartnerSeries();
+  const ep = ps[partnerId]?.episodes?.find(e => e.id === epId);
+  if (!ep) return;
+  ep.status = status;
+  savePartnerSeries(ps);
+  // In-place update — no full re-render so inputs don't lose focus
+  const block = document.getElementById(`ep-block-${epId}`);
+  if (block) {
+    const pill = block.querySelector('.ep-status-pill');
+    if (pill) { pill.className = `ep-status-pill ep-s-${status}`; pill.textContent = EP_STATUS_LABELS[status]; }
+    block.querySelectorAll('.ep-status-btn').forEach(b => {
+      b.className = 'ep-status-btn' + (b.dataset.status === status ? ' sa-' + status : '');
+    });
+    // Update ep count in panel header
+    const ps2 = getPartnerSeries();
+    const eps2 = ps2[partnerId]?.episodes || [];
+    const done2 = eps2.filter(e => e.status === 'recorded' || e.status === 'published').length;
+    const countEl = block.closest('#panel-body')?.querySelector('[data-ep-count]');
+    if (countEl) countEl.textContent = `${eps2.length} episode${eps2.length!==1?'s':''} · ${done2} done`;
+  }
+  renderPartners();
+}
+
+function savePartnerNotes(partnerId) {
+  const val = document.getElementById('pp-notes')?.value || '';
+  const ps = getPartnerSeries();
+  if (!ps[partnerId]) ps[partnerId] = { episodes: [], notes: '' };
+  ps[partnerId].notes = val.trim();
+  savePartnerSeries(ps);
 }
 </script>
 </body>
