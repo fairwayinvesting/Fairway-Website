@@ -50,13 +50,14 @@ ${scriptContext}`;
 
 Write the "${sectionLabel}" section of Luke's script.
 
-Rules:
-- Output ONLY the words Luke speaks — no headings, labels, or meta-commentary
-- Write in first person as Luke
-- Be punchy and specific — no generic property clichés
-- This section should take around 10-15 seconds to say out loud (roughly 30-40 words)
-- Make it flow naturally with whatever else is already written
-- Never start with "I" as the first word${filledSections.length ? '\n- Maintain tonal consistency with the sections already written' : ''}`,
+Output the spoken words only — no labels, no "Here's the X section:", no preamble, no commentary. Start directly with the words Luke will say.
+
+Additional rules:
+- First person as Luke
+- Punchy and specific — no generic property clichés
+- Around 10-15 seconds to say out loud (~30-40 words)
+- Flows naturally with whatever else is already written
+- Do not start with "I" as the first word${filledSections.length ? '\n- Match the tone of the sections already written' : ''}`,
     }];
   } else if (mode === 'chat') {
     const chatSystem = `${systemPrompt}\n\nYou are helping Luke refine his script. Answer concisely. If you suggest replacement text for a section, write it plainly so he can copy it in.`;
