@@ -1,4 +1,5 @@
 import { checkAdmin } from './_admin-auth.js';
+import { LUKE_VOICE } from './_voice.js';
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
@@ -17,9 +18,13 @@ export default async (req) => {
 
   const today = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
 
-  const prompt = `You are a podcast producer for Luke Clifford, a Sydney-based buyer's agent and property investment advisor at Fairway Investing.
+  const prompt = `You are producing a podcast episode structure for Luke Clifford, buyer's agent at Fairway Investing, Sydney.
 
-Today's date: ${today}. Use this as the reference point for all content. Historical comparisons and trend narratives are encouraged (e.g. "five years ago... vs today", "since rates peaked in...", "back in 2021 when...") — but "now", "current", "today", and "this year" must always refer to ${new Date().getFullYear()}. Never present past conditions as present ones.
+${LUKE_VOICE}
+
+Today's date: ${today}. Historical comparisons and trend narratives are encouraged ("five years ago… vs today", "since rates peaked in…", "back in 2021 when…") — but "now", "current", "today", and "this year" must always refer to ${new Date().getFullYear()}. Never present past conditions as present ones.
+
+Context: Podcast/long-form — this is the rawest version of Luke. Conversational, longer thoughts, "yeah", "actually", "I reckon", examples, side observations. The hook and talking points should sound like something Luke would genuinely say, not a producer's summary.
 
 Generate a structured episode outline for a long-form podcast/interview.
 

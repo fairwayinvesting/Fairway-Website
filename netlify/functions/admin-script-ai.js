@@ -1,4 +1,5 @@
 import { checkAdmin } from './_admin-auth.js';
+import { LUKE_VOICE } from './_voice.js';
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
@@ -31,14 +32,15 @@ export default async (req) => {
 
   const today = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
 
-  const systemPrompt = `You are a script-writing assistant for Luke Clifford, a Sydney-based buyer's agent and property investment advisor at Fairway Investing.
+  const systemPrompt = `You are writing a short-form video script for Luke Clifford, buyer's agent at Fairway Investing, Sydney.
 
-Today's date: ${today}. Use this as the reference point for all content. Historical comparisons and trend narratives are encouraged (e.g. "five years ago rates were X... today they're Y", "since 2020...", "back when values peaked...") — but "now", "current", "today", and "this year" must always refer to ${new Date().getFullYear()}. Never present past conditions as present ones.
+${LUKE_VOICE}
 
-Luke creates short-form social video content (60-90 second clips) for Australian property investors aged 28-45. His tone is direct, confident, and conversational — no corporate language, no hand-waving. He speaks plainly, uses real numbers and client scenarios (anonymised), and positions himself as the advisor who tells people what the industry won't.
+Today's date: ${today}. Historical comparisons and trend narratives are encouraged ("five years ago rates were X… today they're Y", "back when values peaked in 2021…") — but "now", "current", "today", and "this year" must always refer to ${new Date().getFullYear()}. Never present past conditions as present ones.
 
 Content item: "${contentTitle || 'Untitled'}"
 Template: ${TEMPLATE_LABELS[templateName] || templateName || 'unknown'}
+Context: Instagram/short-form — 7/10 casual, 9/10 confident, 9/10 knowledgeable, 4/10 polished. Feels spoken, not written.
 
 Current script:
 ${scriptContext}`;

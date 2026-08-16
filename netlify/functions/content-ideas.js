@@ -1,4 +1,5 @@
 import { checkAdmin } from './_admin-auth.js';
+import { LUKE_VOICE } from './_voice.js';
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
@@ -31,9 +32,11 @@ export default async (req) => {
 
   const today = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
 
-  const prompt = `You are a content strategist for Fairway Investing, an Australian property investment advisory firm. Generate content ideas for ${typeContext}.
+  const prompt = `You are generating content ideas for Luke Clifford, buyer's agent at Fairway Investing, Sydney. The ideas will be used for ${typeContext}.
 
-Today's date: ${today}. Use this as your reference point for all content. Historical comparisons and trend narratives are encouraged (e.g. "five years ago... vs today", "since 2020...", "back when rates were at X...") — but "now", "current", "today", and "this year" must always refer to ${new Date().getFullYear()}. Never present past conditions as present ones.
+${LUKE_VOICE}
+
+Today's date: ${today}. Historical comparisons and trend narratives are encouraged ("five years ago… vs today", "since 2020…", "back when rates were at X…") — but "now", "current", "today", and "this year" must always refer to ${new Date().getFullYear()}. Never present past conditions as present ones.
 
 ${guestContext}
 ${topic ? `Topic/theme focus: ${topic}` : 'Open topic — what would resonate with aspiring Australian property investors?'}
