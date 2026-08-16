@@ -6,6 +6,7 @@
 <title>Life — Fairway</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
   body{background:#181614;color:#f7f3ed;font-family:'Outfit',sans-serif;font-weight:300;min-height:100vh;}
@@ -112,6 +113,7 @@
   .hl-row:last-child{border-bottom:none;}
   .hl-bar-wrap{height:5px;background:rgba(247,243,237,0.07);border-radius:100px;overflow:hidden;margin-top:10px;}
   .hl-bar{height:100%;border-radius:100px;transition:width .4s,background .4s;}
+  .hl-set-box{background:rgba(247,243,237,0.02);border:1px solid rgba(247,243,237,0.06);border-radius:10px;padding:12px 14px;margin-bottom:10px;}
 
   /* Custom days picker */
   #life-custom-days-row{display:none;margin-bottom:8px;}
@@ -184,15 +186,21 @@
           <button class="hl-btn" onclick="logWeight()">Save</button>
         </div>
         <div id="hl-weight-history" style="margin-top:12px;"></div>
+        <div style="position:relative;height:80px;margin-top:14px;display:none;" id="hl-weight-chart-wrap">
+          <canvas id="hl-weight-chart"></canvas>
+        </div>
       </div>
 
       <!-- Nutrition -->
       <div class="hl-panel">
         <div class="hl-panel-hd">
           <span class="hl-panel-title">Nutrition</span>
-          <span style="display:flex;align-items:center;gap:8px;">
+          <span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <span id="hl-cal-total" style="font-family:'Fraunces',serif;font-size:22px;color:#f7f3ed;">0</span>
             <span style="font-size:12.5px;color:rgba(247,243,237,0.3);">/ <span id="hl-cal-target-disp">2,000</span> kcal</span>
+            <span style="color:rgba(247,243,237,0.12);font-size:14px;font-weight:300;">·</span>
+            <span id="hl-prot-total" style="font-family:'Fraunces',serif;font-size:22px;color:#f7f3ed;">0</span>
+            <span style="font-size:12.5px;color:rgba(247,243,237,0.3);">g prot</span>
             <button onclick="toggleCalTarget()" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.08);border-radius:6px;color:rgba(247,243,237,0.3);font-size:11px;font-weight:500;padding:3px 8px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .15s;" onmouseover="this.style.color='#f7f3ed'" onmouseout="this.style.color='rgba(247,243,237,0.3)'">Set target</button>
           </span>
         </div>
@@ -212,7 +220,8 @@
             <option value="other">Other</option>
           </select>
           <input type="text" id="hl-food-name" class="hl-input" placeholder="Food item…" style="flex:1;min-width:130px;" onkeydown="if(event.key==='Enter')addFood()">
-          <input type="number" id="hl-food-cals" class="hl-input" placeholder="kcal" style="width:80px;" onkeydown="if(event.key==='Enter')addFood()">
+          <input type="number" id="hl-food-cals" class="hl-input" placeholder="kcal" style="width:76px;" onkeydown="if(event.key==='Enter')addFood()">
+          <input type="number" id="hl-food-protein" class="hl-input" placeholder="prot g" style="width:76px;" onkeydown="if(event.key==='Enter')addFood()">
           <button class="hl-btn" onclick="addFood()">Add</button>
         </div>
         <div id="hl-food-list"></div>
@@ -231,19 +240,39 @@
           <span class="hl-panel-title">Exercise</span>
           <span id="hl-ex-total" style="font-size:12.5px;color:rgba(247,243,237,0.35);"></span>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
-          <select id="hl-ex-type" class="hl-input" style="padding:7px 10px;cursor:pointer;font-size:12.5px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+          <select id="hl-ex-type" class="hl-input" style="padding:7px 10px;cursor:pointer;font-size:12.5px;" onchange="updateExTypeUI()">
             <option value="cardio">Cardio</option>
             <option value="weights">Weights</option>
             <option value="yoga">Yoga / Stretch</option>
             <option value="sport">Sport</option>
             <option value="other">Other</option>
           </select>
-          <input type="text" id="hl-ex-name" class="hl-input" placeholder="e.g. Morning run 5km" style="flex:1;min-width:130px;" onkeydown="if(event.key==='Enter')addExercise()">
-          <input type="number" id="hl-ex-mins" class="hl-input" placeholder="min" style="width:70px;" onkeydown="if(event.key==='Enter')addExercise()">
-          <button class="hl-btn" onclick="addExercise()">Add</button>
+          <input type="text" id="hl-ex-name" class="hl-input" placeholder="e.g. Morning Run" style="flex:1;min-width:130px;" oninput="updateWeightsPrevious()" onkeydown="if(event.key==='Enter'&&document.getElementById('hl-ex-type').value!=='weights')addExercise()">
+          <input type="number" id="hl-ex-mins" class="hl-input" placeholder="min" style="width:68px;" onkeydown="if(event.key==='Enter')addExercise()">
+          <input type="number" id="hl-ex-km" class="hl-input" placeholder="km" style="width:68px;" step="0.1" onkeydown="if(event.key==='Enter')addExercise()">
+          <button class="hl-btn" id="hl-ex-add-btn" onclick="addExercise()">Add</button>
+        </div>
+        <!-- Weights set logger -->
+        <div id="hl-weights-extras" class="hl-set-box" style="display:none;">
+          <div id="hl-weights-prev"></div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            <input type="number" id="hl-set-reps" class="hl-input" placeholder="reps" style="width:76px;" onkeydown="if(event.key==='Enter')addPendingSet()">
+            <span style="font-size:13px;color:rgba(247,243,237,0.28);">×</span>
+            <input type="number" id="hl-set-weight" class="hl-input" placeholder="kg" style="width:76px;" step="0.5" onkeydown="if(event.key==='Enter')addPendingSet()">
+            <button class="hl-btn" onclick="addPendingSet()">+ Set</button>
+          </div>
+          <div id="hl-sets-list" style="margin-top:6px;"></div>
         </div>
         <div id="hl-ex-list"></div>
+      </div>
+
+      <!-- Notes -->
+      <div class="hl-panel">
+        <div class="hl-panel-hd" style="margin-bottom:10px;">
+          <span class="hl-panel-title">Notes</span>
+        </div>
+        <textarea id="hl-notes" class="hl-input" placeholder="How did you feel today — energy, sleep, anything notable…" style="width:100%;resize:vertical;min-height:58px;line-height:1.5;" onblur="saveNotes()"></textarea>
       </div>
 
       <div style="padding-top:4px;border-top:1px solid rgba(247,243,237,0.07);margin-bottom:20px;"></div>
@@ -660,6 +689,147 @@ async function deleteLifeTask(id) {
 
 // ── Health Log ────────────────────────────────────────────────────────────────
 const HL_KEY = 'fw_health_log';
+let pendingSets = [];
+let _weightChart = null;
+
+function updateExTypeUI() {
+  const type = document.getElementById('hl-ex-type')?.value;
+  const kmEl = document.getElementById('hl-ex-km');
+  const weightsExtras = document.getElementById('hl-weights-extras');
+  const addBtn = document.getElementById('hl-ex-add-btn');
+  const nameEl = document.getElementById('hl-ex-name');
+  if (kmEl) kmEl.style.display = type === 'cardio' ? '' : 'none';
+  if (weightsExtras) weightsExtras.style.display = type === 'weights' ? '' : 'none';
+  if (addBtn) addBtn.textContent = type === 'weights' ? 'Log' : 'Add';
+  if (nameEl) nameEl.placeholder = type === 'weights' ? 'e.g. Bench Press' : type === 'cardio' ? 'e.g. Morning Run' : 'e.g. Yoga flow';
+  if (type !== 'weights') { pendingSets = []; renderPendingSets(); }
+  updateWeightsPrevious();
+}
+
+function addPendingSet() {
+  const reps = parseInt(document.getElementById('hl-set-reps')?.value, 10) || 0;
+  const weight = parseFloat(document.getElementById('hl-set-weight')?.value) || 0;
+  if (!reps) { document.getElementById('hl-set-reps')?.focus(); return; }
+  pendingSets.push({ reps, weight });
+  renderPendingSets();
+  const repsEl = document.getElementById('hl-set-reps');
+  if (repsEl) { repsEl.value = ''; repsEl.focus(); }
+}
+
+function removePendingSet(i) {
+  pendingSets.splice(i, 1);
+  renderPendingSets();
+}
+
+function renderPendingSets() {
+  const el = document.getElementById('hl-sets-list');
+  if (!el) return;
+  if (!pendingSets.length) { el.innerHTML = ''; return; }
+  el.innerHTML = pendingSets.map((s, i) =>
+    `<div class="hl-row" style="padding:4px 0;">
+      <span style="font-size:10px;font-weight:600;letter-spacing:0.08em;color:rgba(247,243,237,0.25);width:42px;flex-shrink:0;">SET ${i+1}</span>
+      <span style="flex:1;font-size:13px;color:rgba(247,243,237,0.65);">${s.reps} reps${s.weight ? ' × ' + s.weight + ' kg' : ''}</span>
+      <button onclick="removePendingSet(${i})" style="background:none;border:none;color:rgba(247,243,237,0.18);cursor:pointer;font-size:18px;padding:0 0 0 8px;line-height:1;flex-shrink:0;" title="Remove">&#215;</button>
+    </div>`
+  ).join('');
+}
+
+function getPrevWeightsSession(name) {
+  if (!name) return null;
+  const log = getHealthLog();
+  const today = getHlDate();
+  const ex = log.exercise || {};
+  const dates = Object.keys(ex).filter(d => d < today).sort((a, b) => b.localeCompare(a));
+  for (const d of dates) {
+    const found = ex[d].find(e => e.type === 'weights' && e.name.toLowerCase() === name.toLowerCase() && e.sets?.length);
+    if (found) return { date: d, sets: found.sets };
+  }
+  return null;
+}
+
+function updateWeightsPrevious() {
+  const type = document.getElementById('hl-ex-type')?.value;
+  const el = document.getElementById('hl-weights-prev');
+  if (!el) return;
+  if (type !== 'weights') { el.innerHTML = ''; return; }
+  const name = document.getElementById('hl-ex-name')?.value.trim();
+  if (!name) { el.innerHTML = ''; return; }
+  const prev = getPrevWeightsSession(name);
+  if (prev) {
+    const lbl = new Date(prev.date + 'T12:00:00').toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
+    el.innerHTML = `<div style="font-size:11.5px;color:rgba(247,243,237,0.3);margin-bottom:8px;line-height:1.6;">Last session (${lbl}): ${prev.sets.map((s, i) => `${i+1}) ${s.reps}r×${s.weight}kg`).join(' · ')}</div>`;
+  } else {
+    el.innerHTML = `<div style="font-size:11.5px;color:rgba(247,243,237,0.18);margin-bottom:8px;">No previous session found.</div>`;
+  }
+}
+
+function saveNotes() {
+  const date = getHlDate();
+  const val = (document.getElementById('hl-notes')?.value || '').trim();
+  const log = getHealthLog();
+  if (!log.notes) log.notes = {};
+  if (val) log.notes[date] = val;
+  else delete log.notes[date];
+  saveHealthLog(log);
+}
+
+function renderWeightChart(log) {
+  const wrap = document.getElementById('hl-weight-chart-wrap');
+  const canvas = document.getElementById('hl-weight-chart');
+  if (!wrap || !canvas || typeof Chart === 'undefined') return;
+  const today = getHlDate();
+  const base = new Date(today + 'T12:00:00');
+  const days = [];
+  for (let i = 13; i >= 0; i--) days.push(localDateStr(new Date(base.getTime() - i * 86400000)));
+  const weights = log.weight || {};
+  const hasData = days.some(d => weights[d] != null);
+  if (!hasData) {
+    wrap.style.display = 'none';
+    if (_weightChart) { _weightChart.destroy(); _weightChart = null; }
+    return;
+  }
+  wrap.style.display = '';
+  const labels = days.map(d => new Date(d + 'T12:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }));
+  const data = days.map(d => weights[d] ?? null);
+  if (_weightChart) { _weightChart.destroy(); _weightChart = null; }
+  _weightChart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: '#bd7a70',
+        backgroundColor: 'rgba(189,122,112,0.07)',
+        borderWidth: 1.5,
+        pointBackgroundColor: '#bd7a70',
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        tension: 0.3,
+        spanGaps: true,
+        fill: true,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#22201d',
+          borderColor: 'rgba(247,243,237,0.1)',
+          borderWidth: 1,
+          titleColor: 'rgba(247,243,237,0.38)',
+          bodyColor: '#f7f3ed',
+          callbacks: { label: ctx => ctx.parsed.y != null ? ctx.parsed.y + ' kg' : '' }
+        }
+      },
+      scales: {
+        x: { ticks: { color: 'rgba(247,243,237,0.28)', font: { size: 9, family: 'Outfit' }, maxRotation: 0 }, grid: { color: 'rgba(247,243,237,0.04)' }, border: { display: false } },
+        y: { ticks: { color: 'rgba(247,243,237,0.28)', font: { size: 9, family: 'Outfit' }, callback: v => v + 'kg' }, grid: { color: 'rgba(247,243,237,0.04)' }, border: { display: false } }
+      }
+    }
+  });
+}
 
 function getHealthLog() {
   try { return JSON.parse(localStorage.getItem(HL_KEY)) || {}; } catch { return {}; }
@@ -704,16 +874,19 @@ function addFood() {
   const name = nameEl?.value.trim();
   if (!name) { nameEl?.focus(); return; }
   const cals = parseInt(document.getElementById('hl-food-cals')?.value, 10) || 0;
+  const protein = parseFloat(document.getElementById('hl-food-protein')?.value) || 0;
   const meal = document.getElementById('hl-food-meal')?.value || 'other';
   const log = getHealthLog();
   if (!log.food) log.food = {};
   const date = getHlDate();
   if (!log.food[date]) log.food[date] = [];
-  log.food[date].push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,5), name, cals, meal });
+  log.food[date].push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,5), name, cals, protein, meal });
   saveHealthLog(log);
   nameEl.value = '';
   const calsEl = document.getElementById('hl-food-cals');
   if (calsEl) calsEl.value = '';
+  const protEl = document.getElementById('hl-food-protein');
+  if (protEl) protEl.value = '';
   nameEl.focus();
   renderHealthLog();
 }
@@ -732,13 +905,30 @@ function addExercise() {
   const nameEl = document.getElementById('hl-ex-name');
   const name = nameEl?.value.trim();
   if (!name) { nameEl?.focus(); return; }
-  const mins = parseInt(document.getElementById('hl-ex-mins')?.value, 10) || 0;
   const type = document.getElementById('hl-ex-type')?.value || 'other';
+  const mins = parseInt(document.getElementById('hl-ex-mins')?.value, 10) || 0;
   const log = getHealthLog();
   if (!log.exercise) log.exercise = {};
   const date = getHlDate();
   if (!log.exercise[date]) log.exercise[date] = [];
-  log.exercise[date].push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,5), name, mins, type });
+  const id = Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+
+  if (type === 'weights') {
+    if (!pendingSets.length) { showToast('Add at least one set first'); return; }
+    log.exercise[date].push({ id, name, type, sets: [...pendingSets], mins });
+    pendingSets = [];
+    renderPendingSets();
+    const prevEl = document.getElementById('hl-weights-prev');
+    if (prevEl) prevEl.innerHTML = '';
+  } else if (type === 'cardio') {
+    const distKm = parseFloat(document.getElementById('hl-ex-km')?.value) || 0;
+    log.exercise[date].push({ id, name, type, mins, distKm });
+    const kmEl = document.getElementById('hl-ex-km');
+    if (kmEl) kmEl.value = '';
+  } else {
+    log.exercise[date].push({ id, name, type, mins });
+  }
+
   saveHealthLog(log);
   nameEl.value = '';
   const minsEl = document.getElementById('hl-ex-mins');
@@ -778,10 +968,12 @@ function renderHealthLog() {
       return `<div class="hl-row"><span style="flex:1;font-size:12.5px;color:rgba(247,243,237,0.35);">${lbl}</span><span style="font-size:13px;color:rgba(247,243,237,0.55);">${w} kg</span></div>`;
     }).join('')}</div>` : '';
   }
+  renderWeightChart(log);
 
   // Nutrition
   const foods = log.food?.[date] || [];
   const totalCals = foods.reduce((s,f)=>s+(f.cals||0), 0);
+  const totalProt = foods.reduce((s,f)=>s+(f.protein||0), 0);
   const calPct = Math.min(110, Math.round(totalCals/calTarget*100));
   const calColor = calPct > 100 ? '#e07070' : calPct > 85 ? '#e8a87c' : '#6dbf7b';
   const calTotalEl = document.getElementById('hl-cal-total');
@@ -792,6 +984,8 @@ function renderHealthLog() {
   if (calPctEl) calPctEl.textContent = calPct + '%';
   const calBarEl = document.getElementById('hl-cal-bar');
   if (calBarEl) { calBarEl.style.width = calPct + '%'; calBarEl.style.background = calColor; }
+  const protTotalEl = document.getElementById('hl-prot-total');
+  if (protTotalEl) protTotalEl.textContent = Math.round(totalProt);
 
   const MEALS = { breakfast:'Breakfast', lunch:'Lunch', dinner:'Dinner', snack:'Snack', other:'Other' };
   const MEAL_ORDER = ['breakfast','lunch','dinner','snack','other'];
@@ -804,14 +998,15 @@ function renderHealthLog() {
     } else {
       foodEl.innerHTML = MEAL_ORDER.filter(m=>mealGroups[m]).map(m=>{
         const mCals = mealGroups[m].reduce((s,f)=>s+(f.cals||0),0);
+        const mProt = mealGroups[m].reduce((s,f)=>s+(f.protein||0),0);
         return `<div style="margin-bottom:10px;">
           <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
             <span style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.22);">${MEALS[m]}</span>
-            ${mCals ? `<span style="font-size:11px;color:rgba(247,243,237,0.25);">${mCals.toLocaleString()} kcal</span>` : ''}
+            <span style="font-size:11px;color:rgba(247,243,237,0.25);">${mCals?mCals.toLocaleString()+' kcal':''}${mProt?' · '+Math.round(mProt)+'g prot':''}</span>
           </div>
           ${mealGroups[m].map(f=>`<div class="hl-row">
             <span style="flex:1;font-size:13.5px;color:rgba(247,243,237,0.78);">${esc(f.name)}</span>
-            <span style="font-size:12.5px;color:rgba(247,243,237,0.35);min-width:64px;text-align:right;">${f.cals?f.cals.toLocaleString()+' kcal':'—'}</span>
+            <span style="font-size:12.5px;color:rgba(247,243,237,0.35);text-align:right;white-space:nowrap;">${f.cals?f.cals.toLocaleString()+' kcal':'—'}${f.protein?'<span style="color:rgba(109,191,123,0.6);margin-left:6px;">'+Math.round(f.protein)+'g</span>':''}</span>
             <button onclick="removeFood('${f.id}')" style="background:none;border:none;color:rgba(247,243,237,0.18);cursor:pointer;font-size:18px;padding:0 0 0 10px;line-height:1;flex-shrink:0;" title="Remove">&#215;</button>
           </div>`).join('')}
         </div>`;
@@ -833,15 +1028,31 @@ function renderHealthLog() {
     } else {
       exEl.innerHTML = exercises.map(e=>{
         const col = EX_COLORS[e.type]||EX_COLORS.other;
-        return `<div class="hl-row">
-          <span style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:${col};background:${col.startsWith('rgba')?col.replace('0.35)','0.1)'):col+'1a'};border-radius:100px;padding:2px 9px;white-space:nowrap;flex-shrink:0;">${EX_LABELS[e.type]||'Other'}</span>
-          <span style="flex:1;font-size:13.5px;color:rgba(247,243,237,0.78);padding:0 6px;">${esc(e.name)}</span>
-          <span style="font-size:12.5px;color:rgba(247,243,237,0.35);white-space:nowrap;">${e.mins?e.mins+' min':''}</span>
+        const bgCol = col.startsWith('rgba') ? col.replace('0.35)','0.1)') : col+'1a';
+        let detail = '';
+        if (e.type === 'weights' && e.sets?.length) {
+          detail = `${e.sets.length} sets: ${e.sets.map(s=>s.reps+'r'+(s.weight?'×'+s.weight+'kg':'')).join(', ')}`;
+        } else if (e.type === 'cardio' && (e.distKm || e.mins)) {
+          const paceStr = e.distKm && e.mins ? (()=>{ const s=Math.round((e.mins*60)/e.distKm); return Math.floor(s/60)+':'+(s%60).toString().padStart(2,'0')+'/km'; })() : '';
+          detail = [e.distKm?e.distKm+'km':'', e.mins?e.mins+' min':'', paceStr?'('+paceStr+')':''].filter(Boolean).join(' · ');
+        } else if (e.mins) {
+          detail = e.mins + ' min';
+        }
+        return `<div class="hl-row" style="align-items:flex-start;padding:8px 0;">
+          <span style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:${col};background:${bgCol};border-radius:100px;padding:3px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px;">${EX_LABELS[e.type]||'Other'}</span>
+          <div style="flex:1;min-width:0;padding:0 8px;">
+            <div style="font-size:13.5px;color:rgba(247,243,237,0.78);">${esc(e.name)}</div>
+            ${detail ? `<div style="font-size:11.5px;color:rgba(247,243,237,0.32);margin-top:2px;">${detail}</div>` : ''}
+          </div>
           <button onclick="removeExercise('${e.id}')" style="background:none;border:none;color:rgba(247,243,237,0.18);cursor:pointer;font-size:18px;padding:0 0 0 10px;line-height:1;flex-shrink:0;" title="Remove">&#215;</button>
         </div>`;
       }).join('');
     }
   }
+
+  // Notes
+  const notesEl = document.getElementById('hl-notes');
+  if (notesEl && document.activeElement !== notesEl) notesEl.value = log.notes?.[date] || '';
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
