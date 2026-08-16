@@ -216,6 +216,22 @@
   .script-tmpl-btn.active{background:rgba(189,122,112,0.14);border-color:rgba(189,122,112,0.4);color:#bd7a70;font-weight:500;}
   .tp-launch-btn{background:rgba(189,122,112,0.12);border:1px solid rgba(189,122,112,0.25);border-radius:8px;color:#bd7a70;font-size:12.5px;font-weight:500;padding:7px 14px;cursor:pointer;transition:all .15s;font-family:'Outfit',sans-serif;}
   .tp-launch-btn:hover{background:rgba(189,122,112,0.22);}
+  .ai-draft-btn{background:none;border:none;color:rgba(189,122,112,0.45);font-size:11px;cursor:pointer;padding:0;transition:color .15s;font-family:'Outfit',sans-serif;letter-spacing:.02em;}
+  .ai-draft-btn:hover{color:#bd7a70;}
+  .ai-draft-btn:disabled{opacity:.4;cursor:wait;}
+  .script-chat{margin-top:18px;border-top:1px solid rgba(247,243,237,0.07);padding-top:14px;}
+  .script-chat-history{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;max-height:300px;overflow-y:auto;}
+  .chat-msg{padding:10px 13px;border-radius:10px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;}
+  .chat-msg.user{background:rgba(247,243,237,0.06);color:rgba(247,243,237,0.8);align-self:flex-end;max-width:90%;}
+  .chat-msg.ai{background:rgba(189,122,112,0.08);border:1px solid rgba(189,122,112,0.12);color:rgba(247,243,237,0.85);align-self:flex-start;max-width:100%;}
+  .chat-msg.ai-loading::after{content:'▋';animation:tp-blink .7s infinite;}
+  @keyframes tp-blink{0%,100%{opacity:1}50%{opacity:0}}
+  .script-chat-input-row{display:flex;gap:8px;align-items:flex-end;}
+  .script-chat-input{flex:1;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.1);border-radius:8px;color:#f7f3ed;font-size:13px;font-family:'Outfit',sans-serif;padding:9px 11px;resize:none;outline:none;line-height:1.4;}
+  .script-chat-input:focus{border-color:rgba(189,122,112,0.3);}
+  .script-chat-send{background:rgba(189,122,112,0.14);border:1px solid rgba(189,122,112,0.25);border-radius:8px;color:#bd7a70;font-size:12.5px;font-weight:500;padding:8px 14px;cursor:pointer;transition:all .15s;font-family:'Outfit',sans-serif;white-space:nowrap;}
+  .script-chat-send:hover{background:rgba(189,122,112,0.25);}
+  .script-chat-send:disabled{opacity:.4;cursor:wait;}
 
   /* Teleprompter overlay */
   #teleprompter-overlay{position:fixed;inset:0;background:#060504;z-index:9999;display:none;flex-direction:column;}
@@ -1524,9 +1540,12 @@ function renderScriptSection(item) {
   const durStr = totalWords > 0 ? `~${totalWords}w · ${durSec}s` : '0w';
 
   const sectionsHtml = tmpl.sections.map(sec => `
-    <div class="prep-row" style="flex-direction:column;align-items:flex-start;gap:5px;margin-bottom:14px;">
-      <div style="font-size:11.5px;color:rgba(247,243,237,0.35);font-weight:500;text-transform:uppercase;letter-spacing:.04em;">${sec.label}</div>
-      <textarea class="panel-textarea" rows="3" style="width:100%;box-sizing:border-box;"
+    <div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+        <div style="font-size:11.5px;color:rgba(247,243,237,0.35);font-weight:500;text-transform:uppercase;letter-spacing:.04em;">${sec.label}</div>
+        <button class="ai-draft-btn" data-draft-btn="${item.id}-${sec.key}" onclick="aiDraftSection('${item.id}','${sec.key}')">✦ Draft</button>
+      </div>
+      <textarea class="panel-textarea" id="script-sec-${item.id}-${sec.key}" rows="3" style="width:100%;box-sizing:border-box;"
         placeholder="${sec.placeholder.replace(/"/g,'&quot;')}"
         onblur="saveScriptField('${item.id}','${sec.key}',this.value)"
         oninput="updateScriptStats('${item.id}')"
@@ -1534,12 +1553,27 @@ function renderScriptSection(item) {
     </div>
   `).join('');
 
+  const existingChat = (_scriptChatHistory[item.id] || []).map(m =>
+    `<div class="chat-msg ${m.role === 'assistant' ? 'ai' : 'user'}">${esc(m.content)}</div>`
+  ).join('');
+
   return `
     <div style="padding-bottom:6px;">
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">${tmplBtns}</div>
       <div style="font-size:11.5px;color:rgba(247,243,237,0.28);margin-bottom:16px;" id="script-stats-${item.id}">${durStr}</div>
       ${sectionsHtml}
-      <button class="tp-launch-btn" onclick="openTeleprompter('${item.id}')">▶ Open Teleprompter</button>
+      <div class="script-chat">
+        <div style="font-size:11px;color:rgba(247,243,237,0.25);font-weight:500;letter-spacing:.06em;margin-bottom:10px;">AI ASSISTANT</div>
+        <div class="script-chat-history" id="script-chat-history-${item.id}">${existingChat}</div>
+        <div class="script-chat-input-row">
+          <textarea class="script-chat-input" id="script-chat-input-${item.id}" placeholder="Ask AI to refine your script, adjust the tone, make it punchier…" rows="2"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();aiChatSend('${item.id}');}"></textarea>
+          <button class="script-chat-send" id="script-chat-send-${item.id}" onclick="aiChatSend('${item.id}')">Send</button>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <button class="tp-launch-btn" onclick="openTeleprompter('${item.id}')">▶ Open Teleprompter</button>
+      </div>
     </div>
   `;
 }
@@ -1564,11 +1598,10 @@ function saveScriptField(cid, field, value) {
 function updateScriptStats(cid) {
   const s = getScript(cid);
   const tmpl = SCRIPT_TEMPLATES[s.template] || SCRIPT_TEMPLATES.tip;
-  const textareas = document.querySelectorAll('#panel-script-section textarea');
   let totalWords = 0;
-  textareas.forEach(ta => {
-    const txt = ta.value.trim();
-    if (txt) totalWords += txt.split(/\s+/).length;
+  tmpl.sections.forEach(sec => {
+    const ta = document.getElementById(`script-sec-${cid}-${sec.key}`);
+    if (ta) { const txt = ta.value.trim(); if (txt) totalWords += txt.split(/\s+/).length; }
   });
   const durSec = Math.round((totalWords / 130) * 60);
   const statsEl = document.getElementById(`script-stats-${cid}`);
@@ -1584,6 +1617,137 @@ function assembleScriptText(cid) {
     if (txt) parts.push(txt);
   });
   return parts.join('\n\n');
+}
+
+// ── AI Script Assistant ────────────────────────────────────────────────────────
+
+const _scriptChatHistory = {};
+
+async function aiStreamFetch(body, onChunk, onDone, onError) {
+  try {
+    const res = await fetch('/api/admin/script-ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) { onError('AI request failed (' + res.status + ')'); return; }
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() ?? '';
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        try {
+          const data = JSON.parse(line.slice(6));
+          if (data.done) { onDone(); return; }
+          if (data.t) onChunk(data.t);
+        } catch {}
+      }
+    }
+    onDone();
+  } catch (err) {
+    onError(err.message || 'Network error');
+  }
+}
+
+function getScriptContext(cid) {
+  const s = getScript(cid);
+  const tmpl = SCRIPT_TEMPLATES[s.template] || SCRIPT_TEMPLATES.tip;
+  const currentSections = {};
+  tmpl.sections.forEach(sec => {
+    const ta = document.getElementById(`script-sec-${cid}-${sec.key}`);
+    currentSections[sec.key] = ta ? ta.value : (s.sections[sec.key] || '');
+  });
+  return { templateName: s.template, currentSections };
+}
+
+async function aiDraftSection(cid, sectionKey) {
+  const item = allContent.find(c => c.id === cid);
+  if (!item) return;
+  const s = getScript(cid);
+  const tmpl = SCRIPT_TEMPLATES[s.template] || SCRIPT_TEMPLATES.tip;
+  const sec = tmpl.sections.find(x => x.key === sectionKey);
+  if (!sec) return;
+
+  const btn = document.querySelector(`[data-draft-btn="${cid}-${sectionKey}"]`);
+  const ta = document.getElementById(`script-sec-${cid}-${sectionKey}`);
+  if (!ta) return;
+
+  if (btn) { btn.textContent = '…'; btn.disabled = true; }
+  ta.value = '';
+
+  const ctx = getScriptContext(cid);
+  const cleanLabel = sec.label.replace(/\s*\(.*?\)/, '').trim();
+  let accumulated = '';
+
+  await aiStreamFetch(
+    { mode: 'draft_section', contentTitle: item.title, templateName: ctx.templateName, sectionKey, sectionLabel: cleanLabel, currentSections: ctx.currentSections },
+    chunk => { accumulated += chunk; ta.value = accumulated; updateScriptStats(cid); },
+    () => { saveScriptField(cid, sectionKey, accumulated); if (btn) { btn.textContent = '✦ Draft'; btn.disabled = false; } },
+    err => { if (btn) { btn.textContent = '✦ Draft'; btn.disabled = false; } showToast('Draft failed: ' + err); }
+  );
+}
+
+async function aiChatSend(cid) {
+  const item = allContent.find(c => c.id === cid);
+  if (!item) return;
+  const inputEl = document.getElementById(`script-chat-input-${cid}`);
+  const sendBtn = document.getElementById(`script-chat-send-${cid}`);
+  if (!inputEl) return;
+  const message = inputEl.value.trim();
+  if (!message) return;
+
+  inputEl.value = '';
+  inputEl.disabled = true;
+  if (sendBtn) sendBtn.disabled = true;
+
+  if (!_scriptChatHistory[cid]) _scriptChatHistory[cid] = [];
+  _scriptChatHistory[cid].push({ role: 'user', content: message });
+  appendChatMessage(cid, 'user', message);
+
+  const aiEl = appendChatMessage(cid, 'ai', '');
+  aiEl.classList.add('ai-loading');
+
+  const ctx = getScriptContext(cid);
+  let accumulated = '';
+
+  await aiStreamFetch(
+    { mode: 'chat', contentTitle: item.title, templateName: ctx.templateName, currentSections: ctx.currentSections, message, history: _scriptChatHistory[cid].slice(0, -1) },
+    chunk => {
+      accumulated += chunk;
+      aiEl.textContent = accumulated;
+      aiEl.classList.remove('ai-loading');
+      const histEl = document.getElementById(`script-chat-history-${cid}`);
+      if (histEl) histEl.scrollTop = histEl.scrollHeight;
+    },
+    () => {
+      _scriptChatHistory[cid].push({ role: 'assistant', content: accumulated });
+      inputEl.disabled = false;
+      if (sendBtn) sendBtn.disabled = false;
+      inputEl.focus();
+    },
+    err => {
+      aiEl.textContent = 'Error: ' + err;
+      inputEl.disabled = false;
+      if (sendBtn) sendBtn.disabled = false;
+    }
+  );
+}
+
+function appendChatMessage(cid, role, text) {
+  const histEl = document.getElementById(`script-chat-history-${cid}`);
+  if (!histEl) return document.createElement('div');
+  const el = document.createElement('div');
+  el.className = `chat-msg ${role === 'assistant' ? 'ai' : 'user'}`;
+  el.textContent = text;
+  histEl.appendChild(el);
+  histEl.scrollTop = histEl.scrollHeight;
+  return el;
 }
 
 // ── Teleprompter ───────────────────────────────────────────────────────────────
