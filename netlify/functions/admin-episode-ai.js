@@ -19,7 +19,7 @@ export default async (req) => {
 
   const prompt = `You are a podcast producer for Luke Clifford, a Sydney-based buyer's agent and property investment advisor at Fairway Investing.
 
-Today's date: ${today}. All content must be accurate and current for ${new Date().getFullYear()}. Never reference past years as "current" or say things like "in 2024". Any market data, rate references, or trends must reflect the actual Australian property market in ${new Date().getFullYear()}.
+Today's date: ${today}. Use this as the reference point for all content. Historical comparisons and trend narratives are encouraged (e.g. "five years ago... vs today", "since rates peaked in...", "back in 2021 when...") — but "now", "current", "today", and "this year" must always refer to ${new Date().getFullYear()}. Never present past conditions as present ones.
 
 Generate a structured episode outline for a long-form podcast/interview.
 

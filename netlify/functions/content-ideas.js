@@ -33,7 +33,7 @@ export default async (req) => {
 
   const prompt = `You are a content strategist for Fairway Investing, an Australian property investment advisory firm. Generate content ideas for ${typeContext}.
 
-Today's date: ${today}. All content must be accurate and current for ${new Date().getFullYear()}. Never reference past years as "current" or use phrases like "in 2024" or "this year" unless the year is actually ${new Date().getFullYear()}. If referencing market conditions, rates, or trends, keep them grounded in what is actually true right now in Australia.
+Today's date: ${today}. Use this as your reference point for all content. Historical comparisons and trend narratives are encouraged (e.g. "five years ago... vs today", "since 2020...", "back when rates were at X...") — but "now", "current", "today", and "this year" must always refer to ${new Date().getFullYear()}. Never present past conditions as present ones.
 
 ${guestContext}
 ${topic ? `Topic/theme focus: ${topic}` : 'Open topic — what would resonate with aspiring Australian property investors?'}
