@@ -39,6 +39,7 @@
       .r-hide-mob{display:none!important}
       .r-2col{grid-template-columns:1fr!important}
       .r-4col-steps{grid-template-columns:1fr!important;gap:36px!important;}
+      .r-3col{grid-template-columns:1fr!important;gap:0!important;}
       .hero-h1{font-size:30px!important}
       .hero-sub{font-size:15.5px!important}
       .pad-page{padding:56px 24px!important}
@@ -48,6 +49,9 @@
       .card-pad{padding:28px 24px!important}
       .nav-partner-label{display:none!important}
       .nav-cta{font-size:13px!important;padding:9px 18px!important}
+      .scenario-col{border-right:none!important;border-bottom:1px solid rgba(247,243,237,0.1)!important;padding:32px 0!important}
+      .scenario-col:last-child{border-bottom:none!important;padding-bottom:0!important}
+      .window-grid{grid-template-columns:1fr!important;gap:0!important;}
     }
   </style>
   <script>
@@ -105,7 +109,7 @@
       <h1 class="hero-h1" style="font-family:'Fraunces',serif;font-weight:400;font-size:48px;line-height:1.08;letter-spacing:-0.02em;color:#f7f3ed;margin-bottom:20px;">
         Kif thought <span style="font-style:italic;color:#d4a84a;">we should talk.</span>
       </h1>
-      <p class="hero-sub" style="font-size:18px;font-weight:300;line-height:1.65;color:rgba(247,243,237,0.75);margin-bottom:36px;">Your career has put you in a position most people never reach. Kif helps you navigate the game. I help you make sure those earnings build something that keeps going long after it.</p>
+      <p class="hero-sub" style="font-size:18px;font-weight:300;line-height:1.65;color:rgba(247,243,237,0.75);margin-bottom:36px;">Most athletes spend their earning years focused on the game. The ones who come out the other side with something real had one thing in common — they set it up while they still could. I'm Luke. Let's make sure you're in that group.</p>
       <div class="hero-cta-row" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
         <a href="#book" style="font-size:15px;font-weight:500;color:#22201d;background:#bd7a70;padding:15px 32px;border-radius:100px;transition:background .2s ease;" onmouseover="this.style.background='#cf9b92'" onmouseout="this.style.background='#bd7a70'">Book a free call with Luke</a>
         <a href="#how" style="font-size:15px;font-weight:400;color:rgba(247,243,237,0.65);padding:15px 20px;border:1px solid rgba(247,243,237,0.2);border-radius:100px;transition:border-color .2s ease;" onmouseover="this.style.borderColor='rgba(247,243,237,0.5)'" onmouseout="this.style.borderColor='rgba(247,243,237,0.2)'">How it works</a>
@@ -133,22 +137,31 @@
   </div>
 </section>
 
-<!-- ATHLETE CONTEXT STRIP -->
-<section style="background:#1a1916;padding:44px 44px;">
-  <div style="max-width:900px;margin:0 auto;">
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;" class="r-2col">
-      <div style="padding:0 32px 0 0;border-right:1px solid rgba(247,243,237,0.08);">
-        <div style="font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:#c4922a;margin-bottom:10px;">The reality</div>
-        <p style="font-size:15px;font-weight:300;line-height:1.65;color:rgba(247,243,237,0.65);">A sporting career earns more than most. It also ends earlier than most. The window to build wealth is shorter — and that makes every year of it count more.</p>
+<!-- THE WINDOW — full-width dark section -->
+<section style="background:#16140f;padding:72px 44px;">
+  <div style="max-width:860px;margin:0 auto;text-align:center;">
+    <div style="display:inline-flex;align-items:center;gap:12px;margin-bottom:22px;">
+      <span style="width:24px;height:1px;background:#c4922a;"></span>
+      <span style="font-size:11px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:#c4922a;">The window</span>
+      <span style="width:24px;height:1px;background:#c4922a;"></span>
+    </div>
+    <h2 style="font-family:'Fraunces',serif;font-weight:400;font-size:36px;line-height:1.2;color:#f7f3ed;margin-bottom:20px;">Most athletes earn more in 10 years than most people earn in 30.</h2>
+    <p style="font-size:17px;font-weight:300;line-height:1.75;color:rgba(247,243,237,0.65);margin-bottom:0;">The problem isn't the income. It's what doesn't get built during it. Sport gives you a window most people never get — but it closes faster than it opens. And sometimes it closes without warning.</p>
+  </div>
+  <div class="window-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:0;max-width:860px;margin:52px auto 0;">
+    <div class="scenario-col" style="padding:0 44px 0 0;border-right:1px solid rgba(247,243,237,0.1);">
+      <div style="width:40px;height:40px;border-radius:50%;border:1px solid rgba(196,146,42,0.4);display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+        <span style="font-size:18px;">🏁</span>
       </div>
-      <div style="padding:0 32px;border-right:1px solid rgba(247,243,237,0.08);">
-        <div style="font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:#c4922a;margin-bottom:10px;">The problem</div>
-        <p style="font-size:15px;font-weight:300;line-height:1.65;color:rgba(247,243,237,0.65);">Variable income, contracts that can end, and property structures that simply don't fit how athletes earn. Most lenders don't understand how to model it properly.</p>
+      <h3 style="font-family:'Fraunces',serif;font-weight:400;font-size:22px;color:#f7f3ed;margin-bottom:12px;">When the career ends on your terms</h3>
+      <p style="font-size:15px;font-weight:300;line-height:1.7;color:rgba(247,243,237,0.6);">Retirement, a move overseas, life after sport — whatever it looks like. The athletes who land well aren't the highest earners. They're the ones who had a structure running quietly in the background for years before that day came. Property bought smart, compounding, rented and working.</p>
+    </div>
+    <div class="scenario-col" style="padding:0 0 0 44px;">
+      <div style="width:40px;height:40px;border-radius:50%;border:1px solid rgba(189,122,112,0.4);display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+        <span style="font-size:18px;">⚡</span>
       </div>
-      <div style="padding:0 0 0 32px;">
-        <div style="font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:#c4922a;margin-bottom:10px;">What we do</div>
-        <p style="font-size:15px;font-weight:300;line-height:1.65;color:rgba(247,243,237,0.65);">Get the right finance structure in place, connect you to the right people, and build a property strategy that works with your career — not against it.</p>
-      </div>
+      <h3 style="font-family:'Fraunces',serif;font-weight:400;font-size:22px;color:#f7f3ed;margin-bottom:12px;">When it doesn't</h3>
+      <p style="font-size:15px;font-weight:300;line-height:1.7;color:rgba(247,243,237,0.6);">A serious injury. A contract not renewed. Something that changes the plan overnight. These things happen — and when they do, what matters is what was already in place. Structure set up. Equity building. Assets that don't depend on the career continuing to keep working.</p>
     </div>
   </div>
 </section>
@@ -163,7 +176,7 @@
         <span style="width:24px;height:1px;background:#bd7a70;"></span>
       </div>
       <h2 style="font-family:'Fraunces',serif;font-weight:400;font-size:38px;line-height:1.1;letter-spacing:-0.01em;color:#22201d;">Two people in your corner.</h2>
-      <p style="font-size:17px;font-weight:300;line-height:1.65;color:rgba(34,32,29,0.7);margin-top:14px;max-width:560px;margin-left:auto;margin-right:auto;">Kif manages your career. Luke manages the property side. Together, the aim is the same — make sure everything you've built in sport keeps building after it.</p>
+      <p style="font-size:17px;font-weight:300;line-height:1.65;color:rgba(34,32,29,0.7);margin-top:14px;max-width:560px;margin-left:auto;margin-right:auto;">Kif manages the career side. Luke manages the property side. Both working toward the same thing — making sure what you've built in sport keeps building after it.</p>
     </div>
 
     <div class="r-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
@@ -173,12 +186,12 @@
         <div style="margin-bottom:22px;"><span style="font-size:14px;font-weight:600;letter-spacing:0.02em;color:#c4922a;">Arise Sports</span></div>
         <div style="font-size:13px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(34,32,29,0.45);margin-bottom:6px;">Player Manager</div>
         <h3 style="font-family:'Fraunces',serif;font-weight:400;font-size:24px;color:#22201d;margin-bottom:14px;">Kif Chowdhury</h3>
-        <p style="font-size:15px;font-weight:300;line-height:1.65;color:rgba(34,32,29,0.72);margin-bottom:24px;">Kif works with professional athletes navigating careers, contracts, and the business side of sport. When he sees an athlete who's in a position to build wealth, he makes the connection to the right people.</p>
+        <p style="font-size:15px;font-weight:300;line-height:1.65;color:rgba(34,32,29,0.72);margin-bottom:24px;">Kif works with athletes navigating their careers — contracts, representation, and the business of sport. When he sees someone who's in a position to start building wealth off the field, he connects them to the right people.</p>
         <div style="border-top:1px solid rgba(34,32,29,0.08);padding-top:20px;">
-          <div style="font-size:13px;font-weight:500;color:rgba(34,32,29,0.5);margin-bottom:8px;">What Kif handles</div>
+          <div style="font-size:13px;font-weight:500;color:rgba(34,32,29,0.5);margin-bottom:8px;">Kif's role</div>
           <div style="display:flex;align-items:flex-start;gap:10px;">
             <span style="flex:none;width:20px;height:20px;border-radius:50%;background:#c4922a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;margin-top:1px;">✓</span>
-            <span style="font-size:14.5px;font-weight:300;line-height:1.5;color:#22201d;">Career management, contracts, and knowing when you're ready to start building</span>
+            <span style="font-size:14.5px;font-weight:300;line-height:1.5;color:#22201d;">Career management, contracts and knowing when you're ready to start building</span>
           </div>
         </div>
       </div>
@@ -191,12 +204,12 @@
         </div>
         <div style="font-size:13px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(207,155,146,0.7);margin-bottom:6px;">Buyers Agent</div>
         <h3 style="font-family:'Fraunces',serif;font-weight:400;font-size:24px;color:#f7f3ed;margin-bottom:14px;">Luke Clifford</h3>
-        <p style="font-size:15px;font-weight:300;line-height:1.65;color:rgba(247,243,237,0.7);margin-bottom:24px;">Buyers-only representation. Luke gets the right structure in place, sources and evaluates investment properties, and negotiates the deal — with a flat fee, no commissions, and no conflicts.</p>
+        <p style="font-size:15px;font-weight:300;line-height:1.65;color:rgba(247,243,237,0.7);margin-bottom:24px;">Buyers-only representation. Luke handles the finance structure, ownership setup, property strategy and acquisition — no commissions, no conflicts, flat fee agreed upfront. He's worked with high-income earners whose income doesn't look like a standard salary, and structures it properly from the start.</p>
         <div style="border-top:1px solid rgba(247,243,237,0.1);padding-top:20px;">
-          <div style="font-size:13px;font-weight:500;color:rgba(247,243,237,0.45);margin-bottom:8px;">What Luke handles</div>
+          <div style="font-size:13px;font-weight:500;color:rgba(247,243,237,0.45);margin-bottom:8px;">Luke's role</div>
           <div style="display:flex;align-items:flex-start;gap:10px;">
             <span style="flex:none;width:20px;height:20px;border-radius:50%;background:#bd7a70;color:#22201d;display:flex;align-items:center;justify-content:center;font-size:11px;margin-top:1px;">✓</span>
-            <span style="font-size:14.5px;font-weight:300;line-height:1.5;color:rgba(247,243,237,0.85);">Finance structure, ownership setup, property strategy and acquisition — end to end</span>
+            <span style="font-size:14.5px;font-weight:300;line-height:1.5;color:rgba(247,243,237,0.85);">Property structure, strategy and acquisition — built around how you actually earn</span>
           </div>
         </div>
       </div>
@@ -214,13 +227,13 @@
         <span style="width:24px;height:1px;background:#bd7a70;"></span>
       </div>
       <h2 style="font-family:'Fraunces',serif;font-weight:400;font-size:38px;line-height:1.1;letter-spacing:-0.01em;color:#22201d;">Structured. Strategic. Settled.</h2>
-      <p style="font-size:17px;font-weight:300;line-height:1.65;color:rgba(34,32,29,0.65);margin-top:14px;max-width:520px;margin-left:auto;margin-right:auto;">Four steps from where you are now to a portfolio that works without you.</p>
+      <p style="font-size:17px;font-weight:300;line-height:1.65;color:rgba(34,32,29,0.65);margin-top:14px;max-width:520px;margin-left:auto;margin-right:auto;">Four steps from where you are now to a portfolio that works whether or not the career continues.</p>
     </div>
     <div class="r-4col-steps" style="display:grid;grid-template-columns:1fr 32px 1fr 32px 1fr 32px 1fr;align-items:start;gap:0;">
       <div style="text-align:center;padding:0 6px;">
         <div style="width:52px;height:52px;border-radius:50%;background:#c4922a;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:22px;font-weight:400;margin:0 auto 20px;">1</div>
         <div style="font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:rgba(34,32,29,0.45);margin-bottom:8px;">Finance structure</div>
-        <p style="font-size:15px;font-weight:300;line-height:1.6;color:rgba(34,32,29,0.75);">Understand your income, borrowing capacity and what's actually available to you — with a finance structure that accounts for how athletes earn.</p>
+        <p style="font-size:15px;font-weight:300;line-height:1.6;color:rgba(34,32,29,0.75);">Understand your real borrowing capacity and how to structure it — accounting for contract income, signing bonuses and the way athletes actually earn. Most lenders get this wrong.</p>
       </div>
       <div class="step-connector" style="display:flex;align-items:center;justify-content:center;padding-top:26px;">
         <div style="width:100%;height:1px;background:#ddd3c5;position:relative;">
@@ -230,7 +243,7 @@
       <div style="text-align:center;padding:0 6px;">
         <div style="width:52px;height:52px;border-radius:50%;background:#c4922a;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:22px;font-weight:400;margin:0 auto 20px;">2</div>
         <div style="font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:rgba(34,32,29,0.45);margin-bottom:8px;">Ownership setup</div>
-        <p style="font-size:15px;font-weight:300;line-height:1.6;color:rgba(34,32,29,0.75);">Get the right structure in place from day one — trust, personal name or company — connected to the right accountant who understands your situation.</p>
+        <p style="font-size:15px;font-weight:300;line-height:1.6;color:rgba(34,32,29,0.75);">The right ownership structure from the start — individual, trust, or company — connected to an accountant who knows how to handle athlete income and protect what you're building.</p>
       </div>
       <div class="step-connector" style="display:flex;align-items:center;justify-content:center;padding-top:26px;">
         <div style="width:100%;height:1px;background:#ddd3c5;position:relative;">
@@ -240,7 +253,7 @@
       <div style="text-align:center;padding:0 6px;">
         <div style="width:52px;height:52px;border-radius:50%;background:#bd7a70;color:#22201d;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:22px;font-weight:400;margin:0 auto 20px;">3</div>
         <div style="font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:rgba(34,32,29,0.45);margin-bottom:8px;">Property strategy</div>
-        <p style="font-size:15px;font-weight:300;line-height:1.6;color:rgba(34,32,29,0.75);">A strategy built around your income, timeline, borrowing capacity and goals — not a generic investment pitch. What to buy, where, and why it stacks up.</p>
+        <p style="font-size:15px;font-weight:300;line-height:1.6;color:rgba(34,32,29,0.75);">A strategy built around your situation — not a generic one. What to buy, where, how it performs over time, and how it holds up if the income picture changes.</p>
       </div>
       <div class="step-connector" style="display:flex;align-items:center;justify-content:center;padding-top:26px;">
         <div style="width:100%;height:1px;background:#ddd3c5;position:relative;">
@@ -250,7 +263,28 @@
       <div style="text-align:center;padding:0 6px;">
         <div style="width:52px;height:52px;border-radius:50%;background:#22201d;color:#f7f3ed;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:22px;font-weight:400;margin:0 auto 20px;">4</div>
         <div style="font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:rgba(34,32,29,0.45);margin-bottom:8px;">Property acquisition</div>
-        <p style="font-size:15px;font-weight:300;line-height:1.6;color:rgba(34,32,29,0.75);">Luke finds the property, runs it through due diligence, and negotiates hard. You focus on the game. He handles the transaction through to settlement.</p>
+        <p style="font-size:15px;font-weight:300;line-height:1.6;color:rgba(34,32,29,0.75);">Luke finds the property, runs full due diligence and negotiates hard. You focus on what you do. He manages everything through to settlement.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOR PARENTS -->
+<section style="background:#22201d;">
+  <div class="pad-page" style="max-width:900px;margin:0 auto;padding:80px 44px;">
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:60px;align-items:start;" class="r-2col">
+      <div>
+        <div style="display:inline-flex;align-items:center;gap:12px;margin-bottom:22px;">
+          <span style="width:24px;height:1px;background:#c4922a;"></span>
+          <span style="font-size:11px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:#c4922a;">For parents</span>
+        </div>
+        <h2 style="font-family:'Fraunces',serif;font-weight:400;font-size:32px;line-height:1.15;color:#f7f3ed;">If you're reading this too.</h2>
+      </div>
+      <div>
+        <p style="font-size:16px;font-weight:300;line-height:1.75;color:rgba(247,243,237,0.72);margin-bottom:18px;">You've put enormous time, energy and money into getting to this point. Training, travel, coaching, everything. And the career is real — but you already know it won't last forever, and you want to make sure the years it does last actually build something.</p>
+        <p style="font-size:16px;font-weight:300;line-height:1.75;color:rgba(247,243,237,0.72);margin-bottom:18px;">That's what this is about. Getting the right structure in place now — not when the contract ends, not when something goes wrong — while the income is there and the options are open.</p>
+        <p style="font-size:16px;font-weight:300;line-height:1.75;color:rgba(247,243,237,0.72);margin-bottom:28px;">The 20-minute call with Luke is a good place to start. No pressure, no pitch. Just a straight conversation about where things are at and what the options look like.</p>
+        <a href="#book" style="display:inline-block;font-size:15px;font-weight:500;color:#22201d;background:#bd7a70;padding:14px 30px;border-radius:100px;transition:background .2s ease;" onmouseover="this.style.background='#cf9b92'" onmouseout="this.style.background='#bd7a70'">Book a call with Luke</a>
       </div>
     </div>
   </div>
@@ -275,9 +309,9 @@
           <span style="font-size:11.5px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:#bd7a70;">About Luke</span>
         </div>
         <h2 style="font-family:'Fraunces',serif;font-weight:400;font-size:36px;line-height:1.1;letter-spacing:-0.01em;color:#22201d;margin-bottom:20px;">Research-led. Numbers-driven. No agenda.</h2>
-        <p style="font-size:16px;font-weight:300;line-height:1.7;color:rgba(34,32,29,0.75);margin-bottom:16px;">Luke Clifford is a buyer's agent at Fairway Investing, based in Sydney. He works exclusively for buyers — no vendor relationships, no development sales, no commissions on referrals. Flat fee agreed upfront. That's it.</p>
-        <p style="font-size:16px;font-weight:300;line-height:1.7;color:rgba(34,32,29,0.75);margin-bottom:16px;">His job is to find the right investment property, make sure the numbers actually stack up, and get it secured below market. The same process for every client — whether it's your first investment or your fifth.</p>
-        <p style="font-size:16px;font-weight:300;line-height:1.7;color:rgba(34,32,29,0.75);margin-bottom:28px;">With athletes specifically, the focus is on making sure the income you're earning now translates into a portfolio that keeps working long after the career does.</p>
+        <p style="font-size:16px;font-weight:300;line-height:1.7;color:rgba(34,32,29,0.75);margin-bottom:16px;">Luke Clifford is a buyer's agent at Fairway Investing, based in Sydney. He works exclusively for buyers — no vendor relationships, no development sales, no commissions on referrals. Flat fee agreed upfront, full stop.</p>
+        <p style="font-size:16px;font-weight:300;line-height:1.7;color:rgba(34,32,29,0.75);margin-bottom:16px;">He's worked with clients whose income doesn't fit the standard lender template — high earners, variable income, contracts — and knows how to get the structure right from the start rather than fix it later.</p>
+        <p style="font-size:16px;font-weight:300;line-height:1.7;color:rgba(34,32,29,0.75);margin-bottom:28px;">His approach is straightforward: find the right property, make sure the numbers actually stack up, and secure it. The same process every time.</p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;">
           <span style="font-size:13px;font-weight:400;color:#22201d;background:rgba(34,32,29,0.07);border-radius:100px;padding:8px 16px;">Buyers-only agent</span>
           <span style="font-size:13px;font-weight:400;color:#22201d;background:rgba(34,32,29,0.07);border-radius:100px;padding:8px 16px;">Flat fee</span>
@@ -293,7 +327,7 @@
 <!-- BOTTOM LINE STRIP -->
 <section style="background:#22201d;padding:48px 44px;text-align:center;">
   <div style="max-width:700px;margin:0 auto;">
-    <p style="font-family:'Fraunces',serif;font-style:italic;font-size:26px;line-height:1.4;color:#f7f3ed;margin-bottom:10px;">"The career earns it. The property keeps it."</p>
+    <p style="font-family:'Fraunces',serif;font-style:italic;font-size:26px;line-height:1.4;color:#f7f3ed;margin-bottom:10px;">"The career is the engine. Property keeps running after it stops."</p>
     <p style="font-size:14px;font-weight:300;color:rgba(247,243,237,0.5);">Luke Clifford — Fairway Investing. Flat fee, no commissions, buyers-only representation.</p>
   </div>
 </section>
@@ -308,7 +342,7 @@
         <span style="width:24px;height:1px;background:#bd7a70;"></span>
       </div>
       <h2 style="font-family:'Fraunces',serif;font-weight:400;font-size:38px;line-height:1.1;color:#22201d;margin-bottom:14px;">Let's talk about what you're building.</h2>
-      <p style="font-size:17px;font-weight:300;line-height:1.6;color:rgba(34,32,29,0.65);">It's a chat, not a pitch. 20 minutes. You decide if it's a fit.</p>
+      <p style="font-size:17px;font-weight:300;line-height:1.6;color:rgba(34,32,29,0.65);">20 minutes. Athlete or parent — either works. You decide if it's worth taking further.</p>
     </div>
     <div style="background:#22201d;border-radius:22px;padding:24px 24px 20px;box-shadow:0 28px 70px rgba(34,32,29,0.12);">
       <div id="lunacal-booking" style="min-height:420px;width:100%;"></div>
