@@ -192,10 +192,11 @@ export default async (req) => {
   const { acqId, ...rest } = body; // acqId optional
 
   if (acqId) {
+    const acqSubmission = { ...rest, submittedAt: new Date().toISOString(), clientEmail: payload.email, clientName: payload.name };
     // Store under acquisition-specific key
     try {
       const qStore = getStore('fairway-questionnaires');
-      await qStore.setJSON(`${payload.sub}:${acqId}`, { ...rest, submittedAt: new Date().toISOString(), clientEmail: payload.email, clientName: payload.name });
+      await qStore.setJSON(`${payload.sub}:${acqId}`, acqSubmission);
     } catch (err) { console.error('Blobs save failed:', err?.message || err); }
     // Mark acquisition as submitted on client record
     try {
@@ -207,6 +208,37 @@ export default async (req) => {
         if (acq) { acq.questionnaireSubmitted = true; await clientStore.setJSON('all', clients); }
       }
     } catch {}
+    // Notify Luke via email
+    try {
+      await resend.emails.send({
+        from: 'Fairway Portal <info@fairwayinvesting.com.au>',
+        to: ['luke@fairwayinvesting.com.au'],
+        subject: `${acqSubmission.clientName} completed their questionnaire`,
+        html: buildQuestNotifyEmail(acqSubmission.clientName, acqSubmission.clientEmail),
+      });
+    } catch (err) { console.error('Questionnaire notify email failed:', err?.message || err); }
+    // Slack notification
+    const slackUrlAcq = process.env.SLACK_QUESTIONNAIRE_WEBHOOK_URL;
+    if (slackUrlAcq) {
+      fetch(slackUrlAcq, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: `📋 *${acqSubmission.clientName}* submitted their questionnaire — review in the admin portal.` }),
+      }).catch(err => console.error('Questionnaire Slack notify failed:', err?.message || err));
+    }
+    // Fan-out to Google Sheets
+    const sheetEndpointAcq = process.env.QUESTIONNAIRE_SHEET_ENDPOINT;
+    if (sheetEndpointAcq) {
+      try {
+        const headers = buildSheetHeaders();
+        const row = buildSheetRow(acqSubmission.submittedAt, acqSubmission);
+        await fetch(sheetEndpointAcq, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ headers, row }),
+        });
+      } catch (err) { console.error('Sheet POST failed:', err?.message || err); }
+    }
     return json({ ok: true });
   }
 

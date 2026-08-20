@@ -86,7 +86,7 @@ export default async (req) => {
   if (req.method === 'POST') {
     const body = await req.json().catch(() => ({}));
     const { clientId, action, acqId, strategyNotes, targetMarkets, customMarkets, budgetMin, budgetMax,
-            propertyTypes, propertyCriteria, customCriteria, excludedCharacteristics, customExclusions, status,
+            propertyTypes, propertyCriteria, customCriteria, excludedCharacteristics, customExclusions, typesCriteria, status,
             overrideEntityType, overrideEntityName, overrideFundingMethod, overrideTimeline } = body;
     if (!clientId) return json({ error: 'clientId required' }, 400);
 
@@ -137,6 +137,7 @@ export default async (req) => {
       customCriteria: customCriteria ?? existing?.customCriteria ?? [],
       excludedCharacteristics: excludedCharacteristics ?? existing?.excludedCharacteristics ?? [],
       customExclusions: customExclusions ?? existing?.customExclusions ?? [],
+      typesCriteria: typesCriteria !== undefined ? typesCriteria : (existing?.typesCriteria ?? null),
       // Derived from questionnaire, but allow admin overrides
       entityType: overrideEntityType ?? existing?.entityType ?? entity.type,
       entityName: overrideEntityName !== undefined ? overrideEntityName : (existing?.entityName ?? entity.name),

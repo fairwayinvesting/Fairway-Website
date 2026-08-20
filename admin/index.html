@@ -396,6 +396,14 @@
     .brief-budget-row{display:flex;align-items:center;gap:10px}
     .brief-budget-row input{flex:1}
     .brief-budget-row span{color:rgba(247,243,237,0.25);font-size:16px;flex-shrink:0}
+    .brief-type-section{border:1px solid rgba(247,243,237,0.09);border-radius:12px;overflow:hidden;margin-bottom:14px;}
+    .brief-type-section-head{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:rgba(247,243,237,0.03);border-bottom:1px solid rgba(247,243,237,0.07);}
+    .brief-type-section-title{font-size:13px;font-weight:500;color:#f7f3ed;}
+    .brief-type-reset-btn{background:none;border:none;font-family:'Outfit',sans-serif;font-size:11.5px;color:rgba(247,243,237,0.25);cursor:pointer;padding:0;transition:color .15s;}
+    .brief-type-reset-btn:hover{color:rgba(189,122,112,0.75);}
+    .brief-type-subsection{padding:14px 16px;}
+    .brief-type-subsection+.brief-type-subsection{border-top:1px solid rgba(247,243,237,0.06);}
+    .brief-type-sublabel{font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.28);margin-bottom:9px;}
 
     /* Client cards — horizontal rows */
     .client-cards-list{display:flex;flex-direction:column;gap:10px;}
@@ -2480,62 +2488,69 @@
       <div class="brief-field">
         <label>Property types</label>
         <div class="brief-type-grid">
-          <input type="checkbox" class="brief-type-check" id="bt-house" value="House"><label class="brief-type-label" for="bt-house">House</label>
-          <input type="checkbox" class="brief-type-check" id="bt-unit" value="Unit"><label class="brief-type-label" for="bt-unit">Unit</label>
-          <input type="checkbox" class="brief-type-check" id="bt-townhouse" value="Townhouse"><label class="brief-type-label" for="bt-townhouse">Townhouse</label>
-          <input type="checkbox" class="brief-type-check" id="bt-duplex" value="Duplex"><label class="brief-type-label" for="bt-duplex">Duplex</label>
-          <input type="checkbox" class="brief-type-check" id="bt-land" value="Land"><label class="brief-type-label" for="bt-land">Land</label>
+          <input type="checkbox" class="brief-type-check" id="bt-house" value="House" onchange="onBriefTypeChange()"><label class="brief-type-label" for="bt-house">House</label>
+          <input type="checkbox" class="brief-type-check" id="bt-unit" value="Unit" onchange="onBriefTypeChange()"><label class="brief-type-label" for="bt-unit">Unit</label>
+          <input type="checkbox" class="brief-type-check" id="bt-townhouse" value="Townhouse" onchange="onBriefTypeChange()"><label class="brief-type-label" for="bt-townhouse">Townhouse</label>
+          <input type="checkbox" class="brief-type-check" id="bt-duplex" value="Duplex" onchange="onBriefTypeChange()"><label class="brief-type-label" for="bt-duplex">Duplex</label>
+          <input type="checkbox" class="brief-type-check" id="bt-land" value="Land" onchange="onBriefTypeChange()"><label class="brief-type-label" for="bt-land">Land</label>
         </div>
       </div>
 
-      <!-- Property criteria -->
-      <div class="brief-field">
-        <label>Property criteria</label>
-        <div class="brief-check-grid">
-          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-3bed" value="Minimum 3 bedrooms, 1 bathroom"><label for="bc-3bed">Min 3 bedrooms, 1 bathroom</label></div>
-          <div class="brief-check-item" style="align-items:center"><input type="checkbox" class="brief-criteria-check" id="bc-yield" value="" style="margin-top:0" onchange="if(this.checked)document.getElementById('bc-yield-val').focus()"><label for="bc-yield" style="flex:1">Yield</label><input type="text" id="bc-yield-val" class="brief-val-num" placeholder="4.5" maxlength="5" size="3" oninput="syncBriefYield()"><span class="brief-val-unit">%+</span></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-4bed" value="Minimum 4 bedrooms, 2 bathrooms"><label for="bc-4bed">Min 4 bedrooms, 2 bathrooms</label></div>
-          <div class="brief-check-item" style="align-items:center"><input type="checkbox" class="brief-criteria-check" id="bc-land" value="" style="margin-top:0" onchange="if(this.checked)document.getElementById('bc-land-val').focus()"><label for="bc-land" style="flex:1">Land size</label><input type="text" id="bc-land-val" class="brief-val-num" placeholder="400" maxlength="5" size="3" oninput="syncBriefLand()"><span class="brief-val-unit">sqm</span></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-cosmetic" value="Cosmetic uplift potential"><label for="bc-cosmetic">Cosmetic uplift potential</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-subdiv" value="Subdivision potential"><label for="bc-subdiv">Subdivision potential</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-regular" value="Regular shaped block"><label for="bc-regular">Regular shaped block</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-dualocc" value="Dual occupancy potential"><label for="bc-dualocc">Dual occupancy potential</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-corner" value="Corner block"><label for="bc-corner">Corner block</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-garage" value="Garage or off-street parking"><label for="bc-garage">Garage or off-street parking</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-north" value="North-facing orientation"><label for="bc-north">North-facing orientation</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-established" value="Established home (not new build)"><label for="bc-established">Established home (not new build)</label></div>
+      <!-- Legacy view: flat criteria/exclusions (existing briefs only) -->
+      <div id="brief-legacy-view" style="display:none">
+        <!-- Property criteria -->
+        <div class="brief-field">
+          <label>Property criteria</label>
+          <div class="brief-check-grid">
+            <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-3bed" value="Minimum 3 bedrooms, 1 bathroom"><label for="bc-3bed">Min 3 bedrooms, 1 bathroom</label></div>
+            <div class="brief-check-item" style="align-items:center"><input type="checkbox" class="brief-criteria-check" id="bc-yield" value="" style="margin-top:0" onchange="if(this.checked)document.getElementById('bc-yield-val').focus()"><label for="bc-yield" style="flex:1">Yield</label><input type="text" id="bc-yield-val" class="brief-val-num" placeholder="4.5" maxlength="5" size="3" oninput="syncBriefYield()"><span class="brief-val-unit">%+</span></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-4bed" value="Minimum 4 bedrooms, 2 bathrooms"><label for="bc-4bed">Min 4 bedrooms, 2 bathrooms</label></div>
+            <div class="brief-check-item" style="align-items:center"><input type="checkbox" class="brief-criteria-check" id="bc-land" value="" style="margin-top:0" onchange="if(this.checked)document.getElementById('bc-land-val').focus()"><label for="bc-land" style="flex:1">Land size</label><input type="text" id="bc-land-val" class="brief-val-num" placeholder="400" maxlength="5" size="3" oninput="syncBriefLand()"><span class="brief-val-unit">sqm</span></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-cosmetic" value="Cosmetic uplift potential"><label for="bc-cosmetic">Cosmetic uplift potential</label></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-subdiv" value="Subdivision potential"><label for="bc-subdiv">Subdivision potential</label></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-regular" value="Regular shaped block"><label for="bc-regular">Regular shaped block</label></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-dualocc" value="Dual occupancy potential"><label for="bc-dualocc">Dual occupancy potential</label></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-corner" value="Corner block"><label for="bc-corner">Corner block</label></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-garage" value="Garage or off-street parking"><label for="bc-garage">Garage or off-street parking</label></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-north" value="North-facing orientation"><label for="bc-north">North-facing orientation</label></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-criteria-check" id="bc-established" value="Established home (not new build)"><label for="bc-established">Established home (not new build)</label></div>
+          </div>
+          <div id="brief-custom-criteria" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"></div>
+          <div class="brief-add-row">
+            <input type="text" id="brief-criteria-input" placeholder="Add custom criterion…">
+            <button type="button" onclick="addCustomCriterion()">+ Add</button>
+          </div>
         </div>
-        <div id="brief-custom-criteria" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"></div>
-        <div class="brief-add-row">
-          <input type="text" id="brief-criteria-input" placeholder="Add custom criterion…">
-          <button type="button" onclick="addCustomCriterion()">+ Add</button>
+        <!-- Excluded characteristics -->
+        <div class="brief-field">
+          <label>Excluded characteristics</label>
+          <div class="brief-check-grid">
+            <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-irregular" value="Irregular shaped blocks"><label for="be-irregular">Irregular shaped blocks</label></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-powerlines" value="Overhead powerlines"><label for="be-powerlines">Overhead powerlines</label></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-pool" value="Swimming pools"><label for="be-pool">Swimming pools</label></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-mainroad" value="Main road or arterial road frontage"><label for="be-mainroad">Main road or arterial frontage</label></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-railway" value="Railway-adjacent properties"><label for="be-railway">Railway-adjacent properties</label></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-flood" value="Flood or bushfire-prone zones"><label for="be-flood">Flood or bushfire-prone zones</label></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-flightpath" value="Flight path or industrial noise"><label for="be-flightpath">Flight path or industrial noise</label></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-housing" value="High-density public housing nearby"><label for="be-housing">High-density public housing</label></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-strata" value="Body corporate or strata title"><label for="be-strata">Body corporate or strata title</label></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-newbuild" value="New build or off-the-plan"><label for="be-newbuild">New build or off-the-plan</label></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-leasehold" value="Leasehold title"><label for="be-leasehold">Leasehold title</label></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-heritage" value="Heritage overlay or significant restrictions"><label for="be-heritage">Heritage overlay or restrictions</label></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-asbestos" value="Asbestos or significant structural issues"><label for="be-asbestos">Asbestos or structural issues</label></div>
+            <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-steep" value="Steep or difficult access site"><label for="be-steep">Steep or difficult access site</label></div>
+          </div>
+          <div id="brief-custom-exclusions" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"></div>
+          <div class="brief-add-row">
+            <input type="text" id="brief-exclusion-input" placeholder="Add custom exclusion…">
+            <button type="button" onclick="addCustomExclusion()">+ Add</button>
+          </div>
         </div>
       </div>
 
-      <!-- Excluded characteristics -->
-      <div class="brief-field">
-        <label>Excluded characteristics</label>
-        <div class="brief-check-grid">
-          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-irregular" value="Irregular shaped blocks"><label for="be-irregular">Irregular shaped blocks</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-powerlines" value="Overhead powerlines"><label for="be-powerlines">Overhead powerlines</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-pool" value="Swimming pools"><label for="be-pool">Swimming pools</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-mainroad" value="Main road or arterial road frontage"><label for="be-mainroad">Main road or arterial frontage</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-railway" value="Railway-adjacent properties"><label for="be-railway">Railway-adjacent properties</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-flood" value="Flood or bushfire-prone zones"><label for="be-flood">Flood or bushfire-prone zones</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-flightpath" value="Flight path or industrial noise"><label for="be-flightpath">Flight path or industrial noise</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-housing" value="High-density public housing nearby"><label for="be-housing">High-density public housing</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-strata" value="Body corporate or strata title"><label for="be-strata">Body corporate or strata title</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-newbuild" value="New build or off-the-plan"><label for="be-newbuild">New build or off-the-plan</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-leasehold" value="Leasehold title"><label for="be-leasehold">Leasehold title</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-heritage" value="Heritage overlay or significant restrictions"><label for="be-heritage">Heritage overlay or restrictions</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-asbestos" value="Asbestos or significant structural issues"><label for="be-asbestos">Asbestos or structural issues</label></div>
-          <div class="brief-check-item"><input type="checkbox" class="brief-exclusion-check" id="be-steep" value="Steep or difficult access site"><label for="be-steep">Steep or difficult access site</label></div>
-        </div>
-        <div id="brief-custom-exclusions" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"></div>
-        <div class="brief-add-row">
-          <input type="text" id="brief-exclusion-input" placeholder="Add custom exclusion…">
-          <button type="button" onclick="addCustomExclusion()">+ Add</button>
-        </div>
+      <!-- New type view: per-property-type criteria/exclusions -->
+      <div id="brief-type-view">
+        <div id="brief-type-sections"></div>
       </div>
 
       <!-- Budget range -->
@@ -4004,6 +4019,7 @@ function buildKanbanCards(activeClients) {
     const acqs = c.acquisitions || [];
     const activeAcqs = acqs.filter(a => a.status !== 'settled' && a.pipelineStage);
     if (activeAcqs.length > 1) {
+      const firstAcqId = acqs[0]?.id;
       for (const acq of activeAcqs) {
         cards.push({
           clientId: c.id,
@@ -4013,6 +4029,7 @@ function buildKanbanCards(activeClients) {
           pipelineStageUpdatedAt: acq.pipelineStageUpdatedAt,
           createdAt: c.createdAt,
           isMultiAcq: true,
+          isFirstAcq: acq.id === firstAcqId,
         });
       }
     } else {
@@ -4053,7 +4070,7 @@ function renderPipeline() {
           const since = stageSinceDays(card.pipelineStageUpdatedAt);
           const duration = searchDurationLabel(card.createdAt);
           const clientMs = milestones.filter(m => m.clientId === card.clientId && !m.completed &&
-            (!card.isMultiAcq || !m.acqId || m.acqId === card.acqId))
+            (!card.isMultiAcq || m.acqId === card.acqId || (!m.acqId && card.isFirstAcq)))
             .sort((a, b) => new Date(a.date) - new Date(b.date));
           let dateChip = '';
           if (clientMs.length) {
@@ -4361,11 +4378,183 @@ function syncBriefLand() {
   if (v) cb.checked = true;
 }
 
+const TYPE_DEFS = {
+  house: {
+    label: 'House',
+    criteria: [
+      { key: '3bed',        value: 'Minimum 3 bedrooms, 1 bathroom',   label: 'Min 3 bedrooms, 1 bathroom' },
+      { key: '4bed',        value: 'Minimum 4 bedrooms, 2 bathrooms',  label: 'Min 4 bedrooms, 2 bathrooms' },
+      { key: 'cosmetic',    value: 'Cosmetic uplift potential',         label: 'Cosmetic uplift potential' },
+      { key: 'subdiv',      value: 'Subdivision potential',             label: 'Subdivision potential' },
+      { key: 'regular',     value: 'Regular shaped block',              label: 'Regular shaped block' },
+      { key: 'dualocc',     value: 'Dual occupancy potential',          label: 'Dual occupancy potential' },
+      { key: 'corner',      value: 'Corner block',                      label: 'Corner block' },
+      { key: 'garage',      value: 'Garage or off-street parking',      label: 'Garage or off-street parking' },
+      { key: 'north',       value: 'North-facing orientation',          label: 'North-facing orientation' },
+      { key: 'established', value: 'Established home (not new build)',  label: 'Established (not new build)' },
+    ],
+    numFields: [
+      { key: 'yield',    label: 'Yield',        unit: '%+',   placeholder: '4.5', encode: v => `Rental yield ${v}% or greater`,     decode: v => v.match(/^Rental yield (.+?)% or greater$/) },
+      { key: 'land',     label: 'Land size',     unit: 'sqm+', placeholder: '400', encode: v => `Land size greater than ${v}sqm`,    decode: v => v.match(/^Land size greater than (\d+)sqm$/) },
+      { key: 'internal', label: 'Internal size', unit: 'sqm+', placeholder: '150', encode: v => `Internal size greater than ${v}sqm`, decode: v => v.match(/^Internal size greater than (\d+)sqm$/) },
+    ],
+    exclusions: [
+      { key: 'irregular',  value: 'Irregular shaped blocks',                     label: 'Irregular shaped blocks' },
+      { key: 'powerlines', value: 'Overhead powerlines',                          label: 'Overhead powerlines' },
+      { key: 'pool',       value: 'Swimming pools',                              label: 'Swimming pools' },
+      { key: 'mainroad',   value: 'Main road or arterial road frontage',          label: 'Main road or arterial frontage' },
+      { key: 'railway',    value: 'Railway-adjacent properties',                  label: 'Railway-adjacent properties' },
+      { key: 'flood',      value: 'Flood or bushfire-prone zones',                label: 'Flood or bushfire-prone zones' },
+      { key: 'flightpath', value: 'Flight path or industrial noise',              label: 'Flight path or industrial noise' },
+      { key: 'housing',    value: 'High-density public housing nearby',           label: 'High-density public housing' },
+      { key: 'strata',     value: 'Body corporate or strata title',               label: 'Body corporate or strata title' },
+      { key: 'newbuild',   value: 'New build or off-the-plan',                   label: 'New build or off-the-plan' },
+      { key: 'leasehold',  value: 'Leasehold title',                             label: 'Leasehold title' },
+      { key: 'heritage',   value: 'Heritage overlay or significant restrictions', label: 'Heritage overlay or restrictions' },
+      { key: 'asbestos',   value: 'Asbestos or significant structural issues',    label: 'Asbestos or structural issues' },
+      { key: 'steep',      value: 'Steep or difficult access site',              label: 'Steep or difficult access site' },
+    ],
+    exclNumFields: [],
+  },
+  unit: {
+    label: 'Unit',
+    criteria: [
+      { key: '2bed1bath',   value: 'Minimum 2 bedrooms, 1 bathroom',  label: 'Min 2 bedrooms, 1 bathroom' },
+      { key: '2bed2bath',   value: 'Minimum 2 bedrooms, 2 bathrooms', label: 'Min 2 bedrooms, 2 bathrooms' },
+      { key: 'carspace',    value: 'Dedicated car space',             label: 'Dedicated car space' },
+      { key: 'garage',      value: 'Lock-up garage',                  label: 'Lock-up garage' },
+      { key: 'storage',     value: 'Storage cage included',           label: 'Storage cage included' },
+      { key: 'balcony',     value: 'Balcony or outdoor space',        label: 'Balcony or outdoor space' },
+      { key: 'ground',      value: 'Ground floor with courtyard',     label: 'Ground floor with courtyard' },
+      { key: 'boutique',    value: 'Boutique complex',                label: 'Boutique complex' },
+      { key: 'north',       value: 'North or east-facing aspect',     label: 'North or east-facing' },
+      { key: 'pet',         value: 'Pet-friendly strata',             label: 'Pet-friendly strata' },
+      { key: 'cosmetic',    value: 'Cosmetic uplift potential',       label: 'Cosmetic uplift potential' },
+    ],
+    numFields: [
+      { key: 'yield',    label: 'Yield',        unit: '%+',   placeholder: '4.5', encode: v => `Rental yield ${v}% or greater`,     decode: v => v.match(/^Rental yield (.+?)% or greater$/) },
+      { key: 'internal', label: 'Internal size', unit: 'sqm+', placeholder: '60',  encode: v => `Internal size greater than ${v}sqm`, decode: v => v.match(/^Internal size greater than (\d+)sqm$/) },
+    ],
+    exclusions: [
+      { key: 'highdensity',   value: 'High-density tower (50+ units)',         label: 'High-density tower (50+ units)' },
+      { key: 'student',       value: 'Student accommodation',                  label: 'Student accommodation' },
+      { key: 'serviced',      value: 'Serviced or hotel-style apartments',     label: 'Serviced/hotel-style apartments' },
+      { key: 'investorowned', value: 'Predominantly investor-owned complex',   label: 'Predominantly investor-owned' },
+      { key: 'newbuild',      value: 'New build or off-the-plan',             label: 'New build or off-the-plan' },
+      { key: 'powerlines',    value: 'Overhead powerlines',                    label: 'Overhead powerlines' },
+      { key: 'mainroad',      value: 'Main road or arterial road frontage',    label: 'Main road or arterial frontage' },
+      { key: 'railway',       value: 'Railway-adjacent properties',            label: 'Railway-adjacent properties' },
+      { key: 'flood',         value: 'Flood or bushfire-prone zones',          label: 'Flood or bushfire-prone zones' },
+      { key: 'flightpath',    value: 'Flight path or industrial noise',        label: 'Flight path or industrial noise' },
+      { key: 'housing',       value: 'High-density public housing nearby',     label: 'High-density public housing' },
+      { key: 'leasehold',     value: 'Leasehold title',                       label: 'Leasehold title' },
+      { key: 'asbestos',      value: 'Asbestos or significant structural issues', label: 'Asbestos or structural issues' },
+    ],
+    exclNumFields: [
+      { key: 'stratalevy', label: 'Strata/Owner Corp levies above', prefix: '$', unit: '/qtr', placeholder: '1200', encode: v => `Strata/Owner Corp levies above $${v}/qtr`, decode: v => v.match(/^Strata\/Owner Corp levies above \$(\d+)\/qtr$/) },
+    ],
+  },
+  townhouse: {
+    label: 'Townhouse',
+    criteria: [
+      { key: '3bed1bath', value: 'Minimum 3 bedrooms, 1 bathroom',     label: 'Min 3 bedrooms, 1 bathroom' },
+      { key: '3bed2bath', value: 'Minimum 3 bedrooms, 2 bathrooms',    label: 'Min 3 bedrooms, 2 bathrooms' },
+      { key: 'courtyard', value: 'Private courtyard or outdoor space', label: 'Private courtyard or outdoor space' },
+      { key: 'garage',    value: 'Garage or secure parking',           label: 'Garage or secure parking' },
+      { key: 'dblgarage', value: 'Double lock-up garage',              label: 'Double lock-up garage' },
+      { key: 'endrow',    value: 'End-of-row position',                label: 'End-of-row position' },
+      { key: 'boutique',  value: 'Boutique complex',                   label: 'Boutique complex' },
+      { key: 'cosmetic',  value: 'Cosmetic uplift potential',          label: 'Cosmetic uplift potential' },
+    ],
+    numFields: [
+      { key: 'yield',    label: 'Yield',        unit: '%+',   placeholder: '4.5', encode: v => `Rental yield ${v}% or greater`,     decode: v => v.match(/^Rental yield (.+?)% or greater$/) },
+      { key: 'internal', label: 'Internal size', unit: 'sqm+', placeholder: '150', encode: v => `Internal size greater than ${v}sqm`, decode: v => v.match(/^Internal size greater than (\d+)sqm$/) },
+    ],
+    exclusions: [
+      { key: 'largestrata', value: 'Large strata complex (50+ dwellings)',  label: 'Large strata complex (50+)' },
+      { key: 'noparking',   value: 'No dedicated parking',                  label: 'No dedicated parking' },
+      { key: 'newbuild',    value: 'New build or off-the-plan',            label: 'New build or off-the-plan' },
+      { key: 'powerlines',  value: 'Overhead powerlines',                   label: 'Overhead powerlines' },
+      { key: 'mainroad',    value: 'Main road or arterial road frontage',   label: 'Main road or arterial frontage' },
+      { key: 'railway',     value: 'Railway-adjacent properties',           label: 'Railway-adjacent properties' },
+      { key: 'flood',       value: 'Flood or bushfire-prone zones',         label: 'Flood or bushfire-prone zones' },
+      { key: 'flightpath',  value: 'Flight path or industrial noise',       label: 'Flight path or industrial noise' },
+      { key: 'housing',     value: 'High-density public housing nearby',    label: 'High-density public housing' },
+      { key: 'heritage',    value: 'Heritage overlay or restrictions',      label: 'Heritage overlay or restrictions' },
+      { key: 'asbestos',    value: 'Asbestos or significant structural issues', label: 'Asbestos or structural issues' },
+    ],
+    exclNumFields: [
+      { key: 'ownercorp', label: 'Owner Corp levies above', prefix: '$', unit: '/qtr', placeholder: '1500', encode: v => `Owner Corp levies above $${v}/qtr`, decode: v => v.match(/^Owner Corp levies above \$(\d+)\/qtr$/) },
+    ],
+  },
+  duplex: {
+    label: 'Duplex',
+    criteria: [
+      { key: 'legaldualocc', value: 'Legal dual occupancy',                         label: 'Legal dual occupancy' },
+      { key: 'titles',       value: 'Separate titles (already split or splittable)', label: 'Separate titles or splittable' },
+      { key: 'sidebyside',   value: 'Side-by-side configuration',                   label: 'Side-by-side configuration' },
+      { key: 'independent',  value: 'Independent entries and services',              label: 'Independent entries and services' },
+      { key: 'established',  value: 'Established (not new build)',                   label: 'Established (not new build)' },
+      { key: 'cosmetic',     value: 'Cosmetic uplift potential',                     label: 'Cosmetic uplift potential' },
+    ],
+    numFields: [
+      { key: 'yield',    label: 'Yield',        unit: '%+',   placeholder: '4.5', encode: v => `Rental yield ${v}% or greater`,     decode: v => v.match(/^Rental yield (.+?)% or greater$/) },
+      { key: 'land',     label: 'Land size',     unit: 'sqm+', placeholder: '400', encode: v => `Land size greater than ${v}sqm`,    decode: v => v.match(/^Land size greater than (\d+)sqm$/) },
+      { key: 'internal', label: 'Internal size', unit: 'sqm+', placeholder: '150', encode: v => `Internal size greater than ${v}sqm`, decode: v => v.match(/^Internal size greater than (\d+)sqm$/) },
+    ],
+    exclusions: [
+      { key: 'singlestrata', value: "Single strata title (cannot be separated)", label: "Single strata (can't separate)" },
+      { key: 'sharedutil',   value: 'Shared utilities or single meter',           label: 'Shared utilities/single meter' },
+      { key: 'newbuild',     value: 'New build or off-the-plan',                 label: 'New build or off-the-plan' },
+      { key: 'powerlines',   value: 'Overhead powerlines',                        label: 'Overhead powerlines' },
+      { key: 'mainroad',     value: 'Main road or arterial road frontage',        label: 'Main road or arterial frontage' },
+      { key: 'railway',      value: 'Railway-adjacent properties',                label: 'Railway-adjacent properties' },
+      { key: 'flood',        value: 'Flood or bushfire-prone zones',              label: 'Flood or bushfire-prone zones' },
+      { key: 'flightpath',   value: 'Flight path or industrial noise',            label: 'Flight path or industrial noise' },
+      { key: 'housing',      value: 'High-density public housing nearby',         label: 'High-density public housing' },
+      { key: 'heritage',     value: 'Heritage overlay or restrictions',           label: 'Heritage overlay or restrictions' },
+      { key: 'asbestos',     value: 'Asbestos or significant structural issues',  label: 'Asbestos or structural issues' },
+      { key: 'covenant',     value: 'Restrictive covenant on dual use',           label: 'Restrictive covenant on dual use' },
+    ],
+    exclNumFields: [],
+  },
+  land: {
+    label: 'Land',
+    criteria: [
+      { key: 'flat',       value: 'Flat or gently sloping',                        label: 'Flat or gently sloping' },
+      { key: 'regular',    value: 'Regular shaped block',                          label: 'Regular shaped block' },
+      { key: 'corner',     value: 'Corner block',                                  label: 'Corner block' },
+      { key: 'dualaccess', value: 'Corner block with dual access',                 label: 'Corner block with dual access' },
+      { key: 'services',   value: 'Services connected (water, sewer, power, NBN)', label: 'Services connected' },
+      { key: 'zoning',     value: 'Zoning permits residential construction',       label: 'Zoning: residential permitted' },
+      { key: 'subdiv',     value: 'Subdivision potential',                         label: 'Subdivision potential' },
+      { key: 'da',         value: 'DA-approved plans included',                    label: 'DA-approved plans included' },
+    ],
+    numFields: [
+      { key: 'land', label: 'Land size', unit: 'sqm+', placeholder: '400', encode: v => `Land size greater than ${v}sqm`, decode: v => v.match(/^Land size greater than (\d+)sqm$/) },
+    ],
+    exclusions: [
+      { key: 'irregular',  value: 'Irregular shaped block',            label: 'Irregular shaped block' },
+      { key: 'steep',      value: 'Steep or difficult access',         label: 'Steep or difficult access' },
+      { key: 'nosewer',    value: 'No sewer connection available',     label: 'No sewer connection' },
+      { key: 'enviro',     value: 'Environmental or heritage overlay', label: 'Environmental or heritage overlay' },
+      { key: 'flood',      value: 'Flood or bushfire-prone zones',     label: 'Flood or bushfire-prone zones' },
+      { key: 'flightpath', value: 'Flight path or industrial noise',   label: 'Flight path or industrial noise' },
+      { key: 'powerlines', value: 'Overhead powerlines',               label: 'Overhead powerlines' },
+      { key: 'housing',    value: 'High-density public housing nearby', label: 'High-density public housing' },
+      { key: 'covenant',   value: 'Restrictive covenants',             label: 'Restrictive covenants' },
+    ],
+    exclNumFields: [],
+  },
+};
+
 let _briefClientId = null;
 let _briefAcqId = null;
 let _customMarkets = [];
 let _customCriteria = [];
 let _customExclusions = [];
+let _typesState = {};
+let _isLegacyBrief = false;
 
 function makeChips(arr, removeFn, elId) {
   document.getElementById(elId).innerHTML = arr.map((v, i) =>
@@ -4401,12 +4590,150 @@ function addCustomExclusion() {
 }
 function removeCustomExclusion(i) { _customExclusions.splice(i,1); renderCustomExclusions(); }
 
+function initTypesState() {
+  _typesState = {};
+  for (const [key, def] of Object.entries(TYPE_DEFS)) {
+    _typesState[key] = {
+      criteria: new Set(),
+      exclusions: new Set(),
+      customCriteria: [],
+      customExclusions: [],
+      numFields: Object.fromEntries((def.numFields || []).map(nf => [nf.key, { val: '', active: false }])),
+      exclNumFields: Object.fromEntries((def.exclNumFields || []).map(nf => [nf.key, { val: '', active: false }])),
+    };
+  }
+}
+
+function onBriefTypeChange() {
+  if (!_isLegacyBrief) renderTypeSections();
+}
+
+function renderTypeSections() {
+  const container = document.getElementById('brief-type-sections');
+  if (!container) return;
+  const checkedTypes = [...document.querySelectorAll('.brief-type-check:checked')].map(cb => cb.value.toLowerCase());
+  if (!checkedTypes.length) {
+    container.innerHTML = '<p style="font-size:13px;color:rgba(247,243,237,0.3);padding:8px 0;">Select a property type above to set criteria.</p>';
+    return;
+  }
+  container.innerHTML = checkedTypes.map(typeKey => {
+    const def = TYPE_DEFS[typeKey];
+    if (!def) return '';
+    const st = _typesState[typeKey];
+    const criteriaItems = def.criteria.map(c =>
+      `<div class="brief-check-item"><input type="checkbox" id="bts-${typeKey}-c-${c.key}" onchange="setTypeCriterion('${typeKey}','${c.value}',this.checked)" ${st.criteria.has(c.value) ? 'checked' : ''}><label for="bts-${typeKey}-c-${c.key}">${c.label}</label></div>`
+    ).join('');
+    const numItems = (def.numFields || []).map(nf => {
+      const s = st.numFields[nf.key];
+      return `<div class="brief-check-item" style="align-items:center"><input type="checkbox" id="bts-${typeKey}-cn-${nf.key}" style="margin-top:0" ${s.active && s.val ? 'checked' : ''} onchange="onTypeNumCheck('${typeKey}','${nf.key}',this.checked)"><label for="bts-${typeKey}-cn-${nf.key}" style="flex:1">${nf.label}</label><input type="text" id="bts-${typeKey}-nv-${nf.key}" class="brief-val-num" placeholder="${nf.placeholder}" maxlength="6" size="4" value="${s.val}" oninput="syncTypeNum('${typeKey}','${nf.key}',this.value)"><span class="brief-val-unit">${nf.unit}</span></div>`;
+    }).join('');
+    const exclItems = def.exclusions.map(e =>
+      `<div class="brief-check-item"><input type="checkbox" id="bts-${typeKey}-e-${e.key}" onchange="setTypeExclusion('${typeKey}','${e.value}',this.checked)" ${st.exclusions.has(e.value) ? 'checked' : ''}><label for="bts-${typeKey}-e-${e.key}">${e.label}</label></div>`
+    ).join('');
+    const exclNumItems = (def.exclNumFields || []).map(nf => {
+      const s = st.exclNumFields[nf.key];
+      return `<div class="brief-check-item" style="align-items:center"><input type="checkbox" id="bts-${typeKey}-en-${nf.key}" style="margin-top:0" ${s.active && s.val ? 'checked' : ''} onchange="onTypeExclNumCheck('${typeKey}','${nf.key}',this.checked)"><label for="bts-${typeKey}-en-${nf.key}" style="flex:1">${nf.label}</label>${nf.prefix ? `<span class="brief-val-unit" style="margin-right:2px">${nf.prefix}</span>` : ''}<input type="text" id="bts-${typeKey}-env-${nf.key}" class="brief-val-num" style="width:44px" placeholder="${nf.placeholder}" maxlength="7" size="5" value="${s.val}" oninput="syncTypeExclNum('${typeKey}','${nf.key}',this.value)"><span class="brief-val-unit">${nf.unit}</span></div>`;
+    }).join('');
+    const customCChips = st.customCriteria.map((v, i) =>
+      `<span class="brief-custom-chip">${esc(v)}<button type="button" onclick="removeTypeCustomC('${typeKey}',${i})">&times;</button></span>`
+    ).join('');
+    const customEChips = st.customExclusions.map((v, i) =>
+      `<span class="brief-custom-chip">${esc(v)}<button type="button" onclick="removeTypeCustomE('${typeKey}',${i})">&times;</button></span>`
+    ).join('');
+    return `<div class="brief-type-section">
+      <div class="brief-type-section-head"><span class="brief-type-section-title">${def.label}</span><button type="button" class="brief-type-reset-btn" onclick="resetTypeSection('${typeKey}')">Reset</button></div>
+      <div class="brief-type-subsection">
+        <div class="brief-type-sublabel">Property criteria</div>
+        <div class="brief-check-grid">${criteriaItems}${numItems}</div>
+        ${customCChips ? `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">${customCChips}</div>` : ''}
+        <div class="brief-add-row"><input type="text" id="btci-${typeKey}" placeholder="Add custom criterion…" onkeydown="if(event.key==='Enter'){event.preventDefault();addTypeCustomC('${typeKey}');}"><button type="button" onclick="addTypeCustomC('${typeKey}')">+ Add</button></div>
+      </div>
+      <div class="brief-type-subsection">
+        <div class="brief-type-sublabel">Excluded characteristics</div>
+        <div class="brief-check-grid">${exclItems}${exclNumItems}</div>
+        ${customEChips ? `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">${customEChips}</div>` : ''}
+        <div class="brief-add-row"><input type="text" id="btei-${typeKey}" placeholder="Add custom exclusion…" onkeydown="if(event.key==='Enter'){event.preventDefault();addTypeCustomE('${typeKey}');}"><button type="button" onclick="addTypeCustomE('${typeKey}')">+ Add</button></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setTypeCriterion(typeKey, value, checked) {
+  const st = _typesState[typeKey]; if (!st) return;
+  checked ? st.criteria.add(value) : st.criteria.delete(value);
+}
+function setTypeExclusion(typeKey, value, checked) {
+  const st = _typesState[typeKey]; if (!st) return;
+  checked ? st.exclusions.add(value) : st.exclusions.delete(value);
+}
+function syncTypeNum(typeKey, nfKey, inputVal) {
+  const st = _typesState[typeKey]; if (!st) return;
+  const v = inputVal.replace(/[^0-9.]/g, '');
+  st.numFields[nfKey] = { val: v, active: !!v };
+  const cb = document.getElementById(`bts-${typeKey}-cn-${nfKey}`); if (cb) cb.checked = !!v;
+}
+function onTypeNumCheck(typeKey, nfKey, checked) {
+  const st = _typesState[typeKey]; if (!st) return;
+  if (!st.numFields[nfKey]) st.numFields[nfKey] = { val: '', active: false };
+  st.numFields[nfKey].active = checked;
+  if (checked) { const inp = document.getElementById(`bts-${typeKey}-nv-${nfKey}`); if (inp) inp.focus(); }
+}
+function syncTypeExclNum(typeKey, nfKey, inputVal) {
+  const st = _typesState[typeKey]; if (!st) return;
+  const v = inputVal.replace(/[^0-9]/g, '');
+  st.exclNumFields[nfKey] = { val: v, active: !!v };
+  const cb = document.getElementById(`bts-${typeKey}-en-${nfKey}`); if (cb) cb.checked = !!v;
+}
+function onTypeExclNumCheck(typeKey, nfKey, checked) {
+  const st = _typesState[typeKey]; if (!st) return;
+  if (!st.exclNumFields[nfKey]) st.exclNumFields[nfKey] = { val: '', active: false };
+  st.exclNumFields[nfKey].active = checked;
+  if (checked) { const inp = document.getElementById(`bts-${typeKey}-env-${nfKey}`); if (inp) inp.focus(); }
+}
+function addTypeCustomC(typeKey) {
+  const input = document.getElementById(`btci-${typeKey}`); if (!input) return;
+  const val = input.value.trim();
+  if (!val || _typesState[typeKey].customCriteria.includes(val)) { input.value = ''; return; }
+  _typesState[typeKey].customCriteria.push(val);
+  input.value = '';
+  renderTypeSections();
+  const inp = document.getElementById(`btci-${typeKey}`); if (inp) inp.focus();
+}
+function removeTypeCustomC(typeKey, idx) {
+  _typesState[typeKey].customCriteria.splice(idx, 1);
+  renderTypeSections();
+}
+function addTypeCustomE(typeKey) {
+  const input = document.getElementById(`btei-${typeKey}`); if (!input) return;
+  const val = input.value.trim();
+  if (!val || _typesState[typeKey].customExclusions.includes(val)) { input.value = ''; return; }
+  _typesState[typeKey].customExclusions.push(val);
+  input.value = '';
+  renderTypeSections();
+  const inp = document.getElementById(`btei-${typeKey}`); if (inp) inp.focus();
+}
+function removeTypeCustomE(typeKey, idx) {
+  _typesState[typeKey].customExclusions.splice(idx, 1);
+  renderTypeSections();
+}
+function resetTypeSection(typeKey) {
+  const def = TYPE_DEFS[typeKey]; if (!def) return;
+  _typesState[typeKey] = {
+    criteria: new Set(), exclusions: new Set(), customCriteria: [], customExclusions: [],
+    numFields: Object.fromEntries((def.numFields || []).map(nf => [nf.key, { val: '', active: false }])),
+    exclNumFields: Object.fromEntries((def.exclNumFields || []).map(nf => [nf.key, { val: '', active: false }])),
+  };
+  renderTypeSections();
+}
+
 async function openBrief(clientId, clientName, acqId = null) {
   _briefClientId = clientId;
   _briefAcqId = acqId;
   _customMarkets = [];
   _customCriteria = [];
   _customExclusions = [];
+  _isLegacyBrief = false;
+  initTypesState();
 
   // Reset UI
   document.getElementById('brief-modal-title').textContent = clientName + ' — Buying Brief';
@@ -4437,6 +4764,11 @@ async function openBrief(clientId, clientName, acqId = null) {
 
   const overlay = document.getElementById('brief-overlay');
   overlay.classList.add('open');
+
+  // Default to new type view; flipped to legacy if existing brief uses old format
+  document.getElementById('brief-legacy-view').style.display = 'none';
+  document.getElementById('brief-type-view').style.display = '';
+  renderTypeSections();
 
   // Load existing brief + questionnaire
   try {
@@ -4477,33 +4809,50 @@ async function openBrief(clientId, clientName, acqId = null) {
         document.querySelectorAll('.brief-type-check').forEach(cb => { if (cb.value === type) cb.checked = true; });
       });
 
-      (brief.propertyCriteria || []).forEach(val => {
-        const yieldMatch = val.match(/^Rental yield (.+?)% or greater$/);
-        if (yieldMatch) {
-          document.getElementById('bc-yield-val').value = yieldMatch[1];
-          syncBriefYield();
-          document.getElementById('bc-yield').checked = true;
-          return;
-        }
-        const landMatch = val.match(/^Land size greater than (\d+)sqm$/);
-        if (landMatch) {
-          document.getElementById('bc-land-val').value = landMatch[1];
-          syncBriefLand();
-          document.getElementById('bc-land').checked = true;
-          return;
-        }
-        const cb = document.querySelector(`.brief-criteria-check[value="${val.replace(/"/g, '\\"')}"]`);
-        if (cb) cb.checked = true;
-      });
-      _customCriteria = (brief.customCriteria || []).slice();
-      renderCustomCriteria();
+      // Detect legacy brief (has flat propertyCriteria but no typesCriteria)
+      _isLegacyBrief = !!(brief.propertyCriteria?.length || brief.excludedCharacteristics?.length) && !brief.typesCriteria;
 
-      (brief.excludedCharacteristics || []).forEach(val => {
-        const cb = document.querySelector(`.brief-exclusion-check[value="${val.replace(/"/g, '\\"')}"]`);
-        if (cb) cb.checked = true;
-      });
-      _customExclusions = (brief.customExclusions || []).slice();
-      renderCustomExclusions();
+      if (_isLegacyBrief) {
+        document.getElementById('brief-legacy-view').style.display = '';
+        document.getElementById('brief-type-view').style.display = 'none';
+        (brief.propertyCriteria || []).forEach(val => {
+          const yieldMatch = val.match(/^Rental yield (.+?)% or greater$/);
+          if (yieldMatch) { document.getElementById('bc-yield-val').value = yieldMatch[1]; syncBriefYield(); document.getElementById('bc-yield').checked = true; return; }
+          const landMatch = val.match(/^Land size greater than (\d+)sqm$/);
+          if (landMatch) { document.getElementById('bc-land-val').value = landMatch[1]; syncBriefLand(); document.getElementById('bc-land').checked = true; return; }
+          const cb = document.querySelector(`.brief-criteria-check[value="${val.replace(/"/g, '\\"')}"]`);
+          if (cb) cb.checked = true;
+        });
+        _customCriteria = (brief.customCriteria || []).slice();
+        renderCustomCriteria();
+        (brief.excludedCharacteristics || []).forEach(val => {
+          const cb = document.querySelector(`.brief-exclusion-check[value="${val.replace(/"/g, '\\"')}"]`);
+          if (cb) cb.checked = true;
+        });
+        _customExclusions = (brief.customExclusions || []).slice();
+        renderCustomExclusions();
+      } else {
+        // New format: populate _typesState from typesCriteria
+        if (brief.typesCriteria) {
+          for (const [typeKey, typeData] of Object.entries(brief.typesCriteria)) {
+            const def = TYPE_DEFS[typeKey]; const st = _typesState[typeKey];
+            if (!def || !st) continue;
+            for (const val of typeData.criteria || []) {
+              let matched = false;
+              for (const nf of def.numFields || []) { const m = nf.decode(val); if (m) { st.numFields[nf.key] = { val: m[1], active: true }; matched = true; break; } }
+              if (!matched) st.criteria.add(val);
+            }
+            for (const val of typeData.exclusions || []) {
+              let matched = false;
+              for (const nf of def.exclNumFields || []) { const m = nf.decode(val); if (m) { st.exclNumFields[nf.key] = { val: m[1], active: true }; matched = true; break; } }
+              if (!matched) st.exclusions.add(val);
+            }
+            st.customCriteria = (typeData.customCriteria || []).slice();
+            st.customExclusions = (typeData.customExclusions || []).slice();
+          }
+        }
+        renderTypeSections();
+      }
 
     } else {
       // New brief — pre-fill defaults
@@ -4551,8 +4900,29 @@ async function saveBrief(status) {
 
   const targetMarkets   = [...document.querySelectorAll('.brief-market-check:checked')].map(c => c.value);
   const propertyTypes   = [...document.querySelectorAll('.brief-type-check:checked')].map(c => c.value);
-  const propertyCriteria     = [...document.querySelectorAll('.brief-criteria-check:checked')].map(c => c.value).filter(v => v);
-  const excludedCharacteristics = [...document.querySelectorAll('.brief-exclusion-check:checked')].map(c => c.value);
+  let typesCriteria, propertyCriteria, excludedCharacteristics;
+  if (_isLegacyBrief) {
+    propertyCriteria = [...document.querySelectorAll('.brief-criteria-check:checked')].map(c => c.value).filter(v => v);
+    excludedCharacteristics = [...document.querySelectorAll('.brief-exclusion-check:checked')].map(c => c.value);
+  } else {
+    typesCriteria = {};
+    for (const typeKey of propertyTypes.map(t => t.toLowerCase())) {
+      const def = TYPE_DEFS[typeKey]; const st = _typesState[typeKey];
+      if (!def || !st) continue;
+      typesCriteria[typeKey] = {
+        criteria: [
+          ...st.criteria,
+          ...(def.numFields || []).filter(nf => st.numFields[nf.key]?.active && st.numFields[nf.key]?.val).map(nf => nf.encode(st.numFields[nf.key].val)),
+        ],
+        exclusions: [
+          ...st.exclusions,
+          ...(def.exclNumFields || []).filter(nf => st.exclNumFields[nf.key]?.active && st.exclNumFields[nf.key]?.val).map(nf => nf.encode(st.exclNumFields[nf.key].val)),
+        ],
+        customCriteria: st.customCriteria.slice(),
+        customExclusions: st.customExclusions.slice(),
+      };
+    }
+  }
 
   const payload = {
     clientId: _briefClientId,
@@ -4561,10 +4931,12 @@ async function saveBrief(status) {
     targetMarkets,
     customMarkets: _customMarkets.slice(),
     propertyTypes,
-    propertyCriteria,
-    customCriteria: _customCriteria.slice(),
-    excludedCharacteristics,
-    customExclusions: _customExclusions.slice(),
+    ...(_isLegacyBrief ? {
+      propertyCriteria,
+      customCriteria: _customCriteria.slice(),
+      excludedCharacteristics,
+      customExclusions: _customExclusions.slice(),
+    } : { typesCriteria }),
     budgetMin: document.getElementById('brief-budget-min').value.trim().replace(/[,$]/g, ''),
     budgetMax: document.getElementById('brief-budget-max').value.trim().replace(/[,$]/g, ''),
     overrideEntityType: document.getElementById('brief-entity-type').value,
@@ -7110,7 +7482,8 @@ function renderEngagementTab() {
     const stageLabel = STAGE_LABELS[acq.pipelineStage] || (acq.pipelineStage ? acq.pipelineStage : 'No stage');
     const isFirst = acq.number === 1;
     const mktChips = (acq.markets || []).map(m => `<span class="acq-mkt-chip">${esc(m.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase()))}</span>`).join('') || '<span style="font-size:12px;color:rgba(247,243,237,0.25);">None assigned</span>';
-    const qBadge = acq.questionnaireSubmitted
+    const isQComplete = acq.questionnaireSubmitted || (isFirst && !!crmQuestionnaire);
+    const qBadge = isQComplete
       ? `<span class="acq-badge">Questionnaire complete</span>`
       : `<span class="acq-badge pending">No questionnaire</span>`;
     return `<div class="acq-accordion${expanded?' open':''}" id="acq-acc-${acq.id}">

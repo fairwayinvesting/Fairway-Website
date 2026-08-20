@@ -28,7 +28,7 @@ export default async (req) => {
   if (req.method === 'POST') {
     let body;
     try { body = await req.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
-    const { title, type, stage, scheduledDate, guestIds, dealId, platforms, repurposedFromId, notes } = body;
+    const { title, type, stage, scheduledDate, guestIds, dealId, platforms, repurposedFromId, notes, publishSchedule } = body;
     if (!title?.trim()) return json({ error: 'title required' }, 400);
     const resolvedType = VALID_TYPES.includes(type) ? type : 'long_form';
     const list = await load();
@@ -42,6 +42,7 @@ export default async (req) => {
       guestIds: Array.isArray(guestIds) ? guestIds : [],
       dealId: dealId || null,
       platforms: Array.isArray(platforms) ? platforms : [],
+      publishSchedule: Array.isArray(publishSchedule) ? publishSchedule : [],
       repurposedFromId: repurposedFromId || null,
       notes: notes || null,
       videoKey: null,
@@ -73,6 +74,7 @@ export default async (req) => {
     if (body.guestIds !== undefined) item.guestIds = Array.isArray(body.guestIds) ? body.guestIds : [];
     if (body.dealId !== undefined) item.dealId = body.dealId || null;
     if (body.platforms !== undefined) item.platforms = Array.isArray(body.platforms) ? body.platforms : [];
+    if (body.publishSchedule !== undefined) item.publishSchedule = Array.isArray(body.publishSchedule) ? body.publishSchedule : [];
     if (body.repurposedFromId !== undefined) item.repurposedFromId = body.repurposedFromId || null;
     if (body.notes !== undefined) item.notes = body.notes || null;
     item.updatedAt = new Date().toISOString();

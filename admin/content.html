@@ -140,6 +140,40 @@
   .upload-prog-wrap{width:100%;height:3px;background:rgba(247,243,237,0.07);border-radius:100px;overflow:hidden;margin-top:10px;display:none;}
   .upload-prog-bar{height:100%;background:#bd7a70;border-radius:100px;width:0%;transition:width .3s;}
 
+  /* Calendar sub-mode tabs */
+  .cal-mode-tabs{display:flex;gap:2px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.08);border-radius:8px;padding:3px;margin-left:auto;}
+  .cal-mode-tab{padding:5px 14px;border-radius:6px;border:none;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;background:transparent;color:rgba(247,243,237,0.38);}
+  .cal-mode-tab.active{background:rgba(247,243,237,0.08);color:#f7f3ed;}
+
+  /* Publishing calendar event colors (per platform) */
+  .pcev-youtube{background:rgba(255,80,80,0.13);border-left:2px solid #ff6b6b;color:#ff9090;}
+  .pcev-instagram{background:rgba(225,60,150,0.13);border-left:2px solid #e13c96;color:#e87ac0;}
+  .pcev-linkedin{background:rgba(60,140,255,0.13);border-left:2px solid #4dabf7;color:#80c0ff;}
+  .pcev-tiktok{background:rgba(100,220,200,0.13);border-left:2px solid #64dcc8;color:#90e8d8;}
+  .pcev-facebook{background:rgba(80,130,255,0.13);border-left:2px solid #6090ff;color:#90b0ff;}
+  .pcev-podcast{background:rgba(160,100,255,0.13);border-left:2px solid #a870ff;color:#c090ff;}
+  .pub-cal-event{font-size:10.5px;line-height:1.35;border-radius:0 4px 4px 0;padding:2px 5px;margin-bottom:3px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .pub-cal-platform{font-size:9px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;display:block;opacity:.7;margin-bottom:1px;}
+
+  /* Publish schedule in panel */
+  .pub-sched-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(247,243,237,0.06);}
+  .pub-sched-row:last-child{border-bottom:none;}
+  .pub-sched-platform{font-size:12px;font-weight:500;min-width:88px;border-radius:100px;padding:3px 9px;text-align:center;}
+  .pub-sched-platform.plt-youtube{background:rgba(255,80,80,0.13);color:#ff8080;border:1px solid rgba(255,80,80,0.25);}
+  .pub-sched-platform.plt-instagram{background:rgba(225,60,150,0.13);color:#e87ac0;border:1px solid rgba(225,60,150,0.25);}
+  .pub-sched-platform.plt-linkedin{background:rgba(60,140,255,0.13);color:#80c0ff;border:1px solid rgba(60,140,255,0.25);}
+  .pub-sched-platform.plt-tiktok{background:rgba(100,220,200,0.13);color:#90e8d8;border:1px solid rgba(100,220,200,0.25);}
+  .pub-sched-platform.plt-facebook{background:rgba(80,130,255,0.13);color:#90b0ff;border:1px solid rgba(80,130,255,0.25);}
+  .pub-sched-platform.plt-podcast{background:rgba(160,100,255,0.13);color:#c090ff;border:1px solid rgba(160,100,255,0.25);}
+  .pub-sched-date{flex:1;}
+  .pub-sched-date input[type=date]{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:7px;color:#f7f3ed;font-size:12.5px;padding:5px 9px;width:100%;outline:none;transition:border-color .15s;}
+  .pub-sched-date input[type=date]:focus{border-color:rgba(247,243,237,0.25);}
+  .pub-sched-date input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.45);}
+  .pub-mark-btn{padding:5px 10px;border-radius:100px;border:1px solid rgba(247,243,237,0.12);background:transparent;color:rgba(247,243,237,0.4);font-size:11px;font-family:'Outfit',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s;}
+  .pub-mark-btn:hover{border-color:rgba(109,191,123,0.4);color:#6dbf7b;}
+  .pub-mark-btn.done{background:rgba(109,191,123,0.1);border-color:rgba(109,191,123,0.3);color:#6dbf7b;}
+  .pub-sched-empty{font-size:12.5px;color:rgba(247,243,237,0.25);padding:8px 0;}
+
   /* Ideas modal */
   .ideas-list{display:flex;flex-direction:column;gap:10px;margin-top:16px;}
   .idea-card{background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.08);border-radius:10px;padding:14px;cursor:pointer;transition:border-color .15s;}
@@ -347,6 +381,10 @@
         <button class="cal-nav" onclick="calNav(-1)">&#8249;</button>
         <span class="cal-month-label" id="cal-month-label"></span>
         <button class="cal-nav" onclick="calNav(1)">&#8250;</button>
+        <div class="cal-mode-tabs">
+          <button class="cal-mode-tab active" id="calmode-rec" onclick="setCalView('recording',this)">Recording</button>
+          <button class="cal-mode-tab" id="calmode-pub" onclick="setCalView('publishing',this)">Publishing</button>
+        </div>
       </div>
       <div class="cal-grid" id="cal-grid"></div>
     </div>
@@ -483,11 +521,21 @@ let allPartners = [];
 let _view = 'kanban';
 let _typeFilter = 'all';
 let _calMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let _calView = 'recording'; // 'recording' | 'publishing'
 let _panelId = null;
 let _panelTab = 'details';
 let _cmGuests = [];
 let _panelGuests = [];
 let _dragId = null;
+
+const PLATFORM_COLORS = {
+  youtube:   { cls: 'plt-youtube',   cal: 'pcev-youtube'   },
+  instagram: { cls: 'plt-instagram', cal: 'pcev-instagram' },
+  linkedin:  { cls: 'plt-linkedin',  cal: 'pcev-linkedin'  },
+  tiktok:    { cls: 'plt-tiktok',    cal: 'pcev-tiktok'    },
+  facebook:  { cls: 'plt-facebook',  cal: 'pcev-facebook'  },
+  podcast:   { cls: 'plt-podcast',   cal: 'pcev-podcast'   },
+};
 
 // ── Auth + init ───────────────────────────────────────────────────────────────
 async function api(method, path, body) {
@@ -536,7 +584,10 @@ function setView(v, btn) {
   document.getElementById('weekly-target-bar').style.display = v === 'partners' ? 'none' : '';
   const typeTabs = document.querySelector('.type-tabs');
   if (typeTabs) typeTabs.style.display = v === 'partners' ? 'none' : '';
-  if (v === 'calendar') renderCalendar();
+  if (v === 'calendar') {
+    if (_calView === 'publishing') renderPublishCalendar();
+    else renderCalendar();
+  }
   if (v === 'partners') renderPartners();
 }
 
@@ -553,7 +604,7 @@ function filteredContent() {
 function render() {
   renderWeeklyTarget();
   renderKanban();
-  if (_view === 'calendar') renderCalendar();
+  if (_view === 'calendar') { if (_calView === 'publishing') renderPublishCalendar(); else renderCalendar(); }
 }
 
 // ── Kanban ────────────────────────────────────────────────────────────────────
@@ -638,7 +689,15 @@ async function dropOnStage(e, stage) {
 // ── Calendar ──────────────────────────────────────────────────────────────────
 function calNav(dir) {
   _calMonth = new Date(_calMonth.getFullYear(), _calMonth.getMonth() + dir, 1);
-  renderCalendar();
+  if (_calView === 'publishing') renderPublishCalendar();
+  else renderCalendar();
+}
+
+function setCalView(view, btn) {
+  _calView = view;
+  document.querySelectorAll('.cal-mode-tab').forEach(b => b.classList.toggle('active', b === btn));
+  if (view === 'publishing') renderPublishCalendar();
+  else renderCalendar();
 }
 
 function renderCalendar() {
@@ -688,6 +747,94 @@ function renderCalendar() {
   }
 
   document.getElementById('cal-grid').innerHTML = cells;
+}
+
+function renderPublishCalendar() {
+  const year = _calMonth.getFullYear(), month = _calMonth.getMonth();
+  const today = localDateStr();
+  document.getElementById('cal-month-label').textContent = _calMonth.toLocaleDateString('en-AU',{month:'long',year:'numeric'});
+
+  // Build a map: date → [{contentItem, platform, published}]
+  const byDate = {};
+  filteredContent().forEach(c => {
+    (c.publishSchedule || []).forEach(ps => {
+      if (!ps.publishDate) return;
+      if (!byDate[ps.publishDate]) byDate[ps.publishDate] = [];
+      byDate[ps.publishDate].push({ c, platform: ps.platform, published: ps.published });
+    });
+  });
+
+  const firstDow = new Date(year, month, 1).getDay();
+  const padStart = firstDow === 0 ? 6 : firstDow - 1;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const prevDays = new Date(year, month, 0).getDate();
+
+  const dows = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let cells = dows.map(d => `<div class="cal-dow">${d}</div>`).join('');
+
+  for (let i = 0; i < padStart; i++) {
+    cells += `<div class="cal-cell other-month"><div class="cal-day-num">${prevDays - padStart + 1 + i}</div></div>`;
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = ds === today;
+    const entries = byDate[ds] || [];
+    const events = entries.map(({ c, platform, published }) => {
+      const pc = PLATFORM_COLORS[platform] || {};
+      const title = c.title.length > 28 ? c.title.slice(0,28) + '…' : c.title;
+      const doneStyle = published ? 'opacity:0.5;text-decoration:line-through;' : '';
+      return `<div class="pub-cal-event ${pc.cal||''}" style="${doneStyle}" onclick="openPanel('${c.id}')" title="${esc(c.title)} — ${platform}">
+        <span class="pub-cal-platform">${platform}</span>${esc(title)}
+      </div>`;
+    }).join('');
+    cells += `<div class="cal-cell${isToday?' today':''}"><div class="cal-day-num">${d}</div>${events}</div>`;
+  }
+
+  const totalCells = padStart + daysInMonth;
+  const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (let i = 1; i <= remaining; i++) cells += `<div class="cal-cell other-month"><div class="cal-day-num">${i}</div></div>`;
+
+  document.getElementById('cal-grid').innerHTML = cells;
+}
+
+// ── Publish schedule panel helpers ────────────────────────────────────────────
+function renderPublishSchedulePanel(item) {
+  const platforms = item.platforms || [];
+  if (!platforms.length) return `<div class="pub-sched-empty">Select platforms above to set publish dates.</div>`;
+  const sched = item.publishSchedule || [];
+  return platforms.map(pl => {
+    const entry = sched.find(e => e.platform === pl) || {};
+    const pc = PLATFORM_COLORS[pl] || {};
+    const isDone = entry.published || false;
+    return `<div class="pub-sched-row" data-platform="${pl}">
+      <span class="pub-sched-platform ${pc.cls||''}">${pl.charAt(0).toUpperCase()+pl.slice(1)}</span>
+      <div class="pub-sched-date">
+        <input type="date" class="pub-date-input" value="${entry.publishDate||''}" onchange="panelSave()" ${isDone?'disabled':''}>
+      </div>
+      <button class="pub-mark-btn${isDone?' done':''}" onclick="markPlatformPublished('${pl}',${isDone})">${isDone?'✓ Published':'Mark published'}</button>
+    </div>`;
+  }).join('');
+}
+
+async function markPlatformPublished(platform, currentlyDone) {
+  const item = allContent.find(c => c.id === _panelId);
+  if (!item) return;
+  const sched = (item.publishSchedule || []).map(e =>
+    e.platform === platform ? { ...e, published: !currentlyDone } : e
+  );
+  // If entry doesn't exist yet, add it
+  if (!sched.find(e => e.platform === platform)) {
+    sched.push({ platform, publishDate: null, published: !currentlyDone });
+  }
+  const res = await api('PUT', '/api/admin/content', { id: item.id, publishSchedule: sched });
+  if (!res.ok) { showToast('Save failed.'); return; }
+  const updated = await res.json();
+  const idx = allContent.findIndex(c => c.id === updated.id);
+  if (idx !== -1) allContent[idx] = updated;
+  const psEl = document.getElementById('pn-publish-schedule');
+  if (psEl) psEl.innerHTML = renderPublishSchedulePanel(updated);
+  if (_calView === 'publishing') renderPublishCalendar();
+  showToast(currentlyDone ? 'Marked as unpublished' : '✓ Marked as published');
 }
 
 let _calDragId = null;
@@ -784,7 +931,7 @@ function renderPanelBody(item) {
         </div>
       </div>
       <div class="panel-section">
-        <div class="panel-label">Scheduled date</div>
+        <div class="panel-label">Recording date</div>
         <input class="panel-input" type="date" id="pn-date" value="${item.scheduledDate||''}" onchange="panelSave()">
         ${warnHtml}
       </div>
@@ -806,7 +953,11 @@ function renderPanelBody(item) {
       </div>` : ''}
       <div class="panel-section">
         <div class="panel-label">Platforms</div>
-        <div>${platforms.map(pl => `<label class="platform-cb"><input type="checkbox" value="${pl}" ${item.platforms.includes(pl)?'checked':''} onchange="panelSave()"> ${pl.charAt(0).toUpperCase()+pl.slice(1)}</label>`).join('')}</div>
+        <div id="pn-platforms-list">${platforms.map(pl => `<label class="platform-cb"><input type="checkbox" value="${pl}" ${item.platforms.includes(pl)?'checked':''} onchange="panelSave()"> ${pl.charAt(0).toUpperCase()+pl.slice(1)}</label>`).join('')}</div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-label">Publish schedule</div>
+        <div id="pn-publish-schedule">${renderPublishSchedulePanel(item)}</div>
       </div>
       <div class="panel-section">
         <div class="panel-label">Notes</div>
@@ -850,9 +1001,22 @@ async function panelSave() {
   const title = document.getElementById('pn-title')?.value.trim() || item.title;
   const scheduledDate = document.getElementById('pn-date')?.value || null;
   const notes = document.getElementById('pn-notes')?.value.trim() || null;
-  const platforms = Array.from(document.querySelectorAll('#panel-body input[type=checkbox]:checked')).map(cb => cb.value);
+  const platforms = Array.from(document.querySelectorAll('#pn-platforms-list input[type=checkbox]:checked')).map(cb => cb.value);
   const repurposedFromId = document.getElementById('pn-repurposed')?.value || null;
-  const body = { id: item.id, title, scheduledDate, notes, platforms, guestIds: _panelGuests };
+
+  // Collect publish schedule: carry forward existing entries, update dates from inputs
+  const existing = item.publishSchedule || [];
+  const publishSchedule = platforms.map(pl => {
+    const prev = existing.find(e => e.platform === pl) || {};
+    const dateEl = document.querySelector(`#pn-publish-schedule [data-platform="${pl}"] .pub-date-input`);
+    return {
+      platform: pl,
+      publishDate: dateEl ? (dateEl.value || null) : (prev.publishDate || null),
+      published: prev.published || false,
+    };
+  });
+
+  const body = { id: item.id, title, scheduledDate, notes, platforms, publishSchedule, guestIds: _panelGuests };
   if (item.type === 'short_form') body.repurposedFromId = repurposedFromId;
   const res = await api('PUT', '/api/admin/content', body);
   if (!res.ok) { showToast('Save failed.'); return; }
@@ -860,6 +1024,9 @@ async function panelSave() {
   const idx = allContent.findIndex(c => c.id === updated.id);
   if (idx !== -1) allContent[idx] = updated;
   document.getElementById('panel-title').textContent = updated.title;
+  // Refresh publish schedule UI (platforms may have changed)
+  const psEl = document.getElementById('pn-publish-schedule');
+  if (psEl) psEl.innerHTML = renderPublishSchedulePanel(updated);
   render();
   const warnDays = shortNoticeDays(updated);
   const warnEl = document.querySelector('.warning-banner');
