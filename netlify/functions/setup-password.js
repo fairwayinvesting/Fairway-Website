@@ -37,7 +37,47 @@ export default async (req) => {
   // intercepting a token lookup and causing the password to be set on the wrong record.
   const idx = clients.findIndex(c => !c.deleted && c.active && c.setupToken === token);
 
-  if (idx === -1) return json({ error: 'Invalid or already used setup link.' }, 400);
+  // If not a direct client match, check portalAccess arrays (partner setup)
+  let partnerClientIdx = -1, partnerEntryIdx = -1;
+  if (idx === -1) {
+    outer: for (let ci = 0; ci < clients.length; ci++) {
+      if (clients[ci].deleted || !clients[ci].active) continue;
+      const access = clients[ci].portalAccess || [];
+      for (let pi = 0; pi < access.length; pi++) {
+        if (access[pi].setupToken === token) { partnerClientIdx = ci; partnerEntryIdx = pi; break outer; }
+      }
+    }
+  }
+
+  if (idx === -1 && partnerClientIdx === -1) return json({ error: 'Invalid or already used setup link.' }, 400);
+
+  // Partner setup flow
+  if (partnerClientIdx !== -1) {
+    const entry = clients[partnerClientIdx].portalAccess[partnerEntryIdx];
+    if (!entry.setupTokenExpiry || new Date(entry.setupTokenExpiry) < new Date()) {
+      return json({ error: 'This setup link has expired. Contact Luke for a new one.' }, 400);
+    }
+    const salt = crypto.randomBytes(16).toString('hex');
+    entry.passwordHash = await pbkdf2Hash(password, salt);
+    entry.passwordSalt = salt;
+    delete entry.setupToken;
+    delete entry.setupTokenExpiry;
+    await store.setJSON('all', clients);
+
+    const mainClient = clients[partnerClientIdx];
+    const sessionToken = signJWT({
+      sub: mainClient.id, name: entry.name, email: entry.email,
+      markets: mainClient.markets || [], isPartner: true,
+      exp: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
+    }, process.env.JWT_SECRET);
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Set-Cookie': `fw_session=${sessionToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${30 * 24 * 60 * 60}`,
+      },
+    });
+  }
 
   const client = clients[idx];
   if (!client.setupTokenExpiry || new Date(client.setupTokenExpiry) < new Date()) {

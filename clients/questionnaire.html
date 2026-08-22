@@ -811,6 +811,7 @@ let propCount = 0;
 let propSeq = 0;
 let userData = {};
 let editMode = false;
+let readOnlyMode = false;
 
 // ── AUTH + INIT ───────────────────────────────────────────────────────────
 async function init() {
@@ -831,6 +832,35 @@ async function init() {
     const qr = await fetch(qUrl);
     if (qr.ok) {
       const qdata = await qr.json();
+      if (qdata.readOnly && qdata.completed && qdata.data) {
+        readOnlyMode = true;
+        localStorage.removeItem(LS_KEY);
+        populateForm(qdata.data, false);
+        document.querySelector('.q-page-header h1').textContent = 'Onboarding questionnaire';
+        document.getElementById('page-sub').textContent =
+          'This is the questionnaire submitted by the primary account holder.';
+        // Show read-only banner
+        const banner = document.getElementById('edit-banner');
+        if (banner) {
+          banner.style.background = 'rgba(135,155,200,0.07)';
+          banner.style.borderColor = 'rgba(135,155,200,0.18)';
+          banner.innerHTML = `
+            <div style="flex-shrink:0;width:18px;height:18px;background:rgba(135,155,200,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+              <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><circle cx="4.5" cy="4.5" r="4" stroke="#879bc8" stroke-width="1"/><rect x="4" y="2" width="1" height="3.5" fill="#879bc8" rx=".5"/><rect x="4" y="6.5" width="1" height="1" fill="#879bc8" rx=".5"/></svg>
+            </div>
+            <p style="font-size:13px;color:rgba(247,243,237,0.5);line-height:1.5;margin:0;">You have view-only access to this questionnaire. Only the primary account holder can make changes.</p>
+          `;
+          banner.style.display = 'flex';
+        }
+        // Disable all inputs
+        document.querySelectorAll('.q-form input, .q-form select, .q-form textarea, .q-form button.add-prop-btn').forEach(el => {
+          el.disabled = true;
+          el.style.opacity = '0.5';
+          el.style.cursor = 'not-allowed';
+          el.style.pointerEvents = 'none';
+        });
+        return;
+      }
       if (qdata.completed && qdata.data) {
         editMode = true;
         localStorage.removeItem(LS_KEY); // server data takes precedence
@@ -885,7 +915,13 @@ function showStep(n) {
   currentStep = n;
   updateProgress();
   document.getElementById('btn-prev').style.visibility = n === 1 ? 'hidden' : 'visible';
-  document.getElementById('btn-next').textContent = n === TOTAL_STEPS ? (editMode ? 'Save changes' : 'Submit questionnaire') : 'Continue';
+  if (readOnlyMode) {
+    document.getElementById('btn-next').style.display = n === TOTAL_STEPS ? 'none' : '';
+    document.getElementById('btn-next').textContent = 'Continue';
+  } else {
+    document.getElementById('btn-next').style.display = '';
+    document.getElementById('btn-next').textContent = n === TOTAL_STEPS ? (editMode ? 'Save changes' : 'Submit questionnaire') : 'Continue';
+  }
   window.scrollTo({ top: 0, behavior: 'smooth' });
   saveProgress();
 }
@@ -1159,7 +1195,7 @@ function collectData() {
 
 // ── LOCALSTORAGE ──────────────────────────────────────────────────────────
 function saveProgress() {
-  if (editMode) return; // server is source of truth once submitted; don't overwrite with drafts
+  if (editMode || readOnlyMode) return;
   try {
     const d = collectData();
     d._step = currentStep;
@@ -1233,6 +1269,7 @@ function loadProgress() {
 
 // ── SUBMIT ────────────────────────────────────────────────────────────────
 async function submitForm() {
+  if (readOnlyMode) return;
   const data = collectData();
   if (URL_ACQ_ID) data.acqId = URL_ACQ_ID;
   document.getElementById('q-main').style.display = 'none';

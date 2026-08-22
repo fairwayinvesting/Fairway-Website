@@ -1830,6 +1830,38 @@
 </div><!-- end admin-ui -->
 
 <!-- Share dates modal -->
+<div id="portal-access-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:650;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;">
+  <div style="background:#22201d;border:1px solid rgba(247,243,237,0.1);border-radius:20px;width:100%;max-width:500px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="padding:24px 28px 18px;border-bottom:1px solid rgba(247,243,237,0.07);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <div>
+        <h2 style="font-family:'Fraunces',serif;font-size:20px;font-weight:400;color:#f7f3ed;margin-bottom:3px;">Portal access</h2>
+        <p id="pa-client-label" style="font-size:12px;color:rgba(247,243,237,0.35);"></p>
+      </div>
+      <button class="brief-modal-head-close" onclick="closePortalAccess()">×</button>
+    </div>
+    <div style="padding:22px 28px;overflow-y:auto;flex:1;">
+      <input type="hidden" id="pa-client-id">
+      <!-- Current access list -->
+      <div id="pa-access-list" style="margin-bottom:22px;"></div>
+      <!-- Add access form -->
+      <div style="background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.08);border-radius:12px;padding:18px 20px;">
+        <p style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:14px;">Grant access</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div>
+            <label style="font-size:11px;color:rgba(247,243,237,0.4);display:block;margin-bottom:5px;">Name</label>
+            <input id="pa-new-name" type="text" placeholder="Jane Smith" style="width:100%;background:rgba(247,243,237,0.07);border:1px solid rgba(247,243,237,0.12);border-radius:8px;padding:9px 12px;font-family:'Outfit',sans-serif;font-size:13.5px;color:#f7f3ed;outline:none;">
+          </div>
+          <div>
+            <label style="font-size:11px;color:rgba(247,243,237,0.4);display:block;margin-bottom:5px;">Email</label>
+            <input id="pa-new-email" type="email" placeholder="jane@email.com" style="width:100%;background:rgba(247,243,237,0.07);border:1px solid rgba(247,243,237,0.12);border-radius:8px;padding:9px 12px;font-family:'Outfit',sans-serif;font-size:13.5px;color:#f7f3ed;outline:none;">
+          </div>
+        </div>
+        <button onclick="addPortalAccess()" style="width:100%;background:#bd7a70;color:#f7f3ed;border:none;border-radius:8px;padding:10px;font-family:'Outfit',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;transition:opacity .15s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Send invite</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="share-overlay">
   <div class="share-modal">
     <div class="share-modal-head">
@@ -5061,6 +5093,7 @@ function showClientMenu(id, name) {
     { label: 'Edit client', action: `openEdit('${id}');closeClientMenu()` },
     { label: 'View portal', action: `previewClient('${id}');closeClientMenu()` },
     { label: 'Resend setup link', action: `resendSetupLink('${id}','${name}');closeClientMenu()` },
+    { label: 'Portal access', action: `openPortalAccess('${id}');closeClientMenu()` },
     { label: 'Delete', action: `deleteClient('${id}','${name}');closeClientMenu()`, danger: true },
   ];
   menu.innerHTML = items.map(i => `<button onclick="${i.action}" style="display:block;width:100%;text-align:left;background:none;border:none;font-family:'Outfit',sans-serif;font-size:13.5px;font-weight:400;color:${i.danger ? '#f08080' : 'rgba(247,243,237,0.75)'};padding:8px 12px;border-radius:7px;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='rgba(247,243,237,0.07)'" onmouseout="this.style.background='none'">${i.label}</button>`).join('');
@@ -5087,6 +5120,92 @@ async function resendSetupLink(id, name) {
     const d = await res.json().catch(() => ({}));
     alert('Failed to send: ' + (d.error || 'Unknown error'));
   }
+}
+
+// ── Portal access management ─────────────────────────────────────────────────
+let _paClientId = null;
+
+function openPortalAccess(clientId) {
+  const client = clients.find(c => c.id === clientId);
+  if (!client) return;
+  _paClientId = clientId;
+  document.getElementById('pa-client-id').value = clientId;
+  document.getElementById('pa-client-label').textContent = client.name;
+  document.getElementById('pa-new-name').value = '';
+  document.getElementById('pa-new-email').value = '';
+  renderPortalAccessList(client);
+  const overlay = document.getElementById('portal-access-overlay');
+  overlay.style.opacity = '1';
+  overlay.style.pointerEvents = 'all';
+}
+
+function closePortalAccess() {
+  const overlay = document.getElementById('portal-access-overlay');
+  overlay.style.opacity = '0';
+  overlay.style.pointerEvents = 'none';
+  _paClientId = null;
+}
+
+function renderPortalAccessList(client) {
+  const list = document.getElementById('pa-access-list');
+  const access = client.portalAccess || [];
+  if (!access.length) {
+    list.innerHTML = '<p style="font-size:13.5px;color:rgba(247,243,237,0.3);font-style:italic;">No additional portal access granted yet.</p>';
+    return;
+  }
+  list.innerHTML = `
+    <p style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:12px;">Current access</p>
+    ${access.map((p, i) => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.08);border-radius:10px;margin-bottom:8px;">
+        <div>
+          <div style="font-size:14px;font-weight:500;color:#f7f3ed;">${p.name}</div>
+          <div style="font-size:12px;color:rgba(247,243,237,0.4);margin-top:2px;">${p.email} &middot; <span style="color:${p.pending ? '#cf9b92' : '#7dbf8e'};">${p.pending ? 'Invite pending' : 'Active'}</span></div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          ${p.pending ? `<button onclick="resendPortalInvite('${p.email}')" style="background:none;border:1px solid rgba(247,243,237,0.15);border-radius:6px;padding:5px 10px;font-family:'Outfit',sans-serif;font-size:11.5px;color:rgba(247,243,237,0.5);cursor:pointer;" onmouseover="this.style.color='rgba(247,243,237,0.85)'" onmouseout="this.style.color='rgba(247,243,237,0.5)'">Resend</button>` : ''}
+          <button onclick="removePortalAccess('${p.email}','${p.name}')" style="background:none;border:1px solid rgba(240,128,128,0.25);border-radius:6px;padding:5px 10px;font-family:'Outfit',sans-serif;font-size:11.5px;color:rgba(240,128,128,0.6);cursor:pointer;" onmouseover="this.style.color='rgba(240,128,128,0.9)'" onmouseout="this.style.color='rgba(240,128,128,0.6)'">Remove</button>
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+
+async function addPortalAccess() {
+  const name = document.getElementById('pa-new-name').value.trim();
+  const email = document.getElementById('pa-new-email').value.trim();
+  if (!name || !email) { showToast('Enter a name and email address.', 'error'); return; }
+  const res = await api('PUT', '/api/admin/clients', { id: _paClientId, action: 'add-portal-access', partnerName: name, partnerEmail: email });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) { showToast(data.error || 'Failed to add access.', 'error'); return; }
+  // Refresh client data
+  await refreshClients();
+  const client = clients.find(c => c.id === _paClientId);
+  if (client) renderPortalAccessList(client);
+  document.getElementById('pa-new-name').value = '';
+  document.getElementById('pa-new-email').value = '';
+  showToast(`Invite sent to ${name}`);
+}
+
+async function removePortalAccess(email, name) {
+  if (!confirm(`Remove portal access for ${name} (${email})?`)) return;
+  const res = await api('PUT', '/api/admin/clients', { id: _paClientId, action: 'remove-portal-access', partnerEmail: email });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) { showToast(data.error || 'Failed to remove access.', 'error'); return; }
+  await refreshClients();
+  const client = clients.find(c => c.id === _paClientId);
+  if (client) renderPortalAccessList(client);
+  showToast(`Access removed for ${name}`);
+}
+
+async function resendPortalInvite(email) {
+  const res = await api('PUT', '/api/admin/clients', { id: _paClientId, action: 'resend-portal-access', partnerEmail: email });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) { showToast(data.error || 'Failed to resend invite.', 'error'); return; }
+  showToast(`Invite resent to ${email}`);
+}
+
+async function refreshClients() {
+  await loadClients();
 }
 
 function renderReports() {

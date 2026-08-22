@@ -156,6 +156,13 @@ export default async (req) => {
   const payload = verifyJWT(match[1], process.env.JWT_SECRET);
   if (!payload) return json({ error: 'Session expired' }, 401);
 
+  const isPartner = !!payload.isPartner;
+
+  // Partners cannot submit or modify the questionnaire
+  if (isPartner && req.method === 'POST') {
+    return json({ error: 'Questionnaire editing is only available to the primary account holder.' }, 403);
+  }
+
   // GET — return existing submission if any
   if (req.method === 'GET') {
     const acqId = new URL(req.url).searchParams.get('acq');
@@ -165,7 +172,8 @@ export default async (req) => {
         const store = getStore('fairway-questionnaires');
         const key = `${payload.sub}:${acqId}`;
         const existing = await store.get(key, { type: 'json' });
-        if (existing) return json({ completed: true, data: existing });
+        if (existing) return json({ completed: true, data: existing, readOnly: isPartner });
+        if (isPartner) return json({ completed: false, readOnly: true });
         // Not submitted yet — prefill personal details only (not entity, which may change)
         const original = await store.get(blobKey(payload.email), { type: 'json' }).catch(() => null);
         if (original) {
@@ -182,9 +190,9 @@ export default async (req) => {
     try {
       const store = getStore('fairway-questionnaires');
       const existing = await store.get(blobKey(payload.email), { type: 'json' });
-      if (existing) return json({ completed: true, data: existing });
+      if (existing) return json({ completed: true, data: existing, readOnly: isPartner });
     } catch {}
-    return json({ completed: false });
+    return json({ completed: false, readOnly: isPartner });
   }
 
   const body = await req.json().catch(() => null);

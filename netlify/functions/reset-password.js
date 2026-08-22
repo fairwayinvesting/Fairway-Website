@@ -57,28 +57,57 @@ export default async (req) => {
   const idx = clients.reduce((best, c, i) =>
     (!c.deleted && c.active && c.email?.toLowerCase() === emailNorm) ? i : best, -1);
 
-  // Always return ok to avoid user enumeration
-  if (idx === -1) return json({ ok: true });
-
   const token = crypto.randomBytes(32).toString('hex');
   const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
-  clients[idx].setupToken = token;
-  clients[idx].setupTokenExpiry = expiry;
-  await store.setJSON('all', clients);
-
-  const resetLink = `https://fairwayinvesting.com.au/clients/setup.html?token=${token}`;
-  try {
-    await resend.emails.send({
-      from: 'Fairway Portal <info@fairwayinvesting.com.au>',
-      to: [email],
-      subject: 'Reset your Fairway portal password',
-      html: buildResetEmail(clients[idx].name, resetLink),
-    });
-  } catch (err) {
-    console.error('Reset email failed:', err?.message || err);
+  if (idx !== -1) {
+    // Main client reset
+    clients[idx].setupToken = token;
+    clients[idx].setupTokenExpiry = expiry;
+    await store.setJSON('all', clients);
+    const resetLink = `https://fairwayinvesting.com.au/clients/setup.html?token=${token}`;
+    try {
+      await resend.emails.send({
+        from: 'Fairway Portal <info@fairwayinvesting.com.au>',
+        to: [email],
+        subject: 'Reset your Fairway portal password',
+        html: buildResetEmail(clients[idx].name, resetLink),
+      });
+    } catch (err) {
+      console.error('Reset email failed:', err?.message || err);
+    }
+    return json({ ok: true });
   }
 
+  // Check portalAccess for partner reset
+  let partnerClientIdx = -1, partnerEntryIdx = -1;
+  outer: for (let ci = 0; ci < clients.length; ci++) {
+    if (clients[ci].deleted || !clients[ci].active) continue;
+    const access = clients[ci].portalAccess || [];
+    for (let pi = 0; pi < access.length; pi++) {
+      if (access[pi].email?.toLowerCase() === emailNorm) { partnerClientIdx = ci; partnerEntryIdx = pi; break outer; }
+    }
+  }
+
+  if (partnerClientIdx !== -1) {
+    const entry = clients[partnerClientIdx].portalAccess[partnerEntryIdx];
+    entry.setupToken = token;
+    entry.setupTokenExpiry = expiry;
+    await store.setJSON('all', clients);
+    const resetLink = `https://fairwayinvesting.com.au/clients/setup.html?token=${token}`;
+    try {
+      await resend.emails.send({
+        from: 'Fairway Portal <info@fairwayinvesting.com.au>',
+        to: [entry.email],
+        subject: 'Reset your Fairway portal password',
+        html: buildResetEmail(entry.name, resetLink),
+      });
+    } catch (err) {
+      console.error('Partner reset email failed:', err?.message || err);
+    }
+  }
+
+  // Always return ok to avoid user enumeration
   return json({ ok: true });
 };
 

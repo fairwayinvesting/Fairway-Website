@@ -128,6 +128,40 @@ async function pbkdf2Hash(password, salt) {
   });
 }
 
+function buildPortalAccessEmail(partnerName, mainClientName, setupToken) {
+  const firstName = partnerName.split(' ')[0];
+  const setupLink = `https://fairwayinvesting.com.au/clients/setup.html?token=${setupToken}`;
+  return `<!DOCTYPE html><html lang="en" style="background:#181614;"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fairway Client Portal Access</title>
+<style>@media only screen and (max-width:600px){.ew{padding:32px 22px!important;border-radius:14px!important;}.eh1{font-size:26px!important;}}</style>
+</head>
+<body style="margin:0;padding:0;background:#181614;font-family:Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#181614"><tr><td align="center" style="padding:40px 16px;background:#181614;">
+<table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;">
+  <tr><td class="ew" style="background:#1C1815;border-radius:20px;border:1px solid rgba(181,113,90,0.2);padding:44px 48px;">
+    <p style="margin:0 0 36px;padding-bottom:32px;border-bottom:1px solid rgba(250,246,241,0.08);text-align:center;">
+      <img src="https://fairwayinvesting.com.au/logo-icon.png" width="28" height="28" alt="" style="display:inline-block;border:0;vertical-align:middle;margin-right:10px;">
+      <img src="https://fairwayinvesting.com.au/logo-word.png" width="160" height="24" alt="Fairway Investing" style="display:inline-block;border:0;vertical-align:middle;max-width:160px;">
+    </p>
+    <p style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#B5715A;margin:0 0 16px;">Client portal</p>
+    <h1 class="eh1" style="font-family:Georgia,'Times New Roman',serif;font-size:34px;font-weight:400;color:#FAF6F1;margin:0 0 12px;line-height:1.15;">You've been given portal access, ${firstName}.</h1>
+    <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 32px;line-height:1.65;">${mainClientName.split(' ')[0]} has invited you to view their Fairway client portal. You'll be able to see the buying brief, acquisition progress, milestones and market reports. Set a password to get started.</p>
+    <table cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="border-radius:100px;background:#B5715A;">
+        <a href="${setupLink}" style="display:inline-block;font-size:15px;font-weight:500;color:#FAF6F1;text-decoration:none;padding:15px 34px;">Set your password &rarr;</a>
+      </td>
+    </tr></table>
+    <p style="font-size:12px;color:rgba(250,246,241,0.25);margin:20px 0 0;line-height:1.6;">This link expires in 7 days. If it has expired, ask ${mainClientName.split(' ')[0]} to contact Luke and he can send a new one.</p>
+    <p style="font-size:13px;color:rgba(250,246,241,0.3);margin:20px 0 0;line-height:1.6;">Any questions, reply to this email or call 0416 184 333.</p>
+  </td></tr>
+  <tr><td style="padding:24px 0 0;text-align:center;">
+    <p style="font-size:12px;color:rgba(250,246,241,0.25);margin:0;line-height:1.7;">Fairway Investing &middot; Suite 211, Level 2/5 Alexander Street, Crows Nest NSW 2065<br>
+    <a href="mailto:info@fairwayinvesting.com.au" style="color:#B5715A;text-decoration:none;">info@fairwayinvesting.com.au</a> &middot; 0416 184 333</p>
+  </td></tr>
+</table>
+</td></tr></table>
+</body></html>`;
+}
+
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 
@@ -138,11 +172,15 @@ export default async (req) => {
   const clients = (await store.get('all', { type: 'json' })) || [];
 
   if (req.method === 'GET') {
-    return json(clients.filter(c => !c.deleted).map(({ id, name, email, markets, active, createdAt, setupToken, pipelineStage, pipelineStageUpdatedAt, status, engagementNumber, referralSource, referrerId, crmContactId, acquisitions, customFields, welcomeEmailSentAt, welcomeEmailFailed, dealProfessionals, manualFee, manualFees, manualFeeDeleteLog }) => {
+    return json(clients.filter(c => !c.deleted).map(({ id, name, email, markets, active, createdAt, setupToken, pipelineStage, pipelineStageUpdatedAt, status, engagementNumber, referralSource, referrerId, crmContactId, acquisitions, customFields, welcomeEmailSentAt, welcomeEmailFailed, dealProfessionals, manualFee, manualFees, manualFeeDeleteLog, portalAccess }) => {
       // Migrate legacy single manualFee → manualFees array on read
       const resolvedFees = manualFees?.length ? manualFees
         : (manualFee?.totalFee ? [{ id: 'fee-1', label: 'Acquisition 1', totalFee: manualFee.totalFee, notes: manualFee.notes || '', payments: manualFee.payments || [], createdAt: '' }] : []);
-      return { id, name, email, markets, active, createdAt, hasSetupToken: !!setupToken, pipelineStage: pipelineStage || null, pipelineStageUpdatedAt: pipelineStageUpdatedAt || null, status: status || 'active', engagementNumber: engagementNumber || 1, referralSource: referralSource || null, referrerId: referrerId || null, crmContactId: crmContactId || null, acquisitions: acquisitions || [], customFields: customFields || [], welcomeEmailSentAt: welcomeEmailSentAt || null, welcomeEmailFailed: welcomeEmailFailed || false, dealProfessionals: dealProfessionals || [], manualFee: manualFee || null, manualFees: resolvedFees, manualFeeDeleteLog: manualFeeDeleteLog || [] };
+      // Strip password hashes from portalAccess before returning to admin UI
+      const safePortalAccess = (portalAccess || []).map(({ name: pName, email: pEmail, addedAt, setupToken: pToken }) => ({
+        name: pName, email: pEmail, addedAt, pending: !!pToken,
+      }));
+      return { id, name, email, markets, active, createdAt, hasSetupToken: !!setupToken, pipelineStage: pipelineStage || null, pipelineStageUpdatedAt: pipelineStageUpdatedAt || null, status: status || 'active', engagementNumber: engagementNumber || 1, referralSource: referralSource || null, referrerId: referrerId || null, crmContactId: crmContactId || null, acquisitions: acquisitions || [], customFields: customFields || [], welcomeEmailSentAt: welcomeEmailSentAt || null, welcomeEmailFailed: welcomeEmailFailed || false, dealProfessionals: dealProfessionals || [], manualFee: manualFee || null, manualFees: resolvedFees, manualFeeDeleteLog: manualFeeDeleteLog || [], portalAccess: safePortalAccess };
     }));
   }
 
@@ -378,6 +416,81 @@ export default async (req) => {
         return json({ error: 'Email failed to send' }, 500);
       }
       appendAudit('markets_notified', `Sent markets notification to ${client.name} <${client.email}>`);
+      return json({ ok: true });
+    }
+
+    if (action === 'add-portal-access') {
+      const { partnerName, partnerEmail, sendEmail: doSend = true } = body;
+      if (!partnerName || !partnerEmail) return json({ error: 'partnerName and partnerEmail required' }, 400);
+      const client = clients[idx];
+      if (!client.portalAccess) client.portalAccess = [];
+      const emailNorm = partnerEmail.toLowerCase().trim();
+      // Block if partner email already exists on this or any other client
+      if (client.portalAccess.some(p => p.email?.toLowerCase() === emailNorm)) {
+        return json({ error: 'This email already has portal access for this client.' }, 409);
+      }
+      if (clients.some(c => !c.deleted && c.active && c.email?.toLowerCase() === emailNorm)) {
+        return json({ error: 'This email belongs to an existing primary client account.' }, 409);
+      }
+      const setupToken = crypto.randomBytes(24).toString('hex');
+      const setupTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      client.portalAccess.push({ name: partnerName.trim(), email: emailNorm, setupToken, setupTokenExpiry, addedAt: new Date().toISOString() });
+      await store.setJSON('all', clients);
+      if (doSend) {
+        try {
+          await resend.emails.send({
+            from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
+            to: [emailNorm],
+            reply_to: 'luke@fairwayinvesting.com.au',
+            subject: `You've been invited to the Fairway client portal`,
+            html: buildPortalAccessEmail(partnerName.trim(), client.name, setupToken),
+          });
+        } catch (err) {
+          console.error('Portal access invite email failed:', err?.message || err);
+          return json({ error: 'Access added but invite email failed to send.' }, 500);
+        }
+      }
+      appendAudit('portal_access_added', `Added portal access for ${partnerName} <${emailNorm}> on ${client.name}'s account`);
+      return json({ ok: true });
+    }
+
+    if (action === 'remove-portal-access') {
+      const { partnerEmail } = body;
+      if (!partnerEmail) return json({ error: 'partnerEmail required' }, 400);
+      const client = clients[idx];
+      const emailNorm = partnerEmail.toLowerCase().trim();
+      const before = (client.portalAccess || []).length;
+      client.portalAccess = (client.portalAccess || []).filter(p => p.email?.toLowerCase() !== emailNorm);
+      if (client.portalAccess.length === before) return json({ error: 'No portal access entry found for that email.' }, 404);
+      await store.setJSON('all', clients);
+      appendAudit('portal_access_removed', `Removed portal access for <${emailNorm}> from ${client.name}'s account`);
+      return json({ ok: true });
+    }
+
+    if (action === 'resend-portal-access') {
+      const { partnerEmail } = body;
+      if (!partnerEmail) return json({ error: 'partnerEmail required' }, 400);
+      const client = clients[idx];
+      const emailNorm = partnerEmail.toLowerCase().trim();
+      const entry = (client.portalAccess || []).find(p => p.email?.toLowerCase() === emailNorm);
+      if (!entry) return json({ error: 'No portal access entry found for that email.' }, 404);
+      const setupToken = crypto.randomBytes(24).toString('hex');
+      entry.setupToken = setupToken;
+      entry.setupTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      await store.setJSON('all', clients);
+      try {
+        await resend.emails.send({
+          from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
+          to: [emailNorm],
+          reply_to: 'luke@fairwayinvesting.com.au',
+          subject: `Your Fairway portal invite`,
+          html: buildPortalAccessEmail(entry.name, client.name, setupToken),
+        });
+      } catch (err) {
+        console.error('Portal access resend failed:', err?.message || err);
+        return json({ error: 'Email failed to send.' }, 500);
+      }
+      appendAudit('portal_access_resent', `Resent portal invite to ${entry.name} <${emailNorm}> for ${client.name}'s account`);
       return json({ ok: true });
     }
 

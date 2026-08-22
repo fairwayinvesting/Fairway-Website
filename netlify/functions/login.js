@@ -74,12 +74,22 @@ export default async (req) => {
   const matches = clients.filter(c => !c.deleted && c.active && c.email.toLowerCase() === emailNorm);
   const client = matches.length ? matches[matches.length - 1] : null;
 
+  // If no direct client match, check portalAccess on all active clients (partners/co-investors)
+  let partnerEntry = null, partnerClient = null;
+  if (!client) {
+    for (const c of clients) {
+      if (c.deleted || !c.active) continue;
+      const entry = (c.portalAccess || []).find(p => p.email?.toLowerCase() === emailNorm);
+      if (entry) { partnerEntry = entry; partnerClient = c; break; }
+    }
+  }
+
   // Always run hash to prevent timing-based user enumeration
-  const salt = client ? client.passwordSalt : crypto.randomBytes(16).toString('hex');
-  const hash = client ? client.passwordHash : crypto.randomBytes(32).toString('hex');
+  const salt = client ? client.passwordSalt : (partnerEntry ? partnerEntry.passwordSalt : crypto.randomBytes(16).toString('hex'));
+  const hash = client ? client.passwordHash : (partnerEntry ? partnerEntry.passwordHash : crypto.randomBytes(32).toString('hex'));
   const valid = await verifyPassword(password, salt, hash);
 
-  if (!client || !valid) {
+  if ((!client && !partnerEntry) || !valid) {
     await recordFailure(rlStore, rl.key, rl.data, rl.now);
     return json({ error: 'Invalid email or password' }, 401);
   }
@@ -87,15 +97,18 @@ export default async (req) => {
   // Success — clear rate limit and issue session
   await clearRateLimit(rlStore, rl.key);
 
+  const sessionPayload = client
+    ? { sub: client.id, name: client.name, email: client.email, markets: client.markets }
+    : { sub: partnerClient.id, name: partnerEntry.name, email: partnerEntry.email, markets: partnerClient.markets, isPartner: true };
+
   const token = signJWT({
-    sub: client.id,
-    name: client.name,
-    email: client.email,
-    markets: client.markets,
+    ...sessionPayload,
     exp: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
   }, process.env.JWT_SECRET);
 
-  return json({ ok: true, name: client.name, markets: client.markets }, 200, {
+  const displayName = client ? client.name : partnerEntry.name;
+  const displayMarkets = client ? client.markets : partnerClient.markets;
+  return json({ ok: true, name: displayName, markets: displayMarkets }, 200, {
     'Set-Cookie': `fw_session=${token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${30 * 24 * 60 * 60}`,
   });
 };
