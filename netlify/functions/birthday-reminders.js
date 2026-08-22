@@ -1,8 +1,15 @@
 // Runs daily at 10 PM UTC = 8 AM AEST (9 AM AEDT during daylight saving).
-// Checks all active clients' questionnaire data for upcoming birthdays (within 7 days)
-// and sends a digest to SLACK_BIRTHDAY_WEBHOOK_URL.
+//
+// Two notification modes:
+//  1. Milestone alerts (every day) — fires when a birthday is exactly 0, 1, 3, 5, or 7 days away.
+//  2. Weekly digest (Mondays only) — lists all birthdays in the next 14 days.
+//
+// Requires env var: SLACK_BIRTHDAY_WEBHOOK_URL
 
 import { getStore } from '@netlify/blobs';
+
+const MILESTONE_DAYS = new Set([0, 1, 3, 5, 7]);
+const WEEKLY_LOOKAHEAD = 14;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -10,14 +17,14 @@ function blobKey(email) {
   return (email || '').toLowerCase().replace(/[^a-z0-9]/g, '-');
 }
 
-// Returns today's date string (YYYY-MM-DD) in Sydney time.
 function todayAU() {
   return new Date().toLocaleDateString('en-CA', { timeZone: 'Australia/Sydney' });
 }
 
-// Given a DOB string (YYYY-MM-DD), returns how many days until the next birthday
-// from todayStr (YYYY-MM-DD). Returns 0 on the birthday, negative if already passed
-// this year (next occurrence is next year — we ignore those for the 7-day window).
+function dayOfWeekAU() {
+  return new Date().toLocaleDateString('en-AU', { timeZone: 'Australia/Sydney', weekday: 'long' });
+}
+
 function daysUntilBirthday(dob, todayStr) {
   if (!dob || !dob.match(/^\d{4}-\d{2}-\d{2}$/)) return null;
   const [, mm, dd] = dob.split('-');
@@ -25,7 +32,6 @@ function daysUntilBirthday(dob, todayStr) {
   const thisYear = new Date(`${yr}-${mm}-${dd}T00:00:00`);
   const today    = new Date(`${todayStr}T00:00:00`);
   let days = Math.round((thisYear - today) / 86400000);
-  // If birthday already passed this year, check next year
   if (days < 0) {
     const nextYear = new Date(`${Number(yr) + 1}-${mm}-${dd}T00:00:00`);
     days = Math.round((nextYear - today) / 86400000);
@@ -39,59 +45,32 @@ function fmtDob(dob) {
   return new Date(`2000-${mm}-${dd}T12:00:00Z`).toLocaleDateString('en-AU', { day: 'numeric', month: 'long' });
 }
 
-function dayLabel(days) {
-  if (days === 0) return '🎂 *Today!*';
-  if (days === 1) return '🎂 *Tomorrow*';
-  return `🎁 *In ${days} days*`;
-}
-
 // ── Slack ─────────────────────────────────────────────────────────────────────
 
-async function sendSlack(webhookUrl, items, dateHeading) {
+// One combined message for all milestone hits today — sections per milestone day.
+async function sendMilestoneAlert(webhookUrl, items) {
   const blocks = [
     {
       type: 'header',
-      text: { type: 'plain_text', text: '🎂 Birthday Reminders', emoji: true },
-    },
-    {
-      type: 'context',
-      elements: [{ type: 'mrkdwn', text: dateHeading }],
+      text: { type: 'plain_text', text: '🎂 Birthday Reminder', emoji: true },
     },
     { type: 'divider' },
   ];
 
-  const todayItems  = items.filter(i => i.days === 0);
-  const soonItems   = items.filter(i => i.days > 0 && i.days <= 2);
-  const upcomingItems = items.filter(i => i.days > 2);
+  for (const days of [0, 1, 3, 5, 7]) {
+    const group = items.filter(i => i.days === days);
+    if (!group.length) continue;
 
-  if (todayItems.length) {
+    const emoji = days === 0 ? '🎂' : '🎁';
+    const when  = days === 0 ? 'Today'
+                : days === 1 ? 'Tomorrow'
+                : `In ${days} days`;
+
     blocks.push({
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `🎂 *Today*\n${todayItems.map(i => `• ${i.line}`).join('\n')}`,
-      },
-    });
-    blocks.push({ type: 'divider' });
-  }
-
-  if (soonItems.length) {
-    blocks.push({
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: `📍 *This week*\n${soonItems.map(i => `• ${i.line}`).join('\n')}`,
-      },
-    });
-    blocks.push({ type: 'divider' });
-  }
-
-  if (upcomingItems.length) {
-    blocks.push({
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: `📋 *Coming up*\n${upcomingItems.map(i => `• ${i.line}`).join('\n')}`,
+        text: `${emoji} *${when}*\n${group.map(i => `• *${i.name}* ${i.role} — ${i.dateStr}`).join('\n')}`,
       },
     });
     blocks.push({ type: 'divider' });
@@ -99,17 +78,55 @@ async function sendSlack(webhookUrl, items, dateHeading) {
 
   blocks.push({
     type: 'context',
-    elements: [{
-      type: 'mrkdwn',
-      text: `${items.length} birthday${items.length !== 1 ? 's' : ''} in the next 7 days`,
-    }],
+    elements: [{ type: 'mrkdwn', text: `${items.length} birthday reminder${items.length !== 1 ? 's' : ''} today` }],
   });
 
-  const fallback = items.map(i => i.line).join(' · ');
+  const fallback = items.map(i => `${i.name} (${i.days === 0 ? 'today' : `in ${i.days}d`})`).join(', ');
   await fetch(webhookUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text: `Birthday Reminders — ${fallback}`, blocks }),
+    body: JSON.stringify({ text: `Birthday reminder — ${fallback}`, blocks }),
+  });
+}
+
+// Monday digest — all birthdays in the next 14 days.
+async function sendWeeklyDigest(webhookUrl, items, dateHeading) {
+  const blocks = [
+    {
+      type: 'header',
+      text: { type: 'plain_text', text: '📅 Upcoming Birthdays — Next 2 Weeks', emoji: true },
+    },
+    {
+      type: 'context',
+      elements: [{ type: 'mrkdwn', text: dateHeading }],
+    },
+    { type: 'divider' },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: items.map(i => {
+          const when = i.days === 0 ? '_Today_'
+                     : i.days === 1 ? '_Tomorrow_'
+                     : `_${i.days} days_`;
+          return `• *${i.name}* ${i.role} — ${i.dateStr} ${when}`;
+        }).join('\n'),
+      },
+    },
+    { type: 'divider' },
+    {
+      type: 'context',
+      elements: [{
+        type: 'mrkdwn',
+        text: `${items.length} birthday${items.length !== 1 ? 's' : ''} in the next ${WEEKLY_LOOKAHEAD} days · You'll get individual reminders at 7, 5, 3, and 1 day out`,
+      }],
+    },
+  ];
+
+  await fetch(webhookUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: `Upcoming birthdays — ${items.length} in the next ${WEEKLY_LOOKAHEAD} days`, blocks }),
   });
 }
 
@@ -122,72 +139,77 @@ export default async () => {
     return;
   }
 
-  const today = todayAU();
+  const today   = todayAU();
+  const dayName = dayOfWeekAU();
   const dateHeading = new Date(today + 'T12:00:00Z').toLocaleDateString('en-AU', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   });
 
-  // Load all active clients
   const clientStore = getStore('fairway-clients');
   const allClients  = (await clientStore.get('all', { type: 'json' }).catch(() => null)) || [];
   const active = allClients.filter(c => !c.deleted && (c.status || 'active') !== 'completed');
-
   if (!active.length) return;
 
-  // For each active client, load their questionnaire
   const qStore = getStore('fairway-questionnaires');
-  const items = [];
-  const seen = new Set(); // deduplicate by name:dob in case of duplicate client records
+  const allItems = [];
+  const seen = new Set();
+
+  const addItem = (dob, name, role) => {
+    const days = daysUntilBirthday(dob, today);
+    if (days === null || days < 0 || days > WEEKLY_LOOKAHEAD) return;
+    const key = `${name}:${dob}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    allItems.push({ days, name, role, dateStr: fmtDob(dob) });
+  };
 
   await Promise.all(active.map(async (client) => {
     let q = null;
-    try {
-      q = await qStore.get(blobKey(client.email), { type: 'json' });
-    } catch { return; }
+    try { q = await qStore.get(blobKey(client.email), { type: 'json' }); } catch { return; }
     if (!q) return;
 
-    // Client birthday
     if (q.dob) {
-      const days = daysUntilBirthday(q.dob, today);
-      if (days !== null && days >= 0 && days <= 3) {
-        const name = [q.firstName || client.name.split(' ')[0], q.lastName || ''].join(' ').trim();
-        const key = `${name}:${q.dob}`;
-        if (!seen.has(key)) {
-          seen.add(key);
-          items.push({ days, line: `${dayLabel(days)} — *${name}* (client) — ${fmtDob(q.dob)}` });
-        }
-      }
+      const name = [q.firstName || client.name.split(' ')[0], q.lastName || ''].join(' ').trim();
+      addItem(q.dob, name, '(client)');
     }
 
-    // Partner birthday
     if (q.coInvestor === 'Yes' && q.p2Dob) {
-      const days = daysUntilBirthday(q.p2Dob, today);
-      if (days !== null && days >= 0 && days <= 3) {
-        const partnerName = [q.p2FirstName, q.p2LastName].filter(Boolean).join(' ') || 'Partner';
-        const key = `${partnerName}:${q.p2Dob}`;
-        if (!seen.has(key)) {
-          seen.add(key);
-          const clientFirst = q.firstName || client.name.split(' ')[0];
-          const relationship = q.p2Relationship || 'partner';
-          items.push({ days, line: `${dayLabel(days)} — *${partnerName}* (${relationship.toLowerCase()} of ${clientFirst}) — ${fmtDob(q.p2Dob)}` });
-        }
-      }
+      const partnerName = [q.p2FirstName, q.p2LastName].filter(Boolean).join(' ') || 'Partner';
+      const clientFirst = q.firstName || client.name.split(' ')[0];
+      const relationship = q.p2Relationship || 'partner';
+      addItem(q.p2Dob, partnerName, `(${relationship.toLowerCase()} of ${clientFirst})`);
     }
   }));
 
-  if (!items.length) {
-    console.log('birthday-reminders: no birthdays in next 7 days');
-    return;
+  allItems.sort((a, b) => a.days - b.days);
+
+  // 1. Milestone alerts — fires any day a birthday lands on exactly 0/1/3/5/7 days out
+  const milestoneItems = allItems.filter(i => MILESTONE_DAYS.has(i.days));
+  if (milestoneItems.length) {
+    try {
+      await sendMilestoneAlert(slackUrl, milestoneItems);
+      console.log(`birthday-reminders: sent milestone alert for ${milestoneItems.length} item(s)`);
+    } catch (err) {
+      console.error('birthday-reminders: milestone alert failed:', err?.message || err);
+    }
   }
 
-  // Sort: today first, then by days ascending
-  items.sort((a, b) => a.days - b.days);
+  // 2. Weekly digest — Mondays only, all birthdays in next 14 days
+  if (dayName === 'Monday') {
+    if (allItems.length) {
+      try {
+        await sendWeeklyDigest(slackUrl, allItems, dateHeading);
+        console.log(`birthday-reminders: sent Monday digest with ${allItems.length} item(s)`);
+      } catch (err) {
+        console.error('birthday-reminders: weekly digest failed:', err?.message || err);
+      }
+    } else {
+      console.log('birthday-reminders: Monday — no birthdays in next 14 days');
+    }
+  }
 
-  try {
-    await sendSlack(slackUrl, items, dateHeading);
-    console.log(`birthday-reminders: sent ${items.length} item(s) to Slack`);
-  } catch (err) {
-    console.error('birthday-reminders: Slack send failed:', err?.message || err);
+  if (!milestoneItems.length && dayName !== 'Monday') {
+    console.log('birthday-reminders: no milestone birthdays today, not Monday — nothing sent');
   }
 };
 
