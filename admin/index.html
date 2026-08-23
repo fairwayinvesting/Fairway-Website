@@ -910,6 +910,10 @@
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="10" height="13" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 5h5M4.5 8h5M4.5 11h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M12 9l2.5 2.5-2.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Proposal
       </a>
+      <button class="snav-item" id="nav-staff" onclick="showSection('staff',this);loadStaff()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Team
+      </button>
       <div class="snav-spacer"></div>
       <div class="snav-divider"></div>
       <button class="snav-item" onclick="showSection('settings',this)">
@@ -1230,6 +1234,15 @@
       </div>
       <div id="prospects-pipeline" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;"></div>
       <div id="prospects-list"><span style="font-size:13px;color:rgba(247,243,237,0.2);">Loading…</span></div>
+    </div>
+
+    <!-- Team / Staff -->
+    <div id="sec-staff" class="admin-section">
+      <div class="sec-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <h1>Team</h1>
+        <button class="admin-btn" onclick="openStaffModal()">+ Add team member</button>
+      </div>
+      <div id="staff-list" style="margin-top:4px;"></div>
     </div>
 
     <!-- Settings -->
@@ -1828,6 +1841,52 @@
 </div>
 
 </div><!-- end admin-ui -->
+
+<!-- Staff invite / edit modal -->
+<div id="staff-modal-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:700;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;">
+  <div style="background:#22201d;border:1px solid rgba(247,243,237,0.1);border-radius:20px;width:100%;max-width:520px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="padding:24px 28px 18px;border-bottom:1px solid rgba(247,243,237,0.07);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <h2 id="sm-title" style="font-family:'Fraunces',serif;font-size:20px;font-weight:400;color:#f7f3ed;">Add team member</h2>
+      <button onclick="closeStaffModal()" style="background:none;border:none;color:rgba(247,243,237,0.4);font-size:22px;cursor:pointer;line-height:1;padding:2px 6px;">&times;</button>
+    </div>
+    <div style="padding:24px 28px;overflow-y:auto;flex:1;">
+      <input type="hidden" id="sm-id">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+        <div>
+          <label style="display:block;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:6px;">Full name</label>
+          <input id="sm-name" type="text" placeholder="Aaron Smith" style="width:100%;background:rgba(247,243,237,0.07);border:1px solid rgba(247,243,237,0.12);border-radius:8px;padding:9px 12px;font-family:'Outfit',sans-serif;font-size:13.5px;color:#f7f3ed;outline:none;">
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:6px;">Email</label>
+          <input id="sm-email" type="email" placeholder="aaron@example.com" style="width:100%;background:rgba(247,243,237,0.07);border:1px solid rgba(247,243,237,0.12);border-radius:8px;padding:9px 12px;font-family:'Outfit',sans-serif;font-size:13.5px;color:#f7f3ed;outline:none;">
+        </div>
+      </div>
+      <div id="sm-error" style="display:none;padding:10px 14px;background:rgba(189,122,112,0.12);border:1px solid rgba(189,122,112,0.3);border-radius:8px;font-size:13px;color:#cf9b92;margin-bottom:14px;"></div>
+    </div>
+    <div style="padding:16px 28px;border-top:1px solid rgba(247,243,237,0.07);display:flex;justify-content:flex-end;gap:10px;flex-shrink:0;">
+      <button onclick="closeStaffModal()" style="background:none;border:1px solid rgba(247,243,237,0.15);border-radius:8px;padding:9px 18px;font-family:'Outfit',sans-serif;font-size:13.5px;color:rgba(247,243,237,0.6);cursor:pointer;">Cancel</button>
+      <button id="sm-save-btn" onclick="saveStaffMember()" style="background:#bd7a70;border:none;border-radius:8px;padding:9px 22px;font-family:'Outfit',sans-serif;font-size:13.5px;font-weight:500;color:#f7f3ed;cursor:pointer;">Send invite</button>
+    </div>
+  </div>
+</div>
+
+<!-- Staff manage permissions overlay -->
+<div id="staff-permissions-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:700;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;">
+  <div style="background:#22201d;border:1px solid rgba(247,243,237,0.1);border-radius:20px;width:100%;max-width:600px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="padding:24px 28px 18px;border-bottom:1px solid rgba(247,243,237,0.07);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <div>
+        <h2 style="font-family:'Fraunces',serif;font-size:20px;font-weight:400;color:#f7f3ed;margin-bottom:3px;">Manage access</h2>
+        <p id="sp-name-label" style="font-size:13px;color:rgba(247,243,237,0.35);"></p>
+      </div>
+      <button onclick="closeStaffPermissions()" style="background:none;border:none;color:rgba(247,243,237,0.4);font-size:22px;cursor:pointer;line-height:1;padding:2px 6px;">&times;</button>
+    </div>
+    <div style="padding:20px 28px;overflow-y:auto;flex:1;" id="sp-body">
+    </div>
+    <div style="padding:16px 28px;border-top:1px solid rgba(247,243,237,0.07);display:flex;justify-content:flex-end;gap:10px;flex-shrink:0;">
+      <button onclick="closeStaffPermissions()" style="background:none;border:1px solid rgba(247,243,237,0.15);border-radius:8px;padding:9px 18px;font-family:'Outfit',sans-serif;font-size:13.5px;color:rgba(247,243,237,0.6);cursor:pointer;">Done</button>
+    </div>
+  </div>
+</div>
 
 <!-- Share dates modal -->
 <div id="portal-access-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:650;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;">
@@ -2888,6 +2947,7 @@ async function loadCrmPartners() {
     const data = await res.json();
     if (!Array.isArray(data)) throw new Error('Unexpected response');
     crmPartners = data;
+    window._latestPartners = data;
     _setSysCheck('partners', 'ok', `${crmPartners.length} partners`);
   } catch (err) {
     _setSysCheck('partners', 'err', err.message);
@@ -5206,6 +5266,266 @@ async function resendPortalInvite(email) {
 
 async function refreshClients() {
   await loadClients();
+}
+
+// ── Team / Staff Management ────────────────────────────────────────────────
+let staffList = [];
+
+const STAFF_MODULES = [
+  { id:'clients',       label:'Clients' },
+  { id:'pipeline',      label:'Pipeline' },
+  { id:'dates',         label:'Dates' },
+  { id:'shortlist',     label:'Shortlist' },
+  { id:'presentations', label:'Presentations' },
+  { id:'directory',     label:'Directory' },
+  { id:'tasks',         label:'Tasks' },
+  { id:'my-deals',      label:'My Deals' },
+];
+
+const DIR_PROF_LIST = [
+  { key:'property-manager',   label:'Property Managers' },
+  { key:'conveyancer',        label:'Conveyancers' },
+  { key:'sales-agent',        label:'Sales Agents' },
+  { key:'mortgage-broker',    label:'Mortgage Brokers' },
+  { key:'accountant',         label:'Accountants' },
+  { key:'building-pest',      label:'Building & Pest' },
+  { key:'financial-planner',  label:'Financial Planners' },
+  { key:'buyers-agent',       label:"Buyers Agents" },
+  { key:'trade',              label:'Trades' },
+  { key:'other',              label:'Other' },
+];
+
+async function loadStaff() {
+  const el = document.getElementById('staff-list');
+  el.innerHTML = '<span style="font-size:13px;color:rgba(247,243,237,0.3);">Loading…</span>';
+  const res = await api('GET', '/api/admin/staff');
+  if (!res.ok) { el.innerHTML = '<span style="font-size:13px;color:#cf9b92;">Failed to load team.</span>'; return; }
+  staffList = await res.json();
+  renderStaff();
+}
+
+function renderStaff() {
+  const el = document.getElementById('staff-list');
+  const active = staffList.filter(u => !u.deletedAt && u.active);
+  const inactive = staffList.filter(u => !u.deletedAt && !u.active);
+
+  if (!staffList.length) {
+    el.innerHTML = `<div style="text-align:center;padding:60px 24px;color:rgba(247,243,237,0.25);font-size:14px;">No team members yet. Add your first contractor or employee above.</div>`;
+    return;
+  }
+
+  const renderRow = (u) => {
+    const statusBadge = u.pending
+      ? '<span style="font-size:11px;padding:2px 9px;border-radius:100px;background:rgba(232,168,124,0.1);border:1px solid rgba(232,168,124,0.25);color:rgba(232,168,124,0.9);">Invite pending</span>'
+      : u.active
+        ? '<span style="font-size:11px;padding:2px 9px;border-radius:100px;background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.25);color:rgba(109,191,123,0.9);">Active</span>'
+        : '<span style="font-size:11px;padding:2px 9px;border-radius:100px;background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.1);color:rgba(247,243,237,0.3);">Inactive</span>';
+    const roleLabel = u.role === 'employee' ? 'Employee' : 'Contractor';
+    const clientCount = (u.assignedClients||[]).length;
+    return `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgba(247,243,237,0.06);">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:500;color:#f7f3ed;">${esc(u.name)}</div>
+          <div style="font-size:12px;color:rgba(247,243,237,0.35);margin-top:2px;">${esc(u.email)} &middot; ${roleLabel} &middot; ${clientCount} client${clientCount!==1?'s':''} assigned</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+          ${statusBadge}
+          <button onclick="openStaffPermissions('${u.id}')" style="background:none;border:1px solid rgba(247,243,237,0.15);border-radius:7px;padding:6px 12px;font-family:'Outfit',sans-serif;font-size:12px;color:rgba(247,243,237,0.6);cursor:pointer;" onmouseover="this.style.color='rgba(247,243,237,0.9)'" onmouseout="this.style.color='rgba(247,243,237,0.6)'">Manage</button>
+          <button onclick="toggleStaffActive('${u.id}','${u.active}')" style="background:none;border:1px solid rgba(247,243,237,0.1);border-radius:7px;padding:6px 12px;font-family:'Outfit',sans-serif;font-size:12px;color:rgba(247,243,237,0.4);cursor:pointer;" onmouseover="this.style.color='rgba(247,243,237,0.7)'" onmouseout="this.style.color='rgba(247,243,237,0.4)'">${u.active ? 'Deactivate' : 'Activate'}</button>
+        </div>
+      </div>
+    `;
+  };
+
+  el.innerHTML = `
+    <div style="background:#1e1c1a;border:1px solid rgba(247,243,237,0.08);border-radius:14px;overflow:hidden;">
+      ${active.map(renderRow).join('')}
+      ${inactive.length ? `
+        <div style="padding:12px 20px 4px;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.2);">Inactive</div>
+        ${inactive.map(renderRow).join('')}
+      ` : ''}
+    </div>
+  `;
+}
+
+function openStaffModal() {
+  document.getElementById('sm-id').value = '';
+  document.getElementById('sm-name').value = '';
+  document.getElementById('sm-email').value = '';
+  document.getElementById('sm-title').textContent = 'Add team member';
+  document.getElementById('sm-save-btn').textContent = 'Send invite';
+  document.getElementById('sm-error').style.display = 'none';
+  const ov = document.getElementById('staff-modal-overlay');
+  ov.style.opacity = '1'; ov.style.pointerEvents = 'all';
+  setTimeout(() => document.getElementById('sm-name').focus(), 100);
+}
+
+function closeStaffModal() {
+  const ov = document.getElementById('staff-modal-overlay');
+  ov.style.opacity = '0'; ov.style.pointerEvents = 'none';
+}
+
+async function saveStaffMember() {
+  const btn = document.getElementById('sm-save-btn');
+  const errEl = document.getElementById('sm-error');
+  const name = document.getElementById('sm-name').value.trim();
+  const email = document.getElementById('sm-email').value.trim();
+  errEl.style.display = 'none';
+  if (!name || !email) { errEl.textContent = 'Name and email are required.'; errEl.style.display = 'block'; return; }
+  btn.disabled = true; btn.textContent = 'Sending…';
+  const res = await api('POST', '/api/admin/staff', { name, email });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    errEl.textContent = data.error || 'Failed to create account.';
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Send invite';
+    return;
+  }
+  closeStaffModal();
+  showToast(`Invite sent to ${name}`);
+  await loadStaff();
+}
+
+async function toggleStaffActive(id, currentlyActive) {
+  const action = currentlyActive === 'true' ? 'deactivate' : 'activate';
+  const label = action === 'deactivate' ? 'Deactivate' : 'Activate';
+  if (action === 'deactivate' && !confirm('Deactivating this account will immediately remove their access. Continue?')) return;
+  const res = await api('PUT', '/api/admin/staff', { id, action });
+  if (res.ok) {
+    showToast(`Account ${action}d`);
+    await loadStaff();
+  } else {
+    const d = await res.json().catch(() => ({}));
+    showToast(d.error || 'Failed to update account.', 'error');
+  }
+}
+
+// ── Staff permissions overlay ─────────────────────────────────────────────
+let _spStaffId = null;
+
+function openStaffPermissions(staffId) {
+  const user = staffList.find(u => u.id === staffId);
+  if (!user) return;
+  _spStaffId = staffId;
+  document.getElementById('sp-name-label').textContent = user.name;
+  renderPermissionsBody(user);
+  const ov = document.getElementById('staff-permissions-overlay');
+  ov.style.opacity = '1'; ov.style.pointerEvents = 'all';
+}
+
+function closeStaffPermissions() {
+  const ov = document.getElementById('staff-permissions-overlay');
+  ov.style.opacity = '0'; ov.style.pointerEvents = 'none';
+  _spStaffId = null;
+}
+
+function renderPermissionsBody(user) {
+  const assignedClients = user.assignedClients || [];
+  const modules = user.modules || [];
+  const dirCategories = user.directoryAccess?.categories || [];
+  const hiddenContacts = user.directoryAccess?.hiddenContacts || [];
+
+  // Clients section
+  const activeClients = clients.filter(c => !c.deleted && c.active);
+  const clientCheckboxes = activeClients.map(c => `
+    <label style="display:flex;align-items:center;gap:8px;padding:7px 0;cursor:pointer;">
+      <input type="checkbox" value="${c.id}" ${assignedClients.includes(c.id) ? 'checked' : ''} onchange="updateStaffClients()" style="accent-color:#bd7a70;width:14px;height:14px;">
+      <span style="font-size:13.5px;color:rgba(247,243,237,0.75);">${esc(c.name)}</span>
+    </label>
+  `).join('');
+
+  // Modules section
+  const moduleCheckboxes = STAFF_MODULES.map(m => `
+    <label style="display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;">
+      <input type="checkbox" value="${m.id}" ${modules.includes(m.id) ? 'checked' : ''} onchange="updateStaffModules()" style="accent-color:#bd7a70;width:14px;height:14px;">
+      <span style="font-size:13.5px;color:rgba(247,243,237,0.75);">${m.label}</span>
+    </label>
+  `).join('');
+
+  // Directory categories
+  const dirCheckboxes = DIR_PROF_LIST.map(p => `
+    <label style="display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;">
+      <input type="checkbox" class="dir-cat-cb" value="${p.key}" ${dirCategories.includes(p.key) ? 'checked' : ''} onchange="updateStaffDirectory()" style="accent-color:#bd7a70;width:14px;height:14px;">
+      <span style="font-size:13.5px;color:rgba(247,243,237,0.75);">${p.label}</span>
+    </label>
+  `).join('');
+
+  // Individual hidden contacts
+  const allPartners = window._latestPartners || [];
+  const contactToggles = allPartners.length ? allPartners.map(p => `
+    <label style="display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;">
+      <input type="checkbox" class="dir-hide-cb" value="${p.id}" ${hiddenContacts.includes(p.id) ? 'checked' : ''} onchange="updateStaffDirectory()" style="accent-color:#bd7a70;width:14px;height:14px;">
+      <span style="font-size:13px;color:rgba(247,243,237,0.6);">Hide <strong style="color:rgba(247,243,237,0.75);font-weight:500;">${esc(p.name)}</strong>${p.company ? ` (${esc(p.company)})` : ''}</span>
+    </label>
+  `).join('') : '<p style="font-size:13px;color:rgba(247,243,237,0.25);">No directory contacts yet.</p>';
+
+  const section = (title, content) => `
+    <div style="margin-bottom:22px;">
+      <div style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">${title}</div>
+      ${content}
+    </div>
+  `;
+
+  document.getElementById('sp-body').innerHTML = `
+    ${section('Assigned clients', activeClients.length ? `<div id="sp-clients">${clientCheckboxes}</div>` : '<p style="font-size:13px;color:rgba(247,243,237,0.25);">No active clients yet.</p>')}
+    <div style="border-top:1px solid rgba(247,243,237,0.07);margin-bottom:22px;"></div>
+    ${section('Module access', `<div id="sp-modules" style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">${moduleCheckboxes}</div>`)}
+    <div style="border-top:1px solid rgba(247,243,237,0.07);margin-bottom:22px;"></div>
+    ${section('Directory — allowed categories', `<div id="sp-dir-cats" style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">${dirCheckboxes}</div>`)}
+    ${section('Directory — hidden contacts', `<div id="sp-dir-hide">${contactToggles}</div>`)}
+    <div style="border-top:1px solid rgba(247,243,237,0.07);margin-bottom:22px;"></div>
+    ${section('Other permissions', `
+      <label style="display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;">
+        <input type="checkbox" id="sp-perm-commissions" ${user.permissions?.canViewCommissions ? 'checked' : ''} onchange="updateStaffPermissions()" style="accent-color:#bd7a70;width:14px;height:14px;">
+        <span style="font-size:13.5px;color:rgba(247,243,237,0.75);">Can view commission amounts in My Deals</span>
+      </label>
+    `)}
+    ${user.pending ? `
+      <div style="border-top:1px solid rgba(247,243,237,0.07);margin-top:6px;padding-top:18px;">
+        <p style="font-size:13px;color:rgba(232,168,124,0.7);margin-bottom:10px;">This account has not yet been set up — the invite is pending.</p>
+        <button onclick="resendStaffInvite('${user.id}')" style="background:none;border:1px solid rgba(247,243,237,0.15);border-radius:7px;padding:7px 14px;font-family:'Outfit',sans-serif;font-size:12.5px;color:rgba(247,243,237,0.5);cursor:pointer;">Resend invite email</button>
+      </div>
+    ` : ''}
+  `;
+}
+
+async function updateStaffClients() {
+  if (!_spStaffId) return;
+  const checked = [...document.querySelectorAll('#sp-clients input:checked')].map(cb => cb.value);
+  const res = await api('PUT', '/api/admin/staff', { id: _spStaffId, action: 'set-clients', assignedClients: checked });
+  if (res.ok) { showToast('Client access updated'); await loadStaff(); }
+  else showToast('Failed to update clients', 'error');
+}
+
+async function updateStaffModules() {
+  if (!_spStaffId) return;
+  const checked = [...document.querySelectorAll('#sp-modules input:checked')].map(cb => cb.value);
+  const res = await api('PUT', '/api/admin/staff', { id: _spStaffId, action: 'set-modules', modules: checked });
+  if (res.ok) showToast('Modules updated');
+  else showToast('Failed to update modules', 'error');
+}
+
+async function updateStaffDirectory() {
+  if (!_spStaffId) return;
+  const categories = [...document.querySelectorAll('.dir-cat-cb:checked')].map(cb => cb.value);
+  const hiddenContacts = [...document.querySelectorAll('.dir-hide-cb:checked')].map(cb => cb.value);
+  const res = await api('PUT', '/api/admin/staff', { id: _spStaffId, action: 'set-directory', categories, hiddenContacts });
+  if (res.ok) showToast('Directory access updated');
+  else showToast('Failed to update directory access', 'error');
+}
+
+async function updateStaffPermissions() {
+  if (!_spStaffId) return;
+  const canViewCommissions = document.getElementById('sp-perm-commissions').checked;
+  const res = await api('PUT', '/api/admin/staff', { id: _spStaffId, action: 'set-permissions', permissions: { canViewCommissions } });
+  if (res.ok) showToast('Permissions updated');
+  else showToast('Failed to update permissions', 'error');
+}
+
+async function resendStaffInvite(id) {
+  const res = await api('PUT', '/api/admin/staff', { id, action: 'resend-invite' });
+  if (res.ok) showToast('Invite resent');
+  else showToast('Failed to resend invite', 'error');
 }
 
 function renderReports() {

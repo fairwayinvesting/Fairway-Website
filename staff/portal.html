@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff Portal — Fairway Investing</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="theme-color" content="#181614">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;overflow:hidden;}
+    body{font-family:'Outfit',sans-serif;font-weight:300;background:#181614;color:#f7f3ed;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;}
+
+    /* ── Layout ──────────────────────────────────────────────────────── */
+    .layout{display:flex;height:100vh;overflow:hidden;}
+    .sidebar{width:220px;flex-shrink:0;background:#121110;border-right:1px solid rgba(247,243,237,0.07);display:flex;flex-direction:column;overflow-y:auto;}
+    .main{flex:1;overflow-y:auto;padding:36px 40px;}
+
+    /* ── Sidebar ─────────────────────────────────────────────────────── */
+    .sb-logo{display:flex;align-items:center;gap:10px;padding:28px 20px 20px;}
+    .sb-user{padding:12px 20px 18px;border-bottom:1px solid rgba(247,243,237,0.07);}
+    .sb-user-name{font-size:13px;font-weight:500;color:#f7f3ed;line-height:1.3;}
+    .sb-user-role{font-size:11px;color:rgba(247,243,237,0.3);margin-top:2px;}
+    nav{flex:1;padding:18px 12px 12px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13.5px;color:rgba(247,243,237,0.5);cursor:pointer;transition:all .15s;user-select:none;border:none;background:none;width:100%;text-align:left;font-family:'Outfit',sans-serif;}
+    .nav-item:hover{background:rgba(247,243,237,0.05);color:rgba(247,243,237,0.8);}
+    .nav-item.active{background:rgba(247,243,237,0.07);color:#f7f3ed;font-weight:500;}
+    .nav-item svg{opacity:0.6;flex-shrink:0;}
+    .nav-item.active svg{opacity:1;}
+    .sb-footer{padding:16px 20px;border-top:1px solid rgba(247,243,237,0.07);}
+    .sb-signout{font-size:12.5px;color:rgba(247,243,237,0.3);background:none;border:none;cursor:pointer;font-family:'Outfit',sans-serif;padding:0;transition:color .15s;}
+    .sb-signout:hover{color:rgba(247,243,237,0.6);}
+
+    /* ── Section ─────────────────────────────────────────────────────── */
+    .section{display:none;}
+    .section.active{display:block;}
+    .page-title{font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:#f7f3ed;margin-bottom:6px;}
+    .page-sub{font-size:14px;color:rgba(247,243,237,0.4);margin-bottom:28px;line-height:1.5;}
+    .eyebrow{font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:14px;}
+
+    /* ── Cards / panels ──────────────────────────────────────────────── */
+    .card{background:#1e1c1a;border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:22px 24px;margin-bottom:16px;}
+    .card-title{font-size:15px;font-weight:500;color:#f7f3ed;margin-bottom:4px;}
+    .card-sub{font-size:13px;color:rgba(247,243,237,0.4);line-height:1.5;}
+    .pill{display:inline-block;font-size:11px;padding:3px 10px;border-radius:100px;margin:2px 3px 2px 0;}
+    .pill-neutral{background:rgba(247,243,237,0.07);border:1px solid rgba(247,243,237,0.1);color:rgba(247,243,237,0.5);}
+    .pill-green{background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.25);color:rgba(109,191,123,0.9);}
+    .pill-amber{background:rgba(232,168,124,0.1);border:1px solid rgba(232,168,124,0.25);color:rgba(232,168,124,0.9);}
+    .pill-red{background:rgba(224,112,112,0.1);border:1px solid rgba(224,112,112,0.25);color:rgba(224,112,112,0.9);}
+    .pill-blue{background:rgba(122,184,232,0.1);border:1px solid rgba(122,184,232,0.2);color:rgba(122,184,232,0.8);}
+
+    /* ── Tables ──────────────────────────────────────────────────────── */
+    .data-table{width:100%;border-collapse:collapse;}
+    .data-table th{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);padding:0 16px 10px;text-align:left;}
+    .data-table td{font-size:13.5px;color:rgba(247,243,237,0.7);padding:12px 16px;border-top:1px solid rgba(247,243,237,0.06);}
+    .data-table tr:hover td{background:rgba(247,243,237,0.025);}
+
+    /* ── Dates ───────────────────────────────────────────────────────── */
+    .date-urgency-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;flex-shrink:0;}
+
+    /* ── Directory ───────────────────────────────────────────────────── */
+    .dir-pill{background:none;border:1px solid rgba(247,243,237,0.10);border-radius:100px;color:rgba(247,243,237,0.45);font-family:'Outfit',sans-serif;font-size:12px;padding:5px 13px;cursor:pointer;transition:all .15s;}
+    .dir-pill.active{background:rgba(247,243,237,0.08);border-color:rgba(247,243,237,0.22);color:#f7f3ed;font-weight:500;}
+
+    /* ── Empty state ─────────────────────────────────────────────────── */
+    .empty{text-align:center;padding:60px 24px;color:rgba(247,243,237,0.25);font-size:14px;}
+
+    /* ── Search ──────────────────────────────────────────────────────── */
+    .search-wrap{position:relative;margin-bottom:20px;}
+    .search-wrap input{width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:10px 14px 10px 36px;font-family:'Outfit',sans-serif;font-size:13.5px;color:#f7f3ed;outline:none;}
+    .search-wrap input:focus{border-color:rgba(247,243,237,0.2);}
+    .search-wrap .search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);opacity:0.3;pointer-events:none;}
+
+    /* ── Brief expand ────────────────────────────────────────────────── */
+    .brief-toggle{background:none;border:none;color:#bd7a70;font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;padding:0;margin-top:10px;}
+    .brief-toggle:hover{color:#cf9b92;}
+    .brief-content{display:none;margin-top:12px;padding-top:12px;border-top:1px solid rgba(247,243,237,0.07);}
+    .brief-content.open{display:block;}
+    .brief-row{display:flex;gap:8px;margin-bottom:8px;font-size:13.5px;}
+    .brief-label{color:rgba(247,243,237,0.35);min-width:120px;flex-shrink:0;}
+    .brief-val{color:rgba(247,243,237,0.7);}
+
+    @media(max-width:768px){
+      .layout{flex-direction:column;}
+      .sidebar{width:100%;height:auto;border-right:none;border-bottom:1px solid rgba(247,243,237,0.07);}
+      .main{padding:24px 20px;}
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <!-- ── Sidebar ────────────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <img src="/logo-icon.png" alt="" style="height:24px;width:auto;">
+      <img src="/logo-word.png" alt="Fairway" style="height:16px;width:auto;opacity:0.85;">
+    </div>
+    <div class="sb-user">
+      <div class="sb-user-name" id="sb-name">—</div>
+      <div class="sb-user-role" id="sb-role">Contractor</div>
+    </div>
+    <nav id="nav"></nav>
+    <div class="sb-footer">
+      <button class="sb-signout" id="signout-btn">Sign out</button>
+    </div>
+  </aside>
+
+  <!-- ── Main content ───────────────────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- Clients -->
+    <div class="section" id="sec-clients">
+      <h1 class="page-title">Clients</h1>
+      <p class="page-sub" id="clients-sub">Your assigned clients and their buying briefs.</p>
+      <div id="clients-list"></div>
+    </div>
+
+    <!-- Pipeline -->
+    <div class="section" id="sec-pipeline">
+      <h1 class="page-title">Pipeline</h1>
+      <p class="page-sub">Track the stage of your assigned clients.</p>
+      <div id="pipeline-list"></div>
+    </div>
+
+    <!-- Dates -->
+    <div class="section" id="sec-dates">
+      <h1 class="page-title">Dates</h1>
+      <p class="page-sub">Transaction dates for your assigned clients.</p>
+      <div id="dates-list"></div>
+    </div>
+
+    <!-- Directory -->
+    <div class="section" id="sec-directory">
+      <h1 class="page-title">Directory</h1>
+      <p class="page-sub">Professional contacts for sourcing and progressing properties.</p>
+      <div id="dir-filters" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;"></div>
+      <div class="search-wrap">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="dir-search" placeholder="Search contacts…" oninput="renderDirectory()">
+      </div>
+      <div id="directory-list"></div>
+    </div>
+
+    <!-- No access placeholder -->
+    <div class="section" id="sec-noaccess">
+      <div class="empty" style="padding-top:100px;">
+        <p style="font-size:32px;margin-bottom:12px;">🔒</p>
+        <p style="font-size:16px;color:rgba(247,243,237,0.4);margin-bottom:8px;">No modules available</p>
+        <p style="font-size:13px;">Contact Luke to get access to the platform modules.</p>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let me = null;
+let allClients = [];
+let allDates = [];
+let allDirectory = [];
+let allPipeline = [];
+let dirFilter = 'all';
+
+const STAGE_LABELS = {
+  lead:'Lead', qualify:'Qualifying', brief:'Brief', search:'Searching',
+  presented:'Property Presented', contract:'Under Contract',
+  settled:'Settled', paused:'Paused', inactive:'Inactive',
+};
+
+const DIR_PROFESSIONS = [
+  { key:'property-manager',   label:'Property Managers' },
+  { key:'conveyancer',        label:'Conveyancers' },
+  { key:'sales-agent',        label:'Sales Agents' },
+  { key:'mortgage-broker',    label:'Mortgage Brokers' },
+  { key:'accountant',         label:'Accountants' },
+  { key:'building-pest',      label:'Building & Pest' },
+  { key:'financial-planner',  label:'Financial Planners' },
+  { key:'buyers-agent',       label:"Buyers Agents" },
+  { key:'trade',              label:'Trades' },
+  { key:'other',              label:'Other' },
+];
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt(n) { return Number(n).toLocaleString('en-AU'); }
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '—'; }
+
+// ── Init ───────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const r = await fetch('/api/staff/me');
+    if (!r.ok) { window.location = '/staff/'; return; }
+    me = await r.json();
+  } catch { window.location = '/staff/'; return; }
+
+  document.getElementById('sb-name').textContent = me.name || '—';
+  document.getElementById('sb-role').textContent = me.role === 'employee' ? 'Employee' : 'Contractor';
+  buildNav();
+
+  document.getElementById('signout-btn').addEventListener('click', async () => {
+    await fetch('/api/staff/logout', { method: 'POST' });
+    window.location = '/staff/';
+  });
+
+  // Load data for enabled modules
+  const loads = [];
+  if (hasModule('clients'))   loads.push(loadClients());
+  if (hasModule('pipeline'))  loads.push(loadPipeline());
+  if (hasModule('dates'))     loads.push(loadDates());
+  if (hasModule('directory')) loads.push(loadDirectory());
+  await Promise.allSettled(loads);
+
+  // Show first available section
+  const first = getFirstModule();
+  if (first) showSection(first);
+  else showSection('noaccess');
+}
+
+function hasModule(m) { return Array.isArray(me?.modules) && me.modules.includes(m); }
+
+function getFirstModule() {
+  const order = ['clients','pipeline','dates','directory'];
+  return order.find(m => hasModule(m)) || null;
+}
+
+// ── Nav ────────────────────────────────────────────────────────────────────
+const NAV_ITEMS = [
+  { id:'clients',   label:'Clients',   icon:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' },
+  { id:'pipeline',  label:'Pipeline',  icon:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>' },
+  { id:'dates',     label:'Dates',     icon:'<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' },
+  { id:'directory', label:'Directory', icon:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>' },
+];
+
+function buildNav() {
+  const nav = document.getElementById('nav');
+  nav.innerHTML = NAV_ITEMS
+    .filter(item => hasModule(item.id))
+    .map(item => `
+      <button class="nav-item" id="nav-${item.id}" onclick="showSection('${item.id}')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${item.icon}</svg>
+        ${item.label}
+      </button>
+    `).join('');
+}
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const sec = document.getElementById('sec-' + id);
+  if (sec) sec.classList.add('active');
+  const nav = document.getElementById('nav-' + id);
+  if (nav) nav.classList.add('active');
+}
+
+// ── Clients ────────────────────────────────────────────────────────────────
+async function loadClients() {
+  try {
+    const r = await fetch('/api/staff/clients');
+    if (r.ok) allClients = await r.json();
+  } catch {}
+  renderClients();
+}
+
+function renderClients() {
+  const el = document.getElementById('clients-list');
+  if (!allClients.length) {
+    document.getElementById('clients-sub').textContent = 'No clients have been assigned to you yet.';
+    el.innerHTML = '<div class="empty">No clients assigned. Luke will assign clients to you when ready.</div>';
+    return;
+  }
+  document.getElementById('clients-sub').textContent = `${allClients.length} client${allClients.length !== 1 ? 's' : ''} assigned to you.`;
+  el.innerHTML = allClients.map(c => renderClientCard(c)).join('');
+}
+
+function renderClientCard(c) {
+  const stage = STAGE_LABELS[c.stage] || c.stage || '—';
+  const markets = (c.markets || []).slice(0,4).map(m => `<span class="pill pill-neutral">${esc(m)}</span>`).join('');
+  const budget = formatBudget(c);
+
+  const briefRows = buildBriefRows(c);
+  const briefHtml = briefRows.length ? `
+    <button class="brief-toggle" onclick="toggleBrief('brief-${c.id}')">View buying brief ↓</button>
+    <div class="brief-content" id="brief-${c.id}">
+      ${briefRows.map(([l,v]) => `<div class="brief-row"><span class="brief-label">${esc(l)}</span><span class="brief-val">${v}</span></div>`).join('')}
+      ${c.briefText ? `<div style="margin-top:12px;font-size:13.5px;color:rgba(247,243,237,0.6);line-height:1.6;white-space:pre-wrap;">${esc(c.briefText)}</div>` : ''}
+    </div>
+  ` : '';
+
+  return `
+    <div class="card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;">
+        <div>
+          <div class="card-title">${esc(c.name)}</div>
+          <div class="card-sub" style="margin-top:3px;">${esc(stage)}${budget ? ' &middot; ' + esc(budget) : ''}</div>
+        </div>
+      </div>
+      ${markets ? `<div style="margin-bottom:8px;">${markets}</div>` : ''}
+      ${briefHtml}
+    </div>
+  `;
+}
+
+function formatBudget(c) {
+  const min = c.budgetMin || c.budget;
+  const max = c.budgetMax;
+  if (min && max) return `$${fmt(min)} – $${fmt(max)}`;
+  if (min) return `Up to $${fmt(min)}`;
+  return '';
+}
+
+function buildBriefRows(c) {
+  const rows = [];
+  if ((c.propertyTypes||[]).length) rows.push(['Property types', c.propertyTypes.join(', ')]);
+  if (c.targetYield) rows.push(['Target yield', c.targetYield + '%+']);
+  if (c.strategy) rows.push(['Strategy', c.strategy]);
+  return rows;
+}
+
+function toggleBrief(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const open = el.classList.toggle('open');
+  const btn = el.previousElementSibling;
+  if (btn) btn.textContent = open ? 'Hide buying brief ↑' : 'View buying brief ↓';
+}
+
+// ── Pipeline ───────────────────────────────────────────────────────────────
+async function loadPipeline() {
+  try {
+    const r = await fetch('/api/staff/pipeline');
+    if (r.ok) allPipeline = await r.json();
+  } catch {}
+  renderPipeline();
+}
+
+function renderPipeline() {
+  const el = document.getElementById('pipeline-list');
+  if (!allPipeline.length) {
+    el.innerHTML = '<div class="empty">No pipeline data yet.</div>';
+    return;
+  }
+  el.innerHTML = `
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table class="data-table">
+        <thead><tr>
+          <th>Client</th>
+          <th>Stage</th>
+          <th>Markets</th>
+        </tr></thead>
+        <tbody>
+          ${allPipeline.map(c => {
+            const stage = STAGE_LABELS[c.stage] || c.stage || '—';
+            const stageClass = getStageClass(c.stage);
+            const markets = (c.markets||[]).slice(0,3).map(m => `<span class="pill pill-neutral" style="font-size:11px;">${esc(m)}</span>`).join('');
+            return `<tr>
+              <td style="font-weight:500;color:#f7f3ed;">${esc(c.name)}</td>
+              <td><span class="pill ${stageClass}">${esc(stage)}</span></td>
+              <td>${markets || '<span style="color:rgba(247,243,237,0.25);">—</span>'}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function getStageClass(stage) {
+  if (['settled'].includes(stage)) return 'pill-green';
+  if (['contract'].includes(stage)) return 'pill-amber';
+  if (['inactive','paused'].includes(stage)) return 'pill-red';
+  return 'pill-blue';
+}
+
+// ── Dates ──────────────────────────────────────────────────────────────────
+async function loadDates() {
+  try {
+    const r = await fetch('/api/staff/dates');
+    if (r.ok) allDates = await r.json();
+  } catch {}
+  renderDates();
+}
+
+function renderDates() {
+  const el = document.getElementById('dates-list');
+  const clientsWithDates = allDates.filter(d => d.milestones && d.milestones.length);
+  if (!clientsWithDates.length) {
+    el.innerHTML = '<div class="empty">No transaction dates on record for your clients.</div>';
+    return;
+  }
+
+  el.innerHTML = clientsWithDates.map(d => {
+    const sorted = [...d.milestones].sort((a,b) => new Date(a.date) - new Date(b.date));
+    const rows = sorted.map(m => {
+      const days = Math.round((new Date(m.date) - new Date()) / 86400000);
+      const dotColor = days < 0 ? '#e07070' : days <= 7 ? '#e8a87c' : days <= 14 ? '#f0c060' : '#6dbf7b';
+      const dayLabel = days < 0 ? `${Math.abs(days)}d overdue` : days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days} days`;
+      return `<tr>
+        <td><span class="date-urgency-dot" style="background:${dotColor};"></span>${esc(m.label)}</td>
+        <td>${fmtDate(m.date)}</td>
+        <td style="font-size:12px;color:rgba(247,243,237,0.4);">${dayLabel}</td>
+      </tr>`;
+    }).join('');
+
+    return `
+      <div class="card" style="margin-bottom:20px;">
+        <div style="font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:14px;">${esc(d.clientName)}</div>
+        <table class="data-table" style="margin:-4px -4px;">
+          <thead><tr>
+            <th>Milestone</th>
+            <th>Date</th>
+            <th>Countdown</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── Directory ──────────────────────────────────────────────────────────────
+async function loadDirectory() {
+  try {
+    const r = await fetch('/api/staff/directory');
+    if (r.ok) allDirectory = await r.json();
+  } catch {}
+  buildDirFilters();
+  renderDirectory();
+}
+
+function buildDirFilters() {
+  const presentTypes = new Set(allDirectory.map(p => p.type));
+  const available = DIR_PROFESSIONS.filter(p => presentTypes.has(p.key));
+  const filtersEl = document.getElementById('dir-filters');
+  if (!available.length) { filtersEl.style.display = 'none'; return; }
+  filtersEl.innerHTML = `
+    <button class="dir-pill ${dirFilter==='all'?'active':''}" onclick="dirFilter='all';renderDirectory();buildDirFilters()">All</button>
+    ${available.map(p => `<button class="dir-pill ${dirFilter===p.key?'active':''}" onclick="dirFilter='${p.key}';renderDirectory();buildDirFilters()">${esc(p.label)}</button>`).join('')}
+  `;
+}
+
+function renderDirectory() {
+  const el = document.getElementById('directory-list');
+  const q = document.getElementById('dir-search').value.toLowerCase();
+  let contacts = allDirectory;
+  if (dirFilter !== 'all') contacts = contacts.filter(p => p.type === dirFilter);
+  if (q) contacts = contacts.filter(p =>
+    (p.name||'').toLowerCase().includes(q) ||
+    (p.company||'').toLowerCase().includes(q) ||
+    (p.state||'').toLowerCase().includes(q)
+  );
+
+  if (!contacts.length) {
+    el.innerHTML = '<div class="empty">No contacts match your filter.</div>';
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table class="data-table">
+        <thead><tr>
+          <th>Name</th>
+          <th>Company</th>
+          <th>Type</th>
+          <th>Location</th>
+          <th>Contact</th>
+        </tr></thead>
+        <tbody>
+          ${contacts.map(p => {
+            const typeLabel = DIR_PROFESSIONS.find(d => d.key === p.type)?.label || p.type || '—';
+            return `<tr>
+              <td style="font-weight:500;color:#f7f3ed;">${esc(p.name)}</td>
+              <td>${esc(p.company||'—')}</td>
+              <td><span class="pill pill-neutral" style="font-size:11px;">${esc(typeLabel)}</span></td>
+              <td style="font-size:13px;">${esc(p.state||p.location||'—')}</td>
+              <td style="font-size:12.5px;">
+                ${p.phone ? `<a href="tel:${esc(p.phone)}" style="color:rgba(247,243,237,0.5);text-decoration:none;">${esc(p.phone)}</a>` : ''}
+                ${p.phone && p.email ? '<br>' : ''}
+                ${p.email ? `<a href="mailto:${esc(p.email)}" style="color:#bd7a70;text-decoration:none;">${esc(p.email)}</a>` : ''}
+                ${!p.phone && !p.email ? '<span style="color:rgba(247,243,237,0.2);">—</span>' : ''}
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+init();
+</script>
+</body>
+</html>
