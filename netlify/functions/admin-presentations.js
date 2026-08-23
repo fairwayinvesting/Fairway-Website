@@ -11,6 +11,10 @@ const json = (data, status = 200) =>
 
 function genToken() { return crypto.randomBytes(20).toString('hex'); }
 
+const REVIEW_STATUSES = ['draft','ready_for_review','admin_reviewing','approved','allocated','sent'];
+// Statuses that only admin can set (beyond ready_for_review)
+const ADMIN_ONLY_STATUSES = new Set(['admin_reviewing','approved','allocated','sent']);
+
 function buildPropertyEmail(clientName, address, suburb, price, propertyType, bedrooms, bathrooms, carspaces, link) {
   const firstName = clientName.split(' ')[0];
   const typeLabels = { house: 'House', unit: 'Unit', townhouse: 'Townhouse', duplex: 'Duplex', land: 'Land' };
@@ -84,13 +88,21 @@ function defaultPres(fields) {
     tokens: {}, sentClients: [],
     clientAcquisitions: {},
     previewToken: null,
+    // Sourcing attribution
+    shortlistId: null,
+    sourcedById: 'admin',
+    sourcedByName: 'Luke',
+    sourcedByRole: 'admin',
+    // Review workflow
+    reviewStatus: 'draft',
+    reviewStatusUpdatedAt: new Date().toISOString(),
+    // Contractor nominations
+    suitableClients: [],
     createdAt: new Date().toISOString(),
     ...fields,
   };
 }
 
-// Views are stored separately in fairway-presentation-views keyed by presId.
-// This avoids rewriting the entire presentations array on every client page view.
 const pvStore = () => getStore('fairway-presentation-views');
 
 async function getViews(presId) {
@@ -101,7 +113,6 @@ async function setViews(presId, views) {
   await pvStore().setJSON(presId, views);
 }
 
-// One-time migration: strips views from the 'all' blob and writes them to per-id blobs.
 async function migrateViewsIfNeeded(presentations, presStore) {
   const done = await pvStore().get('_migrated', { type: 'json' }).catch(() => null);
   if (done) return;
@@ -127,13 +138,15 @@ export default async (req) => {
   const store = getStore('fairway-presentations');
   const presentations = (await store.get('all', { type: 'json' })) || [];
 
-  // Run one-time migration to extract views from 'all' into per-id blobs
   await migrateViewsIfNeeded(presentations, store);
 
   if (req.method === 'GET') {
-    // Fetch all view blobs in parallel and merge into each presentation for the admin panel
+    const { searchParams } = new URL(req.url);
+    const filterReviewStatus = searchParams.get('reviewStatus') || '';
     const viewResults = await Promise.all(presentations.map(p => getViews(p.id)));
-    return json(presentations.map((p, i) => ({ ...p, views: viewResults[i] })));
+    let result = presentations.map((p, i) => ({ ...p, views: viewResults[i] }));
+    if (filterReviewStatus) result = result.filter(p => p.reviewStatus === filterReviewStatus);
+    return json(result);
   }
 
   if (req.method === 'POST') {
@@ -160,7 +173,6 @@ export default async (req) => {
     const { id, action } = body;
     if (!id) return json({ error: 'id required' }, 400);
 
-    // Preview uses HMAC — no Blobs read needed, so no eventual-consistency race
     if (action === 'preview') {
       const sig = crypto.createHmac('sha256', process.env.ADMIN_PASSWORD || 'fp-preview')
                         .update(id).digest('hex').slice(0, 32);
@@ -170,24 +182,47 @@ export default async (req) => {
     const idx = presentations.findIndex(p => p.id === id);
     if (idx === -1) return json({ error: 'Not found' }, 404);
 
+    // Admin-only: advance review status
+    if (action === 'set-review-status') {
+      const { reviewStatus } = body;
+      if (!REVIEW_STATUSES.includes(reviewStatus)) return json({ error: 'Invalid review status' }, 400);
+      presentations[idx].reviewStatus = reviewStatus;
+      presentations[idx].reviewStatusUpdatedAt = new Date().toISOString();
+      await store.setJSON('all', presentations);
+      appendAudit('review_status_changed', `"${presentations[idx].address}" → ${reviewStatus}`);
+      return json({ ok: true, pres: presentations[idx] });
+    }
+
+    // Admin-only: update suitable clients list (admin can also edit)
+    if (action === 'set-suitable-clients') {
+      presentations[idx].suitableClients = Array.isArray(body.suitableClients) ? body.suitableClients : [];
+      await store.setJSON('all', presentations);
+      return json({ ok: true });
+    }
+
+    // Admin-only: update attribution (corrections)
+    if (action === 'set-attribution') {
+      if (body.sourcedById !== undefined) presentations[idx].sourcedById = body.sourcedById;
+      if (body.sourcedByName !== undefined) presentations[idx].sourcedByName = body.sourcedByName;
+      if (body.sourcedByRole !== undefined) presentations[idx].sourcedByRole = body.sourcedByRole;
+      await store.setJSON('all', presentations);
+      appendAudit('attribution_updated', `Updated attribution on "${presentations[idx].address}"`);
+      return json({ ok: true });
+    }
+
     if (action === 'send' || action === 'resend' || action === 'notify') {
       const clientStore = getStore('fairway-clients');
       const allClients = (await clientStore.get('all', { type: 'json' })) || [];
       const pres = presentations[idx];
       let toSend;
       if (action === 'notify') {
-        // Send (or resend) to all unrevoked assigned clients
         toSend = pres.assignedClients.filter(cid => !(pres.revokedClients||[]).includes(cid));
       } else if (action === 'resend') {
         const { clientId } = body;
         toSend = clientId ? [clientId] : [];
       } else {
-        // First send — only clients who haven't received it yet.
-        // If the frontend passes explicit targetClients, use those directly to avoid
-        // reading stale Blob data immediately after a save (eventual-consistency race).
         if (Array.isArray(body.targetClients) && body.targetClients.length) {
           toSend = body.targetClients.filter(cid => !(pres.revokedClients||[]).includes(cid));
-          // Ensure they're in assignedClients in case the blob was stale on the save step
           for (const cid of toSend) {
             if (!pres.assignedClients.includes(cid)) pres.assignedClients.push(cid);
           }
@@ -214,15 +249,20 @@ export default async (req) => {
           sent++;
         } catch (err) { console.error('Send failed:', err?.message || err); }
       }
+      // When a presentation is sent, advance reviewStatus to 'sent'
+      if (sent > 0 && presentations[idx].reviewStatus !== 'sent') {
+        presentations[idx].reviewStatus = 'sent';
+        presentations[idx].reviewStatusUpdatedAt = new Date().toISOString();
+      }
       presentations[idx] = pres;
       if (tokensDirty || sent > 0) await store.setJSON('all', presentations);
       if (sent > 0) appendAudit('presentation_sent', `Sent "${pres.address}" to ${sent} client${sent !== 1 ? 's' : ''}`);
       return json({ ok: true, sent, sentClients: pres.sentClients });
     }
 
-    // Regular update — merge all known fields
+    // Regular update
     const pres = presentations[idx];
-    const prevRevokedCount = (pres.revokedClients || []).length; // capture before any mutations
+    const prevRevokedCount = (pres.revokedClients || []).length;
     const fields = ['address','suburb','price','bedrooms','bathrooms','carspaces','landSize',
                     'propertyType','propertyDescription','summary','highlights','knownIssues','agentSubmission','images','videos','cashflow',
                     'riskProfile','demographics','customSections',
@@ -236,11 +276,7 @@ export default async (req) => {
       const prevAssigned = pres.assignedClients || [];
       const prevRevokedSet = new Set(pres.revokedClients || []);
       const newSelectedSet = new Set(body.assignedClients);
-
-      // Previously active = assigned but not yet revoked
       const prevActive = prevAssigned.filter(cid => !prevRevokedSet.has(cid));
-
-      // Grant: generate token for newly selected; initialize their view entry
       presViews = await getViews(pres.id);
       for (const cid of body.assignedClients) {
         if (!pres.tokens[cid]) {
@@ -248,20 +284,19 @@ export default async (req) => {
           presViews[cid] = { firstViewedAt: null, viewCount: 0 };
           viewsUpdated = true;
         }
-        pres.revokedClients = (pres.revokedClients || []).filter(id => id !== cid);
+        pres.revokedClients = (pres.revokedClients || []).filter(rid => rid !== cid);
       }
-
-      // Revoke: was active, no longer selected → add to revokedClients
-      // Keep in assignedClients so the token lookup in property-view.js still finds the
-      // presentation and reaches the revoked check (→ 403 "access removed"), not 404.
       for (const cid of prevActive) {
         if (!newSelectedSet.has(cid) && !(pres.revokedClients || []).includes(cid)) {
           pres.revokedClients = [...(pres.revokedClients || []), cid];
         }
       }
-
-      // assignedClients = union of all previously assigned + newly selected
       pres.assignedClients = [...new Set([...prevAssigned, ...body.assignedClients])];
+      // When a client is assigned, mark as allocated if not yet sent
+      if (body.assignedClients.length > 0 && !['allocated','sent'].includes(pres.reviewStatus)) {
+        pres.reviewStatus = 'allocated';
+        pres.reviewStatusUpdatedAt = new Date().toISOString();
+      }
     }
 
     presentations[idx] = pres;
@@ -273,7 +308,6 @@ export default async (req) => {
     if (nowRevokedCount > prevRevokedCount) {
       appendAudit('access_revoked', `Revoked access on "${pres.address}" (${nowRevokedCount} client${nowRevokedCount !== 1 ? 's' : ''} total)`);
     }
-    // Merge current views into response so admin panel stays in sync
     const currentViews = presViews || await getViews(pres.id);
     return json({ ok: true, pres: { ...pres, views: currentViews } });
   }

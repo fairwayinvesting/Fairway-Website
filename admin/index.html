@@ -221,7 +221,17 @@
     .sl-status{font-size:10px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;border-radius:100px;padding:3px 9px;}
     .sl-s-to_review{background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.12);color:rgba(247,243,237,0.45);}
     .sl-s-shortlisted{background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.25);color:#6dbf7b;}
+    .sl-s-researching{background:rgba(122,184,232,0.1);border:1px solid rgba(122,184,232,0.2);color:rgba(122,184,232,0.85);}
+    .sl-s-moved_to_presentation{background:rgba(189,122,112,0.1);border:1px solid rgba(189,122,112,0.25);color:#cf9b92;}
+    .sl-s-rejected{background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.08);color:rgba(247,243,237,0.25);}
     .sl-s-passed{background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.08);color:rgba(247,243,237,0.25);}
+    .sl-sourced-by{font-size:11px;color:rgba(247,243,237,0.3);margin-top:3px;}
+    .pres-review-draft{background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.12);color:rgba(247,243,237,0.4);}
+    .pres-review-ready_for_review{background:rgba(232,168,124,0.12);border:1px solid rgba(232,168,124,0.3);color:rgba(232,168,124,0.95);}
+    .pres-review-admin_reviewing{background:rgba(122,184,232,0.1);border:1px solid rgba(122,184,232,0.2);color:rgba(122,184,232,0.85);}
+    .pres-review-approved{background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.25);color:#6dbf7b;}
+    .pres-review-allocated{background:rgba(189,122,112,0.1);border:1px solid rgba(189,122,112,0.25);color:#cf9b92;}
+    .pres-review-sent{background:rgba(247,243,237,0.07);border:1px solid rgba(247,243,237,0.15);color:rgba(247,243,237,0.6);}
 
     /* Buttons */
     .btn-primary{display:inline-flex;align-items:center;gap:8px;background:#bd7a70;border:none;border-radius:10px;padding:12px 22px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;color:#f7f3ed;cursor:pointer;transition:background .2s;}
@@ -1110,15 +1120,26 @@
           <button class="btn-primary" onclick="openPresModal()">+ New presentation</button>
         </div>
       </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+        <div id="pres-review-tabs" style="display:flex;gap:6px;">
+          <button class="sl-tab active" onclick="setPresReviewFilter('all',this)">All</button>
+          <button class="sl-tab" onclick="setPresReviewFilter('ready_for_review',this)" style="position:relative;">For review <span id="pres-review-badge" style="display:none;position:absolute;top:-4px;right:-4px;width:8px;height:8px;background:#e8a87c;border-radius:50%;"></span></button>
+          <button class="sl-tab" onclick="setPresReviewFilter('draft',this)">Draft</button>
+          <button class="sl-tab" onclick="setPresReviewFilter('approved',this)">Approved</button>
+          <button class="sl-tab" onclick="setPresReviewFilter('sent',this)">Sent</button>
+        </div>
+      </div>
       <div class="table-wrap">
         <table>
           <thead><tr>
             <th>Property</th>
+            <th>Sourced by</th>
+            <th>Review status</th>
             <th>Client</th>
             <th>Actions</th>
           </tr></thead>
           <tbody id="pres-tbody">
-            <tr class="empty-row"><td colspan="3">Loading…</td></tr>
+            <tr class="empty-row"><td colspan="5">Loading…</td></tr>
           </tbody>
         </table>
       </div>
@@ -1198,12 +1219,17 @@
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
         <div id="sl-tabs" class="sl-tabs">
           <button class="sl-tab active" onclick="setSlFilter('all',this)">All</button>
-          <button class="sl-tab" onclick="setSlFilter('to_review',this)">To review</button>
           <button class="sl-tab" onclick="setSlFilter('shortlisted',this)">Shortlisted</button>
-          <button class="sl-tab" onclick="setSlFilter('passed',this)">Passed</button>
+          <button class="sl-tab" onclick="setSlFilter('researching',this)">Researching</button>
+          <button class="sl-tab" onclick="setSlFilter('moved_to_presentation',this)">Promoted</button>
+          <button class="sl-tab" onclick="setSlFilter('rejected',this)">Rejected</button>
         </div>
         <select id="sl-client-filter" onchange="renderShortlist()" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:100px;color:rgba(247,243,237,0.6);font-family:'Outfit',sans-serif;font-size:12px;padding:6px 14px;cursor:pointer;">
           <option value="">All clients</option>
+        </select>
+        <select id="sl-sourced-filter" onchange="renderShortlist()" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:100px;color:rgba(247,243,237,0.6);font-family:'Outfit',sans-serif;font-size:12px;padding:6px 14px;cursor:pointer;">
+          <option value="">All sources</option>
+          <option value="admin">My properties</option>
         </select>
       </div>
       <div id="sl-grid" class="sl-grid"></div>
@@ -2116,6 +2142,31 @@
 
       <!-- Clients tab -->
       <div class="pres-tab-pane" id="pres-tab-clients">
+        <!-- Sourcing & review workflow — only visible when sourced by contractor -->
+        <div id="pres-review-panel" style="display:none;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.08);border-radius:12px;padding:18px;margin-bottom:24px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+            <div>
+              <p style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin:0 0 4px;">Sourced by contractor</p>
+              <p id="pres-sourced-by-label" style="font-size:14px;color:#f7f3ed;margin:0;"></p>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span style="font-size:12px;color:rgba(247,243,237,0.4);">Review status:</span>
+              <span id="pres-review-status-chip" class="sl-status"></span>
+              <select id="pres-review-status-select" onchange="adminAdvanceReviewStatus()" style="font-size:12px;padding:5px 10px;border-radius:8px;background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.12);color:#f7f3ed;font-family:'Outfit',sans-serif;">
+                <option value="draft">Draft</option>
+                <option value="ready_for_review">Ready for Review</option>
+                <option value="admin_reviewing">Reviewing</option>
+                <option value="approved">Approved</option>
+                <option value="allocated">Allocated</option>
+                <option value="sent">Sent</option>
+              </select>
+            </div>
+          </div>
+          <div id="pres-suitable-clients-section" style="display:none;">
+            <p style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin:0 0 8px;">Contractor suggestions</p>
+            <div id="pres-suitable-clients-list" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+          </div>
+        </div>
         <div class="pres-field-row-2" style="margin-bottom:20px;">
           <div class="field"><label>Presentation status</label>
             <select id="pres-status">
@@ -9254,7 +9305,7 @@ async function loadShortlist() {
   const res = await api('GET', '/api/admin/shortlist');
   if (res.ok) {
     shortlistItems = await res.json();
-    // Populate client filter dropdown with active clients who have shortlist items
+    // Populate client filter
     const clientFilter = document.getElementById('sl-client-filter');
     if (clientFilter) {
       const usedClientIds = new Set(shortlistItems.filter(i => i.clientId).map(i => i.clientId));
@@ -9263,13 +9314,24 @@ async function loadShortlist() {
       clientFilter.innerHTML = '<option value="">All clients</option>' +
         usedClients.map(c => `<option value="${c.id}"${current === c.id ? ' selected' : ''}>${esc(c.name)}</option>`).join('');
     }
+    // Populate sourced-by filter with unique contractors
+    const sourcedFilter = document.getElementById('sl-sourced-filter');
+    if (sourcedFilter) {
+      const contractors = new Map();
+      shortlistItems.forEach(i => {
+        if (i.sourcedById && i.sourcedByRole === 'contractor') contractors.set(i.sourcedById, i.sourcedByName || i.sourcedById);
+      });
+      const currentSrc = sourcedFilter.value;
+      sourcedFilter.innerHTML = '<option value="">All sources</option><option value="admin">My properties</option>' +
+        [...contractors.entries()].map(([id, name]) => `<option value="${id}"${currentSrc === id ? ' selected' : ''}>${esc(name)}</option>`).join('');
+    }
     renderShortlist();
   }
 }
 
 function setSlFilter(f, btn) {
   slFilter = f;
-  document.querySelectorAll('.sl-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#sl-tabs .sl-tab').forEach(t => t.classList.remove('active'));
   if (btn) btn.classList.add('active');
   renderShortlist();
 }
@@ -9278,27 +9340,38 @@ function renderShortlist() {
   const grid = document.getElementById('sl-grid');
   if (!grid) return;
   const clientFilterVal = document.getElementById('sl-client-filter')?.value || '';
+  const sourcedFilterVal = document.getElementById('sl-sourced-filter')?.value || '';
   let items = slFilter === 'all' ? shortlistItems : shortlistItems.filter(i => i.status === slFilter);
+  // Legacy status compat
+  if (slFilter === 'shortlisted') items = shortlistItems.filter(i => i.status === 'shortlisted' || i.status === 'to_review');
+  if (slFilter === 'rejected')    items = shortlistItems.filter(i => i.status === 'rejected' || i.status === 'passed');
   if (clientFilterVal) items = items.filter(i => i.clientId === clientFilterVal);
+  if (sourcedFilterVal === 'admin') items = items.filter(i => i.sourcedByRole === 'admin' || !i.sourcedById);
+  else if (sourcedFilterVal) items = items.filter(i => i.sourcedById === sourcedFilterVal);
   if (!items.length) {
     grid.innerHTML = `<p style="font-size:14px;color:rgba(247,243,237,0.25);padding:4px 0;">${slFilter === 'all' ? 'No properties on the shortlist yet.' : 'No properties with this status.'}</p>`;
     return;
   }
   const typeLabels = { house:'House', unit:'Unit', townhouse:'Townhouse', duplex:'Duplex', land:'Land' };
-  const statusLabels = { to_review:'To review', shortlisted:'Shortlisted', passed:'Passed' };
+  const statusLabels = { to_review:'Shortlisted', shortlisted:'Shortlisted', researching:'Researching', moved_to_presentation:'Promoted', rejected:'Rejected', passed:'Rejected' };
   grid.innerHTML = items.map(item => {
     const specs = [item.bedrooms && `${item.bedrooms} bed`, item.bathrooms && `${item.bathrooms} bath`, item.carspaces && `${item.carspaces} car`, item.landSize && `${item.landSize}m²`].filter(Boolean).join(' · ');
     const agentLine = item.source === 'agent' && item.agentName
       ? `<div class="sl-card-agent">From: <strong>${esc(item.agentName)}</strong>${item.agentAgency ? ` — ${esc(item.agentAgency)}` : ''}${item.agentPhone ? `<br>${esc(item.agentPhone)}` : ''}</div>`
       : item.source === 'own' ? `<div class="sl-card-agent" style="color:rgba(247,243,237,0.22);">Own research</div>` : '';
-    const nextStatus = item.status === 'to_review' ? 'shortlisted' : item.status === 'shortlisted' ? 'passed' : null;
-    const nextLabel  = item.status === 'to_review' ? 'Shortlist ✓' : item.status === 'shortlisted' ? 'Pass' : null;
+    const statusKey = item.status || 'shortlisted';
+    const sourcedLine = item.sourcedByName
+      ? `<div class="sl-sourced-by">Sourced by: ${esc(item.sourcedByName)}</div>`
+      : '';
+    const canEdit = item.status !== 'moved_to_presentation';
+    const canPromote = ['shortlisted','to_review','researching'].includes(item.status);
     return `<div class="sl-card">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px;">
         <div class="sl-card-address">${esc(item.address)}</div>
-        <span class="sl-status sl-s-${item.status}">${statusLabels[item.status] || item.status}</span>
+        <span class="sl-status sl-s-${statusKey}">${statusLabels[statusKey] || statusKey}</span>
       </div>
-      ${item.clientName ? `<div style="font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:rgba(189,122,112,0.7);margin-bottom:4px;">${esc(item.clientName)}</div>` : ''}
+      ${sourcedLine}
+      ${item.clientName ? `<div style="font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:rgba(189,122,112,0.7);margin-bottom:4px;margin-top:3px;">${esc(item.clientName)}</div>` : ''}
       ${item.suburb ? `<div class="sl-card-sub">${esc(item.suburb)}${item.state ? ' ' + esc(item.state) : ''} · ${esc(typeLabels[item.propertyType] || item.propertyType)}</div>` : ''}
       ${item.price ? `<div class="sl-card-price">${esc(item.price)}</div>` : ''}
       ${item.bankValuation ? `<div style="font-size:12px;color:rgba(109,191,123,0.8);margin-top:3px;">Bank val: ${esc(item.bankValuation)}${item.bankLender ? ` <span style="color:rgba(247,243,237,0.3);">· ${esc(item.bankLender)}</span>` : ''}</div>` : ''}
@@ -9306,12 +9379,32 @@ function renderShortlist() {
       ${item.notes ? `<div style="font-size:12px;color:rgba(247,243,237,0.35);margin-top:4px;line-height:1.5;">${esc(item.notes)}</div>` : ''}
       ${agentLine}
       <div class="sl-card-actions">
-        <button onclick="openSlModal('${item.id}')" class="btn-sm" style="font-size:12px;">Edit</button>
-        ${nextStatus ? `<button onclick="updateSlStatus('${item.id}','${nextStatus}')" class="btn-sm" style="font-size:12px;">${nextLabel}</button>` : ''}
-        ${item.status === 'passed' ? `<button onclick="updateSlStatus('${item.id}','to_review')" class="btn-sm" style="font-size:12px;color:rgba(247,243,237,0.4);">Restore</button>` : ''}
+        ${canEdit ? `<button onclick="openSlModal('${item.id}')" class="btn-sm" style="font-size:12px;">Edit</button>` : ''}
+        ${item.status === 'shortlisted' || item.status === 'to_review' ? `<button onclick="updateSlStatus('${item.id}','researching')" class="btn-sm" style="font-size:12px;">Researching</button>` : ''}
+        ${canPromote ? `<button onclick="moveSlToPresentation('${item.id}')" class="btn-sm btn-edit" style="font-size:12px;background:rgba(189,122,112,0.12);color:#cf9b92;">→ Presentation</button>` : ''}
+        ${item.status === 'moved_to_presentation' && item.movedToPresId ? `<button onclick="showSection('presentations')" class="btn-sm" style="font-size:12px;color:rgba(247,243,237,0.4);">View presentation</button>` : ''}
+        ${['shortlisted','to_review','researching'].includes(item.status) ? `<button onclick="updateSlStatus('${item.id}','rejected')" class="btn-sm" style="font-size:12px;color:rgba(247,243,237,0.3);">Reject</button>` : ''}
+        ${['rejected','passed'].includes(item.status) ? `<button onclick="updateSlStatus('${item.id}','shortlisted')" class="btn-sm" style="font-size:12px;color:rgba(247,243,237,0.4);">Restore</button>` : ''}
       </div>
     </div>`;
   }).join('');
+}
+
+async function moveSlToPresentation(id) {
+  if (!confirm('Move this property to a new Presentation? The shortlist entry will be marked as promoted.')) return;
+  const res = await api('PUT', '/api/admin/shortlist', { id, action: 'move-to-presentation' });
+  if (res.ok) {
+    const data = await res.json();
+    const idx = shortlistItems.findIndex(i => i.id === id);
+    if (idx !== -1) shortlistItems[idx] = data.item;
+    renderShortlist();
+    showToast('Moved to Presentations — opening now');
+    await loadPresentations();
+    showSection('presentations', document.querySelector('.snav-item[onclick*="presentations"]'));
+  } else {
+    const d = await res.json().catch(() => ({}));
+    showToast(d.error || 'Failed to move to presentation', 'error');
+  }
 }
 
 function openSlModal(itemId) {
@@ -9398,8 +9491,13 @@ async function saveSlItem() {
 
 async function updateSlStatus(id, status) {
   const res = await api('PUT', '/api/admin/shortlist', { id, status });
-  if (res.ok) { const item = shortlistItems.find(i => i.id === id); if (item) item.status = status; renderShortlist(); }
-  else { alert('Update failed.'); }
+  if (res.ok) {
+    const data = await res.json().catch(() => ({}));
+    const idx = shortlistItems.findIndex(i => i.id === id);
+    if (idx !== -1 && data.item) shortlistItems[idx] = data.item;
+    else if (idx !== -1) shortlistItems[idx].status = status;
+    renderShortlist();
+  } else { showToast('Update failed', 'error'); }
 }
 
 async function deleteSlItem() {
@@ -9433,13 +9531,36 @@ async function copyAgentLink() {
   }
 }
 
+let presReviewFilter = 'all';
+
+function setPresReviewFilter(f, btn) {
+  presReviewFilter = f;
+  document.querySelectorAll('#pres-review-tabs .sl-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderPresentations();
+}
+
 function renderPresentations() {
   const tbody = document.getElementById('pres-tbody');
-  if (!presentations.length) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="3">No presentations yet — click "New presentation" to start.</td></tr>';
+  const REVIEW_LABELS = {
+    draft:'Draft', ready_for_review:'Ready for Review', admin_reviewing:'Reviewing',
+    approved:'Approved', allocated:'Allocated', sent:'Sent',
+  };
+  // Update badge for ready_for_review
+  const reviewBadge = document.getElementById('pres-review-badge');
+  if (reviewBadge) {
+    const pendingCount = presentations.filter(p => p.reviewStatus === 'ready_for_review').length;
+    reviewBadge.style.display = pendingCount ? 'inline-block' : 'none';
+  }
+
+  let filtered = presentations;
+  if (presReviewFilter !== 'all') filtered = presentations.filter(p => (p.reviewStatus || 'draft') === presReviewFilter);
+
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">${presentations.length ? 'No presentations match this filter.' : 'No presentations yet — click "New presentation" to start.'}</td></tr>`;
     return;
   }
-  tbody.innerHTML = presentations.map(p => {
+  tbody.innerHTML = filtered.map(p => {
     const revokedList = p.revokedClients || [];
     const unrevoked = (p.assignedClients || []).filter(cid => !revokedList.includes(cid));
     const sentList = p.sentClients || [];
@@ -9452,10 +9573,25 @@ function renderPresentations() {
       : '';
     const expiry = p.expiresAt ? `<span style="color:rgba(247,243,237,0.25);"> · expires ${new Date(p.expiresAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}</span>` : '';
 
+    // Review status chip
+    const rs = p.reviewStatus || 'draft';
+    const reviewChip = `<span class="sl-status pres-review-${rs}" style="font-size:10px;">${REVIEW_LABELS[rs] || rs}</span>`;
+
+    // Sourcing
+    const sourcedBy = p.sourcedByName ? `<div style="font-size:12px;color:rgba(247,243,237,0.35);margin-top:2px;">${esc(p.sourcedByName)}</div>` : '<span style="color:rgba(247,243,237,0.2);">—</span>';
+
+    // Suitable clients nominated by contractor
+    const suitableHtml = (p.suitableClients||[]).length
+      ? `<div style="margin-top:4px;font-size:11px;color:rgba(247,243,237,0.3);">Suggested: ${p.suitableClients.map(sc => {
+          const c = clients.find(x => x.id === (sc.clientId || sc));
+          return c ? esc(c.name) : 'Unknown';
+        }).join(', ')}</div>`
+      : '';
+
     // Per-client status chips
     let clientCell;
     if (!unrevoked.length) {
-      clientCell = '<span style="font-size:12px;color:rgba(247,243,237,0.35);border:1px dashed rgba(247,243,237,0.18);padding:4px 12px;border-radius:20px;white-space:nowrap;">No clients assigned</span>';
+      clientCell = `<span style="font-size:12px;color:rgba(247,243,237,0.35);border:1px dashed rgba(247,243,237,0.18);padding:4px 12px;border-radius:20px;white-space:nowrap;">No clients assigned</span>${suitableHtml}`;
     } else {
       clientCell = `<div style="display:flex;flex-wrap:wrap;gap:6px;">${unrevoked.map(cid => {
         const c = clients.find(x => x.id === cid);
@@ -9464,27 +9600,30 @@ function renderPresentations() {
         const viewed = vd?.firstViewedAt;
         const isSent = sentList.includes(cid);
         let dot, suffix;
-        if (viewed) {
-          dot = '#6dbf7b';
-          suffix = vd.viewCount > 1 ? `<span style="color:rgba(247,243,237,0.35);margin-left:4px;">${vd.viewCount}×</span>` : '';
-        } else if (isSent) {
-          dot = '#e8a87c';
-          suffix = '';
-        } else {
-          dot = 'rgba(247,243,237,0.25)';
-          suffix = '';
-        }
+        if (viewed) { dot = '#6dbf7b'; suffix = vd.viewCount > 1 ? `<span style="color:rgba(247,243,237,0.35);margin-left:4px;">${vd.viewCount}×</span>` : ''; }
+        else if (isSent) { dot = '#e8a87c'; suffix = ''; }
+        else { dot = 'rgba(247,243,237,0.25)'; suffix = ''; }
         return `<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.1);padding:4px 11px 4px 8px;border-radius:20px;font-size:12.5px;color:#f7f3ed;white-space:nowrap;">
           <span style="width:7px;height:7px;border-radius:50%;background:${dot};flex-shrink:0;"></span>${name}${suffix}</span>`;
-      }).join('')}</div>`;
+      }).join('')}</div>${suitableHtml}`;
     }
 
     const notifyLabel = unrevoked.some(cid => !sentList.includes(cid)) ? '✉ Notify' : '✉ Re-notify';
+
+    // Admin review status actions (only shown when ready for review)
+    const reviewActions = rs === 'ready_for_review'
+      ? `<button class="btn-sm" onclick="adminSetReviewStatus('${p.id}','admin_reviewing')" style="background:rgba(122,184,232,0.12);color:rgba(122,184,232,0.9);font-size:11.5px;">Mark reviewing</button>`
+      : rs === 'admin_reviewing'
+      ? `<button class="btn-sm" onclick="adminSetReviewStatus('${p.id}','approved')" style="background:rgba(109,191,123,0.12);color:#6dbf7b;font-size:11.5px;">Approve</button>`
+      : '';
+
     return `<tr>
       <td>
         <div class="td-name">${esc(p.address)}${propStatusHtml}${p.source === 'agent' ? '<span class="pill" style="background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.3);color:#fbbf24;margin-left:6px;">From Agent</span>' : ''}</div>
         <div style="font-size:12px;color:rgba(247,243,237,0.3);margin-top:3px;">${p.source === 'agent' && p.agentSubmission ? `${esc(p.agentSubmission.agentName)}${p.agentSubmission.agentAgency ? ' · ' + esc(p.agentSubmission.agentAgency) : ''}` : p.price ? esc(p.price) : ''}${expiry}</div>
       </td>
+      <td>${sourcedBy}</td>
+      <td>${reviewChip}${reviewActions ? '<div style="margin-top:6px;">' + reviewActions + '</div>' : ''}</td>
       <td>${clientCell}</td>
       <td><div class="actions">
         <button class="btn-sm btn-edit" onclick="openPresModal('${p.id}')">Edit</button>
@@ -9494,6 +9633,30 @@ function renderPresentations() {
       </div></td>
     </tr>`;
   }).join('');
+}
+
+async function adminAdvanceReviewStatus() {
+  const presId = document.getElementById('pres-edit-id').value;
+  if (!presId) return;
+  const status = document.getElementById('pres-review-status-select').value;
+  await adminSetReviewStatus(presId, status);
+  // Update chip in modal
+  const REVIEW_LABELS_MODAL = { draft:'Draft', ready_for_review:'Ready for Review', admin_reviewing:'Reviewing', approved:'Approved', allocated:'Allocated', sent:'Sent' };
+  const chip = document.getElementById('pres-review-status-chip');
+  chip.textContent = REVIEW_LABELS_MODAL[status] || status;
+  chip.className = `sl-status pres-review-${status}`;
+}
+
+async function adminSetReviewStatus(presId, status) {
+  const res = await api('PUT', '/api/admin/presentations', { id: presId, action: 'set-review-status', reviewStatus: status });
+  if (res.ok) {
+    const pres = presentations.find(p => p.id === presId);
+    if (pres) pres.reviewStatus = status;
+    renderPresentations();
+    showToast('Review status updated');
+  } else {
+    showToast('Failed to update status', 'error');
+  }
 }
 
 // ── Comparable sales & rentals ────────────────────────────────────────────────
@@ -9997,6 +10160,35 @@ function openPresModal(id) {
       }).join('');
     } else { linksSection.style.display = 'none'; }
     document.getElementById('pres-revocation-reason').value = p.revocationReason || '';
+    // Review workflow panel (contractor-sourced presentations)
+    const reviewPanel = document.getElementById('pres-review-panel');
+    const REVIEW_LABELS_MODAL = { draft:'Draft', ready_for_review:'Ready for Review', admin_reviewing:'Reviewing', approved:'Approved', allocated:'Allocated', sent:'Sent' };
+    if (p.sourcedByRole === 'contractor' && p.sourcedById !== 'admin') {
+      reviewPanel.style.display = 'block';
+      document.getElementById('pres-sourced-by-label').textContent = p.sourcedByName || 'Unknown contractor';
+      const rs = p.reviewStatus || 'draft';
+      const chip = document.getElementById('pres-review-status-chip');
+      chip.textContent = REVIEW_LABELS_MODAL[rs] || rs;
+      chip.className = `sl-status pres-review-${rs}`;
+      document.getElementById('pres-review-status-select').value = rs;
+      // Suitable clients nominations
+      const suitableSection = document.getElementById('pres-suitable-clients-section');
+      const suitableList = document.getElementById('pres-suitable-clients-list');
+      const suitableClients = p.suitableClients || [];
+      if (suitableClients.length) {
+        suitableSection.style.display = 'block';
+        suitableList.innerHTML = suitableClients.map(sc => {
+          const cid = sc.clientId || sc;
+          const c = clients.find(x => x.id === cid);
+          return `<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(122,184,232,0.08);border:1px solid rgba(122,184,232,0.2);padding:4px 12px;border-radius:20px;font-size:12.5px;color:rgba(122,184,232,0.85);">${c ? esc(c.name) : 'Unknown'}</span>`;
+        }).join('');
+      } else {
+        suitableSection.style.display = 'none';
+        suitableList.innerHTML = '';
+      }
+    } else {
+      reviewPanel.style.display = 'none';
+    }
     const unrevoked = (p.assignedClients || []).filter(cid => !revokedList.includes(cid));
     const canSend = unrevoked.some(cid => !sentList.includes(cid));
     document.getElementById('pres-preview-btn').style.display = 'inline-flex';
@@ -10019,6 +10211,7 @@ function openPresModal(id) {
     ['demo-image-preview'].forEach(id => { const el = document.getElementById(id); if (el) { el.src=''; el.style.display='none'; } });
     _presRiskItems = []; renderRiskItems();
     document.getElementById('pres-links-section').style.display = 'none';
+    document.getElementById('pres-review-panel').style.display = 'none';
     document.getElementById('pres-preview-btn').style.display = 'none';
     document.getElementById('pres-send-btn').style.display = 'none';
     document.getElementById('pres-save-btn').textContent = 'Save draft';

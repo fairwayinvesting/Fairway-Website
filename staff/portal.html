@@ -84,10 +84,57 @@
     .brief-label{color:rgba(247,243,237,0.35);min-width:120px;flex-shrink:0;}
     .brief-val{color:rgba(247,243,237,0.7);}
 
+    /* ── Forms ───────────────────────────────────────────────────────── */
+    .field-label{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:6px;display:block;}
+    .field-input{width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:10px 13px;font-family:'Outfit',sans-serif;font-size:13.5px;color:#f7f3ed;outline:none;transition:border-color .15s;}
+    .field-input:focus{border-color:rgba(247,243,237,0.25);}
+    .field-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+    .field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px;}
+    .field-group{margin-bottom:14px;}
+
+    /* ── Buttons ─────────────────────────────────────────────────────── */
+    .btn-primary{background:#bd7a70;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:'Outfit',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;transition:opacity .15s;}
+    .btn-primary:hover{opacity:.85;}
+    .btn-secondary{background:rgba(247,243,237,0.07);color:rgba(247,243,237,0.7);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:9px 18px;font-family:'Outfit',sans-serif;font-size:13.5px;cursor:pointer;transition:all .15s;}
+    .btn-secondary:hover{background:rgba(247,243,237,0.10);color:#f7f3ed;}
+    .btn-sm{background:rgba(247,243,237,0.07);border:1px solid rgba(247,243,237,0.1);color:rgba(247,243,237,0.65);border-radius:6px;padding:5px 12px;font-size:12px;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .15s;}
+    .btn-sm:hover{background:rgba(247,243,237,0.11);color:#f7f3ed;}
+
+    /* ── Shortlist status badges ─────────────────────────────────────── */
+    .status-badge{font-size:10px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;border-radius:100px;padding:3px 9px;}
+    .status-shortlisted{background:rgba(122,184,232,0.1);border:1px solid rgba(122,184,232,0.2);color:rgba(122,184,232,0.85);}
+    .status-researching{background:rgba(163,134,200,0.1);border:1px solid rgba(163,134,200,0.2);color:rgba(163,134,200,0.85);}
+    .status-rejected{background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);color:rgba(247,243,237,0.3);}
+    .status-moved_to_presentation{background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.2);color:#6dbf7b;}
+
+    /* ── Presentation review badges ──────────────────────────────────── */
+    .prs-draft{background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.12);color:rgba(247,243,237,0.4);}
+    .prs-ready_for_review{background:rgba(232,168,124,0.12);border:1px solid rgba(232,168,124,0.3);color:rgba(232,168,124,0.95);}
+    .prs-admin_reviewing{background:rgba(122,184,232,0.1);border:1px solid rgba(122,184,232,0.2);color:rgba(122,184,232,0.85);}
+    .prs-approved{background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.25);color:#6dbf7b;}
+    .prs-allocated,.prs-sent{background:rgba(247,243,237,0.07);border:1px solid rgba(247,243,237,0.15);color:rgba(247,243,237,0.6);}
+
+    /* ── Modal overlay ───────────────────────────────────────────────── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(15,13,11,0.75);display:flex;align-items:flex-start;justify-content:center;z-index:200;padding:40px 16px;overflow-y:auto;opacity:0;pointer-events:none;transition:opacity .2s;}
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal-box{background:#1e1c1a;border:1px solid rgba(247,243,237,0.1);border-radius:16px;width:100%;max-width:580px;padding:28px;position:relative;}
+    .modal-title{font-family:'Fraunces',serif;font-size:22px;font-weight:400;margin-bottom:24px;}
+    .modal-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:24px;padding-top:20px;border-top:1px solid rgba(247,243,237,0.07);}
+
+    /* ── Toast ───────────────────────────────────────────────────────── */
+    .toast{position:fixed;bottom:28px;right:28px;background:#22201d;border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:14px 20px;font-size:13.5px;color:#f7f3ed;z-index:999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;max-width:320px;}
+    .toast.show{opacity:1;transform:none;}
+
+    /* ── Suitable client checks ──────────────────────────────────────── */
+    .client-check{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:8px;cursor:pointer;border:1px solid rgba(247,243,237,0.07);transition:all .15s;margin-bottom:6px;}
+    .client-check:hover{background:rgba(247,243,237,0.04);}
+    .client-check input[type=checkbox]{accent-color:#bd7a70;width:16px;height:16px;flex-shrink:0;}
+
     @media(max-width:768px){
       .layout{flex-direction:column;}
       .sidebar{width:100%;height:auto;border-right:none;border-bottom:1px solid rgba(247,243,237,0.07);}
       .main{padding:24px 20px;}
+      .field-row-2,.field-row-3{grid-template-columns:1fr;}
     }
   </style>
 </head>
@@ -145,6 +192,25 @@
       <div id="directory-list"></div>
     </div>
 
+    <!-- Shortlist -->
+    <div class="section" id="sec-shortlist">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:28px;">
+        <div>
+          <h1 class="page-title" style="margin-bottom:4px;">Shortlist</h1>
+          <p class="page-sub" style="margin-bottom:0;">Properties you've sourced and are tracking.</p>
+        </div>
+        <button class="btn-primary" onclick="openSlModal()">+ Add property</button>
+      </div>
+      <div id="shortlist-list"></div>
+    </div>
+
+    <!-- Presentations -->
+    <div class="section" id="sec-presentations">
+      <h1 class="page-title" style="margin-bottom:4px;">Presentations</h1>
+      <p class="page-sub">Presentations created from your shortlisted properties.</p>
+      <div id="presentations-list"></div>
+    </div>
+
     <!-- No access placeholder -->
     <div class="section" id="sec-noaccess">
       <div class="empty" style="padding-top:100px;">
@@ -157,6 +223,122 @@
   </main>
 </div>
 
+<!-- Shortlist add/edit modal -->
+<div class="modal-overlay" id="sl-modal">
+  <div class="modal-box">
+    <h2 class="modal-title" id="sl-modal-title">Add property</h2>
+    <input type="hidden" id="sl-edit-id">
+    <div class="field-group">
+      <label class="field-label">Address *</label>
+      <input type="text" class="field-input" id="sl-address" placeholder="123 Example St">
+    </div>
+    <div class="field-row-3">
+      <div><label class="field-label">Suburb</label><input type="text" class="field-input" id="sl-suburb" placeholder="Suburb"></div>
+      <div><label class="field-label">State</label>
+        <select class="field-input" id="sl-state">
+          <option value="">—</option>
+          <option>NSW</option><option>VIC</option><option>QLD</option><option>SA</option><option>WA</option><option>TAS</option><option>ACT</option><option>NT</option>
+        </select>
+      </div>
+      <div><label class="field-label">Price</label><input type="text" class="field-input" id="sl-price" placeholder="$650,000"></div>
+    </div>
+    <div class="field-row-3">
+      <div><label class="field-label">Type</label>
+        <select class="field-input" id="sl-type">
+          <option value="house">House</option><option value="unit">Unit / Apt</option><option value="townhouse">Townhouse</option><option value="land">Land</option><option value="other">Other</option>
+        </select>
+      </div>
+      <div><label class="field-label">Beds</label><input type="text" class="field-input" id="sl-beds" placeholder="3"></div>
+      <div><label class="field-label">Baths</label><input type="text" class="field-input" id="sl-baths" placeholder="2"></div>
+    </div>
+    <div class="field-row-2">
+      <div><label class="field-label">Car spaces</label><input type="text" class="field-input" id="sl-cars" placeholder="1"></div>
+      <div><label class="field-label">Land size (m²)</label><input type="text" class="field-input" id="sl-land" placeholder="450"></div>
+    </div>
+    <div style="border-top:1px solid rgba(247,243,237,0.07);margin:16px 0;padding-top:16px;">
+      <p class="eyebrow" style="margin-bottom:14px;">Agent details</p>
+      <div class="field-row-2">
+        <div><label class="field-label">Agent name</label><input type="text" class="field-input" id="sl-agent-name" placeholder="Jane Smith"></div>
+        <div><label class="field-label">Agency</label><input type="text" class="field-input" id="sl-agent-agency" placeholder="Ray White"></div>
+      </div>
+      <div class="field-row-2">
+        <div><label class="field-label">Phone</label><input type="text" class="field-input" id="sl-agent-phone" placeholder="0400 000 000"></div>
+        <div><label class="field-label">Email</label><input type="email" class="field-input" id="sl-agent-email" placeholder="jane@raywhite.com"></div>
+      </div>
+    </div>
+    <div class="field-row-2" style="margin-bottom:14px;">
+      <div>
+        <label class="field-label">Assign to client</label>
+        <select class="field-input" id="sl-client"><option value="">— None —</option></select>
+      </div>
+      <div>
+        <label class="field-label">Status</label>
+        <select class="field-input" id="sl-status">
+          <option value="shortlisted">Shortlisted</option>
+          <option value="researching">Researching</option>
+          <option value="rejected">Rejected / Pass</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Links (one per line)</label>
+      <textarea class="field-input" id="sl-links" rows="3" placeholder="https://realestate.com.au/property/..."></textarea>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Notes</label>
+      <textarea class="field-input" id="sl-notes" rows="3" placeholder="Any observations, concerns, or context…"></textarea>
+    </div>
+    <p id="sl-modal-error" style="display:none;color:#e07070;font-size:13px;margin-top:4px;"></p>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeSlModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveSlItem()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Presentation edit modal (research fields only) -->
+<div class="modal-overlay" id="pres-modal">
+  <div class="modal-box" style="max-width:640px;">
+    <h2 class="modal-title" id="pres-modal-title">Edit presentation</h2>
+    <input type="hidden" id="pres-edit-id">
+    <div id="pres-review-status-row" style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:12px 16px;background:rgba(247,243,237,0.04);border-radius:10px;">
+      <span style="font-size:13px;color:rgba(247,243,237,0.4);">Review status:</span>
+      <span id="pres-review-chip" class="status-badge"></span>
+      <span id="pres-review-locked" style="display:none;font-size:12px;color:rgba(247,243,237,0.3);margin-left:4px;">— under admin review, editing locked</span>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Property description</label>
+      <textarea class="field-input" id="pres-prop-desc" rows="3" placeholder="Brief overview of the property…"></textarea>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Summary for client</label>
+      <textarea class="field-input" id="pres-summary" rows="3" placeholder="Why this property is worth considering…"></textarea>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Highlights (one per line)</label>
+      <textarea class="field-input" id="pres-highlights" rows="3" placeholder="Close to train station&#10;Rental demand is strong&#10;Below median price"></textarea>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Known issues / due diligence notes</label>
+      <textarea class="field-input" id="pres-issues" rows="3" placeholder="Any concerns or due diligence flags…"></textarea>
+    </div>
+    <div style="border-top:1px solid rgba(247,243,237,0.07);margin:16px 0;padding-top:16px;">
+      <p class="eyebrow" style="margin-bottom:12px;">Nominate suitable clients</p>
+      <p style="font-size:13px;color:rgba(247,243,237,0.4);margin-bottom:14px;">Tick clients you think this property suits. Luke will make the final allocation decision.</p>
+      <div id="pres-suitable-clients"></div>
+    </div>
+    <p id="pres-modal-error" style="display:none;color:#e07070;font-size:13px;margin-top:4px;"></p>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closePresModal()">Cancel</button>
+      <button class="btn-primary" id="pres-submit-review-btn" onclick="submitForReview()" style="background:#e8a87c;">Submit for review</button>
+      <button class="btn-primary" id="pres-save-btn" onclick="savePres()">Save draft</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
 <script>
 // ── State ──────────────────────────────────────────────────────────────────
 let me = null;
@@ -164,6 +346,8 @@ let allClients = [];
 let allDates = [];
 let allDirectory = [];
 let allPipeline = [];
+let allShortlist = [];
+let allPresentations = [];
 let dirFilter = 'all';
 
 const STAGE_LABELS = {
@@ -208,10 +392,12 @@ async function init() {
 
   // Load data for enabled modules
   const loads = [];
-  if (hasModule('clients'))   loads.push(loadClients());
-  if (hasModule('pipeline'))  loads.push(loadPipeline());
-  if (hasModule('dates'))     loads.push(loadDates());
-  if (hasModule('directory')) loads.push(loadDirectory());
+  if (hasModule('clients'))       loads.push(loadClients());
+  if (hasModule('pipeline'))      loads.push(loadPipeline());
+  if (hasModule('dates'))         loads.push(loadDates());
+  if (hasModule('directory'))     loads.push(loadDirectory());
+  if (hasModule('shortlist'))     loads.push(loadShortlist());
+  if (hasModule('presentations')) loads.push(loadPresentations());
   await Promise.allSettled(loads);
 
   // Show first available section
@@ -223,16 +409,18 @@ async function init() {
 function hasModule(m) { return Array.isArray(me?.modules) && me.modules.includes(m); }
 
 function getFirstModule() {
-  const order = ['clients','pipeline','dates','directory'];
+  const order = ['clients','pipeline','shortlist','presentations','dates','directory'];
   return order.find(m => hasModule(m)) || null;
 }
 
 // ── Nav ────────────────────────────────────────────────────────────────────
 const NAV_ITEMS = [
-  { id:'clients',   label:'Clients',   icon:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' },
-  { id:'pipeline',  label:'Pipeline',  icon:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>' },
-  { id:'dates',     label:'Dates',     icon:'<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' },
-  { id:'directory', label:'Directory', icon:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>' },
+  { id:'clients',       label:'Clients',       icon:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' },
+  { id:'pipeline',      label:'Pipeline',      icon:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>' },
+  { id:'shortlist',     label:'Shortlist',     icon:'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>' },
+  { id:'presentations', label:'Presentations', icon:'<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>' },
+  { id:'dates',         label:'Dates',         icon:'<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' },
+  { id:'directory',     label:'Directory',     icon:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>' },
 ];
 
 function buildNav() {
@@ -488,6 +676,301 @@ function renderDirectory() {
       </table>
     </div>
   `;
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+let _toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ── Shortlist ──────────────────────────────────────────────────────────────
+async function loadShortlist() {
+  try {
+    const r = await fetch('/api/staff/shortlist');
+    if (r.ok) allShortlist = await r.json();
+  } catch {}
+  renderShortlist();
+}
+
+const SL_STATUS_LABELS = { shortlisted:'Shortlisted', researching:'Researching', rejected:'Rejected', moved_to_presentation:'Promoted' };
+
+function renderShortlist() {
+  const el = document.getElementById('shortlist-list');
+  if (!el) return;
+  const active = allShortlist.filter(i => i.status !== 'rejected');
+  const rejected = allShortlist.filter(i => i.status === 'rejected');
+  const all = [...active, ...rejected];
+  if (!all.length) {
+    el.innerHTML = '<div class="empty">Nothing shortlisted yet. Use the button above to add your first property.</div>';
+    return;
+  }
+  el.innerHTML = all.map(item => {
+    const statusClass = `status-${item.status || 'shortlisted'}`;
+    const statusLabel = SL_STATUS_LABELS[item.status] || item.status;
+    const clientName = item.clientName ? `<span class="pill pill-neutral" style="font-size:11px;">${esc(item.clientName)}</span>` : '';
+    const isLocked = item.status === 'moved_to_presentation';
+    const details = [item.suburb, item.state].filter(Boolean).join(', ');
+    const specs = [item.bedrooms && item.bedrooms + 'bd', item.bathrooms && item.bathrooms + 'ba', item.landSize && item.landSize + 'm²'].filter(Boolean).join(' · ');
+    const rejected = item.status === 'rejected';
+    return `<div class="card" style="${rejected ? 'opacity:0.5;' : ''}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+            <span style="font-size:15px;font-weight:500;color:#f7f3ed;">${esc(item.address)}</span>
+            <span class="status-badge ${statusClass}">${statusLabel}</span>
+          </div>
+          ${details ? `<div style="font-size:13px;color:rgba(247,243,237,0.4);margin-bottom:6px;">${esc(details)}${specs ? ' · ' + esc(specs) : ''}${item.price ? ' · ' + esc(item.price) : ''}</div>` : ''}
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">${clientName}</div>
+          ${item.notes ? `<div style="margin-top:10px;font-size:13px;color:rgba(247,243,237,0.5);line-height:1.5;white-space:pre-wrap;">${esc(item.notes)}</div>` : ''}
+        </div>
+        ${!isLocked ? `<div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;">
+          <button class="btn-sm" onclick="openSlModal('${item.id}')">Edit</button>
+          ${rejected
+            ? `<button class="btn-sm" onclick="updateSlStatus('${item.id}','shortlisted')">Restore</button>`
+            : `<button class="btn-sm" onclick="updateSlStatus('${item.id}','rejected')" style="color:rgba(247,243,237,0.35);">Reject</button>`}
+        </div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function updateSlStatus(id, status) {
+  const r = await fetch('/api/staff/shortlist', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id, status }) });
+  if (r.ok) {
+    const data = await r.json();
+    const idx = allShortlist.findIndex(i => i.id === id);
+    if (idx !== -1) allShortlist[idx] = data.item;
+    renderShortlist();
+    showToast('Status updated');
+  } else { showToast('Error updating status'); }
+}
+
+function openSlModal(id) {
+  const modal = document.getElementById('sl-modal');
+  document.getElementById('sl-modal-error').style.display = 'none';
+  // Populate client dropdown
+  const sel = document.getElementById('sl-client');
+  sel.innerHTML = '<option value="">— None —</option>' + allClients.map(c =>
+    `<option value="${esc(c.id)}">${esc(c.name)}</option>`
+  ).join('');
+
+  if (id) {
+    const item = allShortlist.find(i => i.id === id);
+    if (!item) return;
+    document.getElementById('sl-modal-title').textContent = 'Edit property';
+    document.getElementById('sl-edit-id').value = id;
+    document.getElementById('sl-address').value = item.address || '';
+    document.getElementById('sl-suburb').value = item.suburb || '';
+    document.getElementById('sl-state').value = item.state || '';
+    document.getElementById('sl-price').value = item.price || '';
+    document.getElementById('sl-type').value = item.propertyType || 'house';
+    document.getElementById('sl-beds').value = item.bedrooms || '';
+    document.getElementById('sl-baths').value = item.bathrooms || '';
+    document.getElementById('sl-cars').value = item.carspaces || '';
+    document.getElementById('sl-land').value = item.landSize || '';
+    document.getElementById('sl-agent-name').value = item.agentName || '';
+    document.getElementById('sl-agent-agency').value = item.agentAgency || '';
+    document.getElementById('sl-agent-phone').value = item.agentPhone || '';
+    document.getElementById('sl-agent-email').value = item.agentEmail || '';
+    document.getElementById('sl-client').value = item.clientId || '';
+    document.getElementById('sl-status').value = item.status || 'shortlisted';
+    document.getElementById('sl-links').value = (item.links||[]).join('\n');
+    document.getElementById('sl-notes').value = item.notes || '';
+  } else {
+    document.getElementById('sl-modal-title').textContent = 'Add property';
+    document.getElementById('sl-edit-id').value = '';
+    ['sl-address','sl-suburb','sl-price','sl-beds','sl-baths','sl-cars','sl-land','sl-agent-name','sl-agent-agency','sl-agent-phone','sl-agent-email','sl-links','sl-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('sl-type').value = 'house';
+    document.getElementById('sl-status').value = 'shortlisted';
+  }
+  modal.classList.add('open');
+}
+
+function closeSlModal() { document.getElementById('sl-modal').classList.remove('open'); }
+
+async function saveSlItem() {
+  const id = document.getElementById('sl-edit-id').value;
+  const errEl = document.getElementById('sl-modal-error');
+  errEl.style.display = 'none';
+  const address = document.getElementById('sl-address').value.trim();
+  if (!address) { errEl.textContent = 'Address is required.'; errEl.style.display = 'block'; return; }
+  const clientId = document.getElementById('sl-client').value;
+  const clientName = clientId ? (allClients.find(c => c.id === clientId)?.name || '') : '';
+  const links = document.getElementById('sl-links').value.split('\n').map(l => l.trim()).filter(Boolean);
+  const body = {
+    address, suburb: document.getElementById('sl-suburb').value.trim(),
+    state: document.getElementById('sl-state').value,
+    price: document.getElementById('sl-price').value.trim(),
+    propertyType: document.getElementById('sl-type').value,
+    bedrooms: document.getElementById('sl-beds').value.trim(),
+    bathrooms: document.getElementById('sl-baths').value.trim(),
+    carspaces: document.getElementById('sl-cars').value.trim(),
+    landSize: document.getElementById('sl-land').value.trim(),
+    agentName: document.getElementById('sl-agent-name').value.trim(),
+    agentAgency: document.getElementById('sl-agent-agency').value.trim(),
+    agentPhone: document.getElementById('sl-agent-phone').value.trim(),
+    agentEmail: document.getElementById('sl-agent-email').value.trim(),
+    clientId: clientId || null, clientName,
+    status: document.getElementById('sl-status').value,
+    links,
+    notes: document.getElementById('sl-notes').value.trim(),
+  };
+  if (id) body.id = id;
+  const r = await fetch('/api/staff/shortlist', { method: id ? 'PUT' : 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  const data = await r.json().catch(() => ({}));
+  if (r.ok) {
+    if (id) { const idx = allShortlist.findIndex(i => i.id === id); if (idx !== -1) allShortlist[idx] = data.item; }
+    else allShortlist.push(data.item);
+    renderShortlist();
+    closeSlModal();
+    showToast(id ? 'Property updated' : 'Property added to shortlist');
+  } else {
+    errEl.textContent = data.error || 'Something went wrong.';
+    errEl.style.display = 'block';
+  }
+}
+
+// ── Presentations ──────────────────────────────────────────────────────────
+async function loadPresentations() {
+  try {
+    const r = await fetch('/api/staff/presentations');
+    if (r.ok) allPresentations = await r.json();
+  } catch {}
+  renderPresentations();
+}
+
+const PRES_REVIEW_LABELS = { draft:'Draft', ready_for_review:'Ready for Review', admin_reviewing:'Under Review', approved:'Approved', allocated:'Allocated', sent:'Sent' };
+
+function renderPresentations() {
+  const el = document.getElementById('presentations-list');
+  if (!el) return;
+  if (!allPresentations.length) {
+    el.innerHTML = '<div class="empty">No presentations yet. Properties you shortlist will appear here once promoted to a presentation by Luke.</div>';
+    return;
+  }
+  el.innerHTML = allPresentations.map(p => {
+    const rs = p.reviewStatus || 'draft';
+    const rsLabel = PRES_REVIEW_LABELS[rs] || rs;
+    const canEdit = rs === 'draft' || rs === 'ready_for_review';
+    const canSubmit = rs === 'draft';
+    const details = [p.suburb, p.price].filter(Boolean).join(' · ');
+    return `<div class="card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+            <span style="font-size:15px;font-weight:500;color:#f7f3ed;">${esc(p.address)}</span>
+            <span class="status-badge prs-${rs}">${rsLabel}</span>
+          </div>
+          ${details ? `<div style="font-size:13px;color:rgba(247,243,237,0.4);margin-bottom:6px;">${esc(details)}</div>` : ''}
+          ${(p.suitableClients||[]).length ? `<div style="font-size:12.5px;color:rgba(247,243,237,0.35);">Suggested: ${p.suitableClients.map(sc => {
+            const c = allClients.find(x => x.id === (sc.clientId||sc));
+            return c ? esc(c.name) : 'Unknown';
+          }).join(', ')}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;">
+          ${canEdit ? `<button class="btn-sm" onclick="openPresModal('${p.id}')">Edit / Nominate</button>` : `<button class="btn-sm" onclick="openPresModal('${p.id}')">View</button>`}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openPresModal(id) {
+  const p = allPresentations.find(x => x.id === id);
+  if (!p) return;
+  const modal = document.getElementById('pres-modal');
+  const rs = p.reviewStatus || 'draft';
+  const canEdit = rs === 'draft' || rs === 'ready_for_review';
+  const canSubmit = rs === 'draft';
+
+  document.getElementById('pres-modal-title').textContent = esc(p.address);
+  document.getElementById('pres-edit-id').value = id;
+  // Review status chip
+  const chip = document.getElementById('pres-review-chip');
+  chip.textContent = PRES_REVIEW_LABELS[rs] || rs;
+  chip.className = `status-badge prs-${rs}`;
+  document.getElementById('pres-review-locked').style.display = canEdit ? 'none' : 'inline';
+  // Research fields
+  document.getElementById('pres-prop-desc').value = p.propertyDescription || '';
+  document.getElementById('pres-summary').value = p.summary || '';
+  document.getElementById('pres-highlights').value = (p.highlights||[]).join('\n');
+  document.getElementById('pres-issues').value = p.knownIssues || '';
+  // Disable fields if locked
+  ['pres-prop-desc','pres-summary','pres-highlights','pres-issues'].forEach(fid => {
+    document.getElementById(fid).disabled = !canEdit;
+  });
+  // Suitable clients checkboxes (always available)
+  const suitableContainer = document.getElementById('pres-suitable-clients');
+  const existingSuitable = new Set((p.suitableClients||[]).map(sc => sc.clientId||sc));
+  if (allClients.length) {
+    suitableContainer.innerHTML = allClients.map(c => `
+      <label class="client-check">
+        <input type="checkbox" value="${esc(c.id)}" ${existingSuitable.has(c.id) ? 'checked' : ''}>
+        <span style="font-size:14px;color:#f7f3ed;">${esc(c.name)}</span>
+      </label>`).join('');
+  } else {
+    suitableContainer.innerHTML = '<p style="font-size:13px;color:rgba(247,243,237,0.3);">No clients assigned to you yet.</p>';
+  }
+  // Buttons
+  document.getElementById('pres-submit-review-btn').style.display = canSubmit ? 'inline-flex' : 'none';
+  document.getElementById('pres-save-btn').style.display = canEdit ? 'inline-flex' : 'none';
+  document.getElementById('pres-modal-error').style.display = 'none';
+  modal.classList.add('open');
+}
+
+function closePresModal() { document.getElementById('pres-modal').classList.remove('open'); }
+
+async function savePres(submitForReviewFlag = false) {
+  const id = document.getElementById('pres-edit-id').value;
+  const errEl = document.getElementById('pres-modal-error');
+  errEl.style.display = 'none';
+  const suitableClients = [...document.querySelectorAll('#pres-suitable-clients input[type=checkbox]:checked')].map(cb => ({ clientId: cb.value }));
+
+  // Save research fields
+  const body = {
+    id,
+    propertyDescription: document.getElementById('pres-prop-desc').value.trim(),
+    summary:             document.getElementById('pres-summary').value.trim(),
+    highlights:          document.getElementById('pres-highlights').value.split('\n').map(l => l.trim()).filter(Boolean),
+    knownIssues:         document.getElementById('pres-issues').value.trim(),
+  };
+  const r = await fetch('/api/staff/presentations', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  if (!r.ok) {
+    const data = await r.json().catch(() => ({}));
+    errEl.textContent = data.error || 'Failed to save.'; errEl.style.display = 'block'; return;
+  }
+  // Save suitable clients
+  if (allClients.length) {
+    await fetch('/api/staff/presentations', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id, action:'set-suitable-clients', suitableClients }) });
+  }
+  // Reload and update
+  const data = await r.json().catch(() => ({}));
+  const idx = allPresentations.findIndex(p => p.id === id);
+  if (idx !== -1 && data.pres) allPresentations[idx] = { ...allPresentations[idx], ...data.pres, suitableClients };
+  renderPresentations();
+  if (!submitForReviewFlag) { closePresModal(); showToast('Presentation saved'); }
+}
+
+async function submitForReview() {
+  await savePres(true);
+  const id = document.getElementById('pres-edit-id').value;
+  const errEl = document.getElementById('pres-modal-error');
+  const r = await fetch('/api/staff/presentations', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id, action:'ready-for-review' }) });
+  if (r.ok) {
+    const idx = allPresentations.findIndex(p => p.id === id);
+    if (idx !== -1) allPresentations[idx].reviewStatus = 'ready_for_review';
+    renderPresentations();
+    closePresModal();
+    showToast('Submitted for Luke\'s review');
+  } else {
+    const data = await r.json().catch(() => ({}));
+    errEl.textContent = data.error || 'Failed to submit.'; errEl.style.display = 'block';
+  }
 }
 
 init();
