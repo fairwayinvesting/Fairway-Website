@@ -159,6 +159,30 @@
   <!-- ── Main content ───────────────────────────────────────────────────── -->
   <main class="main">
 
+    <!-- Tasks -->
+    <div class="section" id="sec-tasks">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+        <div>
+          <h1 class="page-title" style="margin-bottom:4px;">Tasks</h1>
+          <p class="page-sub" style="margin-bottom:0;" id="tasks-sub">Your task list.</p>
+        </div>
+        <button class="btn-primary" onclick="openTaskModal()">+ Add task</button>
+      </div>
+      <!-- View tabs -->
+      <div style="display:flex;gap:6px;margin-bottom:20px;">
+        <button class="dir-pill active" id="task-tab-mine" onclick="setTaskTab('mine',this)">My tasks</button>
+        <button class="dir-pill" id="task-tab-assigned" onclick="setTaskTab('assigned',this)">Assigned by Luke <span id="task-assigned-badge" style="display:none;background:#e8a87c;color:#22201d;border-radius:100px;padding:1px 7px;font-size:10px;margin-left:4px;font-weight:600;"></span></button>
+      </div>
+      <div id="tasks-list"></div>
+    </div>
+
+    <!-- My Deals -->
+    <div class="section" id="sec-my-deals">
+      <h1 class="page-title" style="margin-bottom:4px;">My Deals</h1>
+      <p class="page-sub">Properties you sourced that have been allocated to a client.</p>
+      <div id="deals-list"></div>
+    </div>
+
     <!-- Clients -->
     <div class="section" id="sec-clients">
       <h1 class="page-title">Clients</h1>
@@ -221,6 +245,40 @@
     </div>
 
   </main>
+</div>
+
+<!-- Task add modal -->
+<div class="modal-overlay" id="task-modal">
+  <div class="modal-box" style="max-width:440px;">
+    <h2 class="modal-title">Add task</h2>
+    <div class="field-group">
+      <label class="field-label">Task *</label>
+      <input type="text" class="field-input" id="task-title" placeholder="What needs to be done?">
+    </div>
+    <div class="field-row-2">
+      <div>
+        <label class="field-label">Urgency</label>
+        <div style="display:flex;gap:6px;margin-top:2px;">
+          <button class="btn-sm" id="task-urg-high" onclick="setStaffTaskUrg('high',this)" style="flex:1;">High</button>
+          <button class="btn-sm active" id="task-urg-medium" onclick="setStaffTaskUrg('medium',this)" style="flex:1;background:rgba(189,122,112,0.15);border-color:rgba(189,122,112,0.3);color:#cf9b92;">Medium</button>
+          <button class="btn-sm" id="task-urg-low" onclick="setStaffTaskUrg('low',this)" style="flex:1;">Low</button>
+        </div>
+      </div>
+      <div>
+        <label class="field-label">Due date</label>
+        <input type="date" class="field-input" id="task-due-date" style="color-scheme:dark;">
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Notes <span style="font-weight:300;opacity:0.5;">(optional)</span></label>
+      <textarea class="field-input" id="task-notes" rows="2" placeholder="Any context…"></textarea>
+    </div>
+    <p id="task-modal-error" style="display:none;color:#e07070;font-size:13px;margin-top:4px;"></p>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeTaskModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveTask()">Add task</button>
+    </div>
+  </div>
 </div>
 
 <!-- Shortlist add/edit modal -->
@@ -348,7 +406,11 @@ let allDirectory = [];
 let allPipeline = [];
 let allShortlist = [];
 let allPresentations = [];
+let allTasks = [];
+let allDeals = [];
 let dirFilter = 'all';
+let taskTab = 'mine';
+let staffTaskUrgency = 'medium';
 
 const STAGE_LABELS = {
   lead:'Lead', qualify:'Qualifying', brief:'Brief', search:'Searching',
@@ -398,6 +460,8 @@ async function init() {
   if (hasModule('directory'))     loads.push(loadDirectory());
   if (hasModule('shortlist'))     loads.push(loadShortlist());
   if (hasModule('presentations')) loads.push(loadPresentations());
+  if (hasModule('tasks'))         loads.push(loadTasks());
+  if (hasModule('my-deals'))      loads.push(loadDeals());
   await Promise.allSettled(loads);
 
   // Show first available section
@@ -409,16 +473,18 @@ async function init() {
 function hasModule(m) { return Array.isArray(me?.modules) && me.modules.includes(m); }
 
 function getFirstModule() {
-  const order = ['clients','pipeline','shortlist','presentations','dates','directory'];
+  const order = ['tasks','clients','pipeline','shortlist','presentations','my-deals','dates','directory'];
   return order.find(m => hasModule(m)) || null;
 }
 
 // ── Nav ────────────────────────────────────────────────────────────────────
 const NAV_ITEMS = [
+  { id:'tasks',         label:'Tasks',         icon:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>' },
   { id:'clients',       label:'Clients',       icon:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' },
   { id:'pipeline',      label:'Pipeline',      icon:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>' },
   { id:'shortlist',     label:'Shortlist',     icon:'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>' },
   { id:'presentations', label:'Presentations', icon:'<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>' },
+  { id:'my-deals',      label:'My Deals',      icon:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>' },
   { id:'dates',         label:'Dates',         icon:'<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' },
   { id:'directory',     label:'Directory',     icon:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>' },
 ];
@@ -676,6 +742,207 @@ function renderDirectory() {
       </table>
     </div>
   `;
+}
+
+function localDate() { return new Date().toISOString().slice(0,10); }
+
+// ── Tasks ──────────────────────────────────────────────────────────────────
+async function loadTasks() {
+  try {
+    const r = await fetch('/api/staff/tasks');
+    if (r.ok) allTasks = await r.json();
+  } catch {}
+  renderTasks();
+}
+
+function setTaskTab(tab, btn) {
+  taskTab = tab;
+  document.querySelectorAll('#sec-tasks .dir-pill').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderTasks();
+}
+
+function renderTasks() {
+  const el = document.getElementById('tasks-list');
+  if (!el) return;
+  const today = localDate();
+  const urgOrder = { high:0, medium:1, low:2 };
+
+  const mine     = allTasks.filter(t => !t.assignedByAdmin);
+  const assigned = allTasks.filter(t => t.assignedByAdmin);
+
+  // Update assigned badge
+  const badge = document.getElementById('task-assigned-badge');
+  const assignedPending = assigned.filter(t => !t.completedAt);
+  if (badge) { badge.textContent = assignedPending.length || ''; badge.style.display = assignedPending.length ? 'inline' : 'none'; }
+
+  const pool = taskTab === 'mine' ? mine : assigned;
+  const active    = pool.filter(t => !t.completedAt).sort((a,b) => {
+    const urgDiff = (urgOrder[a.urgency]??1) - (urgOrder[b.urgency]??1);
+    return urgDiff !== 0 ? urgDiff : (a.dueDate||'').localeCompare(b.dueDate||'');
+  });
+  const completed = pool.filter(t => t.completedAt);
+  const sub = document.getElementById('tasks-sub');
+  if (sub) sub.textContent = `${active.length} active task${active.length !== 1 ? 's' : ''}${completed.length ? `, ${completed.length} done` : ''}.`;
+
+  if (!active.length && !completed.length) {
+    el.innerHTML = taskTab === 'mine'
+      ? '<div class="empty">No tasks yet — hit "+ Add task" to get started.</div>'
+      : '<div class="empty">No tasks assigned by Luke yet.</div>';
+    return;
+  }
+
+  const urgColors = { high:'#e07070', medium:'#e8a87c', low:'rgba(247,243,237,0.35)' };
+
+  const renderItem = (t) => {
+    const done = !!t.completedAt;
+    const isOwn = !t.assignedByAdmin;
+    const daysOver = (!done && t.dueDate < today) ? Math.round((new Date(today) - new Date(t.dueDate))/86400000) : 0;
+    const dateFmt = t.dueDate !== today ? new Date(t.dueDate+'T00:00:00').toLocaleDateString('en-AU',{day:'numeric',month:'short'}) : 'Today';
+    const overdueLabel = daysOver > 0 ? `<span style="font-size:11px;color:#e07070;margin-left:6px;">↑ ${daysOver}d overdue</span>` : '';
+    const urgDot = `<span style="width:8px;height:8px;border-radius:50%;background:${done?'rgba(247,243,237,0.15)':urgColors[t.urgency]||'rgba(247,243,237,0.35)'};display:inline-block;flex-shrink:0;margin-top:3px;"></span>`;
+    return `<div style="display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid rgba(247,243,237,0.06);${done?'opacity:0.45;':''}" id="task-row-${t.id}">
+      <button onclick="toggleTask('${t.id}')" style="width:20px;height:20px;border-radius:6px;border:1.5px solid ${done?'#6dbf7b':'rgba(247,243,237,0.2)'};background:${done?'rgba(109,191,123,0.15)':'transparent'};cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all .15s;">
+        ${done?'<svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="#6dbf7b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
+      </button>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;color:${done?'rgba(247,243,237,0.4)':'#f7f3ed'};${done?'text-decoration:line-through;':''}">${esc(t.title)}</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;">
+          ${urgDot}
+          <span style="font-size:12px;color:rgba(247,243,237,0.35);">${dateFmt}</span>
+          ${overdueLabel}
+          ${t.notes ? `<span style="font-size:12px;color:rgba(247,243,237,0.3);">${esc(t.notes)}</span>` : ''}
+        </div>
+      </div>
+      ${isOwn && !done ? `<button onclick="deleteTask('${t.id}')" style="background:none;border:none;color:rgba(247,243,237,0.2);cursor:pointer;font-size:18px;line-height:1;padding:0 2px;flex-shrink:0;" title="Remove">&#215;</button>` : ''}
+    </div>`;
+  };
+
+  let html = active.map(renderItem).join('');
+  if (completed.length) {
+    html += `<div style="margin-top:20px;">
+      <p style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:10px;">Completed</p>
+      ${completed.map(renderItem).join('')}
+    </div>`;
+  }
+  el.innerHTML = `<div style="border:1px solid rgba(247,243,237,0.07);border-radius:12px;padding:0 16px;background:#1e1c1a;">${html}</div>`;
+}
+
+async function toggleTask(id) {
+  const t = allTasks.find(x => x.id === id);
+  if (!t) return;
+  const completedAt = t.completedAt ? null : new Date().toISOString();
+  const r = await fetch('/api/staff/tasks', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id, completedAt }) });
+  if (r.ok) { t.completedAt = completedAt; renderTasks(); }
+}
+
+async function deleteTask(id) {
+  const r = await fetch(`/api/staff/tasks?id=${id}`, { method:'DELETE' });
+  if (r.ok) { allTasks = allTasks.filter(t => t.id !== id); renderTasks(); showToast('Task removed'); }
+}
+
+function openTaskModal() {
+  const today = localDate();
+  document.getElementById('task-title').value = '';
+  document.getElementById('task-due-date').value = today;
+  document.getElementById('task-notes').value = '';
+  document.getElementById('task-modal-error').style.display = 'none';
+  setStaffTaskUrg('medium', document.getElementById('task-urg-medium'));
+  document.getElementById('task-modal').classList.add('open');
+  setTimeout(() => document.getElementById('task-title').focus(), 50);
+}
+
+function closeTaskModal() { document.getElementById('task-modal').classList.remove('open'); }
+
+function setStaffTaskUrg(urg, btn) {
+  staffTaskUrgency = urg;
+  ['high','medium','low'].forEach(u => {
+    const b = document.getElementById('task-urg-' + u);
+    if (!b) return;
+    if (u === urg) {
+      b.style.background = 'rgba(189,122,112,0.15)';
+      b.style.borderColor = 'rgba(189,122,112,0.3)';
+      b.style.color = '#cf9b92';
+    } else {
+      b.style.background = ''; b.style.borderColor = ''; b.style.color = '';
+    }
+  });
+}
+
+async function saveTask() {
+  const title = document.getElementById('task-title').value.trim();
+  const errEl = document.getElementById('task-modal-error');
+  errEl.style.display = 'none';
+  if (!title) { errEl.textContent = 'Task description required.'; errEl.style.display = 'block'; return; }
+  const body = {
+    title,
+    urgency: staffTaskUrgency,
+    dueDate: document.getElementById('task-due-date').value || localDate(),
+    notes:   document.getElementById('task-notes').value.trim(),
+  };
+  const r = await fetch('/api/staff/tasks', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  if (r.ok) {
+    const task = await r.json();
+    allTasks.push(task);
+    renderTasks();
+    closeTaskModal();
+    showToast('Task added');
+  } else {
+    const data = await r.json().catch(() => ({}));
+    errEl.textContent = data.error || 'Failed to add task.';
+    errEl.style.display = 'block';
+  }
+}
+
+// ── My Deals ───────────────────────────────────────────────────────────────
+async function loadDeals() {
+  try {
+    const r = await fetch('/api/staff/deals');
+    if (r.ok) allDeals = await r.json();
+  } catch {}
+  renderDeals();
+}
+
+const DEAL_STATUS_LABELS = { allocated:'Allocated to client', sent:'Sent to client' };
+const DEAL_STATUS_CLASSES = { allocated:'pill-blue', sent:'pill-green' };
+
+function renderDeals() {
+  const el = document.getElementById('deals-list');
+  if (!el) return;
+  if (!allDeals.length) {
+    el.innerHTML = '<div class="empty">No deals yet. Properties you source that get allocated to a client will appear here.</div>';
+    return;
+  }
+  el.innerHTML = allDeals.map(d => {
+    const statusLabel = DEAL_STATUS_LABELS[d.reviewStatus] || d.reviewStatus;
+    const statusClass = DEAL_STATUS_CLASSES[d.reviewStatus] || 'pill-neutral';
+    const clientsHtml = d.clientNames?.length
+      ? `<div style="margin-top:8px;font-size:13px;color:rgba(247,243,237,0.5);">Client${d.clientNames.length > 1 ? 's' : ''}: ${d.clientNames.map(n => esc(n)).join(', ')}</div>`
+      : '';
+    const commHtml = d.contractorCommission != null
+      ? `<div style="margin-top:10px;padding:10px 14px;background:rgba(109,191,123,0.07);border:1px solid rgba(109,191,123,0.15);border-radius:8px;">
+           <span style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(109,191,123,0.7);">Commission</span>
+           <div style="font-size:18px;font-weight:500;color:#6dbf7b;margin-top:2px;">$${Number(d.contractorCommission).toLocaleString('en-AU')}</div>
+           ${d.contractorCommissionNote ? `<div style="font-size:12px;color:rgba(247,243,237,0.35);margin-top:3px;">${esc(d.contractorCommissionNote)}</div>` : ''}
+         </div>`
+      : '';
+    const details = [d.suburb, d.price].filter(Boolean).join(' · ');
+    const allocDate = d.allocatedAt ? new Date(d.allocatedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '';
+    return `<div class="card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+            <span style="font-size:15px;font-weight:500;color:#f7f3ed;">${esc(d.address)}</span>
+            <span class="pill ${statusClass}">${statusLabel}</span>
+          </div>
+          ${details ? `<div style="font-size:13px;color:rgba(247,243,237,0.4);margin-bottom:2px;">${esc(details)}</div>` : ''}
+          ${allocDate ? `<div style="font-size:12px;color:rgba(247,243,237,0.25);">Allocated ${allocDate}</div>` : ''}
+          ${clientsHtml}
+        </div>
+      </div>
+      ${commHtml}
+    </div>`;
+  }).join('');
 }
 
 // ── Toast ──────────────────────────────────────────────────────────────────

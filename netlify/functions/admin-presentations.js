@@ -200,6 +200,16 @@ export default async (req) => {
       return json({ ok: true });
     }
 
+    // Admin-only: set contractor commission on a deal
+    if (action === 'set-commission') {
+      const amount = body.contractorCommission !== undefined ? Number(body.contractorCommission) || null : undefined;
+      if (amount !== undefined) presentations[idx].contractorCommission = amount;
+      if (body.contractorCommissionNote !== undefined) presentations[idx].contractorCommissionNote = body.contractorCommissionNote?.trim() || '';
+      await store.setJSON('all', presentations);
+      appendAudit('commission_set', `Set commission on "${presentations[idx].address}"`);
+      return json({ ok: true });
+    }
+
     // Admin-only: update attribution (corrections)
     if (action === 'set-attribution') {
       if (body.sourcedById !== undefined) presentations[idx].sourcedById = body.sourcedById;

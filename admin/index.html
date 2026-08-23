@@ -1001,6 +1001,7 @@
           <button class="task-domain-tab" onclick="setTaskView('clients',this)">Clients</button>
           <button class="task-domain-tab" onclick="setTaskView('prospecting',this)">Prospecting</button>
           <button class="task-domain-tab" onclick="setTaskView('content',this)">Content</button>
+          <button class="task-domain-tab" id="task-team-tab" onclick="setTaskView('team',this)" style="display:none;">Team</button>
         </div>
 
         <!-- Add task -->
@@ -1025,6 +1026,24 @@
           <input type="date" id="task-date-input" class="task-date-input" title="Due date (one-off tasks)" style="font-size:12.5px;padding:8px 12px;">
           <button onclick="addTask()" class="btn-primary" style="font-size:13px;padding:10px 20px;white-space:nowrap;flex-shrink:0;">Add task</button>
         </div>
+        <!-- Team task assignment row (only shown in Team view) -->
+        <div id="task-team-add-row" style="display:none;background:rgba(247,243,237,0.03);border:1px solid rgba(247,243,237,0.08);border-radius:12px;padding:16px;margin-bottom:12px;flex-wrap:wrap;gap:8px;flex-direction:column;">
+          <p style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:8px;">Assign task to team member</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <input type="text" id="task-team-input" class="task-add-input" placeholder="Task description…" onkeydown="if(event.key==='Enter')addTeamTask()" style="flex:1;min-width:180px;">
+            <select id="task-team-assignee" style="background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;color:rgba(247,243,237,0.7);font-family:'Outfit',sans-serif;font-size:12.5px;padding:8px 12px;cursor:pointer;outline:none;">
+              <option value="">Assign to…</option>
+            </select>
+            <div class="task-urg-sel" id="task-team-urg-sel">
+              <button class="task-urg-btn" data-urg="high" onclick="setTeamTaskUrgency('high',this)">High</button>
+              <button class="task-urg-btn active" data-urg="medium" onclick="setTeamTaskUrgency('medium',this)">Medium</button>
+              <button class="task-urg-btn" data-urg="low" onclick="setTeamTaskUrgency('low',this)">Low</button>
+            </div>
+            <input type="date" id="task-team-date" class="task-date-input" title="Due date" style="font-size:12.5px;padding:8px 12px;">
+            <button onclick="addTeamTask()" class="btn-primary" style="font-size:13px;padding:10px 20px;white-space:nowrap;flex-shrink:0;">Assign task</button>
+          </div>
+        </div>
+
         <!-- Custom days picker (shown when recurrence = custom_days) -->
         <div id="task-custom-days-row" style="display:none;margin-bottom:12px;display:none;">
           <div style="display:flex;gap:6px;flex-wrap:wrap;padding:8px 0;">
@@ -1045,8 +1064,11 @@
           <div id="task-list-done"></div>
         </div>
 
+        <!-- Team tasks list (shown only in Team view) -->
+        <div id="task-team-list" style="display:none;"></div>
+
         <!-- Stats -->
-        <div class="task-stats">
+        <div class="task-stats" id="task-stats-wrap">
           <p style="font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:16px;">Completion stats</p>
           <div class="task-stats-tabs">
             <button class="task-stat-tab active" onclick="renderTaskStats('week',this)">Week</button>
@@ -2165,6 +2187,21 @@
           <div id="pres-suitable-clients-section" style="display:none;">
             <p style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin:0 0 8px;">Contractor suggestions</p>
             <div id="pres-suitable-clients-list" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+          </div>
+          <!-- Commission (shown once allocated/sent) -->
+          <div id="pres-commission-panel" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid rgba(247,243,237,0.07);">
+            <p style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin:0 0 12px;">Contractor commission</p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start;">
+              <div style="flex:0 0 160px;">
+                <label class="field-note" style="display:block;margin-bottom:4px;">Amount ($)</label>
+                <input type="number" id="pres-commission-amount" placeholder="0" min="0" step="1" style="width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:9px 12px;font-family:'Outfit',sans-serif;font-size:13.5px;color:#f7f3ed;outline:none;">
+              </div>
+              <div style="flex:1;min-width:180px;">
+                <label class="field-note" style="display:block;margin-bottom:4px;">Note (optional)</label>
+                <input type="text" id="pres-commission-note" placeholder="e.g. 25% of first acquisition fee" style="width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:9px 12px;font-family:'Outfit',sans-serif;font-size:13.5px;color:#f7f3ed;outline:none;">
+              </div>
+              <button onclick="savePresCommission()" class="btn-secondary" style="margin-top:22px;font-size:12.5px;padding:9px 16px;flex-shrink:0;">Save commission</button>
+            </div>
           </div>
         </div>
         <div class="pres-field-row-2" style="margin-bottom:20px;">
@@ -3782,7 +3819,7 @@ function showSection(id, btn) {
   if (id === 'prospects') renderProspects();
   if (id === 'settings') { loadCompliance(); loadAgentSignatureSettings(); }
   if (id === 'reports') renderReports();
-  if (id === 'tasks') loadTasks();
+  if (id === 'tasks') { loadTasks(); if (!_staffTasksLoaded) loadStaffTasks(); }
   localStorage.setItem('fw_admin_section', id);
 }
 
@@ -5353,6 +5390,15 @@ async function loadStaff() {
   if (!res.ok) { el.innerHTML = '<span style="font-size:13px;color:#cf9b92;">Failed to load team.</span>'; return; }
   staffList = await res.json();
   renderStaff();
+  // Show Team tab in tasks and populate assignee dropdown if there are active staff
+  const activeStaff = staffList.filter(u => !u.deletedAt && u.active && !u.pending);
+  const teamTab = document.getElementById('task-team-tab');
+  if (teamTab) teamTab.style.display = activeStaff.length ? '' : 'none';
+  const assigneeSel = document.getElementById('task-team-assignee');
+  if (assigneeSel) {
+    assigneeSel.innerHTML = '<option value="">Assign to…</option>' +
+      activeStaff.map(u => `<option value="${esc(u.id)}">${esc(u.name)}</option>`).join('');
+  }
 }
 
 function renderStaff() {
@@ -6313,17 +6359,154 @@ let allTasks = [];
 let taskNewUrgency = 'medium';
 let _taskStatPeriod = 'week';
 let _tasksLoaded = false;
-// 'today' | 'clients' | 'prospecting' | 'content'
+// 'today' | 'clients' | 'prospecting' | 'content' | 'team'
 let _taskView = 'today';
+let allStaffTasks = [];
+let teamTaskUrgency = 'medium';
 
 function setTaskView(view, btn) {
   _taskView = view;
   document.querySelectorAll('.task-domain-tab').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
+  const isTeam = view === 'team';
+  // Toggle visibility of add rows
+  const myAddRow = document.querySelector('.task-add-row');
+  const teamAddRow = document.getElementById('task-team-add-row');
+  const teamList   = document.getElementById('task-team-list');
+  const statsWrap  = document.getElementById('task-stats-wrap');
+  const listActive = document.getElementById('task-list-active');
+  const doneSec    = document.getElementById('task-done-section');
+  if (myAddRow)   myAddRow.style.display   = isTeam ? 'none' : '';
+  if (teamAddRow) teamAddRow.style.display  = isTeam ? 'flex' : 'none';
+  if (teamList)   teamList.style.display    = isTeam ? 'block' : 'none';
+  if (statsWrap)  statsWrap.style.display   = isTeam ? 'none' : '';
+  if (listActive) listActive.style.display  = isTeam ? 'none' : '';
+  if (doneSec)    doneSec.style.display     = isTeam ? 'none' : (doneSec.dataset.hasItems ? 'block' : 'none');
+  if (isTeam) {
+    renderTeamTasks();
+    return;
+  }
   // Pre-select matching stream in add form
   const streamSel = document.getElementById('task-new-stream');
   if (streamSel && view !== 'today') streamSel.value = view;
   renderTaskList();
+}
+
+// ── Team tasks (admin assigns to contractors) ──────────────────────────────
+let _staffTasksLoaded = false;
+
+async function loadStaffTasks() {
+  try {
+    const res = await api('GET', '/api/admin/staff-tasks');
+    if (res.ok) allStaffTasks = await res.json();
+  } catch {}
+  _staffTasksLoaded = true;
+}
+
+function setTeamTaskUrgency(urg, btn) {
+  teamTaskUrgency = urg;
+  document.querySelectorAll('#task-team-urg-sel .task-urg-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+async function addTeamTask() {
+  const input    = document.getElementById('task-team-input');
+  const assignSel = document.getElementById('task-team-assignee');
+  const dateInput = document.getElementById('task-team-date');
+  const title = input?.value.trim();
+  if (!title) { input?.focus(); return; }
+  const assignedTo   = assignSel?.value;
+  const assignedToName = assignSel?.options[assignSel.selectedIndex]?.text || '';
+  if (!assignedTo) { assignSel?.focus(); return; }
+  const dueDate = dateInput?.value || localDateStr();
+  const res = await api('POST', '/api/admin/staff-tasks', { title, urgency: teamTaskUrgency, dueDate, assignedTo, assignedToName });
+  if (res.ok) {
+    const task = await res.json();
+    allStaffTasks.push(task);
+    if (input) input.value = '';
+    renderTeamTasks();
+    showToast('Task assigned');
+  }
+}
+
+async function deleteTeamTask(id) {
+  const res = await api('DELETE', `/api/admin/staff-tasks?id=${id}`);
+  if (res.ok) {
+    const idx = allStaffTasks.findIndex(t => t.id === id);
+    if (idx !== -1) allStaffTasks.splice(idx, 1);
+    renderTeamTasks();
+  }
+}
+
+function renderTeamTasks() {
+  const el = document.getElementById('task-team-list');
+  if (!el) return;
+  const today = localDateStr();
+  const urgOrder = { high:0, medium:1, low:2 };
+  const active    = allStaffTasks.filter(t => !t.deletedAt && !t.completedAt).sort((a,b) => (urgOrder[a.urgency]??1) - (urgOrder[b.urgency]??1));
+  const completed = allStaffTasks.filter(t => !t.deletedAt && t.completedAt);
+  if (!active.length && !completed.length) {
+    el.innerHTML = '<div style="padding:24px 0;text-align:center;color:rgba(247,243,237,0.18);font-size:13.5px;">No tasks assigned yet. Use the form above to assign a task to a team member.</div>';
+    return;
+  }
+  // Group active by assignee
+  const groups = {};
+  active.forEach(t => {
+    const key = t.assignedToName || t.ownerId;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(t);
+  });
+  let html = Object.entries(groups).map(([name, tasks]) => `
+    <div style="margin-bottom:20px;">
+      <div class="task-section-head">
+        <span class="task-section-head-label">${esc(name)}</span>
+        <span class="task-section-head-count">${tasks.length}</span>
+        <div class="task-section-div"></div>
+      </div>
+      ${tasks.map(t => teamTaskItemHtml(t, today)).join('')}
+    </div>`).join('');
+  if (completed.length) {
+    html += `<div style="margin-top:20px;">
+      <div class="task-section-head">
+        <span class="task-section-head-label" style="color:rgba(247,243,237,0.3);">Completed</span>
+        <span class="task-section-head-count">${completed.length}</span>
+        <div class="task-section-div"></div>
+      </div>
+      ${completed.map(t => teamTaskItemHtml(t, today)).join('')}
+    </div>`;
+  }
+  el.innerHTML = html;
+}
+
+function teamTaskItemHtml(t, today) {
+  const done = !!t.completedAt;
+  const daysOver = (!done && t.dueDate < today) ? Math.round((new Date(today) - new Date(t.dueDate)) / 86400000) : 0;
+  const overLabel = daysOver > 0 ? `<span class="task-roll-badge">↑ ${daysOver}d overdue</span>` : '';
+  const urgLabel = {high:'High',medium:'Medium',low:'Low'}[t.urgency] || t.urgency;
+  const dateFmt = t.dueDate !== today ? new Date(t.dueDate + 'T00:00:00').toLocaleDateString('en-AU',{day:'numeric',month:'short'}) : '';
+  return `<div class="task-item${done?' task-done':''}" data-urg="${t.urgency}">
+    <div class="task-check" style="opacity:0.4;cursor:default;">
+      <svg class="task-tick" width="10" height="8" viewBox="0 0 10 8" fill="none">
+        <path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="task-body">
+      <div>
+        <div class="task-title">${esc(t.title)}</div>
+        <div class="task-meta">
+          <span class="task-urg-badge" data-urg="${t.urgency}">${urgLabel}</span>
+          ${dateFmt ? `<span class="task-date-badge">${dateFmt}</span>` : ''}
+          ${overLabel}
+          <span style="font-size:11px;color:rgba(247,243,237,0.25);margin-left:4px;">→ ${esc(t.assignedToName || 'Unknown')}</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:2px;flex-shrink:0;">
+      <button class="task-del" onclick="deleteTeamTask('${t.id}')" title="Remove task">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>`;
 }
 
 function updateTaskNewStreamOptions() {
@@ -9635,6 +9818,23 @@ function renderPresentations() {
   }).join('');
 }
 
+async function savePresCommission() {
+  const id = document.getElementById('pres-edit-id').value;
+  if (!id) return;
+  const amount = document.getElementById('pres-commission-amount').value;
+  const note   = document.getElementById('pres-commission-note').value;
+  const res = await api('PUT', '/api/admin/presentations', {
+    id, action: 'set-commission',
+    contractorCommission: amount !== '' ? Number(amount) : null,
+    contractorCommissionNote: note,
+  });
+  if (res.ok) {
+    const p = presentations.find(x => x.id === id);
+    if (p) { p.contractorCommission = amount !== '' ? Number(amount) : null; p.contractorCommissionNote = note; }
+    showToast('Commission saved');
+  } else { showToast('Failed to save commission', 'error'); }
+}
+
 async function adminAdvanceReviewStatus() {
   const presId = document.getElementById('pres-edit-id').value;
   if (!presId) return;
@@ -10186,8 +10386,17 @@ function openPresModal(id) {
         suitableSection.style.display = 'none';
         suitableList.innerHTML = '';
       }
+      // Commission panel (show when allocated or sent)
+      const commPanel = document.getElementById('pres-commission-panel');
+      const isAllocated = ['allocated','sent'].includes(p.reviewStatus || '');
+      commPanel.style.display = isAllocated ? 'block' : 'none';
+      if (isAllocated) {
+        document.getElementById('pres-commission-amount').value = p.contractorCommission != null ? p.contractorCommission : '';
+        document.getElementById('pres-commission-note').value = p.contractorCommissionNote || '';
+      }
     } else {
       reviewPanel.style.display = 'none';
+      document.getElementById('pres-commission-panel').style.display = 'none';
     }
     const unrevoked = (p.assignedClients || []).filter(cid => !revokedList.includes(cid));
     const canSend = unrevoked.some(cid => !sentList.includes(cid));
