@@ -5498,6 +5498,7 @@ function renderStaff() {
           ${u.active && !u.pending ? `<button onclick="previewAsStaff('${u.id}',this)" style="background:none;border:1px solid rgba(122,184,232,0.25);border-radius:7px;padding:6px 12px;font-family:'Outfit',sans-serif;font-size:12px;color:rgba(122,184,232,0.7);cursor:pointer;" onmouseover="this.style.color='rgba(122,184,232,0.95)'" onmouseout="this.style.color='rgba(122,184,232,0.7)'">Preview portal</button>` : ''}
           <button onclick="openStaffPermissions('${u.id}')" style="background:none;border:1px solid rgba(247,243,237,0.15);border-radius:7px;padding:6px 12px;font-family:'Outfit',sans-serif;font-size:12px;color:rgba(247,243,237,0.6);cursor:pointer;" onmouseover="this.style.color='rgba(247,243,237,0.9)'" onmouseout="this.style.color='rgba(247,243,237,0.6)'">Manage</button>
           <button onclick="toggleStaffActive('${u.id}','${u.active}')" style="background:none;border:1px solid rgba(247,243,237,0.1);border-radius:7px;padding:6px 12px;font-family:'Outfit',sans-serif;font-size:12px;color:rgba(247,243,237,0.4);cursor:pointer;" onmouseover="this.style.color='rgba(247,243,237,0.7)'" onmouseout="this.style.color='rgba(247,243,237,0.4)'">${u.active ? 'Deactivate' : 'Activate'}</button>
+          <button onclick="deleteStaff('${u.id}','${esc(u.name)}')" style="background:none;border:1px solid rgba(224,112,112,0.2);border-radius:7px;padding:6px 12px;font-family:'Outfit',sans-serif;font-size:12px;color:rgba(224,112,112,0.45);cursor:pointer;" onmouseover="this.style.color='rgba(224,112,112,0.8)'" onmouseout="this.style.color='rgba(224,112,112,0.45)'">Delete</button>
         </div>
       </div>
     `;
@@ -5566,6 +5567,13 @@ async function toggleStaffActive(id, currentlyActive) {
   }
 }
 
+async function deleteStaff(id, name) {
+  if (!confirm(`Permanently delete ${name}? This removes their account and cannot be undone. Their sourced properties will still show their name.`)) return;
+  const res = await fetch(`/api/admin/staff?id=${encodeURIComponent(id)}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' } });
+  if (res.ok) { showToast(`${name} deleted`); await loadStaff(); }
+  else showToast('Failed to delete account.', 'error');
+}
+
 // ── Staff permissions overlay ─────────────────────────────────────────────
 let _spStaffId = null;
 
@@ -5616,14 +5624,24 @@ function renderPermissionsBody(user) {
     </label>
   `).join('');
 
-  // Individual hidden contacts
+  // Individual hidden contacts — compact searchable list
   const allPartners = window._latestPartners || [];
-  const contactToggles = allPartners.length ? allPartners.map(p => `
-    <label style="display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;">
-      <input type="checkbox" class="dir-hide-cb" value="${p.id}" ${hiddenContacts.includes(p.id) ? 'checked' : ''} onchange="updateStaffDirectory()" style="accent-color:#bd7a70;width:14px;height:14px;">
-      <span style="font-size:13px;color:rgba(247,243,237,0.6);">Hide <strong style="color:rgba(247,243,237,0.75);font-weight:500;">${esc(p.name)}</strong>${p.company ? ` (${esc(p.company)})` : ''}</span>
-    </label>
-  `).join('') : '<p style="font-size:13px;color:rgba(247,243,237,0.25);">No directory contacts yet.</p>';
+  const hiddenSet = new Set(hiddenContacts);
+  const contactToggles = allPartners.length ? `
+    <input type="text" id="sp-hide-search" placeholder="Search contacts…" oninput="filterHideContacts()" style="width:100%;box-sizing:border-box;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:7px 11px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:12.5px;outline:none;margin-bottom:10px;">
+    <div id="sp-hide-list" style="max-height:180px;overflow-y:auto;">
+      ${allPartners.map(p => {
+        const isHidden = hiddenSet.has(p.id);
+        return `<div class="sp-hide-row" data-name="${esc((p.name + ' ' + (p.company||'')).toLowerCase())}" style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(247,243,237,0.04);">
+          <span style="font-size:12.5px;color:${isHidden ? 'rgba(247,243,237,0.3)' : 'rgba(247,243,237,0.7)'};">${esc(p.name)}${p.company ? ` <span style="color:rgba(247,243,237,0.3);font-size:11.5px;">· ${esc(p.company)}</span>` : ''}</span>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex-shrink:0;">
+            <span style="font-size:11px;color:rgba(247,243,237,0.3);">${isHidden ? 'Hidden' : 'Visible'}</span>
+            <input type="checkbox" class="dir-hide-cb" value="${p.id}" ${isHidden ? 'checked' : ''} onchange="updateStaffDirectory()" style="accent-color:#bd7a70;width:13px;height:13px;">
+          </label>
+        </div>`;
+      }).join('')}
+    </div>
+  ` : '<p style="font-size:13px;color:rgba(247,243,237,0.25);">No directory contacts yet.</p>';
 
   const section = (title, content) => `
     <div style="margin-bottom:22px;">
@@ -5653,6 +5671,13 @@ function renderPermissionsBody(user) {
       </div>
     ` : ''}
   `;
+}
+
+function filterHideContacts() {
+  const q = document.getElementById('sp-hide-search')?.value.toLowerCase() || '';
+  document.querySelectorAll('.sp-hide-row').forEach(row => {
+    row.style.display = !q || row.dataset.name.includes(q) ? '' : 'none';
+  });
 }
 
 async function updateStaffClients() {
