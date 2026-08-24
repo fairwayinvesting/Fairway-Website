@@ -39,6 +39,7 @@
     .snav-item svg{flex-shrink:0;}
     .snav-spacer{flex:1;}
     .snav-divider{height:1px;background:rgba(247,243,237,0.07);margin:8px 0;}
+    .snav-label{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.22);padding:14px 12px 4px;}
     /* Sections */
     .admin-section{display:none;}
     .admin-section.active{display:block;}
@@ -869,6 +870,8 @@
   <!-- ── Sidebar ── -->
   <aside class="admin-sidebar">
     <nav class="snav">
+
+      <div class="snav-label">Business</div>
       <button class="snav-item active" onclick="showSection('dashboard',this)">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6.5" height="6.5" rx="1.5" fill="currentColor" opacity=".8"/><rect x="8.5" y="1" width="6.5" height="6.5" rx="1.5" fill="currentColor" opacity=".8"/><rect x="1" y="8.5" width="6.5" height="6.5" rx="1.5" fill="currentColor" opacity=".8"/><rect x="8.5" y="8.5" width="6.5" height="6.5" rx="1.5" fill="currentColor" opacity=".8"/></svg>
         Dashboard
@@ -885,30 +888,47 @@
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="5" width="3.5" height="9" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="6.25" y="2" width="3.5" height="12" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="11" y="7" width="3.5" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
         Pipeline
       </button>
+      <button class="snav-item" onclick="showSection('financials',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Financials
+      </button>
       <button class="snav-item" onclick="showSection('reports',this)">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 13l3.5-4 3 3L14 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Reports
       </button>
+
+      <div class="snav-divider" style="margin-top:10px;"></div>
+      <div class="snav-label">Property</div>
       <button class="snav-item" onclick="showSection('presentations',this)">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5L1.5 7H3v7h10V7h1.5L8 1.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><rect x="6" y="10" width="4" height="4" rx=".75" stroke="currentColor" stroke-width="1.25"/></svg>
         Presentations
-      </button>
-      <button class="snav-item" onclick="showSection('dates',this)">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3.5" width="13" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 2v3M11 2v3M1.5 7h13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        Dates
       </button>
       <button class="snav-item" onclick="showSection('shortlist',this)">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 2h10a1 1 0 011 1v10.5l-5-3-5 3V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
         Shortlist
       </button>
-      <button class="snav-item" onclick="showSection('partners',this)">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10.5 10c1.657 0 3 .895 3 2v1h-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.4"/><circle cx="10.5" cy="4" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M2.5 13v-1c0-1.105 1.343-2 3.5-2s3.5.895 3.5 2v1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-        Directory
+      <button class="snav-item" onclick="showSection('dates',this)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3.5" width="13" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 2v3M11 2v3M1.5 7h13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Dates
       </button>
+
+      <div class="snav-divider" style="margin-top:10px;"></div>
+      <div class="snav-label">People</div>
       <button class="snav-item" onclick="showSection('prospects',this)">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13 13v-1.5A2.5 2.5 0 0 0 10.5 9h-5A2.5 2.5 0 0 0 3 11.5V13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M11 2l1 1 2-2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Prospects
       </button>
+      <button class="snav-item" onclick="showSection('partners',this)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10.5 10c1.657 0 3 .895 3 2v1h-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.4"/><circle cx="10.5" cy="4" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M2.5 13v-1c0-1.105 1.343-2 3.5-2s3.5.895 3.5 2v1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Directory
+      </button>
+      <button class="snav-item" id="nav-staff" onclick="showSection('staff',this);loadStaff()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Team
+      </button>
+
+      <div class="snav-divider" style="margin-top:10px;"></div>
+      <div class="snav-label">Content</div>
       <a class="snav-item" href="/admin/content.html" style="text-decoration:none;">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2" fill="currentColor" opacity=".7"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         Content
@@ -921,14 +941,7 @@
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="10" height="13" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 5h5M4.5 8h5M4.5 11h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M12 9l2.5 2.5-2.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Proposal
       </a>
-      <button class="snav-item" id="nav-staff" onclick="showSection('staff',this);loadStaff()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Team
-      </button>
-      <button class="snav-item" onclick="showSection('financials',this)">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        Financials
-      </button>
+
       <div class="snav-spacer"></div>
       <div class="snav-divider"></div>
       <button class="snav-item" onclick="showSection('settings',this)">
