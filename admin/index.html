@@ -1289,7 +1289,7 @@
     <div id="sec-staff" class="admin-section">
       <div class="sec-header" style="display:flex;align-items:center;justify-content:space-between;">
         <h1>Team</h1>
-        <button class="admin-btn" onclick="openStaffModal()">+ Add team member</button>
+        <button class="btn-primary" onclick="openStaffModal()" style="font-size:13px;padding:10px 20px;">+ Add team member</button>
       </div>
       <div id="staff-list" style="margin-top:4px;"></div>
     </div>
@@ -3913,7 +3913,8 @@ async function completeLogin() {
   const navBtn = Array.from(document.querySelectorAll('.snav-item')).find(b => (b.getAttribute('onclick') || '').includes(`'${lastSection}'`)) || document.querySelector('.snav-item');
   showSection(lastSection, navBtn);
   renderPartnerList();
-  loadClients();
+  // Start all loads in parallel — store clients promise so financials can await it
+  const clientsReady = loadClients();
   loadMilestones();
   loadPresentations();
   loadAuditLog();
@@ -3924,7 +3925,11 @@ async function completeLogin() {
   loadProspects();
   loadQrCodes();
   loadTasks();
-  // Load signature settings for the settings section (non-blocking)
+  // Financials needs client data — wait for it then render explicitly
+  if (lastSection === 'financials') {
+    await clientsReady;
+    renderFinancials();
+  }
   setTimeout(() => loadAgentSignatureSettings(), 500);
 }
 
