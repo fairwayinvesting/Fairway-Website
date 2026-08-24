@@ -978,10 +978,6 @@
         <div class="dash-panel-title">Top referrers</div>
         <div id="dash-referrers"><span style="font-size:13px;color:rgba(247,243,237,0.2);">Loading…</span></div>
       </div>
-      <div class="dash-panel" style="margin-top:18px;">
-        <div class="dash-panel-title">Fees</div>
-        <div id="dash-fees"><span style="font-size:13px;color:rgba(247,243,237,0.2);">Loading…</span></div>
-      </div>
     </div>
 
     <!-- Tasks -->
@@ -5456,6 +5452,7 @@ function renderStaff() {
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
           ${statusBadge}
+          ${u.active && !u.pending ? `<button onclick="previewAsStaff('${u.id}',this)" style="background:none;border:1px solid rgba(122,184,232,0.25);border-radius:7px;padding:6px 12px;font-family:'Outfit',sans-serif;font-size:12px;color:rgba(122,184,232,0.7);cursor:pointer;" onmouseover="this.style.color='rgba(122,184,232,0.95)'" onmouseout="this.style.color='rgba(122,184,232,0.7)'">Preview portal</button>` : ''}
           <button onclick="openStaffPermissions('${u.id}')" style="background:none;border:1px solid rgba(247,243,237,0.15);border-radius:7px;padding:6px 12px;font-family:'Outfit',sans-serif;font-size:12px;color:rgba(247,243,237,0.6);cursor:pointer;" onmouseover="this.style.color='rgba(247,243,237,0.9)'" onmouseout="this.style.color='rgba(247,243,237,0.6)'">Manage</button>
           <button onclick="toggleStaffActive('${u.id}','${u.active}')" style="background:none;border:1px solid rgba(247,243,237,0.1);border-radius:7px;padding:6px 12px;font-family:'Outfit',sans-serif;font-size:12px;color:rgba(247,243,237,0.4);cursor:pointer;" onmouseover="this.style.color='rgba(247,243,237,0.7)'" onmouseout="this.style.color='rgba(247,243,237,0.4)'">${u.active ? 'Deactivate' : 'Activate'}</button>
         </div>
@@ -5646,6 +5643,18 @@ async function updateStaffPermissions() {
   const res = await api('PUT', '/api/admin/staff', { id: _spStaffId, action: 'set-permissions', permissions: { canViewCommissions } });
   if (res.ok) showToast('Permissions updated');
   else showToast('Failed to update permissions', 'error');
+}
+
+async function previewAsStaff(staffId, btn) {
+  const orig = btn.textContent;
+  btn.textContent = 'Opening…';
+  btn.disabled = true;
+  const res = await api('POST', '/api/admin/staff-preview', { staffId });
+  btn.textContent = orig;
+  btn.disabled = false;
+  if (!res.ok) { showToast('Failed to generate preview link', 'error'); return; }
+  const { token } = await res.json();
+  window.open(`/api/staff/activate-preview?t=${encodeURIComponent(token)}`, '_blank');
 }
 
 async function resendStaffInvite(id) {
@@ -6484,19 +6493,12 @@ async function finRecordPayment(clientId, feeId) {
   if (!fee) return;
   const newPmt = { id: crypto.randomUUID(), amount, note, paidAt };
   const updatedPayments = [...(fee.payments || []), newPmt];
-  const body = c.acquisitions?.length
-    ? { id: clientId, action: 'update-fee-payments', feeId, payments: updatedPayments }
-    : { id: clientId, manualFee: { ...c.manualFee, payments: updatedPayments } };
-  const res = await api('PUT', '/api/admin/clients', body);
+  const updatedManualFees = getManualFees(c).map(f => f.id === feeId ? { ...f, payments: updatedPayments } : f);
+  const res = await api('PUT', '/api/admin/clients', { id: clientId, manualFees: updatedManualFees });
   if (res.ok) {
-    if (c.acquisitions?.length) {
-      const acq = c.acquisitions.find(a => a.id === feeId || (a.fees || []).find(f => f.id === feeId));
-      if (acq) { const f = (acq.fees || []).find(f => f.id === feeId); if (f) f.payments = updatedPayments; }
-    } else if (c.manualFee) {
-      c.manualFee.payments = updatedPayments;
-    }
+    c.manualFees = updatedManualFees;
+    c.manualFee = null;
     renderFinFees();
-    renderDashboardFees();
     showToast('Payment recorded');
   }
 }
@@ -8758,7 +8760,7 @@ async function confirmFeeRefund(clientId, feeId, paymentId) {
 async function dashRemovePayment(clientId, feeId, paymentId) {
   const client = clients.find(c => c.id === clientId);
   if (!client) return;
-  const reason = document.getElementById('dash-rr-' + paymentId)?.value?.trim();
+  const reason = (document.getElementById('fin-rr-' + paymentId) || document.getElementById('dash-rr-' + paymentId))?.value?.trim();
   if (!reason) { showToast('Please enter a reason.', 'warning'); return; }
   const fees = getManualFees(client);
   const manualFees = fees.map(f => f.id === feeId
@@ -8769,7 +8771,7 @@ async function dashRemovePayment(clientId, feeId, paymentId) {
   if (!res.ok) { showToast('Failed to remove payment.', 'warning'); return; }
   client.manualFees = manualFees;
   client.manualFee = null;
-  renderDashboardFees();
+  renderFinFees();
   if (crmProfileClientId === clientId) refreshProfileView();
   showToast('Payment removed');
 }

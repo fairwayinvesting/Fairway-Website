@@ -23,6 +23,7 @@ export default async (req) => {
       assignedClients: user.assignedClients || [],
       directoryAccess: user.directoryAccess || {},
       permissions: user.permissions || {},
+      preview: payload.preview || false,
     });
   } catch {
     return json({

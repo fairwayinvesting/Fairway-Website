@@ -139,6 +139,13 @@
   </style>
 </head>
 <body>
+<!-- Preview mode banner (hidden by default, shown if session has preview:true) -->
+<div id="preview-banner" style="display:none;background:#1a2a1a;border-bottom:1px solid rgba(122,184,232,0.3);padding:10px 24px;font-size:13px;color:rgba(122,184,232,0.9);align-items:center;gap:10px;">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+  <span>Admin preview — viewing as <strong id="preview-name"></strong>. This session expires in 1 hour.</span>
+  <a href="/admin/" style="margin-left:auto;color:rgba(122,184,232,0.6);font-size:12px;text-decoration:none;" onmouseover="this.style.color='rgba(122,184,232,0.9)'" onmouseout="this.style.color='rgba(122,184,232,0.6)'">&larr; Back to admin</a>
+</div>
+
 <div class="layout">
   <!-- ── Sidebar ────────────────────────────────────────────────────────── -->
   <aside class="sidebar">
@@ -442,6 +449,12 @@ async function init() {
     if (!r.ok) { window.location = '/staff/'; return; }
     me = await r.json();
   } catch { window.location = '/staff/'; return; }
+
+  if (me.preview) {
+    const banner = document.getElementById('preview-banner');
+    document.getElementById('preview-name').textContent = me.name;
+    banner.style.display = 'flex';
+  }
 
   document.getElementById('sb-name').textContent = me.name || '—';
   document.getElementById('sb-role').textContent = me.role === 'employee' ? 'Employee' : 'Contractor';
