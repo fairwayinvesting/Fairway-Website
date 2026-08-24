@@ -4,9 +4,11 @@ import { getStaffPayload, hasModule } from './_staff-auth.js';
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 
-// Fields a contractor is allowed to update (research fields only)
+// Fields a contractor is allowed to update
 const EDITABLE_FIELDS = [
+  'address','suburb','price','propertyType','bedrooms','bathrooms','carspaces','landSize',
   'propertyDescription','summary','highlights','knownIssues',
+  'images','videos',
   'cashflow','riskProfile','demographics','customSections',
   'comparableSales','comparableRentals',
 ];
