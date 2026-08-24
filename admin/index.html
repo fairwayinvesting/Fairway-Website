@@ -3800,6 +3800,7 @@ async function removeProfessional(idx) {
 
 // Auth is handled entirely by the fw_admin HttpOnly cookie set by admin-login.
 let clients = [];
+let _clientsLoaded = false;
 let milestones = [];
 let presentations = [];
 let complianceData = null;
@@ -3844,7 +3845,7 @@ function showSection(id, btn) {
   if (id === 'settings') { loadCompliance(); loadAgentSignatureSettings(); }
   if (id === 'reports') renderReports();
   if (id === 'tasks') { loadTasks(); if (!_staffTasksLoaded) loadStaffTasks(); }
-  if (id === 'financials') renderFinancials();
+  if (id === 'financials' && _clientsLoaded) renderFinancials();
   localStorage.setItem('fw_admin_section', id);
 }
 
@@ -4003,6 +4004,7 @@ async function loadClients() {
     const data = await res.json();
     if (!Array.isArray(data)) throw new Error('Unexpected response');
     clients = data;
+    _clientsLoaded = true;
     _setSysCheck('clients', 'ok', `${clients.filter(c => !c.deleted).length} clients`);
   } catch (e) {
     _setSysCheck('clients', 'err', e.message);
