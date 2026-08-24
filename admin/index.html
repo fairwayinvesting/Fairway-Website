@@ -924,6 +924,10 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Team
       </button>
+      <button class="snav-item" onclick="showSection('financials',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Financials
+      </button>
       <div class="snav-spacer"></div>
       <div class="snav-divider"></div>
       <button class="snav-item" onclick="showSection('settings',this)">
@@ -1291,6 +1295,30 @@
         <button class="admin-btn" onclick="openStaffModal()">+ Add team member</button>
       </div>
       <div id="staff-list" style="margin-top:4px;"></div>
+    </div>
+
+    <!-- Financials -->
+    <div id="sec-financials" class="admin-section">
+      <div class="sec-header" style="margin-bottom:24px;">
+        <h1>Financials</h1>
+      </div>
+
+      <!-- Tab bar -->
+      <div style="display:flex;gap:2px;border-bottom:1px solid rgba(247,243,237,0.08);margin-bottom:28px;">
+        <button class="pres-tab active" id="fin-tab-fees" onclick="setFinTab('fees',this)">Client Fees</button>
+        <button class="pres-tab" id="fin-tab-commissions" onclick="setFinTab('commissions',this)">Contractor Commissions</button>
+      </div>
+
+      <!-- Client Fees tab -->
+      <div id="fin-pane-fees">
+        <div id="fin-fees-body"></div>
+      </div>
+
+      <!-- Contractor Commissions tab -->
+      <div id="fin-pane-commissions" style="display:none;">
+        <div id="fin-comm-summary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px;"></div>
+        <div id="fin-comm-body"></div>
+      </div>
     </div>
 
     <!-- Settings -->
@@ -3820,6 +3848,7 @@ function showSection(id, btn) {
   if (id === 'settings') { loadCompliance(); loadAgentSignatureSettings(); }
   if (id === 'reports') renderReports();
   if (id === 'tasks') { loadTasks(); if (!_staffTasksLoaded) loadStaffTasks(); }
+  if (id === 'financials') renderFinancials();
   localStorage.setItem('fw_admin_section', id);
 }
 
@@ -6319,6 +6348,270 @@ async function testTotpCode(secret) {
   const { valid } = await res.json();
   resultEl.textContent = valid ? '✓ Code is valid' : '✗ Invalid code';
   resultEl.style.color = valid ? '#6dbf7b' : '#f08080';
+}
+
+// ── Financials ────────────────────────────────────────────────────────────────
+let _finTab = 'fees';
+
+function setFinTab(tab, btn) {
+  _finTab = tab;
+  document.querySelectorAll('#sec-financials .pres-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('fin-pane-fees').style.display        = tab === 'fees'        ? '' : 'none';
+  document.getElementById('fin-pane-commissions').style.display = tab === 'commissions' ? '' : 'none';
+  if (tab === 'commissions') renderContractorCommissions();
+  if (tab === 'fees')        renderFinFees();
+}
+
+function renderFinancials() {
+  renderFinFees();
+  if (_finTab === 'commissions') renderContractorCommissions();
+}
+
+// ── Financials: Client Fees ───────────────────────────────────────────────
+function renderFinFees() {
+  const el = document.getElementById('fin-fees-body');
+  if (!el) return;
+  const today = localDateStr(new Date());
+  const fmtCur = n => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const calcPaid = fee => (fee.payments || []).filter(p => !p.refundedAt).reduce((s, p) => s + (Number(p.amount) || 0), 0);
+
+  const rows = [];
+  clients.forEach(c => getManualFees(c).filter(f => f.totalFee).forEach(f => rows.push({ c, f })));
+
+  if (!rows.length) {
+    el.innerHTML = '<p style="font-size:13.5px;color:rgba(247,243,237,0.3);padding:12px 0;">No fees assigned yet. Open a client\'s Engagement tab to set a fee.</p>';
+    return;
+  }
+
+  let totalCollected = 0, totalOutstanding = 0;
+  rows.forEach(({ f }) => { const p = calcPaid(f); totalCollected += p; totalOutstanding += Math.max(0, (f.totalFee || 0) - p); });
+  rows.sort((a, b) => Math.max(0, (b.f.totalFee || 0) - calcPaid(b.f)) - Math.max(0, (a.f.totalFee || 0) - calcPaid(a.f)));
+
+  const multiPerClient = {};
+  rows.forEach(({ c }) => { multiPerClient[c.id] = (multiPerClient[c.id] || 0) + 1; });
+
+  const summaryHtml = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px;">
+      <div style="background:rgba(109,191,123,0.07);border:1px solid rgba(109,191,123,0.15);border-radius:12px;padding:16px 18px;">
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#6dbf7b;margin-bottom:6px;">Collected</div>
+        <div style="font-family:'Fraunces',serif;font-size:28px;color:#f7f3ed;line-height:1.1;">${fmtCur(totalCollected)}</div>
+        <div style="font-size:12px;color:rgba(247,243,237,0.35);margin-top:4px;">${fmtCur(totalCollected * 1.1)} inc GST</div>
+      </div>
+      <div style="background:rgba(232,168,124,0.07);border:1px solid rgba(232,168,124,0.15);border-radius:12px;padding:16px 18px;">
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#e8a87c;margin-bottom:6px;">Outstanding</div>
+        <div style="font-family:'Fraunces',serif;font-size:28px;color:#f7f3ed;line-height:1.1;">${fmtCur(totalOutstanding)}</div>
+        <div style="font-size:12px;color:rgba(247,243,237,0.35);margin-top:4px;">${fmtCur(totalOutstanding * 1.1)} inc GST</div>
+      </div>
+      <div style="background:rgba(189,122,112,0.07);border:1px solid rgba(189,122,112,0.2);border-radius:12px;padding:16px 18px;">
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#bd7a70;margin-bottom:6px;">GST to ATO</div>
+        <div style="font-family:'Fraunces',serif;font-size:28px;color:#f7f3ed;line-height:1.1;">${fmtCur(totalCollected * 0.1)}</div>
+        <div style="font-size:12px;color:rgba(247,243,237,0.35);margin-top:4px;">10% of collected</div>
+      </div>
+    </div>`;
+
+  const rowsHtml = rows.map(({ c, f }) => {
+    const paid        = calcPaid(f);
+    const outstanding = Math.max(0, (f.totalFee || 0) - paid);
+    const isPaid      = outstanding <= 0;
+    const paidPct     = f.totalFee > 0 ? Math.round((paid / f.totalFee) * 100) : 0;
+    const nameLabel   = multiPerClient[c.id] > 1 ? `${esc(c.name)} <span style="color:rgba(247,243,237,0.35);">· ${esc(f.label || 'Fee')}</span>` : esc(c.name);
+    const activePmts  = (f.payments || []).filter(p => !p.refundedAt);
+    const panelId     = `fin-fee-panel-${c.id}-${f.id}`;
+
+    const pmtHistoryHtml = activePmts.map(p => {
+      const ds = new Date(p.paidAt).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
+      return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(247,243,237,0.05);">
+        <span style="flex:1;font-size:13px;color:#f7f3ed;">${fmtCur(p.amount)}</span>
+        <span style="font-size:12px;color:rgba(247,243,237,0.35);">${ds}${p.note ? ' · ' + esc(p.note) : ''}</span>
+        <button onclick="toggleDashFeePanel('fin-rfm-${p.id}')" style="background:none;border:none;color:rgba(247,243,237,0.2);cursor:pointer;font-size:18px;padding:2px 4px;line-height:1;" title="Remove">&#215;</button>
+      </div>
+      <div id="fin-rfm-${p.id}" style="display:none;background:rgba(224,112,112,0.05);border:1px solid rgba(224,112,112,0.15);border-radius:8px;padding:10px 12px;margin-bottom:8px;">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#e07070;margin-bottom:6px;">Remove ${fmtCur(p.amount)} payment?</div>
+        <input id="fin-rr-${p.id}" class="pf-edit-input" type="text" placeholder="Reason (e.g. entered in error)" style="margin-bottom:8px;">
+        <div style="display:flex;gap:8px;">
+          <button class="btn-sm" style="color:#e07070;border-color:rgba(224,112,112,0.3);" onclick="dashRemovePayment('${c.id}','${f.id}','${p.id}')">Confirm remove</button>
+          <button class="btn-sm" onclick="toggleDashFeePanel('fin-rfm-${p.id}')">Cancel</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div style="border-bottom:1px solid rgba(247,243,237,0.06);">
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 0;">
+        <div style="flex:1;min-width:0;cursor:pointer;" onclick="openClientEngagementTab('${c.id}')">
+          <div style="font-size:14px;color:${isPaid ? 'rgba(247,243,237,0.4)' : '#f7f3ed'};">${nameLabel}</div>
+          <div style="font-size:12px;color:rgba(247,243,237,0.3);margin-top:3px;">Total ${fmtCur(f.totalFee)} ex GST · ${paidPct}% paid</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-size:14px;font-weight:500;color:${isPaid ? '#6dbf7b' : '#e8a87c'};">${isPaid ? 'Cleared' : fmtCur(outstanding) + ' due'}</div>
+          ${!isPaid ? `<div style="font-size:11.5px;color:rgba(247,243,237,0.3);margin-top:2px;">${fmtCur(outstanding * 1.1)} inc GST</div>` : ''}
+        </div>
+        <button class="btn-sm" style="flex-shrink:0;" onclick="toggleDashFeePanel('${panelId}')">${isPaid ? 'History' : '+ Payment'}</button>
+      </div>
+      <div id="${panelId}" style="display:none;background:rgba(247,243,237,0.03);border-radius:10px;padding:14px 16px;margin-bottom:12px;">
+        ${activePmts.length ? `<div style="margin-bottom:12px;">${pmtHistoryHtml}</div>` : ''}
+        ${!isPaid ? `
+          <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:10px;">${activePmts.length ? 'Record another payment' : 'Record payment'}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+            <div><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Amount (ex GST)</label>
+              <input id="fin-fee-amt-${c.id}-${f.id}" class="pf-edit-input" type="number" step="0.01" min="0" placeholder="${outstanding.toFixed(2)}"></div>
+            <div><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Date</label>
+              <input id="fin-fee-date-${c.id}-${f.id}" class="pf-edit-input" type="date" value="${today}"></div>
+          </div>
+          <div style="margin-bottom:8px;"><label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:4px;">Note (optional)</label>
+            <input id="fin-fee-note-${c.id}-${f.id}" class="pf-edit-input" type="text" placeholder="e.g. Deposit, Final payment"></div>
+          <button class="btn-primary" style="font-size:12.5px;padding:8px 18px;" onclick="finRecordPayment('${c.id}','${f.id}')">Record payment</button>
+        ` : '<p style="font-size:13px;color:#6dbf7b;">Fully paid ✓</p>'}
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = summaryHtml + `<div style="background:#1e1c1a;border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:0 20px;">${rowsHtml}</div>`;
+}
+
+async function finRecordPayment(clientId, feeId) {
+  const amtEl  = document.getElementById(`fin-fee-amt-${clientId}-${feeId}`);
+  const dateEl = document.getElementById(`fin-fee-date-${clientId}-${feeId}`);
+  const noteEl = document.getElementById(`fin-fee-note-${clientId}-${feeId}`);
+  const amount = parseFloat(amtEl?.value);
+  if (!amount || amount <= 0) { amtEl?.focus(); return; }
+  const paidAt = dateEl?.value || localDateStr(new Date());
+  const note   = noteEl?.value?.trim() || '';
+  const c      = clients.find(x => x.id === clientId);
+  if (!c) return;
+  const fees   = getManualFees(c);
+  const fee    = fees.find(f => f.id === feeId);
+  if (!fee) return;
+  const newPmt = { id: crypto.randomUUID(), amount, note, paidAt };
+  const updatedPayments = [...(fee.payments || []), newPmt];
+  const body = c.acquisitions?.length
+    ? { id: clientId, action: 'update-fee-payments', feeId, payments: updatedPayments }
+    : { id: clientId, manualFee: { ...c.manualFee, payments: updatedPayments } };
+  const res = await api('PUT', '/api/admin/clients', body);
+  if (res.ok) {
+    if (c.acquisitions?.length) {
+      const acq = c.acquisitions.find(a => a.id === feeId || (a.fees || []).find(f => f.id === feeId));
+      if (acq) { const f = (acq.fees || []).find(f => f.id === feeId); if (f) f.payments = updatedPayments; }
+    } else if (c.manualFee) {
+      c.manualFee.payments = updatedPayments;
+    }
+    renderFinFees();
+    renderDashboardFees();
+    showToast('Payment recorded');
+  }
+}
+
+// ── Financials: Contractor Commissions ────────────────────────────────────
+function renderContractorCommissions() {
+  const summaryEl = document.getElementById('fin-comm-summary');
+  const bodyEl    = document.getElementById('fin-comm-body');
+  if (!summaryEl || !bodyEl) return;
+
+  const fmtCur = n => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  // Deals = contractor-sourced presentations that are allocated or sent and have a commission set
+  const DEAL_STATUSES = new Set(['allocated','sent']);
+  const deals = presentations.filter(p =>
+    p.sourcedByRole === 'contractor' &&
+    DEAL_STATUSES.has(p.reviewStatus) &&
+    p.contractorCommission != null
+  );
+
+  if (!deals.length) {
+    summaryEl.innerHTML = '';
+    bodyEl.innerHTML = '<p style="font-size:13.5px;color:rgba(247,243,237,0.3);padding:12px 0;">No contractor commissions set yet. Open a presentation\'s Clients tab to set a commission once it\'s allocated.</p>';
+    return;
+  }
+
+  // Aggregate per contractor
+  const byContractor = {};
+  deals.forEach(p => {
+    const cid = p.sourcedById;
+    if (!byContractor[cid]) byContractor[cid] = { id: cid, name: p.sourcedByName || 'Unknown', deals: [] };
+    byContractor[cid].deals.push(p);
+  });
+
+  let totalEarned = 0, totalPaid = 0;
+  Object.values(byContractor).forEach(con => {
+    con.deals.forEach(p => {
+      const amt = Number(p.contractorCommission) || 0;
+      totalEarned += amt;
+      if (p.contractorCommissionPaidAt) totalPaid += amt;
+    });
+  });
+  const totalOwed = totalEarned - totalPaid;
+
+  summaryEl.innerHTML = `
+    <div style="background:rgba(109,191,123,0.07);border:1px solid rgba(109,191,123,0.15);border-radius:12px;padding:16px 18px;">
+      <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#6dbf7b;margin-bottom:6px;">Total earned</div>
+      <div style="font-family:'Fraunces',serif;font-size:28px;color:#f7f3ed;line-height:1.1;">${fmtCur(totalEarned)}</div>
+      <div style="font-size:12px;color:rgba(247,243,237,0.35);margin-top:4px;">${deals.length} deal${deals.length !== 1 ? 's' : ''}</div>
+    </div>
+    <div style="background:rgba(232,168,124,0.07);border:1px solid rgba(232,168,124,0.15);border-radius:12px;padding:16px 18px;">
+      <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#e8a87c;margin-bottom:6px;">Still owed</div>
+      <div style="font-family:'Fraunces',serif;font-size:28px;color:#f7f3ed;line-height:1.1;">${fmtCur(totalOwed)}</div>
+      <div style="font-size:12px;color:rgba(247,243,237,0.35);margin-top:4px;">${deals.filter(p => !p.contractorCommissionPaidAt).length} unpaid</div>
+    </div>
+    <div style="background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.08);border-radius:12px;padding:16px 18px;">
+      <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:6px;">Paid out</div>
+      <div style="font-family:'Fraunces',serif;font-size:28px;color:#f7f3ed;line-height:1.1;">${fmtCur(totalPaid)}</div>
+      <div style="font-size:12px;color:rgba(247,243,237,0.35);margin-top:4px;">${deals.filter(p => p.contractorCommissionPaidAt).length} paid</div>
+    </div>`;
+
+  bodyEl.innerHTML = Object.values(byContractor).map(con => {
+    const conEarned = con.deals.reduce((s, p) => s + (Number(p.contractorCommission) || 0), 0);
+    const conPaid   = con.deals.filter(p => p.contractorCommissionPaidAt).reduce((s, p) => s + (Number(p.contractorCommission) || 0), 0);
+    const conOwed   = conEarned - conPaid;
+    const allPaid   = conOwed <= 0;
+
+    const dealsHtml = con.deals.map(p => {
+      const amt     = Number(p.contractorCommission) || 0;
+      const isPaid  = !!p.contractorCommissionPaidAt;
+      const paidDate = isPaid ? new Date(p.contractorCommissionPaidAt).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '';
+      const clients_ = (p.assignedClients || []).map(cid => { const c = clients.find(x => x.id === cid); return c ? c.name.split(' ')[0] : null; }).filter(Boolean);
+      return `<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(247,243,237,0.05);">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13.5px;color:${isPaid ? 'rgba(247,243,237,0.4)' : '#f7f3ed'};">${esc(p.address)}</div>
+          <div style="font-size:12px;color:rgba(247,243,237,0.3);margin-top:2px;">
+            ${clients_.length ? clients_.join(', ') + ' · ' : ''}${p.contractorCommissionNote ? esc(p.contractorCommissionNote) : ''}
+            ${isPaid ? `<span style="color:#6dbf7b;">Paid ${paidDate}</span>` : ''}
+          </div>
+        </div>
+        <div style="font-size:14px;font-weight:500;color:${isPaid ? 'rgba(247,243,237,0.35)' : '#f7f3ed'};flex-shrink:0;">${fmtCur(amt)}</div>
+        ${isPaid
+          ? `<button class="btn-sm" style="flex-shrink:0;color:rgba(247,243,237,0.35);" onclick="setCommissionPaid('${p.id}',false)">Unmark</button>`
+          : `<button class="btn-sm" style="flex-shrink:0;background:rgba(109,191,123,0.1);border-color:rgba(109,191,123,0.25);color:#6dbf7b;" onclick="setCommissionPaid('${p.id}',true)">Mark paid</button>`}
+      </div>`;
+    }).join('');
+
+    return `<div style="background:#1e1c1a;border:1px solid rgba(247,243,237,0.08);border-radius:14px;padding:0 20px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:16px 0;border-bottom:1px solid rgba(247,243,237,0.07);">
+        <div>
+          <div style="font-size:15px;font-weight:500;color:#f7f3ed;">${esc(con.name)}</div>
+          <div style="font-size:12px;color:rgba(247,243,237,0.35);margin-top:2px;">${con.deals.length} deal${con.deals.length !== 1 ? 's' : ''} · ${fmtCur(conEarned)} total</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:16px;font-weight:500;color:${allPaid ? '#6dbf7b' : '#e8a87c'};">${allPaid ? 'All paid ✓' : fmtCur(conOwed) + ' owed'}</div>
+          ${!allPaid ? `<div style="font-size:12px;color:rgba(247,243,237,0.35);margin-top:2px;">${fmtCur(conPaid)} paid so far</div>` : ''}
+        </div>
+      </div>
+      ${dealsHtml}
+    </div>`;
+  }).join('');
+}
+
+async function setCommissionPaid(presId, paid) {
+  const action = paid ? 'mark-commission-paid' : 'mark-commission-unpaid';
+  const res = await api('PUT', '/api/admin/presentations', { id: presId, action });
+  if (res.ok) {
+    const p = presentations.find(x => x.id === presId);
+    if (p) {
+      p.contractorCommissionPaidAt = paid ? new Date().toISOString() : null;
+      if (paid) { const data = await res.json().catch(() => ({})); if (data.paidAt) p.contractorCommissionPaidAt = data.paidAt; }
+    }
+    renderContractorCommissions();
+    showToast(paid ? 'Commission marked as paid' : 'Commission unmarked');
+  }
 }
 
 // ── Audit log ─────────────────────────────────────────────────────────────────

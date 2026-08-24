@@ -49,8 +49,9 @@ export default async (req) => {
       };
 
       if (canViewCommissions) {
-        deal.contractorCommission     = p.contractorCommission     ?? null;
-        deal.contractorCommissionNote = p.contractorCommissionNote || '';
+        deal.contractorCommission       = p.contractorCommission       ?? null;
+        deal.contractorCommissionNote   = p.contractorCommissionNote   || '';
+        deal.contractorCommissionPaidAt = p.contractorCommissionPaidAt || null;
       }
 
       return deal;

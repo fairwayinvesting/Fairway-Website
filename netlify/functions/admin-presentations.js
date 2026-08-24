@@ -200,6 +200,20 @@ export default async (req) => {
       return json({ ok: true });
     }
 
+    // Admin-only: mark contractor commission as paid / unpaid
+    if (action === 'mark-commission-paid') {
+      presentations[idx].contractorCommissionPaidAt = body.paidAt || new Date().toISOString();
+      await store.setJSON('all', presentations);
+      appendAudit('commission_paid', `Marked commission paid on "${presentations[idx].address}"`);
+      return json({ ok: true, paidAt: presentations[idx].contractorCommissionPaidAt });
+    }
+
+    if (action === 'mark-commission-unpaid') {
+      presentations[idx].contractorCommissionPaidAt = null;
+      await store.setJSON('all', presentations);
+      return json({ ok: true });
+    }
+
     // Admin-only: set contractor commission on a deal
     if (action === 'set-commission') {
       const amount = body.contractorCommission !== undefined ? Number(body.contractorCommission) || null : undefined;
