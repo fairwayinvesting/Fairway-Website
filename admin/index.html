@@ -896,6 +896,10 @@
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 13l3.5-4 3 3L14 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Reports
       </button>
+      <button class="snav-item" onclick="showSection('bin',this)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5 4V2.5A.5.5 0 015.5 2h5a.5.5 0 01.5.5V4M13 4l-1 10H4L3 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Bin
+      </button>
 
       <div class="snav-divider" style="margin-top:10px;"></div>
       <div class="snav-label">Property</div>
@@ -1145,6 +1149,22 @@
         <span style="font-size:12px;font-weight:300;color:rgba(247,243,237,0.3);">Opens in new tab — admin session bypasses client login</span>
       </div>
       <div id="reports-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;"></div>
+    </div>
+
+    <!-- Bin -->
+    <div id="sec-bin" class="admin-section">
+      <div class="sec-header">
+        <h1>Bin</h1>
+        <span style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.35);">Items deleted by contractors. Reinstate or permanently delete.</span>
+      </div>
+      <!-- Filter tabs -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;">
+        <button class="sl-tab active" id="bin-tab-all" onclick="setBinFilter('all',this)">All</button>
+        <button class="sl-tab" id="bin-tab-shortlist" onclick="setBinFilter('shortlist',this)">Shortlist</button>
+        <button class="sl-tab" id="bin-tab-presentation" onclick="setBinFilter('presentation',this)">Presentations</button>
+        <button class="sl-tab" id="bin-tab-directory" onclick="setBinFilter('directory',this)">Directory</button>
+      </div>
+      <div id="bin-list"></div>
     </div>
 
     <!-- Presentations -->
@@ -3860,6 +3880,7 @@ function showSection(id, btn) {
   if (id === 'reports') renderReports();
   if (id === 'tasks') { loadTasks(); if (!_staffTasksLoaded) loadStaffTasks(); }
   if (id === 'financials' && _clientsLoaded) renderFinancials();
+  if (id === 'bin') loadBin();
   localStorage.setItem('fw_admin_section', id);
 }
 
@@ -11619,6 +11640,79 @@ function renderQrCodes() {
   }
   container.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:8px;">` +
     qrCodes.map(q => renderQrCard(q, false)).join('') + `</div>`;
+}
+
+// ── Bin ───────────────────────────────────────────────────────────────────────
+let _binItems = [];
+let _binFilter = 'all';
+
+async function loadBin() {
+  document.getElementById('bin-list').innerHTML = '<p style="color:rgba(247,243,237,0.3);font-size:13px;">Loading…</p>';
+  try {
+    const r = await fetch('/api/admin/bin');
+    if (r.ok) _binItems = await r.json();
+    else _binItems = [];
+  } catch { _binItems = []; }
+  renderBin();
+}
+
+function setBinFilter(filter, btn) {
+  _binFilter = filter;
+  document.querySelectorAll('#sec-bin .sl-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderBin();
+}
+
+const BIN_TYPE_LABELS = { shortlist: 'Shortlist', presentation: 'Presentation', directory: 'Directory' };
+const BIN_TYPE_COLORS = {
+  shortlist: { bg: 'rgba(122,184,232,0.1)', border: 'rgba(122,184,232,0.2)', color: 'rgba(122,184,232,0.85)' },
+  presentation: { bg: 'rgba(189,122,112,0.1)', border: 'rgba(189,122,112,0.25)', color: '#cf9b92' },
+  directory: { bg: 'rgba(134,152,124,0.15)', border: 'rgba(134,152,124,0.25)', color: 'rgba(134,152,124,0.9)' },
+};
+
+function renderBin() {
+  const el = document.getElementById('bin-list');
+  if (!el) return;
+  const items = _binFilter === 'all' ? _binItems : _binItems.filter(i => i.type === _binFilter);
+  if (!items.length) {
+    el.innerHTML = '<div style="text-align:center;padding:60px 24px;color:rgba(247,243,237,0.25);font-size:14px;">The bin is empty.</div>';
+    return;
+  }
+  el.innerHTML = items.map(item => {
+    const typeColor = BIN_TYPE_COLORS[item.type] || BIN_TYPE_COLORS.directory;
+    const typeLabel = BIN_TYPE_LABELS[item.type] || item.type;
+    const deletedDate = item.deletedAt ? new Date(item.deletedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+    return `<div style="background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:12px;padding:16px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:200px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+          <span style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:2px 9px;border-radius:100px;background:${typeColor.bg};border:1px solid ${typeColor.border};color:${typeColor.color};">${typeLabel}</span>
+          <span style="font-size:14px;font-weight:400;color:#f7f3ed;">${esc(item.label)}</span>
+        </div>
+        <div style="font-size:12px;color:rgba(247,243,237,0.35);">Deleted by ${esc(item.deletedByName || '—')} &middot; ${deletedDate}</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        <button class="btn-sm" style="color:#6dbf7b;border-color:rgba(109,191,123,0.25);" onclick="binAction('${esc(item.id)}','reinstate')">Reinstate</button>
+        <button class="btn-sm" style="color:#e07070;border-color:rgba(224,112,112,0.25);" onclick="binAction('${esc(item.id)}','permanent-delete')">Delete forever</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function binAction(id, action) {
+  if (action === 'permanent-delete' && !confirm('Permanently delete this item? This cannot be undone.')) return;
+  const r = await fetch('/api/admin/bin', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, action }),
+  });
+  if (r.ok) {
+    _binItems = _binItems.filter(i => i.id !== id);
+    renderBin();
+    showToast(action === 'reinstate' ? 'Item reinstated' : 'Permanently deleted');
+  } else {
+    const data = await r.json().catch(() => ({}));
+    showToast(data.error || 'Action failed');
+  }
 }
 </script>
 </body>

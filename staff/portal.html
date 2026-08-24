@@ -213,9 +213,14 @@
 
     <!-- Directory -->
     <div class="section" id="sec-directory">
-      <h1 class="page-title">Directory</h1>
-      <p class="page-sub">Professional contacts for sourcing and progressing properties.</p>
-      <div id="dir-filters" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:6px;">
+        <div>
+          <h1 class="page-title" style="margin-bottom:4px;">Directory</h1>
+          <p class="page-sub" style="margin-bottom:0;">Professional contacts for sourcing and progressing properties.</p>
+        </div>
+        <button class="btn-primary" id="dir-add-btn" style="display:none;" onclick="openDirAddModal()">+ Add contact</button>
+      </div>
+      <div id="dir-filters" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;margin-top:18px;"></div>
       <div class="search-wrap">
         <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
         <input type="text" id="dir-search" placeholder="Search contacts…" oninput="renderDirectory()">
@@ -401,6 +406,79 @@
   </div>
 </div>
 
+<!-- Bin delete gate modal -->
+<div id="bin-gate-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#1e1c1a;border:1px solid rgba(247,243,237,0.1);border-radius:16px;padding:28px 32px;max-width:400px;width:90%;">
+    <div style="font-family:'Fraunces',serif;font-size:18px;color:#f7f3ed;margin-bottom:8px;">Confirm delete</div>
+    <div id="bin-gate-desc" style="font-size:13.5px;color:rgba(247,243,237,0.5);margin-bottom:20px;line-height:1.5;"></div>
+    <input id="bin-gate-pw" type="password" placeholder="Your password" style="width:100%;box-sizing:border-box;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:8px;padding:10px 14px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:14px;outline:none;margin-bottom:8px;">
+    <div id="bin-gate-err" style="display:none;font-size:12px;color:#e07070;margin-bottom:10px;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn-sm" onclick="closeBinGate()">Cancel</button>
+      <button id="bin-gate-confirm" class="btn-sm" style="color:#e07070;border-color:rgba(224,112,112,0.3);" onclick="confirmBinDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Directory add contact modal -->
+<div class="modal-overlay" id="dir-add-modal">
+  <div class="modal-box" style="max-width:520px;">
+    <h2 class="modal-title">Add contact</h2>
+    <div class="field-group">
+      <label class="field-label">Name *</label>
+      <input type="text" class="field-input" id="dir-add-name" placeholder="Jane Smith">
+    </div>
+    <div class="field-row-2">
+      <div>
+        <label class="field-label">Company</label>
+        <input type="text" class="field-input" id="dir-add-company" placeholder="Ray White">
+      </div>
+      <div>
+        <label class="field-label">Type</label>
+        <select class="field-input" id="dir-add-type">
+          <option value="">— Select —</option>
+          <option value="mortgage-broker">Mortgage Brokers</option>
+          <option value="accountant">Accountants</option>
+          <option value="building-pest">Building &amp; Pest</option>
+          <option value="property-manager">Property Managers</option>
+          <option value="conveyancer">Conveyancers</option>
+          <option value="sales-agent">Sales Agents</option>
+          <option value="financial-planner">Financial Planners</option>
+          <option value="buyers-agent">Buyers Agents</option>
+          <option value="trade">Trades</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row-2">
+      <div>
+        <label class="field-label">Phone</label>
+        <input type="text" class="field-input" id="dir-add-phone" placeholder="0400 000 000">
+      </div>
+      <div>
+        <label class="field-label">Email</label>
+        <input type="email" class="field-input" id="dir-add-email" placeholder="jane@example.com">
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">State</label>
+      <select class="field-input" id="dir-add-state">
+        <option value="">—</option>
+        <option>NSW</option><option>VIC</option><option>QLD</option><option>SA</option><option>WA</option><option>TAS</option><option>ACT</option><option>NT</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Notes</label>
+      <textarea class="field-input" id="dir-add-notes" rows="2" placeholder="Any context…"></textarea>
+    </div>
+    <p id="dir-add-error" style="display:none;color:#e07070;font-size:13px;margin-top:4px;"></p>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeDirAddModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveDirectoryContact()">Add contact</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -512,6 +590,12 @@ function buildNav() {
         ${item.label}
       </button>
     `).join('');
+
+  // Show "Add contact" button for contractors with directory module access
+  if (hasModule('directory')) {
+    const addBtn = document.getElementById('dir-add-btn');
+    if (addBtn) addBtn.style.display = '';
+  }
 }
 
 function showSection(id) {
@@ -734,6 +818,7 @@ function renderDirectory() {
           <th>Type</th>
           <th>Location</th>
           <th>Contact</th>
+          <th></th>
         </tr></thead>
         <tbody>
           ${contacts.map(p => {
@@ -748,6 +833,9 @@ function renderDirectory() {
                 ${p.phone && p.email ? '<br>' : ''}
                 ${p.email ? `<a href="mailto:${esc(p.email)}" style="color:#bd7a70;text-decoration:none;">${esc(p.email)}</a>` : ''}
                 ${!p.phone && !p.email ? '<span style="color:rgba(247,243,237,0.2);">—</span>' : ''}
+              </td>
+              <td style="text-align:right;padding-right:14px;">
+                <button class="btn-sm" style="color:rgba(224,112,112,0.7);border-color:rgba(224,112,112,0.2);font-size:11px;" onclick="openBinGate('directory','${esc(p.id)}','${esc(p.name)}')">Delete</button>
               </td>
             </tr>`;
           }).join('')}
@@ -1015,12 +1103,13 @@ function renderShortlist() {
           <div style="display:flex;gap:6px;flex-wrap:wrap;">${clientName}</div>
           ${item.notes ? `<div style="margin-top:10px;font-size:13px;color:rgba(247,243,237,0.5);line-height:1.5;white-space:pre-wrap;">${esc(item.notes)}</div>` : ''}
         </div>
-        ${!isLocked ? `<div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;">
-          <button class="btn-sm" onclick="openSlModal('${item.id}')">Edit</button>
-          ${rejected
+        <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;">
+          ${!isLocked ? `<button class="btn-sm" onclick="openSlModal('${item.id}')">Edit</button>` : ''}
+          ${!isLocked ? (rejected
             ? `<button class="btn-sm" onclick="updateSlStatus('${item.id}','shortlisted')">Restore</button>`
-            : `<button class="btn-sm" onclick="updateSlStatus('${item.id}','rejected')" style="color:rgba(247,243,237,0.35);">Reject</button>`}
-        </div>` : ''}
+            : `<button class="btn-sm" onclick="updateSlStatus('${item.id}','rejected')" style="color:rgba(247,243,237,0.35);">Reject</button>`) : ''}
+          <button class="btn-sm" style="color:rgba(224,112,112,0.7);border-color:rgba(224,112,112,0.2);" onclick="openBinGate('shortlist','${item.id}','${item.address.replace(/'/g,"\\'")}')">Delete</button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -1161,6 +1250,7 @@ function renderPresentations() {
         </div>
         <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;">
           ${canEdit ? `<button class="btn-sm" onclick="openPresModal('${p.id}')">Edit / Nominate</button>` : `<button class="btn-sm" onclick="openPresModal('${p.id}')">View</button>`}
+          <button class="btn-sm" style="color:rgba(224,112,112,0.7);border-color:rgba(224,112,112,0.2);" onclick="openBinGate('presentation','${p.id}','${p.address.replace(/'/g,"\\'")}')">Delete</button>
         </div>
       </div>
     </div>`;
@@ -1257,6 +1347,106 @@ async function submitForReview() {
   } else {
     const data = await r.json().catch(() => ({}));
     errEl.textContent = data.error || 'Failed to submit.'; errEl.style.display = 'block';
+  }
+}
+
+// ── Bin / Delete gate ──────────────────────────────────────────────────────
+let _binPending = null; // { type, id, label }
+
+function openBinGate(type, id, label) {
+  _binPending = { type, id, label };
+  document.getElementById('bin-gate-desc').textContent = `"${label}" will be moved to the admin bin. Enter your password to confirm.`;
+  document.getElementById('bin-gate-pw').value = '';
+  document.getElementById('bin-gate-err').style.display = 'none';
+  const overlay = document.getElementById('bin-gate-overlay');
+  overlay.style.display = 'flex';
+  setTimeout(() => document.getElementById('bin-gate-pw').focus(), 50);
+}
+
+function closeBinGate() {
+  document.getElementById('bin-gate-overlay').style.display = 'none';
+  _binPending = null;
+}
+
+async function confirmBinDelete() {
+  if (!_binPending) return;
+  const pw = document.getElementById('bin-gate-pw').value;
+  if (!pw) { document.getElementById('bin-gate-pw').focus(); return; }
+  const btn = document.getElementById('bin-gate-confirm');
+  const errEl = document.getElementById('bin-gate-err');
+  btn.disabled = true; btn.textContent = 'Deleting…';
+  errEl.style.display = 'none';
+  const r = await fetch('/api/staff/bin-delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type: _binPending.type, id: _binPending.id, password: pw }),
+  });
+  btn.disabled = false; btn.textContent = 'Delete';
+  if (r.status === 403) {
+    errEl.textContent = 'Incorrect password.';
+    errEl.style.display = 'block';
+    document.getElementById('bin-gate-pw').value = '';
+    document.getElementById('bin-gate-pw').focus();
+    return;
+  }
+  if (!r.ok) {
+    const data = await r.json().catch(() => ({}));
+    errEl.textContent = data.error || 'Delete failed. Please try again.';
+    errEl.style.display = 'block';
+    return;
+  }
+  // Remove from local state
+  const { type, id } = _binPending;
+  if (type === 'shortlist') { allShortlist = allShortlist.filter(i => i.id !== id); renderShortlist(); }
+  if (type === 'presentation') { allPresentations = allPresentations.filter(i => i.id !== id); renderPresentations(); }
+  if (type === 'directory') { allDirectory = allDirectory.filter(i => i.id !== id); renderDirectory(); buildDirFilters(); }
+  closeBinGate();
+  showToast('Moved to bin');
+}
+
+// ── Directory add contact ──────────────────────────────────────────────────
+function openDirAddModal() {
+  ['dir-add-name','dir-add-company','dir-add-phone','dir-add-email','dir-add-notes'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('dir-add-type').value = '';
+  document.getElementById('dir-add-state').value = '';
+  document.getElementById('dir-add-error').style.display = 'none';
+  document.getElementById('dir-add-modal').classList.add('open');
+  setTimeout(() => document.getElementById('dir-add-name').focus(), 50);
+}
+
+function closeDirAddModal() {
+  document.getElementById('dir-add-modal').classList.remove('open');
+}
+
+async function saveDirectoryContact() {
+  const errEl = document.getElementById('dir-add-error');
+  errEl.style.display = 'none';
+  const name = document.getElementById('dir-add-name').value.trim();
+  if (!name) { errEl.textContent = 'Name is required.'; errEl.style.display = 'block'; return; }
+
+  const body = {
+    name,
+    company: document.getElementById('dir-add-company').value.trim(),
+    type: document.getElementById('dir-add-type').value,
+    phone: document.getElementById('dir-add-phone').value.trim(),
+    email: document.getElementById('dir-add-email').value.trim(),
+    state: document.getElementById('dir-add-state').value,
+    notes: document.getElementById('dir-add-notes').value.trim(),
+  };
+
+  const r = await fetch('/api/staff/directory', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const data = await r.json().catch(() => ({}));
+  if (r.ok && data.contact) {
+    allDirectory.push(data.contact);
+    renderDirectory();
+    buildDirFilters();
+    closeDirAddModal();
+    showToast('Contact added');
+  } else {
+    errEl.textContent = data.error || 'Failed to add contact.';
+    errEl.style.display = 'block';
   }
 }
 
