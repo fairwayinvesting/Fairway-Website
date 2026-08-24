@@ -4015,6 +4015,7 @@ async function loadClients() {
   renderDashboard();
   renderPartnersSection();
   if (presentations.length) renderPresentations();
+  if (document.getElementById('sec-financials')?.classList.contains('active')) renderFinancials();
 }
 
 function clientPageNav(dir) {
