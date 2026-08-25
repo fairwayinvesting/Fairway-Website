@@ -4615,9 +4615,9 @@ function showToast(msg, type = 'success') {
   if (existing) existing.remove();
   const t = document.createElement('div');
   t.id = 'admin-toast';
-  const bg = type === 'warning' ? 'rgba(232,168,124,0.12)' : 'rgba(109,191,123,0.1)';
-  const border = type === 'warning' ? 'rgba(232,168,124,0.3)' : 'rgba(109,191,123,0.3)';
-  const color = type === 'warning' ? '#e8a87c' : '#6dbf7b';
+  const bg = type === 'error' ? 'rgba(220,70,70,0.12)' : type === 'warning' ? 'rgba(232,168,124,0.12)' : 'rgba(109,191,123,0.1)';
+  const border = type === 'error' ? 'rgba(220,70,70,0.3)' : type === 'warning' ? 'rgba(232,168,124,0.3)' : 'rgba(109,191,123,0.3)';
+  const color = type === 'error' ? '#e07070' : type === 'warning' ? '#e8a87c' : '#6dbf7b';
   t.style.cssText = `position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:${bg};border:1px solid ${border};color:${color};padding:12px 22px;border-radius:100px;font-size:13px;font-family:'Outfit',sans-serif;z-index:9999;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,0.4);opacity:1;transition:opacity .3s;`;
   t.textContent = msg;
   document.body.appendChild(t);
@@ -11920,8 +11920,16 @@ function renderBin() {
   }).join('');
 }
 
+function _reloadReinstatedSections(types) {
+  const typeSet = new Set(Array.isArray(types) ? types : [types]);
+  if (typeSet.has('presentation')) loadPresentations();
+  if (typeSet.has('shortlist')) loadShortlist();
+  if (typeSet.has('directory')) loadCrmPartners();
+}
+
 async function binAction(id, action) {
   if (action === 'permanent-delete' && !confirm('Permanently delete this item? This cannot be undone.')) return;
+  const record = _binItems.find(i => i.id === id);
   const r = await fetch('/api/admin/bin', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -11932,7 +11940,7 @@ async function binAction(id, action) {
     _binSelected.delete(id);
     renderBin();
     showToast(action === 'reinstate' ? 'Item reinstated' : 'Permanently deleted');
-    if (action === 'reinstate') loadPresentations();
+    if (action === 'reinstate' && record) _reloadReinstatedSections(record.type);
   } else {
     const data = await r.json().catch(() => ({}));
     showToast(data.error || 'Action failed', 'warning');
@@ -11945,6 +11953,7 @@ async function bulkBinAction(action) {
   const n = ids.length;
   if (action === 'permanent-delete' && !confirm(`Permanently delete ${n} item${n !== 1 ? 's' : ''}? This cannot be undone.`)) return;
 
+  const reinstatedTypes = ids.map(id => _binItems.find(i => i.id === id)?.type).filter(Boolean);
   const r = await fetch('/api/admin/bin', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -11957,7 +11966,7 @@ async function bulkBinAction(action) {
     renderBin();
     if (action === 'reinstate') {
       showToast(data.errors?.length ? `${n - data.errors.length} reinstated, ${data.errors.length} skipped` : `${n} item${n !== 1 ? 's' : ''} reinstated`);
-      loadPresentations();
+      _reloadReinstatedSections(reinstatedTypes);
     } else {
       showToast(`${n} item${n !== 1 ? 's' : ''} permanently deleted`);
     }

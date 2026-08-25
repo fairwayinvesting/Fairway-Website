@@ -7,7 +7,8 @@ const json = (data, status = 200) =>
 function storeForType(type) {
   if (type === 'shortlist') return 'fairway-shortlist';
   if (type === 'presentation') return 'fairway-presentations';
-  return 'fairway-referral-partners';
+  if (type === 'directory') return 'fairway-referral-partners';
+  throw new Error(`Unknown bin type: ${type}`);
 }
 
 export default async (req) => {
@@ -43,9 +44,13 @@ export default async (req) => {
       // Group records by target store to minimise writes
       const byStore = {};
       for (const record of records) {
-        const sName = storeForType(record.type);
-        if (!byStore[sName]) byStore[sName] = [];
-        byStore[sName].push(record);
+        try {
+          const sName = storeForType(record.type);
+          if (!byStore[sName]) byStore[sName] = [];
+          byStore[sName].push(record);
+        } catch {
+          errors.push(`"${record.label}" has unknown type "${record.type}" — skipped`);
+        }
       }
 
       for (const [storeName, recs] of Object.entries(byStore)) {

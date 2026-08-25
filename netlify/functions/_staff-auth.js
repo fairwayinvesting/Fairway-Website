@@ -13,13 +13,13 @@ async function verifyStaffToken(req) {
     if (sa.length !== sb.length || !crypto.timingSafeEqual(sa, sb)) return null;
     const payload = JSON.parse(Buffer.from(b, 'base64url').toString());
     if (payload.role !== 'contractor' || payload.exp <= Date.now() / 1000) return null;
-    // Verify account is still active
+    // Verify account is still active — fail closed on any store error
     try {
       const store = getStore({ name: 'fairway-staff', consistency: 'strong' });
-      const all = (await store.get('all', { type: 'json' }).catch(() => null)) || [];
+      const all = (await store.get('all', { type: 'json' }).catch(() => { throw new Error('store unavailable'); })) || [];
       const user = all.find(u => u.id === payload.userId);
       if (!user || !user.active) return null;
-    } catch {}
+    } catch { return null; }
     return payload;
   } catch {}
   return null;

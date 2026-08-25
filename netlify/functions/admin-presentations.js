@@ -7,7 +7,7 @@ import { checkAdmin } from './_admin-auth.js';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const json = (data, status = 200) =>
-  new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+  new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 
 function genToken() { return crypto.randomBytes(20).toString('hex'); }
 

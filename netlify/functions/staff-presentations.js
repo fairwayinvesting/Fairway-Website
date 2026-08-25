@@ -18,7 +18,7 @@ export default async (req) => {
   if (!payload) return json({ error: 'Unauthorized' }, 401);
   if (!hasModule(payload, 'presentations')) return json({ error: 'Access denied' }, 403);
 
-  const store = getStore('fairway-presentations');
+  const store = getStore({ name: 'fairway-presentations', consistency: 'strong' });
   const all = (await store.get('all', { type: 'json' }).catch(() => null)) || [];
 
   if (req.method === 'GET') {

@@ -124,6 +124,8 @@
     /* ── Toast ───────────────────────────────────────────────────────── */
     .toast{position:fixed;bottom:28px;right:28px;background:#22201d;border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:14px 20px;font-size:13.5px;color:#f7f3ed;z-index:999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;max-width:320px;}
     .toast.show{opacity:1;transform:none;}
+    .toast.toast-warning{background:rgba(232,168,124,0.1);border-color:rgba(232,168,124,0.3);color:#e8a87c;}
+    .toast.toast-error{background:rgba(220,70,70,0.1);border-color:rgba(220,70,70,0.3);color:#e07070;}
 
     /* ── Suitable client checks ──────────────────────────────────────── */
     .client-check{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:8px;cursor:pointer;border:1px solid rgba(247,243,237,0.07);transition:all .15s;margin-bottom:6px;}
@@ -1483,9 +1485,12 @@ function renderDeals() {
 
 // ── Toast ──────────────────────────────────────────────────────────────────
 let _toastTimer;
-function showToast(msg) {
+function showToast(msg, type = 'success') {
   const el = document.getElementById('toast');
   el.textContent = msg;
+  el.classList.remove('toast-warning', 'toast-error');
+  if (type === 'warning') el.classList.add('toast-warning');
+  if (type === 'error') el.classList.add('toast-error');
   el.classList.add('show');
   clearTimeout(_toastTimer);
   _toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
@@ -2001,7 +2006,7 @@ async function savePres(submitForReviewFlag = false) {
   errEl.style.display = 'none';
 
   const address = document.getElementById('pres-address').value.trim();
-  if (!address) { errEl.textContent = 'Address is required.'; errEl.style.display = 'inline'; switchPresTab('details', document.querySelector('#pres-panel-overlay .pres-tab')); return; }
+  if (!address) { errEl.textContent = 'Address is required.'; errEl.style.display = 'inline'; switchPresTab('details', document.querySelector('#pres-panel-overlay .pres-tab')); return false; }
 
   syncComparables('sales'); syncComparables('rentals');
   const highlights = document.getElementById('pres-highlights').value.split('\n').map(l => l.trim()).filter(Boolean).slice(0, 6);
@@ -2036,7 +2041,7 @@ async function savePres(submitForReviewFlag = false) {
   btn.disabled = false; btn.textContent = 'Save draft';
   if (!r.ok) {
     const data = await r.json().catch(() => ({}));
-    errEl.textContent = data.error || 'Failed to save.'; errEl.style.display = 'inline'; return;
+    errEl.textContent = data.error || 'Failed to save.'; errEl.style.display = 'inline'; return false;
   }
   // Save suitable clients separately
   await fetch('/api/staff/presentations', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, action: 'set-suitable-clients', suitableClients }) });
@@ -2046,10 +2051,12 @@ async function savePres(submitForReviewFlag = false) {
   if (idx !== -1) allPresentations[idx] = { ...allPresentations[idx], ...(data.pres || body), suitableClients };
   renderPresentations();
   if (!submitForReviewFlag) { closePresModal(); showToast('Presentation saved'); }
+  return true;
 }
 
 async function submitForReview() {
-  await savePres(true);
+  const saved = await savePres(true);
+  if (!saved) return;
   const id = document.getElementById('pres-edit-id').value;
   const errEl = document.getElementById('pres-modal-error');
   const r = await fetch('/api/staff/presentations', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, action: 'ready-for-review' }) });
