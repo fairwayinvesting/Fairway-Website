@@ -259,6 +259,8 @@
     .staff-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
     .staff-backdrop.open{display:block;}
     @media(max-width:768px){
+      /* Allow the page to scroll on mobile — the desktop app-shell overflow:hidden doesn't apply */
+      html,body{height:auto;overflow:auto;}
       .layout{display:block;height:auto;overflow:visible;}
       .sidebar{
         position:fixed;top:0;left:0;height:100vh;z-index:100;
@@ -268,7 +270,7 @@
         width:240px;overflow-y:auto;
       }
       .sidebar.open{transform:translateX(0);}
-      .main{padding:80px 20px 32px;min-height:100vh;}
+      .main{padding:80px 20px 32px;min-height:100vh;overflow:visible;}
       .field-row-2,.field-row-3{grid-template-columns:1fr;}
       .mobile-bar{
         display:flex;align-items:center;gap:12px;
@@ -278,6 +280,10 @@
       }
       .mobile-bar-hamburger{display:flex;align-items:center;justify-content:center;width:36px;height:36px;background:none;border:none;cursor:pointer;color:rgba(247,243,237,0.65);border-radius:8px;padding:0;transition:background .15s;}
       .mobile-bar-hamburger:hover{background:rgba(247,243,237,0.07);}
+      /* Presentation panel full-screen on mobile */
+      .pres-panel-overlay{padding:0;align-items:flex-end;}
+      .pres-panel{border-radius:20px 20px 0 0;max-height:95vh;max-width:100%;}
+      .pres-panel-head,.pres-panel-body,.pres-panel-foot{padding-left:20px;padding-right:20px;}
     }
   </style>
 </head>
