@@ -3920,8 +3920,8 @@ function openSidebar() {
   document.body.style.overflow = 'hidden';
 }
 function closeSidebar() {
-  document.getElementById('admin-sidebar').classList.remove('sidebar-open');
-  document.getElementById('sidebar-backdrop').classList.remove('open');
+  document.getElementById('admin-sidebar')?.classList.remove('sidebar-open');
+  document.getElementById('sidebar-backdrop')?.classList.remove('open');
   document.body.style.overflow = '';
 }
 
@@ -5308,13 +5308,13 @@ async function previewClient(clientId) {
   }
 }
 
-let _pendingDeleteId = null;
-let _pendingDeleteName = null;
+let _pendingDeleteClientId = null;
+let _pendingDeleteClientName = null;
 let _pendingDeleteProspectId = null;
 
 function deleteClient(id, name) {
-  _pendingDeleteId = id;
-  _pendingDeleteName = name;
+  _pendingDeleteClientId = id;
+  _pendingDeleteClientName = name;
   document.getElementById('del-client-name').textContent = name;
   document.getElementById('del-client-pw').value = '';
   document.getElementById('del-client-err').style.display = 'none';
@@ -5323,8 +5323,8 @@ function deleteClient(id, name) {
 }
 
 function cancelDeleteClient() {
-  _pendingDeleteId = null;
-  _pendingDeleteName = null;
+  _pendingDeleteClientId = null;
+  _pendingDeleteClientName = null;
   document.getElementById('del-client-overlay').style.display = 'none';
 }
 
@@ -5336,9 +5336,9 @@ async function confirmDeleteClient() {
   btn.disabled = true;
   btn.textContent = 'Deleting…';
   errEl.style.display = 'none';
-  const res = await api('DELETE', `/api/admin/clients?id=${encodeURIComponent(_pendingDeleteId)}`, { password });
+  const res = await api('DELETE', `/api/admin/clients?id=${encodeURIComponent(_pendingDeleteClientId)}`, { password });
   if (res.ok) {
-    clients = clients.filter(c => c.id !== _pendingDeleteId);
+    clients = clients.filter(c => c.id !== _pendingDeleteClientId);
     cancelDeleteClient();
     renderTable();
     renderBriefs();
