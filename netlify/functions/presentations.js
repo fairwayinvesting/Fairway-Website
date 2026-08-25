@@ -28,7 +28,7 @@ export default async (req) => {
 
   let all = [];
   try {
-    const store = getStore('fairway-presentations');
+    const store = getStore({ name: 'fairway-presentations', consistency: 'strong' });
     all = (await store.get('all', { type: 'json' })) || [];
   } catch (err) {
     console.error('presentations: Blobs error', err?.message || err);

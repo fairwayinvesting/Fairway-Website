@@ -23,7 +23,7 @@ export default async (req) => {
 
   // Live lookup so markets (and name) are always current, not stale from JWT
   try {
-    const store = getStore('fairway-clients');
+    const store = getStore({ name: 'fairway-clients', consistency: 'strong' });
     const clients = (await store.get('all', { type: 'json' })) || [];
     const client = clients.find(c => c.id === payload.sub);
     if (!client || !client.active || client.deleted) {
@@ -34,7 +34,7 @@ export default async (req) => {
     let settlementDate = null;
     let purchaseCount = 0;
     try {
-      const [msStore, purchasesStore] = [getStore('fairway-milestones'), getStore('fairway-purchases')];
+      const [msStore, purchasesStore] = [getStore({ name: 'fairway-milestones', consistency: 'strong' }), getStore('fairway-purchases')];
       const [milestones, purchases] = await Promise.all([
         msStore.get(client.id, { type: 'json' }).catch(() => []),
         purchasesStore.get(client.id, { type: 'json' }).catch(() => []),

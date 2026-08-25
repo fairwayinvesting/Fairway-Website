@@ -25,13 +25,13 @@ export default async (req) => {
   if (!payload) return json({ error: 'Session expired' }, 401);
 
   const clientId = payload.sub;
-  const msStore = getStore('fairway-milestones');
+  const msStore = getStore({ name: 'fairway-milestones', consistency: 'strong' });
 
   // Client-level milestones
   const clientMs = await msStore.get(clientId, { type: 'json' }).catch(() => null) || [];
 
   // Acquisition-level milestones — look up client's acquisitions first
-  const clientStore = getStore('fairway-clients');
+  const clientStore = getStore({ name: 'fairway-clients', consistency: 'strong' });
   const allClients = await clientStore.get('all', { type: 'json' }).catch(() => null) || [];
   const client = allClients.find(c => c.id === clientId);
   const acquisitions = client?.acquisitions || [];

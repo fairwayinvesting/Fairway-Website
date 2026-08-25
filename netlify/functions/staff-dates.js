@@ -26,8 +26,8 @@ export default async (req) => {
   const { assignedClients = [] } = payload;
   if (!assignedClients.length) return json([]);
 
-  const clientStore = getStore('fairway-clients');
-  const msStore = getStore('fairway-milestones');
+  const clientStore = getStore({ name: 'fairway-clients', consistency: 'strong' });
+  const msStore = getStore({ name: 'fairway-milestones', consistency: 'strong' });
 
   const allClients = (await clientStore.get('all', { type: 'json' }).catch(() => null)) || [];
   const visibleClients = allClients.filter(c => !c.deleted && c.active && assignedClients.includes(c.id));

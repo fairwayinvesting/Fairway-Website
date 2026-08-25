@@ -13,8 +13,8 @@ export default async (req) => {
 
   if (req.method !== 'GET') return new Response('Method Not Allowed', { status: 405 });
 
-  const presStore = getStore('fairway-presentations');
-  const clientStore = getStore('fairway-clients');
+  const presStore = getStore({ name: 'fairway-presentations', consistency: 'strong' });
+  const clientStore = getStore({ name: 'fairway-clients', consistency: 'strong' });
 
   const [allPres, allClients] = await Promise.all([
     presStore.get('all', { type: 'json' }).catch(() => null).then(d => d || []),

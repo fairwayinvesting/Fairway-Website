@@ -26,7 +26,7 @@ export default async (req) => {
 
   const acqId = new URL(req.url).searchParams.get('acq');
   const storeKey = acqId ? `${payload.sub}:${acqId}` : payload.sub;
-  const store = getStore('fairway-briefs');
+  const store = getStore({ name: 'fairway-briefs', consistency: 'strong' });
   const brief = await store.get(storeKey, { type: 'json' }).catch(() => null);
 
   if (!brief || brief.status !== 'published') return json({ published: false });

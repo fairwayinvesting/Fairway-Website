@@ -26,7 +26,7 @@ export default async (req) => {
   const clientId = payload.sub;
 
   try {
-    const clientStore = getStore('fairway-clients');
+    const clientStore = getStore({ name: 'fairway-clients', consistency: 'strong' });
     const clients = (await clientStore.get('all', { type: 'json' })) || [];
     const client = clients.find(c => c.id === clientId && !c.deleted && c.active);
     if (!client) return json({ error: 'Not found' }, 404);
@@ -35,8 +35,8 @@ export default async (req) => {
     if (acquisitions.length <= 1) return json({ multiAcquisition: false });
 
     // Fetch brief status and settlement date for each acquisition in parallel
-    const briefStore = getStore('fairway-briefs');
-    const msStore = getStore('fairway-milestones');
+    const briefStore = getStore({ name: 'fairway-briefs', consistency: 'strong' });
+    const msStore = getStore({ name: 'fairway-milestones', consistency: 'strong' });
     const qStore = getStore('fairway-questionnaires');
 
     function blobKey(email) { return email.toLowerCase().replace(/[^a-z0-9]/g, '-'); }
