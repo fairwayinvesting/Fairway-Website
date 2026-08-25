@@ -144,7 +144,8 @@
     .kb-col.drag-over{outline:1px dashed rgba(181,113,90,0.45);background:rgba(181,113,90,0.04);border-radius:10px;}
     .kb-card-name{font-size:13px;font-weight:500;color:#f7f3ed;line-height:1.3;margin-bottom:5px;}
     .kb-card-since{font-size:11px;color:rgba(247,243,237,0.28);margin-bottom:4px;}
-    .kb-card-date{margin:6px 0 4px;}
+    .kb-card-date{margin:6px 0 4px;overflow:hidden;min-width:0;}
+    .kb-card-date-label{font-size:10.5px;color:rgba(247,243,237,0.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;}
     .kb-move{width:100%;margin-top:8px;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.09);border-radius:7px;padding:5px 8px;font-family:'Outfit',sans-serif;font-size:11.5px;color:rgba(247,243,237,0.4);cursor:pointer;outline:none;appearance:none;transition:border-color .15s;}
     .kb-move:hover{border-color:rgba(247,243,237,0.18);}
     .kb-move option{background:#1e1c1a;}
@@ -1037,7 +1038,7 @@ function renderPipeline() {
           if (ms) {
             const days = kbDaysFromToday(ms.date);
             const urg = kbUrgClass(days);
-            dateChip = `<div class="kb-card-date"><span class="${urg}" style="display:inline-flex;"><span class="urg-badge" style="min-width:auto;font-size:10px;">${esc(ms.label)} · ${kbUrgLabel(days)}</span></span></div>`;
+            dateChip = `<div class="kb-card-date" title="${esc(ms.label)}"><div class="kb-card-date-label">${esc(ms.label)}</div><span class="${urg}" style="display:inline-flex;"><span class="urg-badge" style="min-width:auto;font-size:10px;">${kbUrgLabel(days)}</span></span></div>`;
           }
           const handler = card.acqId
             ? `moveStaffStage('${card.clientId}','${card.acqId}',this.value,this)`

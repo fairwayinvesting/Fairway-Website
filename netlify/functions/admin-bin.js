@@ -4,6 +4,12 @@ import { checkAdmin } from './_admin-auth.js';
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 
+function storeForType(type) {
+  if (type === 'shortlist') return 'fairway-shortlist';
+  if (type === 'presentation') return 'fairway-presentations';
+  return 'fairway-referral-partners';
+}
+
 export default async (req) => {
   const isAdmin = await checkAdmin(req);
   if (!isAdmin) return json({ error: 'Unauthorized' }, 401);
@@ -12,7 +18,6 @@ export default async (req) => {
 
   if (req.method === 'GET') {
     const all = (await binStore.get('all', { type: 'json' }).catch(() => null)) || [];
-    // Sort newest first
     const sorted = [...all].sort((a, b) => new Date(b.deletedAt) - new Date(a.deletedAt));
     return json(sorted);
   }
@@ -21,37 +26,50 @@ export default async (req) => {
     let body;
     try { body = await req.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
 
-    const { id, action } = body;
-    if (!id || !action) return json({ error: 'id and action required' }, 400);
-    if (!['reinstate', 'permanent-delete'].includes(action)) return json({ error: 'Invalid action' }, 400);
+    const { action } = body;
+    if (!action || !['reinstate', 'permanent-delete'].includes(action)) return json({ error: 'Invalid action' }, 400);
 
-    const binAll = (await binStore.get('all', { type: 'json' }).catch(() => null)) || [];
-    const record = binAll.find(r => r.id === id);
-    if (!record) return json({ error: 'Bin record not found' }, 404);
+    // Support single id or array of ids
+    const ids = body.ids ? body.ids : (body.id ? [body.id] : []);
+    if (!ids.length) return json({ error: 'id or ids required' }, 400);
+
+    let binAll = (await binStore.get('all', { type: 'json' }).catch(() => null)) || [];
+    const records = ids.map(id => binAll.find(r => r.id === id)).filter(Boolean);
+    if (!records.length) return json({ error: 'No matching bin records found' }, 404);
+
+    const errors = [];
 
     if (action === 'reinstate') {
-      // Determine target store
-      let storeName;
-      if (record.type === 'shortlist') storeName = 'fairway-shortlist';
-      else if (record.type === 'presentation') storeName = 'fairway-presentations';
-      else storeName = 'fairway-referral-partners';
+      // Group records by target store to minimise writes
+      const byStore = {};
+      for (const record of records) {
+        const sName = storeForType(record.type);
+        if (!byStore[sName]) byStore[sName] = [];
+        byStore[sName].push(record);
+      }
 
-      const targetStore = getStore({ name: storeName, consistency: 'strong' });
-      const targetAll = (await targetStore.get('all', { type: 'json' }).catch(() => null)) || [];
-
-      // Check for id collision (in case item was recreated)
-      const exists = targetAll.some(i => i.id === record.data.id);
-      if (exists) return json({ error: 'An item with this ID already exists in the store. Cannot reinstate.' }, 409);
-
-      targetAll.push(record.data);
-      await targetStore.setJSON('all', targetAll);
+      for (const [storeName, recs] of Object.entries(byStore)) {
+        const targetStore = getStore({ name: storeName, consistency: 'strong' });
+        const targetAll = (await targetStore.get('all', { type: 'json' }).catch(() => null)) || [];
+        for (const record of recs) {
+          const exists = targetAll.some(i => i.id === record.data.id);
+          if (exists) {
+            errors.push(`"${record.label}" already exists — skipped`);
+            // Still remove from bin
+          } else {
+            targetAll.push(record.data);
+          }
+        }
+        await targetStore.setJSON('all', targetAll);
+      }
     }
 
-    // Remove from bin regardless of action
-    const updatedBin = binAll.filter(r => r.id !== id);
-    await binStore.setJSON('all', updatedBin);
+    // Remove all processed records from bin
+    const processedIds = new Set(records.map(r => r.id));
+    binAll = binAll.filter(r => !processedIds.has(r.id));
+    await binStore.setJSON('all', binAll);
 
-    return json({ ok: true });
+    return json({ ok: true, errors });
   }
 
   return new Response('Method Not Allowed', { status: 405 });

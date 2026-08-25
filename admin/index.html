@@ -596,7 +596,8 @@
     .kb-card{background:#22201d;border:1px solid rgba(247,243,237,0.09);border-radius:11px;padding:13px 13px 11px;display:flex;flex-direction:column;gap:0;}
     .kb-card-name{font-size:13.5px;font-weight:500;color:#f7f3ed;line-height:1.3;}
     .kb-card-since{font-size:11px;color:rgba(247,243,237,0.3);margin-top:3px;}
-    .kb-card-date{margin-top:8px;padding-top:8px;border-top:1px solid rgba(247,243,237,0.06);}
+    .kb-card-date{margin-top:8px;padding-top:8px;border-top:1px solid rgba(247,243,237,0.06);overflow:hidden;min-width:0;}
+    .kb-card-date-label{font-size:10.5px;color:rgba(247,243,237,0.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;}
     .kb-move{margin-top:10px;width:100%;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.09);border-radius:7px;color:rgba(247,243,237,0.45);font-family:'Outfit',sans-serif;font-size:11.5px;padding:6px 8px;cursor:pointer;transition:background .15s,border-color .15s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(247,243,237,0.3)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px;}
     .kb-move:hover{background:rgba(247,243,237,0.08);border-color:rgba(247,243,237,0.15);}
     .kb-move:focus{outline:none;border-color:rgba(189,122,112,0.5);}
@@ -1151,11 +1152,27 @@
       <div id="reports-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;"></div>
     </div>
 
+    <!-- Delete confirm modal -->
+    <div id="del-confirm-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;display:none;align-items:center;justify-content:center;">
+      <div style="background:#1e1c1a;border:1px solid rgba(247,243,237,0.12);border-radius:16px;padding:28px 30px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.6);">
+        <div style="font-size:17px;font-weight:500;color:#f7f3ed;margin-bottom:6px;">Confirm deletion</div>
+        <div id="del-confirm-desc" style="font-size:13px;color:rgba(247,243,237,0.45);margin-bottom:20px;"></div>
+        <label style="font-size:11.5px;color:rgba(247,243,237,0.4);display:block;margin-bottom:6px;">Enter admin password to confirm</label>
+        <input id="del-confirm-pw" type="password" class="pf-edit-input" placeholder="Admin password" style="width:100%;box-sizing:border-box;"
+          onkeydown="if(event.key==='Enter')confirmDeletion();if(event.key==='Escape')closeDelConfirm();">
+        <div id="del-confirm-err" style="display:none;font-size:12px;color:#e07070;margin-top:6px;">Incorrect password. Try again.</div>
+        <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+          <button class="btn-sm" onclick="closeDelConfirm()">Cancel</button>
+          <button class="btn-sm" id="del-confirm-btn" style="background:rgba(224,112,112,0.12);border-color:rgba(224,112,112,0.3);color:#e07070;" onclick="confirmDeletion()">Delete</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Bin -->
     <div id="sec-bin" class="admin-section">
       <div class="sec-header">
         <h1>Bin</h1>
-        <span style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.35);">Items deleted by contractors. Reinstate or permanently delete.</span>
+        <span style="font-size:13px;font-weight:300;color:rgba(247,243,237,0.35);">Deleted items. Reinstate to restore or permanently delete.</span>
       </div>
       <!-- Filter tabs -->
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;">
@@ -1163,6 +1180,12 @@
         <button class="sl-tab" id="bin-tab-shortlist" onclick="setBinFilter('shortlist',this)">Shortlist</button>
         <button class="sl-tab" id="bin-tab-presentation" onclick="setBinFilter('presentation',this)">Presentations</button>
         <button class="sl-tab" id="bin-tab-directory" onclick="setBinFilter('directory',this)">Directory</button>
+      </div>
+      <!-- Bulk action bar (shown when items selected) -->
+      <div id="bin-bulk-bar" style="display:none;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.1);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:none;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span id="bin-bulk-count" style="font-size:13px;color:rgba(247,243,237,0.6);flex:1;"></span>
+        <button class="btn-sm" style="color:#6dbf7b;border-color:rgba(109,191,123,0.25);" onclick="bulkBinAction('reinstate')">Reinstate selected</button>
+        <button class="btn-sm" style="color:#e07070;border-color:rgba(224,112,112,0.25);" onclick="bulkBinAction('permanent-delete')">Delete selected forever</button>
       </div>
       <div id="bin-list"></div>
     </div>
@@ -1332,6 +1355,9 @@
       <div class="sec-header" style="margin-bottom:24px;">
         <h1>Financials</h1>
       </div>
+
+      <!-- Tax reserve summary -->
+      <div id="fin-tax-summary" style="margin-bottom:28px;"></div>
 
       <!-- Tab bar -->
       <div style="display:flex;gap:2px;border-bottom:1px solid rgba(247,243,237,0.08);margin-bottom:28px;">
@@ -3879,7 +3905,7 @@ function showSection(id, btn) {
   if (id === 'settings') { loadCompliance(); loadAgentSignatureSettings(); }
   if (id === 'reports') renderReports();
   if (id === 'tasks') { loadTasks(); if (!_staffTasksLoaded) loadStaffTasks(); }
-  if (id === 'financials' && _clientsLoaded) renderFinancials();
+  if (id === 'financials') renderFinancials();
   if (id === 'bin') loadBin();
   localStorage.setItem('fw_admin_section', id);
 }
@@ -4057,7 +4083,7 @@ async function loadClients() {
   renderDashboard();
   renderPartnersSection();
   if (presentations.length) renderPresentations();
-  if (document.getElementById('sec-financials')?.classList.contains('active')) renderFinancials();
+  renderFinancials();
 }
 
 function clientPageNav(dir) {
@@ -4325,7 +4351,7 @@ function renderPipeline() {
             const next = clientMs[0];
             const days = daysFromToday(next.date);
             const urg = urgencyClass(days);
-            dateChip = `<div class="kb-card-date"><span class="${urg}" style="display:inline-flex;"><span class="urg-badge" style="min-width:auto;font-size:10px;">${esc(next.label)} · ${urgencyLabel(days)}</span></span></div>`;
+            dateChip = `<div class="kb-card-date" title="${esc(next.label)}"><div class="kb-card-date-label">${esc(next.label)}</div><span class="${urg}" style="display:inline-flex;"><span class="urg-badge" style="min-width:auto;font-size:10px;">${urgencyLabel(days)}</span></span></div>`;
           }
           const moveHandler = card.acqId
             ? `moveKanbanCard('${card.clientId}','${card.acqId}',this.value,this)`
@@ -6440,7 +6466,61 @@ function setFinTab(tab, btn) {
   if (tab === 'fees')        renderFinFees();
 }
 
+function renderTaxSummary() {
+  const el = document.getElementById('fin-tax-summary');
+  if (!el) return;
+  if (!_clientsLoaded) { el.innerHTML = ''; return; }
+
+  const fmtCur = n => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const calcPaid = fee => (fee.payments || []).filter(p => !p.refundedAt).reduce((s, p) => s + (Number(p.amount) || 0), 0);
+
+  // Revenue = all collected client fee payments
+  let revenue = 0;
+  clients.forEach(c => getManualFees(c).filter(f => f.totalFee).forEach(f => { revenue += calcPaid(f); }));
+
+  // Expenses = contractor commissions actually paid out
+  const DEAL_STATUSES = new Set(['allocated','sent']);
+  let commissionsPaid = 0;
+  presentations.filter(p => p.sourcedByRole === 'contractor' && DEAL_STATUSES.has(p.reviewStatus) && p.contractorCommission != null && p.contractorCommissionPaidAt)
+    .forEach(p => { commissionsPaid += Number(p.contractorCommission) || 0; });
+
+  const profit = revenue - commissionsPaid;
+  const taxReserve = profit * 0.25;
+  const gst = revenue * 0.1;
+
+  el.innerHTML = `
+    <div style="background:rgba(130,100,200,0.07);border:1px solid rgba(130,100,200,0.2);border-radius:14px;padding:20px 22px;">
+      <div style="font-size:10.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(160,130,220,0.8);margin-bottom:16px;">Income Tax Reserve — 25% of net profit</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+        <div>
+          <div style="font-size:11px;color:rgba(247,243,237,0.35);margin-bottom:4px;">Revenue collected</div>
+          <div style="font-family:'Fraunces',serif;font-size:22px;color:#f7f3ed;">${fmtCur(revenue)}</div>
+          <div style="font-size:11px;color:rgba(247,243,237,0.25);margin-top:2px;">excl. GST</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:rgba(247,243,237,0.35);margin-bottom:4px;">Commissions paid</div>
+          <div style="font-family:'Fraunces',serif;font-size:22px;color:#e8a87c;">${fmtCur(commissionsPaid)}</div>
+          <div style="font-size:11px;color:rgba(247,243,237,0.25);margin-top:2px;">contractor expenses</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:rgba(247,243,237,0.35);margin-bottom:4px;">Net profit</div>
+          <div style="font-family:'Fraunces',serif;font-size:22px;color:${profit >= 0 ? '#f7f3ed' : '#e07070'};">${fmtCur(profit)}</div>
+          <div style="font-size:11px;color:rgba(247,243,237,0.25);margin-top:2px;">revenue − commissions</div>
+        </div>
+        <div style="background:rgba(130,100,200,0.1);border:1px solid rgba(130,100,200,0.25);border-radius:10px;padding:12px 14px;">
+          <div style="font-size:11px;color:rgba(160,130,220,0.9);margin-bottom:4px;">Hold for tax</div>
+          <div style="font-family:'Fraunces',serif;font-size:24px;color:#c9a8f0;">${fmtCur(taxReserve)}</div>
+          <div style="font-size:11px;color:rgba(160,130,220,0.6);margin-top:2px;">25% of net profit</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(130,100,200,0.15);font-size:11.5px;color:rgba(247,243,237,0.3);">
+        GST to ATO: <span style="color:rgba(247,243,237,0.5);">${fmtCur(gst)}</span> (10% of revenue, separate to income tax) &nbsp;·&nbsp; These figures are a guide only — consult your accountant for actual tax obligations.
+      </div>
+    </div>`;
+}
+
 function renderFinancials() {
+  renderTaxSummary();
   renderFinFees();
   if (_finTab === 'commissions') renderContractorCommissions();
 }
@@ -6449,6 +6529,10 @@ function renderFinancials() {
 function renderFinFees() {
   const el = document.getElementById('fin-fees-body');
   if (!el) return;
+  if (!_clientsLoaded) {
+    el.innerHTML = '<p style="font-size:13.5px;color:rgba(247,243,237,0.2);padding:12px 0;">Loading…</p>';
+    return;
+  }
   const today = localDateStr(new Date());
   const fmtCur = n => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const calcPaid = fee => (fee.payments || []).filter(p => !p.refundedAt).reduce((s, p) => s + (Number(p.amount) || 0), 0);
@@ -6567,6 +6651,7 @@ async function finRecordPayment(clientId, feeId) {
     c.manualFees = updatedManualFees;
     c.manualFee = null;
     renderFinFees();
+    renderTaxSummary();
     showToast('Payment recorded');
   }
 }
@@ -6680,6 +6765,7 @@ async function setCommissionPaid(presId, paid) {
       if (paid) { const data = await res.json().catch(() => ({})); if (data.paidAt) p.contractorCommissionPaidAt = data.paidAt; }
     }
     renderContractorCommissions();
+    renderTaxSummary();
     showToast(paid ? 'Commission marked as paid' : 'Commission unmarked');
   }
 }
@@ -8840,6 +8926,7 @@ async function dashRemovePayment(clientId, feeId, paymentId) {
   client.manualFees = manualFees;
   client.manualFee = null;
   renderFinFees();
+  renderTaxSummary();
   if (crmProfileClientId === clientId) refreshProfileView();
   showToast('Payment removed');
 }
@@ -10986,13 +11073,68 @@ async function previewFromModal() {
   await previewPresentation(id);
 }
 
-async function deletePresentation(id) {
+// ── Delete confirmation modal ─────────────────────────────────────────────────
+let _pendingDeleteId = null;
+let _pendingDeleteType = null;
+
+function requestDelete(type, id) {
   const p = presentations.find(x => x.id === id);
-  if (!confirm(`Delete presentation for "${p?.address}"? This cannot be undone.`)) return;
-  const res = await api('DELETE', `/api/admin/presentations?id=${encodeURIComponent(id)}`);
-  if (!res.ok) return;
-  presentations = presentations.filter(x => x.id !== id);
-  renderPresentations();
+  _pendingDeleteId = id;
+  _pendingDeleteType = type;
+  const overlay = document.getElementById('del-confirm-overlay');
+  document.getElementById('del-confirm-desc').textContent = `"${p?.address || id}" will be moved to the bin.`;
+  document.getElementById('del-confirm-pw').value = '';
+  document.getElementById('del-confirm-err').style.display = 'none';
+  document.getElementById('del-confirm-btn').disabled = false;
+  document.getElementById('del-confirm-btn').textContent = 'Delete';
+  overlay.style.display = 'flex';
+  setTimeout(() => document.getElementById('del-confirm-pw').focus(), 50);
+}
+
+function closeDelConfirm() {
+  document.getElementById('del-confirm-overlay').style.display = 'none';
+  _pendingDeleteId = null;
+  _pendingDeleteType = null;
+}
+
+async function confirmDeletion() {
+  const pw = document.getElementById('del-confirm-pw').value.trim();
+  if (!pw) { document.getElementById('del-confirm-pw').focus(); return; }
+  const btn = document.getElementById('del-confirm-btn');
+  btn.disabled = true; btn.textContent = 'Verifying…';
+  const errEl = document.getElementById('del-confirm-err');
+  errEl.style.display = 'none';
+
+  const verifyRes = await fetch('/api/admin-login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pw }),
+  });
+  if (verifyRes.status !== 200 && verifyRes.status !== 202) {
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Delete';
+    document.getElementById('del-confirm-pw').select();
+    return;
+  }
+
+  if (_pendingDeleteType === 'presentation' && _pendingDeleteId) {
+    btn.textContent = 'Deleting…';
+    const res = await api('DELETE', `/api/admin/presentations?id=${encodeURIComponent(_pendingDeleteId)}`);
+    if (res.ok) {
+      presentations = presentations.filter(x => x.id !== _pendingDeleteId);
+      renderPresentations();
+      showToast('Presentation moved to bin');
+      closeDelConfirm();
+      if (document.getElementById('sec-bin')?.classList.contains('active')) loadBin();
+    } else {
+      showToast('Delete failed', 'warning');
+      btn.disabled = false; btn.textContent = 'Delete';
+    }
+  }
+}
+
+function deletePresentation(id) {
+  requestDelete('presentation', id);
 }
 
 function copyLink(link, btn) {
@@ -11670,6 +11812,7 @@ function renderQrCodes() {
 // ── Bin ───────────────────────────────────────────────────────────────────────
 let _binItems = [];
 let _binFilter = 'all';
+let _binSelected = new Set();
 
 async function loadBin() {
   document.getElementById('bin-list').innerHTML = '<p style="color:rgba(247,243,237,0.3);font-size:13px;">Loading…</p>';
@@ -11678,11 +11821,13 @@ async function loadBin() {
     if (r.ok) _binItems = await r.json();
     else _binItems = [];
   } catch { _binItems = []; }
+  _binSelected.clear();
   renderBin();
 }
 
 function setBinFilter(filter, btn) {
   _binFilter = filter;
+  _binSelected.clear();
   document.querySelectorAll('#sec-bin .sl-tab').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
   renderBin();
@@ -11695,23 +11840,75 @@ const BIN_TYPE_COLORS = {
   directory: { bg: 'rgba(134,152,124,0.15)', border: 'rgba(134,152,124,0.25)', color: 'rgba(134,152,124,0.9)' },
 };
 
+function _updateBinBulkBar(visibleItems) {
+  const bar = document.getElementById('bin-bulk-bar');
+  const count = document.getElementById('bin-bulk-count');
+  const n = _binSelected.size;
+  if (n > 0) {
+    bar.style.display = 'flex';
+    count.textContent = `${n} item${n !== 1 ? 's' : ''} selected`;
+  } else {
+    bar.style.display = 'none';
+  }
+  // Update select-all state
+  const allCb = document.getElementById('bin-select-all');
+  if (allCb) {
+    allCb.checked = visibleItems.length > 0 && visibleItems.every(i => _binSelected.has(i.id));
+    allCb.indeterminate = _binSelected.size > 0 && !allCb.checked;
+  }
+}
+
+function toggleBinItem(id, checked) {
+  if (checked) _binSelected.add(id); else _binSelected.delete(id);
+  const visibleIds = [...document.querySelectorAll('.bin-row-cb')].map(cb => cb.dataset.id);
+  const visibleItems = _binItems.filter(i => visibleIds.includes(i.id));
+  _updateBinBulkBar(visibleItems);
+  // Highlight row
+  const row = document.querySelector(`.bin-item-row[data-id="${id}"]`);
+  if (row) row.style.background = checked ? 'rgba(247,243,237,0.05)' : '';
+}
+
+function toggleBinSelectAll(checked) {
+  const cbs = document.querySelectorAll('.bin-row-cb');
+  cbs.forEach(cb => {
+    cb.checked = checked;
+    if (checked) _binSelected.add(cb.dataset.id); else _binSelected.delete(cb.dataset.id);
+    const row = document.querySelector(`.bin-item-row[data-id="${cb.dataset.id}"]`);
+    if (row) row.style.background = checked ? 'rgba(247,243,237,0.05)' : '';
+  });
+  const visibleItems = _binItems.filter(i => [...cbs].map(c => c.dataset.id).includes(i.id));
+  _updateBinBulkBar(visibleItems);
+}
+
 function renderBin() {
   const el = document.getElementById('bin-list');
   if (!el) return;
   const items = _binFilter === 'all' ? _binItems : _binItems.filter(i => i.type === _binFilter);
+
+  // Reset bulk bar
+  _updateBinBulkBar(items);
+
   if (!items.length) {
     el.innerHTML = '<div style="text-align:center;padding:60px 24px;color:rgba(247,243,237,0.25);font-size:14px;">The bin is empty.</div>';
     return;
   }
-  el.innerHTML = items.map(item => {
+
+  const selectAllRow = `<div style="display:flex;align-items:center;gap:10px;padding:8px 18px;margin-bottom:8px;">
+    <input type="checkbox" id="bin-select-all" style="width:15px;height:15px;cursor:pointer;accent-color:#6dbf7b;" onchange="toggleBinSelectAll(this.checked)">
+    <label for="bin-select-all" style="font-size:12px;color:rgba(247,243,237,0.4);cursor:pointer;">Select all</label>
+  </div>`;
+
+  el.innerHTML = selectAllRow + items.map(item => {
     const typeColor = BIN_TYPE_COLORS[item.type] || BIN_TYPE_COLORS.directory;
     const typeLabel = BIN_TYPE_LABELS[item.type] || item.type;
     const deletedDate = item.deletedAt ? new Date(item.deletedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
-    return `<div style="background:#22201d;border:1px solid rgba(247,243,237,0.08);border-radius:12px;padding:16px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-      <div style="flex:1;min-width:200px;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+    const isSelected = _binSelected.has(item.id);
+    return `<div class="bin-item-row" data-id="${esc(item.id)}" style="background:${isSelected ? 'rgba(247,243,237,0.05)' : ''};border:1px solid rgba(247,243,237,0.08);border-radius:12px;padding:14px 18px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;transition:background 0.15s;">
+      <input type="checkbox" class="bin-row-cb" data-id="${esc(item.id)}" ${isSelected ? 'checked' : ''} style="width:15px;height:15px;cursor:pointer;flex-shrink:0;accent-color:#6dbf7b;" onchange="toggleBinItem('${esc(item.id)}',this.checked)">
+      <div style="flex:1;min-width:180px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
           <span style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:2px 9px;border-radius:100px;background:${typeColor.bg};border:1px solid ${typeColor.border};color:${typeColor.color};">${typeLabel}</span>
-          <span style="font-size:14px;font-weight:400;color:#f7f3ed;">${esc(item.label)}</span>
+          <span style="font-size:14px;color:#f7f3ed;">${esc(item.label)}</span>
         </div>
         <div style="font-size:12px;color:rgba(247,243,237,0.35);">Deleted by ${esc(item.deletedByName || '—')} &middot; ${deletedDate}</div>
       </div>
@@ -11732,11 +11929,41 @@ async function binAction(id, action) {
   });
   if (r.ok) {
     _binItems = _binItems.filter(i => i.id !== id);
+    _binSelected.delete(id);
     renderBin();
     showToast(action === 'reinstate' ? 'Item reinstated' : 'Permanently deleted');
+    if (action === 'reinstate') loadPresentations();
   } else {
     const data = await r.json().catch(() => ({}));
-    showToast(data.error || 'Action failed');
+    showToast(data.error || 'Action failed', 'warning');
+  }
+}
+
+async function bulkBinAction(action) {
+  if (!_binSelected.size) return;
+  const ids = [..._binSelected];
+  const n = ids.length;
+  if (action === 'permanent-delete' && !confirm(`Permanently delete ${n} item${n !== 1 ? 's' : ''}? This cannot be undone.`)) return;
+
+  const r = await fetch('/api/admin/bin', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ids, action }),
+  });
+  if (r.ok) {
+    const data = await r.json().catch(() => ({}));
+    _binItems = _binItems.filter(i => !_binSelected.has(i.id));
+    _binSelected.clear();
+    renderBin();
+    if (action === 'reinstate') {
+      showToast(data.errors?.length ? `${n - data.errors.length} reinstated, ${data.errors.length} skipped` : `${n} item${n !== 1 ? 's' : ''} reinstated`);
+      loadPresentations();
+    } else {
+      showToast(`${n} item${n !== 1 ? 's' : ''} permanently deleted`);
+    }
+  } else {
+    const data = await r.json().catch(() => ({}));
+    showToast(data.error || 'Action failed', 'warning');
   }
 }
 </script>

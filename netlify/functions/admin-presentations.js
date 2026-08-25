@@ -135,8 +135,8 @@ async function migrateViewsIfNeeded(presentations, presStore) {
 export default async (req) => {
   if (!(await checkAdmin(req))) return json({ error: 'Unauthorized' }, 401);
 
-  const store = getStore('fairway-presentations');
-  const presentations = (await store.get('all', { type: 'json' })) || [];
+  const store = getStore({ name: 'fairway-presentations', consistency: 'strong' });
+  const presentations = (await store.get('all', { type: 'json' }).catch(() => null)) || [];
 
   await migrateViewsIfNeeded(presentations, store);
 
@@ -342,6 +342,22 @@ export default async (req) => {
     const toDelete = presentations.find(p => p.id === id);
     const updated = presentations.filter(p => p.id !== id);
     if (updated.length === presentations.length) return json({ error: 'Not found' }, 404);
+
+    // Move to bin before removing
+    const binStore = getStore({ name: 'fairway-bin', consistency: 'strong' });
+    const binAll = (await binStore.get('all', { type: 'json' }).catch(() => null)) || [];
+    if (toDelete) {
+      binAll.push({
+        id: crypto.randomUUID(),
+        type: 'presentation',
+        label: toDelete.address || 'Presentation',
+        data: toDelete,
+        deletedAt: new Date().toISOString(),
+        deletedByName: 'Admin',
+      });
+      await binStore.setJSON('all', binAll);
+    }
+
     await Promise.all([
       store.setJSON('all', updated),
       pvStore().delete(id).catch(() => {}),
