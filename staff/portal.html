@@ -855,9 +855,11 @@ async function init() {
   // Re-render pipeline after all data (including dates) is loaded so milestone chips appear
   if (hasModule('pipeline')) renderPipeline();
 
-  // Show first available section
+  // Restore last visited section, falling back to first available module
+  const saved = (() => { try { return localStorage.getItem('fw_staff_section'); } catch { return null; } })();
   const first = getFirstModule();
-  if (first) showSection(first);
+  const target = (saved && hasModule(saved)) ? saved : first;
+  if (target) showSection(target);
   else showSection('noaccess');
 }
 
@@ -917,6 +919,7 @@ function showSection(id) {
   const nav = document.getElementById('nav-' + id);
   if (nav) nav.classList.add('active');
   closeStaffSidebar();
+  try { localStorage.setItem('fw_staff_section', id); } catch {}
 }
 
 // ── Clients ────────────────────────────────────────────────────────────────
@@ -941,45 +944,52 @@ function renderClients() {
 
 function renderClientCard(c) {
   const stage = STAGE_LABELS[c.stage] || c.stage || '—';
-  const markets = (c.markets || []).slice(0,4).map(m => `<span class="pill pill-neutral">${esc(m)}</span>`).join('');
-  const budget = formatBudget(c);
+  const b = c.publishedBrief;
 
-  const briefRows = buildBriefRows(c);
+  const briefRows = b ? buildBriefRows(b) : [];
   const briefHtml = briefRows.length ? `
     <button class="brief-toggle" onclick="toggleBrief('brief-${c.id}')">View buying brief ↓</button>
     <div class="brief-content" id="brief-${c.id}">
       ${briefRows.map(([l,v]) => `<div class="brief-row"><span class="brief-label">${esc(l)}</span><span class="brief-val">${v}</span></div>`).join('')}
-      ${c.briefText ? `<div style="margin-top:12px;font-size:13.5px;color:rgba(247,243,237,0.6);line-height:1.6;white-space:pre-wrap;">${esc(c.briefText)}</div>` : ''}
+      ${b.strategyNotes ? `<div style="margin-top:12px;font-size:13.5px;color:rgba(247,243,237,0.6);line-height:1.6;white-space:pre-wrap;">${esc(b.strategyNotes)}</div>` : ''}
     </div>
   ` : '';
 
   return `
     <div class="card">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;">
-        <div>
-          <div class="card-title">${esc(c.name)}</div>
-          <div class="card-sub" style="margin-top:3px;">${esc(stage)}${budget ? ' &middot; ' + esc(budget) : ''}</div>
-        </div>
+      <div style="margin-bottom:${briefHtml ? '10' : '0'}px;">
+        <div class="card-title">${esc(c.name)}</div>
+        <div class="card-sub" style="margin-top:3px;">${esc(stage)}</div>
       </div>
-      ${markets ? `<div style="margin-bottom:8px;">${markets}</div>` : ''}
       ${briefHtml}
     </div>
   `;
 }
 
-function formatBudget(c) {
-  const min = c.budgetMin || c.budget;
-  const max = c.budgetMax;
+function formatBriefBudget(b) {
+  const fmt = n => Number(n).toLocaleString('en-AU');
+  const min = b.budgetMin;
+  const max = b.budgetMax;
   if (min && max) return `$${fmt(min)} – $${fmt(max)}`;
   if (min) return `Up to $${fmt(min)}`;
+  if (max) return `Up to $${fmt(max)}`;
   return '';
 }
 
-function buildBriefRows(c) {
+function buildBriefRows(b) {
   const rows = [];
-  if ((c.propertyTypes||[]).length) rows.push(['Property types', c.propertyTypes.join(', ')]);
-  if (c.targetYield) rows.push(['Target yield', c.targetYield + '%+']);
-  if (c.strategy) rows.push(['Strategy', c.strategy]);
+  const budget = formatBriefBudget(b);
+  if (budget) rows.push(['Budget', budget]);
+  const allMarkets = [...(b.targetMarkets || []), ...(b.customMarkets || [])];
+  if (allMarkets.length) rows.push(['Target markets', allMarkets.join(', ')]);
+  if ((b.propertyTypes || []).length) rows.push(['Property types', b.propertyTypes.join(', ')]);
+  if (b.entityType && b.entityType !== 'Individual') {
+    rows.push(['Entity', b.entityName ? `${b.entityType} — ${b.entityName}` : b.entityType]);
+  } else if (b.entityType === 'Individual') {
+    rows.push(['Entity', 'Individual']);
+  }
+  if (b.fundingMethod) rows.push(['Funding', b.fundingMethod]);
+  if (b.timeline) rows.push(['Timeline', b.timeline]);
   return rows;
 }
 

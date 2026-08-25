@@ -4,8 +4,7 @@ import { getStaffPayload, hasModule } from './_staff-auth.js';
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 
-// Fields a contractor is allowed to see on a client
-function filterClientFields(c) {
+function filterClientFields(c, publishedBrief) {
   return {
     id: c.id,
     name: c.name,
@@ -15,16 +14,8 @@ function filterClientFields(c) {
     markets: c.markets,
     active: c.active,
     createdAt: c.createdAt,
-    // brief / search parameters
-    brief: c.brief,
-    briefText: c.briefText,
-    briefUrl: c.briefUrl,
-    strategy: c.strategy,
-    budgetMin: c.budgetMin,
-    budgetMax: c.budgetMax,
-    budget: c.budget,
-    propertyTypes: c.propertyTypes,
-    targetYield: c.targetYield,
+    // Published buying brief (from fairway-briefs store — this is the source of truth)
+    publishedBrief: publishedBrief || null,
     // acquisition context
     acquisitions: (c.acquisitions || []).map(acq => ({
       id: acq.id,
@@ -51,12 +42,22 @@ export default async (req) => {
   const { assignedClients = [] } = payload;
   if (!assignedClients.length) return json([]);
 
-  const store = getStore('fairway-clients');
-  const all = (await store.get('all', { type: 'json' }).catch(() => null)) || [];
+  const clientStore = getStore({ name: 'fairway-clients', consistency: 'strong' });
+  const briefStore = getStore({ name: 'fairway-briefs', consistency: 'strong' });
 
-  const visible = all
-    .filter(c => !c.deleted && c.active && assignedClients.includes(c.id))
-    .map(filterClientFields);
+  const all = (await clientStore.get('all', { type: 'json' }).catch(() => null)) || [];
+  const assigned = all.filter(c => !c.deleted && c.active && assignedClients.includes(c.id));
+
+  // Load published briefs for all assigned clients in parallel
+  const briefs = await Promise.all(
+    assigned.map(c =>
+      briefStore.get(c.id, { type: 'json' })
+        .then(b => (b && b.status === 'published' ? b : null))
+        .catch(() => null)
+    )
+  );
+
+  const visible = assigned.map((c, i) => filterClientFields(c, briefs[i]));
 
   return json(visible);
 };
