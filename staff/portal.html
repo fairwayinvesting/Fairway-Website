@@ -84,6 +84,58 @@
     .brief-label{color:rgba(247,243,237,0.35);min-width:120px;flex-shrink:0;}
     .brief-val{color:rgba(247,243,237,0.7);}
 
+    /* ── Full brief overlay ──────────────────────────────────────────── */
+    .brief-overlay{position:fixed;inset:0;z-index:2000;background:#1a1916;display:none;flex-direction:column;overflow:hidden;}
+    .brief-overlay.open{display:flex;}
+    .brief-overlay-bar{background:#22201d;border-bottom:1px solid rgba(247,243,237,0.08);padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:60px;flex-shrink:0;}
+    .brief-overlay-title{font-size:14px;font-weight:500;color:rgba(247,243,237,0.6);}
+    .brief-overlay-close{background:none;border:1px solid rgba(247,243,237,0.12);border-radius:100px;color:rgba(247,243,237,0.5);font-family:'Outfit',sans-serif;font-size:13px;padding:6px 16px;cursor:pointer;transition:all .15s;}
+    .brief-overlay-close:hover{border-color:rgba(247,243,237,0.25);color:#f7f3ed;}
+    .brief-overlay-body{flex:1;overflow-y:auto;padding:48px 24px 80px;}
+    .bo-wrap{max-width:720px;margin:0 auto;}
+    .bo-eyebrow{font-size:11px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:#bd7a70;margin-bottom:12px;}
+    .bo-h1{font-family:'Fraunces',serif;font-size:36px;font-weight:400;line-height:1.15;color:#f7f3ed;margin-bottom:8px;}
+    .bo-updated{font-size:13px;color:rgba(247,243,237,0.28);margin-bottom:40px;}
+    .bo-section{margin-bottom:12px;}
+    .bo-card{background:#22201d;border:1px solid rgba(247,243,237,0.09);border-radius:18px;padding:28px 32px;}
+    .bo-card-label{font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:16px;}
+    .bo-strategy{font-size:15px;line-height:1.8;color:rgba(247,243,237,0.75);}
+    .bo-meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+    .bo-meta-item{padding:16px 0;border-bottom:1px solid rgba(247,243,237,0.07);}
+    .bo-meta-item:nth-last-child(-n+2){border-bottom:none;}
+    .bo-meta-item:nth-child(odd){padding-right:24px;border-right:1px solid rgba(247,243,237,0.07);}
+    .bo-meta-item:nth-child(even){padding-left:24px;}
+    .bo-meta-label{font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.28);margin-bottom:6px;}
+    .bo-meta-value{font-size:14px;font-weight:400;color:#f7f3ed;}
+    .bo-market-chips{display:flex;flex-wrap:wrap;gap:8px;}
+    .bo-market-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(189,122,112,0.1);border:1px solid rgba(189,122,112,0.22);border-radius:100px;font-size:13px;color:#f7f3ed;}
+    .bo-chip-state{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#bd7a70;}
+    .bo-prop-chips{display:flex;flex-wrap:wrap;gap:8px;}
+    .bo-prop-chip{padding:7px 14px;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:100px;font-size:13px;color:rgba(247,243,237,0.65);}
+    .bo-checklist{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+    .bo-checklist-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(247,243,237,0.05);}
+    .bo-checklist-item:nth-last-child(-n+2){border-bottom:none;}
+    .bo-check-icon{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+    .bo-check-icon.inc{background:rgba(100,190,120,0.15);border:1px solid rgba(100,190,120,0.3);}
+    .bo-check-icon.exc{background:rgba(220,80,80,0.1);border:1px solid rgba(220,80,80,0.25);}
+    .bo-check-text{font-size:13.5px;color:rgba(247,243,237,0.75);line-height:1.4;}
+    .bo-type-sublabel{font-size:10.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.25);margin-bottom:12px;}
+    .bo-type-subsection+.bo-type-subsection{border-top:1px solid rgba(247,243,237,0.07);padding-top:20px;margin-top:4px;}
+    @media(max-width:640px){
+      .brief-overlay-bar{padding:0 16px;}
+      .brief-overlay-body{padding:32px 16px 60px;}
+      .bo-h1{font-size:28px;}
+      .bo-card{padding:20px;}
+      .bo-meta-grid{grid-template-columns:1fr;}
+      .bo-meta-item:nth-child(odd){padding-right:0;border-right:none;}
+      .bo-meta-item:nth-child(even){padding-left:0;}
+      .bo-meta-item:nth-last-child(-n+2){border-bottom:1px solid rgba(247,243,237,0.07);}
+      .bo-meta-item:last-child{border-bottom:none;}
+      .bo-checklist{grid-template-columns:1fr;}
+      .bo-checklist-item:nth-last-child(-n+2){border-bottom:1px solid rgba(247,243,237,0.05);}
+      .bo-checklist-item:last-child{border-bottom:none;}
+    }
+
     /* ── Forms ───────────────────────────────────────────────────────── */
     .field-label{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.35);margin-bottom:6px;display:block;}
     .field-input{width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:10px 13px;font-family:'Outfit',sans-serif;font-size:13.5px;color:#f7f3ed;outline:none;transition:border-color .15s;}
@@ -951,7 +1003,7 @@ function renderClientCard(c) {
     <button class="brief-toggle" onclick="toggleBrief('brief-${c.id}')">View buying brief ↓</button>
     <div class="brief-content" id="brief-${c.id}">
       ${briefRows.map(([l,v]) => `<div class="brief-row"><span class="brief-label">${esc(l)}</span><span class="brief-val">${v}</span></div>`).join('')}
-      ${b.strategyNotes ? `<div style="margin-top:12px;font-size:13.5px;color:rgba(247,243,237,0.6);line-height:1.6;white-space:pre-wrap;">${esc(b.strategyNotes)}</div>` : ''}
+      <button onclick="openFullBrief('${c.id}')" style="margin-top:14px;background:none;border:1px solid rgba(189,122,112,0.35);border-radius:6px;color:#bd7a70;font-family:'Outfit',sans-serif;font-size:12.5px;padding:6px 14px;cursor:pointer;transition:all .15s;" onmouseover="this.style.background='rgba(189,122,112,0.08)'" onmouseout="this.style.background='none'">View full brief →</button>
     </div>
   ` : '';
 
@@ -2230,6 +2282,128 @@ async function saveDirectoryContact() {
 }
 
 init();
+
+// ── Full brief overlay ──────────────────────────────────────────────────────
+const BO_MARKET_META = {
+  'geelong':'Geelong','bendigo':'Bendigo','dubbo':'Dubbo','bacchus-marsh':'Bacchus Marsh',
+  'devonport':'Devonport','hobart':'Hobart','lara':'Lara','launceston':'Launceston',
+  'mackay':'Mackay','melbourne':'Melbourne','newcastle':'Newcastle',
+  'rockhampton':'Rockhampton','townsville':'Townsville',
+};
+const BO_MARKET_STATE = {
+  'geelong':'VIC','bendigo':'VIC','dubbo':'NSW','bacchus-marsh':'VIC',
+  'devonport':'TAS','hobart':'TAS','lara':'VIC','launceston':'TAS',
+  'mackay':'QLD','melbourne':'VIC','newcastle':'NSW',
+  'rockhampton':'QLD','townsville':'QLD',
+};
+
+function boChecklist(items, type) {
+  if (!items?.length) return '';
+  const icon = type === 'inc'
+    ? `<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="rgba(100,190,120,0.9)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+    : `<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3 3l4 4M7 3l-4 4" stroke="rgba(210,80,80,0.8)" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+  return items.map(t => `<div class="bo-checklist-item"><span class="bo-check-icon ${type}">${icon}</span><span class="bo-check-text">${esc(t)}</span></div>`).join('');
+}
+
+function openFullBrief(clientId) {
+  const client = allClients.find(c => c.id === clientId);
+  const b = client?.publishedBrief;
+  if (!b) return;
+
+  const fmtN = n => { const v = parseFloat(String(n).replace(/[,$]/g,'')); return isNaN(v) ? null : '$' + v.toLocaleString('en-AU'); };
+  const budgetRange = (() => {
+    const lo = fmtN(b.budgetMin), hi = fmtN(b.budgetMax);
+    if (lo && hi) return `${lo} – ${hi}`;
+    if (hi) return `Up to ${hi}`;
+    if (lo) return `From ${lo}`;
+    return '—';
+  })();
+  const fmtDate = d => d ? new Date(d).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}) : '—';
+
+  const knownChips = (b.targetMarkets||[]).map(k => {
+    const name = BO_MARKET_META[k] || k;
+    const state = BO_MARKET_STATE[k] || '';
+    return `<span class="bo-market-chip">${state ? `<span class="bo-chip-state">${esc(state)}</span>` : ''}${esc(name)}</span>`;
+  });
+  const customChips = (b.customMarkets||[]).map(n => `<span class="bo-market-chip">${esc(n)}</span>`);
+  const markets = [...knownChips, ...customChips].join('') || '<span style="color:rgba(247,243,237,0.3);font-size:14px;">To be confirmed</span>';
+
+  const propTypes = (b.propertyTypes||[]).length
+    ? b.propertyTypes.map(t => `<span class="bo-prop-chip">${esc(t)}</span>`).join('') : '';
+
+  const allCriteria  = [...(b.propertyCriteria||[]), ...(b.customCriteria||[])];
+  const allExclusions = [...(b.excludedCharacteristics||[]), ...(b.customExclusions||[])];
+
+  const typeCriteriaHtml = b.typesCriteria
+    ? (b.propertyTypes||[]).map(typeName => {
+        const td = b.typesCriteria[typeName.toLowerCase()];
+        if (!td) return '';
+        const allC = [...(td.criteria||[]), ...(td.customCriteria||[])];
+        const allE = [...(td.exclusions||[]), ...(td.customExclusions||[])];
+        if (!allC.length && !allE.length) return '';
+        return `<div class="bo-section"><div class="bo-card">
+          <p class="bo-card-label" style="margin-bottom:18px">${esc(typeName)}</p>
+          ${allC.length ? `<div class="bo-type-subsection"><p class="bo-type-sublabel">Property criteria</p><div class="bo-checklist">${boChecklist(allC,'inc')}</div></div>` : ''}
+          ${allE.length ? `<div class="bo-type-subsection"><p class="bo-type-sublabel">Excluded characteristics</p><div class="bo-checklist">${boChecklist(allE,'exc')}</div></div>` : ''}
+        </div></div>`;
+      }).join('')
+    : `${allCriteria.length ? `<div class="bo-section"><div class="bo-card"><p class="bo-card-label">Property criteria</p><div class="bo-checklist">${boChecklist(allCriteria,'inc')}</div></div></div>` : ''}
+       ${allExclusions.length ? `<div class="bo-section"><div class="bo-card"><p class="bo-card-label">Excluded characteristics</p><div class="bo-checklist">${boChecklist(allExclusions,'exc')}</div></div></div>` : ''}`;
+
+  const entityLine = b.entityType === 'Individual' ? 'Individual'
+    : `${b.entityType||''}${b.entityName ? ' — ' + b.entityName : ''}`;
+  const coInvLine = b.coInvestor === 'Yes' && b.p2Name
+    ? `${esc(b.clientName||'')} &amp; ${esc(b.p2Name)}` : esc(b.clientName||'—');
+
+  const metaItems = [
+    { label: 'Purchasing entity', value: esc(entityLine) },
+    { label: 'Purchaser(s)', value: coInvLine },
+    { label: 'Purchase range', value: esc(budgetRange) },
+    { label: 'Target timeframe', value: esc(b.timeline||'—') },
+    { label: 'Funding method', value: esc(b.fundingMethod||'—') },
+  ].map(i => `<div class="bo-meta-item"><p class="bo-meta-label">${i.label}</p><p class="bo-meta-value">${i.value}</p></div>`).join('');
+
+  document.getElementById('brief-overlay-client').textContent = client.name + ' — Buying Brief';
+  document.getElementById('brief-overlay-content').innerHTML = `
+    <p class="bo-eyebrow">Fairway Investing</p>
+    <h1 class="bo-h1">Buying Brief</h1>
+    <p class="bo-updated">Last updated ${fmtDate(b.updatedAt)}</p>
+    <div class="bo-section"><div class="bo-card">
+      <p class="bo-card-label">Strategy</p>
+      <p class="bo-strategy">${b.strategyNotes ? b.strategyNotes.replace(/\n/g,'<br>') : '—'}</p>
+    </div></div>
+    <div class="bo-section"><div class="bo-card">
+      <p class="bo-card-label">Target markets</p>
+      <div class="bo-market-chips">${markets}</div>
+    </div></div>
+    ${propTypes ? `<div class="bo-section"><div class="bo-card"><p class="bo-card-label">Property types</p><div class="bo-prop-chips">${propTypes}</div></div></div>` : ''}
+    ${typeCriteriaHtml}
+    <div class="bo-section"><div class="bo-card">
+      <p class="bo-card-label">Parameters</p>
+      <div class="bo-meta-grid">${metaItems}</div>
+    </div></div>`;
+
+  document.getElementById('brief-overlay').classList.add('open');
+  document.getElementById('brief-overlay').scrollTop = 0;
+  document.getElementById('brief-overlay-body').scrollTop = 0;
+}
+
+function closeFullBrief() {
+  document.getElementById('brief-overlay').classList.remove('open');
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFullBrief(); });
 </script>
+
+<div class="brief-overlay" id="brief-overlay">
+  <div class="brief-overlay-bar">
+    <span class="brief-overlay-title" id="brief-overlay-client"></span>
+    <button class="brief-overlay-close" onclick="closeFullBrief()">Close</button>
+  </div>
+  <div class="brief-overlay-body" id="brief-overlay-body">
+    <div class="bo-wrap" id="brief-overlay-content"></div>
+  </div>
+</div>
+
 </body>
 </html>
