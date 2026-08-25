@@ -455,8 +455,11 @@
 
     <!-- Presentations -->
     <div class="section" id="sec-presentations">
-      <h1 class="page-title" style="margin-bottom:4px;">Presentations</h1>
-      <p class="page-sub">Presentations created from your shortlisted properties.</p>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px;">
+        <h1 class="page-title" style="margin-bottom:0;">Presentations</h1>
+        <button class="btn-primary" onclick="newPresModal()" style="flex-shrink:0;white-space:nowrap;">+ New presentation</button>
+      </div>
+      <p class="page-sub">Property presentations you've created and submitted for Luke's review.</p>
       <div id="presentations-list"></div>
     </div>
 
@@ -1766,22 +1769,25 @@ async function loadPresentations() {
   renderPresentations();
 }
 
-const PRES_REVIEW_LABELS = { draft:'Draft', ready_for_review:'Ready for Review', admin_reviewing:'Under Review', approved:'Approved', allocated:'Allocated', sent:'Sent' };
+const PRES_REVIEW_LABELS = { draft:'Draft', ready_for_review:'Pending Review', admin_reviewing:'Under Review', approved:'Approved', allocated:'Allocated', sent:'Sent', rejected:'Changes Requested' };
 
 function renderPresentations() {
   const el = document.getElementById('presentations-list');
   if (!el) return;
   if (!allPresentations.length) {
-    el.innerHTML = '<div class="empty">No presentations yet. Properties you shortlist will appear here once promoted to a presentation by Luke.</div>';
+    el.innerHTML = '<div class="empty">No presentations yet. Click "+ New presentation" to create your first one.</div>';
     return;
   }
   el.innerHTML = allPresentations.map(p => {
     const rs = p.reviewStatus || 'draft';
     const rsLabel = PRES_REVIEW_LABELS[rs] || rs;
-    const canEdit = rs === 'draft' || rs === 'ready_for_review';
+    const canEdit = ['draft','ready_for_review','rejected'].includes(rs);
+    const canSubmit = ['draft','rejected'].includes(rs);
     const details = [p.suburb, p.price].filter(Boolean).join(' · ');
     const imgCount = (p.images||[]).length;
-    const suggested = (p.suitableClients||[]).map(sc => { const c = allClients.find(x => x.id === (sc.clientId||sc)); return c ? esc(c.name) : null; }).filter(Boolean).join(', ');
+    const feedback = rs === 'rejected' && p.reviewFeedback
+      ? `<div style="margin-top:8px;padding:10px 12px;background:rgba(224,112,112,0.07);border:1px solid rgba(224,112,112,0.18);border-radius:8px;font-size:12.5px;color:rgba(247,243,237,0.65);line-height:1.55;"><strong style="color:rgba(224,112,112,0.8);">Feedback:</strong> ${esc(p.reviewFeedback)}</div>`
+      : '';
     return `<div class="card">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
         <div style="flex:1;min-width:0;">
@@ -1790,15 +1796,31 @@ function renderPresentations() {
             <span class="status-badge prs-${rs}">${rsLabel}</span>
           </div>
           ${details ? `<div style="font-size:13px;color:rgba(247,243,237,0.4);margin-bottom:4px;">${esc(details)}${p.propertyType ? ' · ' + esc(p.propertyType) : ''}${imgCount ? ` · ${imgCount} photo${imgCount !== 1 ? 's' : ''}` : ''}</div>` : ''}
-          ${suggested ? `<div style="font-size:12.5px;color:rgba(247,243,237,0.35);">Suggested: ${suggested}</div>` : ''}
+          ${feedback}
         </div>
-        <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;">
-          <button class="btn-sm" onclick="openPresModal('${p.id}')">${canEdit ? 'Edit' : 'View'}</button>
+        <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;align-items:flex-start;">
+          <button class="btn-sm" onclick="openPresModal('${p.id}')">${canEdit ? (rs === 'rejected' ? 'Edit & Resubmit' : 'Edit') : 'View'}</button>
+          ${canEdit && rs !== 'ready_for_review' ? `<button class="btn-sm" style="background:rgba(109,191,123,0.1);color:rgba(109,191,123,0.9);border-color:rgba(109,191,123,0.25);" onclick="quickSubmitForReview('${p.id}')">Submit for review</button>` : ''}
           <button class="btn-sm" style="color:rgba(224,112,112,0.7);border-color:rgba(224,112,112,0.2);" onclick="openBinGate('presentation','${p.id}','${p.address.replace(/'/g,"\\'")}')">Delete</button>
         </div>
       </div>
     </div>`;
   }).join('');
+}
+
+async function quickSubmitForReview(id) {
+  const pres = allPresentations.find(p => p.id === id);
+  if (!pres) return;
+  const r = await fetch('/api/staff/presentations', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, action: 'ready-for-review' }) });
+  if (r.ok) {
+    pres.reviewStatus = 'ready_for_review';
+    pres.reviewFeedback = null;
+    renderPresentations();
+    showToast('Submitted for Luke\'s review');
+  } else {
+    const data = await r.json().catch(() => ({}));
+    showToast(data.error || 'Failed to submit', 'error');
+  }
 }
 
 const RISK_PRESETS = [
@@ -2001,13 +2023,44 @@ function removeCustomSection(id) { _presSections = _presSections.filter(s => s.i
 function addCustomBlock(secId, type) { const s = _presSections.find(x => x.id === secId); if (s) { s.blocks.push({ id: uid(), type, content: '', url: '', caption: '' }); renderSecList(); } }
 function removeBlock(secId, blockId) { const s = _presSections.find(x => x.id === secId); if (s) { s.blocks = s.blocks.filter(b => b.id !== blockId); renderSecList(); } }
 
+function newPresModal() {
+  const overlay = document.getElementById('pres-panel-overlay');
+  document.getElementById('pres-modal-error').style.display = 'none';
+  switchPresTab('details', document.querySelector('#pres-panel-overlay .pres-tab'));
+  _presImages = []; _presVideos = []; _presSections = []; _presRiskItems = []; _presSales = []; _presRentals = [];
+  document.getElementById('pres-panel-title').textContent = 'New presentation';
+  document.getElementById('pres-edit-id').value = '';
+  const chip = document.getElementById('pres-panel-status-chip');
+  chip.textContent = 'Draft'; chip.className = 'status-badge prs-draft';
+  document.getElementById('pres-panel-locked-notice').style.display = 'none';
+  ['pres-address','pres-suburb','pres-price','pres-prop-desc','pres-summary','pres-highlights','pres-known-issues'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('pres-type').value = 'house';
+  ['pres-beds','pres-baths','pres-cars','pres-land'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('cf-enabled').checked = false; document.getElementById('analysis-cashflow').classList.remove('open');
+  document.getElementById('risk-enabled').checked = false; document.getElementById('analysis-risk').classList.remove('open');
+  document.getElementById('demo-enabled').checked = false; document.getElementById('analysis-demo').classList.remove('open');
+  document.getElementById('sales-enabled').checked = false; document.getElementById('analysis-sales').classList.remove('open');
+  document.getElementById('rentals-enabled').checked = false; document.getElementById('analysis-rentals').classList.remove('open');
+  ['cf-price','cf-rent','cf-rate','cf-lvr','cf-mgmt','cf-rates','cf-insurance','cf-maint','demo-owner','demo-renter','demo-public','demo-notes','demo-image'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  renderImgList(); renderVidList(); renderRiskItems(); renderSecList(); renderComparables('sales'); renderComparables('rentals');
+  const suitableContainer = document.getElementById('pres-suitable-clients');
+  suitableContainer.innerHTML = allClients.length
+    ? allClients.map(c => `<label class="client-check"><input type="checkbox" value="${esc(c.id)}"><span style="font-size:14px;color:#f7f3ed;">${esc(c.name)}</span></label>`).join('')
+    : '<p style="font-size:13px;color:rgba(247,243,237,0.3);">No clients assigned to you yet.</p>';
+  document.getElementById('pres-submit-review-btn').style.display = 'inline-flex';
+  document.getElementById('pres-save-btn').style.display = 'inline-flex';
+  document.getElementById('pres-save-btn').textContent = 'Save draft';
+  overlay.classList.add('open');
+  setTimeout(() => document.getElementById('pres-address').focus(), 100);
+}
+
 function openPresModal(id) {
   const p = allPresentations.find(x => x.id === id);
   if (!p) return;
   const overlay = document.getElementById('pres-panel-overlay');
   const rs = p.reviewStatus || 'draft';
-  const canEdit = rs === 'draft' || rs === 'ready_for_review';
-  const canSubmit = rs === 'draft';
+  const canEdit = ['draft','ready_for_review','rejected'].includes(rs);
+  const canSubmit = ['draft','rejected'].includes(rs);
 
   document.getElementById('pres-modal-error').style.display = 'none';
   switchPresTab('details', document.querySelector('#pres-panel-overlay .pres-tab'));
@@ -2015,6 +2068,14 @@ function openPresModal(id) {
   _presImages = []; _presVideos = []; _presSections = []; _presRiskItems = []; _presSales = []; _presRentals = [];
 
   document.getElementById('pres-panel-title').textContent = p.address || 'Edit presentation';
+  if (rs === 'rejected' && p.reviewFeedback) {
+    const lockedNotice = document.getElementById('pres-panel-locked-notice');
+    lockedNotice.style.display = 'block';
+    lockedNotice.style.background = 'rgba(224,112,112,0.07)';
+    lockedNotice.style.borderColor = 'rgba(224,112,112,0.2)';
+    lockedNotice.style.color = 'rgba(247,243,237,0.7)';
+    lockedNotice.innerHTML = `<strong style="color:rgba(224,112,112,0.8);">Changes requested:</strong> ${esc(p.reviewFeedback)}`;
+  }
   document.getElementById('pres-edit-id').value = id;
 
   const chip = document.getElementById('pres-panel-status-chip');
@@ -2102,7 +2163,9 @@ function openPresModal(id) {
   }
 
   document.getElementById('pres-submit-review-btn').style.display = canSubmit ? 'inline-flex' : 'none';
+  document.getElementById('pres-submit-review-btn').textContent = rs === 'rejected' ? 'Save & Resubmit' : 'Submit for review';
   document.getElementById('pres-save-btn').style.display = canEdit ? 'inline-flex' : 'none';
+  document.getElementById('pres-save-btn').textContent = 'Save draft';
 
   overlay.classList.add('open');
 }
@@ -2146,20 +2209,36 @@ async function savePres(submitForReviewFlag = false) {
 
   const btn = document.getElementById('pres-save-btn');
   btn.disabled = true; btn.textContent = 'Saving…';
-  const r = await fetch('/api/staff/presentations', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const isNew = !id;
+  const r = await fetch('/api/staff/presentations', {
+    method: isNew ? 'POST' : 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
   btn.disabled = false; btn.textContent = 'Save draft';
   if (!r.ok) {
     const data = await r.json().catch(() => ({}));
     errEl.textContent = data.error || 'Failed to save.'; errEl.style.display = 'inline'; return false;
   }
-  // Save suitable clients separately
-  await fetch('/api/staff/presentations', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, action: 'set-suitable-clients', suitableClients }) });
-
   const data = await r.json().catch(() => ({}));
-  const idx = allPresentations.findIndex(p => p.id === id);
-  if (idx !== -1) allPresentations[idx] = { ...allPresentations[idx], ...(data.pres || body), suitableClients };
+  const savedPres = data.pres || body;
+  const savedId = savedPres.id || id;
+
+  // Save suitable clients separately (only on existing presentations)
+  if (!isNew) {
+    await fetch('/api/staff/presentations', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: savedId, action: 'set-suitable-clients', suitableClients }) });
+  }
+
+  if (isNew) {
+    allPresentations.push({ ...savedPres, suitableClients: [] });
+    // Update the hidden id field so submitForReview can use it
+    document.getElementById('pres-edit-id').value = savedId;
+  } else {
+    const idx = allPresentations.findIndex(p => p.id === savedId);
+    if (idx !== -1) allPresentations[idx] = { ...allPresentations[idx], ...(savedPres), suitableClients };
+  }
   renderPresentations();
-  if (!submitForReviewFlag) { closePresModal(); showToast('Presentation saved'); }
+  if (!submitForReviewFlag) { closePresModal(); showToast(isNew ? 'Presentation created' : 'Presentation saved'); }
   return true;
 }
 

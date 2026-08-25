@@ -1,10 +1,11 @@
 import { getStore } from '@netlify/blobs';
+import crypto from 'crypto';
 import { getStaffPayload, hasModule } from './_staff-auth.js';
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 
-// Fields a contractor is allowed to update
+// Fields a contractor is allowed to set/update
 const EDITABLE_FIELDS = [
   'address','suburb','price','propertyType','bedrooms','bathrooms','carspaces','landSize',
   'propertyDescription','summary','highlights','knownIssues',
@@ -22,15 +23,34 @@ export default async (req) => {
   const all = (await store.get('all', { type: 'json' }).catch(() => null)) || [];
 
   if (req.method === 'GET') {
-    // Contractor sees presentations they sourced
     const mine = all
       .filter(p => p.sourcedById === payload.userId)
       .map(p => {
-        // Strip tokens and sensitive client data
         const { tokens, sentClients, clientAcquisitions, ...safe } = p;
         return safe;
       });
     return json(mine);
+  }
+
+  // Create new presentation from scratch
+  if (req.method === 'POST') {
+    const body = await req.json().catch(() => ({}));
+    if (!body.address?.trim()) return json({ error: 'address required' }, 400);
+    const now = new Date().toISOString();
+    const pres = {
+      id: crypto.randomUUID(),
+      reviewStatus: 'draft',
+      reviewStatusUpdatedAt: now,
+      sourcedById: payload.userId,
+      sourcedByName: payload.name,
+      createdAt: now,
+      updatedAt: now,
+    };
+    EDITABLE_FIELDS.forEach(f => { if (body[f] !== undefined) pres[f] = body[f]; });
+    all.push(pres);
+    await store.setJSON('all', all);
+    const { tokens, sentClients, clientAcquisitions, ...safe } = pres;
+    return json({ ok: true, pres: safe }, 201);
   }
 
   if (req.method === 'PUT') {
@@ -40,22 +60,23 @@ export default async (req) => {
 
     const idx = all.findIndex(p => p.id === id);
     if (idx === -1) return json({ error: 'Not found' }, 404);
-
-    // Contractor can only edit their own presentations
     if (all[idx].sourcedById !== payload.userId) return json({ error: 'Access denied' }, 403);
 
-    // Ready for Review — contractor submits for admin review
+    const rs = all[idx].reviewStatus || 'draft';
+
+    // Submit/resubmit for review — allowed from draft or rejected
     if (action === 'ready-for-review') {
-      if (all[idx].reviewStatus !== 'draft') {
+      if (!['draft', 'rejected'].includes(rs)) {
         return json({ error: 'This presentation has already been submitted for review.' }, 400);
       }
       all[idx].reviewStatus = 'ready_for_review';
       all[idx].reviewStatusUpdatedAt = new Date().toISOString();
+      all[idx].reviewFeedback = null;
       await store.setJSON('all', all);
       return json({ ok: true, reviewStatus: 'ready_for_review' });
     }
 
-    // Nominate suitable clients (only from contractor's assigned clients)
+    // Nominate suitable clients
     if (action === 'set-suitable-clients') {
       const assignedClients = new Set(payload.assignedClients || []);
       const suitableClients = Array.isArray(body.suitableClients)
@@ -66,10 +87,10 @@ export default async (req) => {
       return json({ ok: true });
     }
 
-    // Research field updates — only allowed while in draft or ready_for_review
-    const editableStatuses = new Set(['draft', 'ready_for_review']);
-    if (!editableStatuses.has(all[idx].reviewStatus)) {
-      return json({ error: 'This presentation is under admin review and can no longer be edited.' }, 403);
+    // Field edits — allowed while draft, ready_for_review, or rejected
+    const editableStatuses = new Set(['draft', 'ready_for_review', 'rejected']);
+    if (!editableStatuses.has(rs)) {
+      return json({ error: 'This presentation has been approved and can no longer be edited.' }, 403);
     }
 
     EDITABLE_FIELDS.forEach(f => { if (body[f] !== undefined) all[idx][f] = body[f]; });
@@ -81,4 +102,4 @@ export default async (req) => {
   return new Response('Method Not Allowed', { status: 405 });
 };
 
-export const config = { path: '/api/staff/presentations', method: ['GET', 'PUT'] };
+export const config = { path: '/api/staff/presentations', method: ['GET', 'POST', 'PUT'] };

@@ -11,9 +11,9 @@ const json = (data, status = 200) =>
 
 function genToken() { return crypto.randomBytes(20).toString('hex'); }
 
-const REVIEW_STATUSES = ['draft','ready_for_review','admin_reviewing','approved','allocated','sent'];
+const REVIEW_STATUSES = ['draft','ready_for_review','admin_reviewing','approved','allocated','sent','rejected'];
 // Statuses that only admin can set (beyond ready_for_review)
-const ADMIN_ONLY_STATUSES = new Set(['admin_reviewing','approved','allocated','sent']);
+const ADMIN_ONLY_STATUSES = new Set(['admin_reviewing','approved','allocated','sent','rejected']);
 
 function buildPropertyEmail(clientName, address, suburb, price, propertyType, bedrooms, bathrooms, carspaces, link) {
   const firstName = clientName.split(' ')[0];
@@ -188,8 +188,19 @@ export default async (req) => {
       if (!REVIEW_STATUSES.includes(reviewStatus)) return json({ error: 'Invalid review status' }, 400);
       presentations[idx].reviewStatus = reviewStatus;
       presentations[idx].reviewStatusUpdatedAt = new Date().toISOString();
+      if (reviewStatus !== 'rejected') presentations[idx].reviewFeedback = null;
       await store.setJSON('all', presentations);
       appendAudit('review_status_changed', `"${presentations[idx].address}" → ${reviewStatus}`);
+      return json({ ok: true, pres: presentations[idx] });
+    }
+
+    // Admin-only: reject with feedback
+    if (action === 'reject') {
+      presentations[idx].reviewStatus = 'rejected';
+      presentations[idx].reviewStatusUpdatedAt = new Date().toISOString();
+      presentations[idx].reviewFeedback = body.feedback || '';
+      await store.setJSON('all', presentations);
+      appendAudit('review_status_changed', `"${presentations[idx].address}" → rejected`);
       return json({ ok: true, pres: presentations[idx] });
     }
 

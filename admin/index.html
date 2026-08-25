@@ -1189,6 +1189,21 @@
       </div>
     </div>
 
+    <!-- Reject presentation modal -->
+    <div id="pres-reject-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;align-items:center;justify-content:center;">
+      <div style="background:#1e1c1a;border:1px solid rgba(247,243,237,0.12);border-radius:16px;padding:28px 30px;max-width:460px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.6);">
+        <div style="font-size:17px;font-weight:500;color:#f7f3ed;margin-bottom:6px;">Reject presentation</div>
+        <div style="font-size:13px;color:rgba(247,243,237,0.45);margin-bottom:16px;" id="pres-reject-address"></div>
+        <label style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.35);display:block;margin-bottom:6px;">Feedback for contractor *</label>
+        <textarea id="pres-reject-feedback" placeholder="Explain what needs to change — the contractor will see this message…" style="width:100%;box-sizing:border-box;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:10px 12px;font-family:'Outfit',sans-serif;font-size:13.5px;color:#f7f3ed;outline:none;resize:vertical;min-height:90px;line-height:1.5;" onkeydown="if(event.key==='Escape')closePresReject();"></textarea>
+        <div id="pres-reject-err" style="display:none;font-size:12px;color:#e07070;margin-top:6px;">Please enter feedback before rejecting.</div>
+        <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+          <button class="btn-sm" onclick="closePresReject()">Cancel</button>
+          <button class="btn-sm" id="pres-reject-btn" style="background:rgba(224,112,112,0.12);border-color:rgba(224,112,112,0.3);color:#e07070;" onclick="confirmPresReject()">Send rejection</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Bin -->
     <div id="sec-bin" class="admin-section">
       <div class="sec-header">
@@ -1226,6 +1241,7 @@
           <button class="sl-tab" onclick="setPresReviewFilter('ready_for_review',this)" style="position:relative;">For review <span id="pres-review-badge" style="display:none;position:absolute;top:-4px;right:-4px;width:8px;height:8px;background:#e8a87c;border-radius:50%;"></span></button>
           <button class="sl-tab" onclick="setPresReviewFilter('draft',this)">Draft</button>
           <button class="sl-tab" onclick="setPresReviewFilter('approved',this)">Approved</button>
+          <button class="sl-tab" onclick="setPresReviewFilter('rejected',this)">Rejected</button>
           <button class="sl-tab" onclick="setPresReviewFilter('sent',this)">Sent</button>
         </div>
       </div>
@@ -10209,8 +10225,8 @@ function setPresReviewFilter(f, btn) {
 function renderPresentations() {
   const tbody = document.getElementById('pres-tbody');
   const REVIEW_LABELS = {
-    draft:'Draft', ready_for_review:'Ready for Review', admin_reviewing:'Reviewing',
-    approved:'Approved', allocated:'Allocated', sent:'Sent',
+    draft:'Draft', ready_for_review:'Pending Review', admin_reviewing:'Reviewing',
+    approved:'Approved', allocated:'Allocated', sent:'Sent', rejected:'Changes Requested',
   };
   // Update badge for ready_for_review
   const reviewBadge = document.getElementById('pres-review-badge');
@@ -10276,11 +10292,12 @@ function renderPresentations() {
 
     const notifyLabel = unrevoked.some(cid => !sentList.includes(cid)) ? '✉ Notify' : '✉ Re-notify';
 
-    // Admin review status actions (only shown when ready for review)
-    const reviewActions = rs === 'ready_for_review'
-      ? `<button class="btn-sm" onclick="adminSetReviewStatus('${p.id}','admin_reviewing')" style="background:rgba(122,184,232,0.12);color:rgba(122,184,232,0.9);font-size:11.5px;">Mark reviewing</button>`
-      : rs === 'admin_reviewing'
-      ? `<button class="btn-sm" onclick="adminSetReviewStatus('${p.id}','approved')" style="background:rgba(109,191,123,0.12);color:#6dbf7b;font-size:11.5px;">Approve</button>`
+    // Admin review status actions
+    const reviewActions = (rs === 'ready_for_review' || rs === 'admin_reviewing')
+      ? `<button class="btn-sm" onclick="adminSetReviewStatus('${p.id}','approved')" style="background:rgba(109,191,123,0.12);color:#6dbf7b;border-color:rgba(109,191,123,0.25);font-size:11.5px;">✓ Approve</button>
+         <button class="btn-sm" onclick="adminRejectPresentation('${p.id}')" style="background:rgba(224,112,112,0.08);color:rgba(224,112,112,0.8);border-color:rgba(224,112,112,0.2);font-size:11.5px;">✗ Reject</button>`
+      : rs === 'rejected'
+      ? `<button class="btn-sm" onclick="adminSetReviewStatus('${p.id}','approved')" style="background:rgba(109,191,123,0.12);color:#6dbf7b;border-color:rgba(109,191,123,0.25);font-size:11.5px;">Approve anyway</button>`
       : '';
 
     return `<tr>
@@ -10289,7 +10306,11 @@ function renderPresentations() {
         <div style="font-size:12px;color:rgba(247,243,237,0.3);margin-top:3px;">${p.source === 'agent' && p.agentSubmission ? `${esc(p.agentSubmission.agentName)}${p.agentSubmission.agentAgency ? ' · ' + esc(p.agentSubmission.agentAgency) : ''}` : p.price ? esc(p.price) : ''}${expiry}</div>
       </td>
       <td>${sourcedBy}</td>
-      <td>${reviewChip}${reviewActions ? '<div style="margin-top:6px;">' + reviewActions + '</div>' : ''}</td>
+      <td>
+        ${reviewChip}
+        ${p.reviewFeedback && rs === 'rejected' ? `<div style="margin-top:5px;font-size:11.5px;color:rgba(247,243,237,0.4);font-style:italic;max-width:220px;line-height:1.4;">${esc(p.reviewFeedback)}</div>` : ''}
+        ${reviewActions ? '<div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;">' + reviewActions + '</div>' : ''}
+      </td>
       <td>${clientCell}</td>
       <td><div class="actions">
         <button class="btn-sm btn-edit" onclick="openPresModal('${p.id}')">Edit</button>
@@ -10334,11 +10355,44 @@ async function adminSetReviewStatus(presId, status) {
   const res = await api('PUT', '/api/admin/presentations', { id: presId, action: 'set-review-status', reviewStatus: status });
   if (res.ok) {
     const pres = presentations.find(p => p.id === presId);
-    if (pres) pres.reviewStatus = status;
+    if (pres) { pres.reviewStatus = status; if (status !== 'rejected') pres.reviewFeedback = null; }
     renderPresentations();
-    showToast('Review status updated');
+    showToast(status === 'approved' ? 'Presentation approved' : 'Status updated');
   } else {
     showToast('Failed to update status', 'error');
+  }
+}
+
+let _rejectPresId = null;
+function adminRejectPresentation(presId) {
+  _rejectPresId = presId;
+  const pres = presentations.find(p => p.id === presId);
+  document.getElementById('pres-reject-address').textContent = pres?.address || '';
+  document.getElementById('pres-reject-feedback').value = pres?.reviewFeedback || '';
+  document.getElementById('pres-reject-err').style.display = 'none';
+  const overlay = document.getElementById('pres-reject-overlay');
+  overlay.style.display = 'flex';
+  setTimeout(() => document.getElementById('pres-reject-feedback').focus(), 50);
+}
+function closePresReject() {
+  document.getElementById('pres-reject-overlay').style.display = 'none';
+  _rejectPresId = null;
+}
+async function confirmPresReject() {
+  const feedback = document.getElementById('pres-reject-feedback').value.trim();
+  if (!feedback) { document.getElementById('pres-reject-err').style.display = 'block'; return; }
+  const btn = document.getElementById('pres-reject-btn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  const res = await api('PUT', '/api/admin/presentations', { id: _rejectPresId, action: 'reject', feedback });
+  btn.disabled = false; btn.textContent = 'Send rejection';
+  if (res.ok) {
+    const pres = presentations.find(p => p.id === _rejectPresId);
+    if (pres) { pres.reviewStatus = 'rejected'; pres.reviewFeedback = feedback; }
+    closePresReject();
+    renderPresentations();
+    showToast('Rejection sent to contractor');
+  } else {
+    showToast('Failed to send rejection', 'error');
   }
 }
 
