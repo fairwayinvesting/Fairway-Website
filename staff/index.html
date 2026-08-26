@@ -52,6 +52,7 @@
     <h1>Sign in</h1>
     <p class="sub">Enter your credentials to access the Fairway staff platform.</p>
 
+    <!-- Step 1: email + password -->
     <form id="form" novalidate>
       <div class="field">
         <label for="email">Email address</label>
@@ -70,6 +71,20 @@
       <button class="btn" type="submit" id="btn">Sign in</button>
       <div class="error" id="error"></div>
     </form>
+
+    <!-- Step 2: authenticator code (shown if account has MFA) -->
+    <div id="totp-form" style="display:none;">
+      <p style="font-size:14px;color:rgba(247,243,237,0.5);margin-bottom:24px;line-height:1.6;">Open your authenticator app and enter the 6-digit code for Fairway Investing.</p>
+      <div class="field">
+        <label for="totp-code">Authenticator code</label>
+        <input type="text" id="totp-code" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" placeholder="000000" maxlength="6" style="letter-spacing:0.25em;font-size:22px;text-align:center;">
+      </div>
+      <button class="btn" id="totp-btn" type="button">Verify</button>
+      <div class="error" id="totp-error"></div>
+      <p style="margin-top:14px;font-size:13px;text-align:center;">
+        <button type="button" style="background:none;border:none;font-family:'Outfit',sans-serif;font-size:13px;color:rgba(247,243,237,0.4);cursor:pointer;" id="totp-back-btn">← Back</button>
+      </p>
+    </div>
 
     <div class="reset-form" id="reset-form">
       <div class="field">
@@ -90,9 +105,13 @@
     fetch('/api/staff/me').then(r => { if (r.ok) window.location = '/staff/portal.html'; }).catch(() => {});
 
     const form     = document.getElementById('form');
+    const totpForm = document.getElementById('totp-form');
     const resetFrm = document.getElementById('reset-form');
     const errEl    = document.getElementById('error');
     const pwInput  = document.getElementById('password');
+
+    // Stored credentials for TOTP step
+    let _pendingEmail = '', _pendingPw = '';
 
     // Toggle password visibility
     document.getElementById('eye-btn').addEventListener('click', () => {
@@ -103,19 +122,31 @@
         : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
     });
 
-    // Login
+    // Login (step 1)
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById('btn');
       btn.disabled = true; btn.textContent = 'Signing in…';
       errEl.className = 'error';
+      const email = document.getElementById('email').value;
+      const password = pwInput.value;
       try {
         const r = await fetch('/api/staff/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: document.getElementById('email').value, password: pwInput.value }),
+          body: JSON.stringify({ email, password }),
         });
-        if (r.ok) {
+        if (r.status === 202) {
+          // TOTP required — move to step 2
+          _pendingEmail = email;
+          _pendingPw = password;
+          form.style.display = 'none';
+          totpForm.style.display = 'block';
+          document.getElementById('totp-code').value = '';
+          document.getElementById('totp-error').className = 'error';
+          setTimeout(() => document.getElementById('totp-code').focus(), 50);
+          btn.disabled = false; btn.textContent = 'Sign in';
+        } else if (r.ok) {
           window.location = '/staff/portal.html';
         } else {
           const d = await r.json().catch(() => ({}));
@@ -128,6 +159,49 @@
         errEl.className = 'error visible';
         btn.disabled = false; btn.textContent = 'Sign in';
       }
+    });
+
+    // TOTP verify (step 2)
+    document.getElementById('totp-btn').addEventListener('click', async () => {
+      const code = document.getElementById('totp-code').value.replace(/\s/g, '');
+      const totpBtn = document.getElementById('totp-btn');
+      const totpErr = document.getElementById('totp-error');
+      if (!code) { document.getElementById('totp-code').focus(); return; }
+      totpBtn.disabled = true; totpBtn.textContent = 'Verifying…';
+      totpErr.className = 'error';
+      try {
+        const r = await fetch('/api/staff/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: _pendingEmail, password: _pendingPw, code }),
+        });
+        if (r.ok) {
+          window.location = '/staff/portal.html';
+        } else {
+          const d = await r.json().catch(() => ({}));
+          totpErr.textContent = d.error || 'Invalid code. Try again.';
+          totpErr.className = 'error visible';
+          document.getElementById('totp-code').value = '';
+          document.getElementById('totp-code').focus();
+          totpBtn.disabled = false; totpBtn.textContent = 'Verify';
+        }
+      } catch {
+        totpErr.textContent = 'Network error. Please try again.';
+        totpErr.className = 'error visible';
+        totpBtn.disabled = false; totpBtn.textContent = 'Verify';
+      }
+    });
+
+    // Allow Enter key in TOTP code input
+    document.getElementById('totp-code').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('totp-btn').click();
+    });
+
+    // Back from TOTP step
+    document.getElementById('totp-back-btn').addEventListener('click', () => {
+      totpForm.style.display = 'none';
+      form.style.display = '';
+      _pendingEmail = ''; _pendingPw = '';
     });
 
     // Forgot password toggle

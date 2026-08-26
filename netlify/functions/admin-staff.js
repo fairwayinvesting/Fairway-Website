@@ -69,10 +69,11 @@ function buildInviteEmail(name, email, setupToken) {
 }
 
 function safeUser(u) {
-  const { passwordHash, passwordSalt, setupToken, setupTokenExpiry, ...rest } = u;
+  const { passwordHash, passwordSalt, setupToken, setupTokenExpiry, totpSecret, ...rest } = u;
   return {
     ...rest,
     pending: !!u.setupToken,
+    mfaEnabled: !!u.totpSecret,
   };
 }
 

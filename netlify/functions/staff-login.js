@@ -1,6 +1,28 @@
 import { getStore } from '@netlify/blobs';
 import crypto from 'crypto';
 
+function verifyTOTP(secret, token) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  let bits = '';
+  for (const c of secret.toUpperCase().replace(/\s+/g, '').replace(/=+$/, '')) {
+    const i = chars.indexOf(c);
+    if (i < 0) continue;
+    bits += i.toString(2).padStart(5, '0');
+  }
+  const key = Buffer.alloc(Math.floor(bits.length / 8));
+  for (let i = 0; i < key.length; i++) key[i] = parseInt(bits.slice(i * 8, i * 8 + 8), 2);
+  const now = Math.floor(Date.now() / 1000 / 30);
+  for (const d of [-1, 0, 1]) {
+    const buf = Buffer.alloc(8);
+    buf.writeBigUInt64BE(BigInt(now + d));
+    const hmac = crypto.createHmac('sha1', key).update(buf).digest();
+    const offset = hmac[hmac.length - 1] & 0x0f;
+    const otp = ((hmac.readUInt32BE(offset) & 0x7fffffff) % 1_000_000).toString().padStart(6, '0');
+    if (otp === String(token).padStart(6, '0')) return true;
+  }
+  return false;
+}
+
 async function verifyPassword(password, salt, hash) {
   return new Promise((resolve, reject) => {
     crypto.pbkdf2(password, salt, 100000, 32, 'sha256', (err, key) =>
@@ -48,7 +70,7 @@ export default async (req) => {
 
   let body;
   try { body = await req.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
-  const { email, password } = body;
+  const { email, password, code } = body;
   if (!email || !password) return json({ error: 'email and password required' }, 400);
 
   const emailNorm = email.toLowerCase().trim();
@@ -70,6 +92,15 @@ export default async (req) => {
 
   if (!user.active) return json({ error: 'Your account has been deactivated. Contact Luke.' }, 403);
   if (!user.passwordHash) return json({ error: 'Account not yet set up. Check your email for a setup link.' }, 403);
+
+  // TOTP check — if configured, require code
+  if (user.totpSecret) {
+    if (!code) return json({ step: 'totp' }, 202);
+    if (!verifyTOTP(user.totpSecret, code)) {
+      await recordFailure(rlStore, rlKey, rl.data, rl.now);
+      return json({ error: 'Invalid authenticator code. Try again.' }, 401);
+    }
+  }
 
   // Clear rate limit on success
   await rlStore.delete(rlKey).catch(() => {});

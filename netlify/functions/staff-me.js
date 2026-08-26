@@ -24,6 +24,7 @@ export default async (req) => {
       directoryAccess: user.directoryAccess || {},
       permissions: user.permissions || {},
       preview: payload.preview || false,
+      mfaEnabled: !!user.totpSecret,
     });
   } catch {
     return json({

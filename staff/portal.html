@@ -374,6 +374,10 @@
     </div>
     <nav id="nav"></nav>
     <div class="sb-footer">
+      <button class="nav-item" id="nav-security" onclick="showSection('security')" style="width:100%;margin-bottom:6px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Security
+      </button>
       <button class="sb-signout" id="signout-btn">Sign out</button>
     </div>
   </aside>
@@ -474,6 +478,23 @@
         <button class="sl-tab" onclick="setPresTab('killed',this)">Killed</button>
       </div>
       <div id="presentations-list"></div>
+    </div>
+
+    <!-- Security -->
+    <div class="section" id="sec-security">
+      <h1 class="page-title">Security</h1>
+      <p class="page-sub" style="margin-bottom:32px;">Manage your account security settings.</p>
+
+      <div class="card" style="max-width:520px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;">
+          <div>
+            <div style="font-size:15px;font-weight:500;color:#f7f3ed;margin-bottom:4px;">Two-factor authentication</div>
+            <div id="mfa-status-label" style="font-size:13px;color:rgba(247,243,237,0.4);">Loading…</div>
+          </div>
+          <div id="mfa-status-badge"></div>
+        </div>
+        <div id="mfa-setup-area"></div>
+      </div>
     </div>
 
     <!-- No access placeholder -->
@@ -1003,6 +1024,7 @@ function showSection(id) {
   if (nav) nav.classList.add('active');
   closeStaffSidebar();
   try { localStorage.setItem('fw_staff_section', id); } catch {}
+  if (id === 'security') loadSecurity();
 }
 
 // ── Clients ────────────────────────────────────────────────────────────────
@@ -2566,6 +2588,94 @@ function closeFullBrief() {
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFullBrief(); });
+
+// ── Security / MFA ──────────────────────────────────────────────────────────
+let _mfaSetupSecret = null;
+
+async function loadSecurity() {
+  try {
+    const r = await fetch('/api/staff/totp');
+    if (!r.ok) return;
+    const data = await r.json();
+    renderMfaStatus(data);
+  } catch {}
+}
+
+function renderMfaStatus(data) {
+  const label = document.getElementById('mfa-status-label');
+  const badge = document.getElementById('mfa-status-badge');
+  const area  = document.getElementById('mfa-setup-area');
+  if (!label || !badge || !area) return;
+
+  if (data.configured) {
+    label.textContent = 'Your account is protected with 2FA.';
+    badge.innerHTML = '<span style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;background:rgba(109,191,123,0.12);border:1px solid rgba(109,191,123,0.25);color:#6dbf7b;border-radius:100px;padding:4px 10px;">Enabled</span>';
+    area.innerHTML = `
+      <hr style="border:none;border-top:1px solid rgba(247,243,237,0.07);margin-bottom:20px;">
+      <p style="font-size:13px;color:rgba(247,243,237,0.45);margin-bottom:16px;line-height:1.55;">To disable 2FA, enter a code from your authenticator app to confirm.</p>
+      <div style="display:flex;gap:8px;align-items:flex-start;">
+        <input type="text" id="mfa-disable-code" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="000000" style="width:140px;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:8px;padding:9px 12px;font-family:'Outfit',sans-serif;font-size:16px;letter-spacing:0.2em;color:#f7f3ed;outline:none;text-align:center;">
+        <button class="btn-sm" style="color:#e07070;border-color:rgba(224,112,112,0.25);" onclick="disableMfa()">Disable 2FA</button>
+      </div>
+      <div id="mfa-disable-err" style="display:none;font-size:12px;color:#e07070;margin-top:8px;"></div>`;
+  } else {
+    _mfaSetupSecret = data.secret;
+    label.textContent = '2FA is not enabled on your account.';
+    badge.innerHTML = '<span style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;background:rgba(247,243,237,0.06);border:1px solid rgba(247,243,237,0.1);color:rgba(247,243,237,0.4);border-radius:100px;padding:4px 10px;">Not set up</span>';
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&color=F7F3ED&bgcolor=1e1c1a&data=${encodeURIComponent(data.uri)}`;
+    area.innerHTML = `
+      <hr style="border:none;border-top:1px solid rgba(247,243,237,0.07);margin-bottom:20px;">
+      <p style="font-size:13px;color:rgba(247,243,237,0.45);margin-bottom:20px;line-height:1.55;">Scan the QR code with Google Authenticator, Microsoft Authenticator, or Authy. Then enter the 6-digit code to confirm setup.</p>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;margin-bottom:20px;">
+        <img src="${qrUrl}" alt="QR code" width="140" height="140" style="border-radius:8px;flex-shrink:0;">
+        <div>
+          <p style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:6px;">Manual entry key</p>
+          <code style="font-size:13px;color:#f7f3ed;letter-spacing:0.12em;word-break:break-all;line-height:1.8;">${data.secret}</code>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;">
+        <input type="text" id="mfa-setup-code" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="000000" style="width:140px;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:8px;padding:9px 12px;font-family:'Outfit',sans-serif;font-size:16px;letter-spacing:0.2em;color:#f7f3ed;outline:none;text-align:center;">
+        <button class="btn-primary" style="font-size:13px;padding:10px 18px;" onclick="enableMfa()">Enable 2FA</button>
+      </div>
+      <div id="mfa-setup-err" style="display:none;font-size:12px;color:#e07070;margin-top:8px;"></div>`;
+  }
+}
+
+async function enableMfa() {
+  const code = document.getElementById('mfa-setup-code')?.value.replace(/\s/g, '');
+  const errEl = document.getElementById('mfa-setup-err');
+  if (!code || !_mfaSetupSecret) return;
+  errEl.style.display = 'none';
+  const r = await fetch('/api/staff/totp', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'enable', secret: _mfaSetupSecret, code }) });
+  const data = await r.json().catch(() => ({}));
+  if (r.ok) {
+    showToast('2FA enabled successfully');
+    loadSecurity();
+  } else {
+    errEl.textContent = data.error || 'Failed to enable 2FA.';
+    errEl.style.display = 'block';
+    document.getElementById('mfa-setup-code').value = '';
+    document.getElementById('mfa-setup-code').focus();
+  }
+}
+
+async function disableMfa() {
+  const code = document.getElementById('mfa-disable-code')?.value.replace(/\s/g, '');
+  const errEl = document.getElementById('mfa-disable-err');
+  if (!code) return;
+  errEl.style.display = 'none';
+  const r = await fetch('/api/staff/totp', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'disable', code }) });
+  const data = await r.json().catch(() => ({}));
+  if (r.ok) {
+    showToast('2FA disabled');
+    loadSecurity();
+  } else {
+    errEl.textContent = data.error || 'Failed to disable 2FA.';
+    errEl.style.display = 'block';
+    document.getElementById('mfa-disable-code').value = '';
+    document.getElementById('mfa-disable-code').focus();
+  }
+}
 </script>
 
 <div class="brief-overlay" id="brief-overlay">
