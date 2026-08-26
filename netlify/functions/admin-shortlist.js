@@ -11,7 +11,7 @@ const VALID_STATUSES = new Set(['shortlisted','researching','moved_to_presentati
 export default async (req) => {
   if (!(await checkAdmin(req))) return json({ error: 'Unauthorized' }, 401);
 
-  const store = getStore('fairway-shortlist');
+  const store = getStore({ name: 'fairway-shortlist', consistency: 'strong' });
   const all = (await store.get('all', { type: 'json' }).catch(() => null)) || [];
 
   if (req.method === 'GET') {

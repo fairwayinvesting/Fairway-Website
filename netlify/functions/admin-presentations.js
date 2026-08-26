@@ -11,9 +11,14 @@ const json = (data, status = 200) =>
 
 function genToken() { return crypto.randomBytes(20).toString('hex'); }
 
-const REVIEW_STATUSES = ['draft','ready_for_review','admin_reviewing','approved','allocated','sent','rejected'];
+const REVIEW_STATUSES = ['draft','ready_for_review','admin_reviewing','approved','allocated','sent','rejected','killed'];
 // Statuses that only admin can set (beyond ready_for_review)
-const ADMIN_ONLY_STATUSES = new Set(['admin_reviewing','approved','allocated','sent','rejected']);
+const ADMIN_ONLY_STATUSES = new Set(['admin_reviewing','approved','allocated','sent','rejected','killed']);
+
+const KILL_REASONS = new Set([
+  'Poor value','Building/pest issue','Strata issue','Location concern','Rental concern',
+  'Vendor expectations too high','Due diligence issue','Property sold','No longer available','Other',
+]);
 
 function buildPropertyEmail(clientName, address, suburb, price, propertyType, bedrooms, bathrooms, carspaces, link) {
   const firstName = clientName.split(' ')[0];
@@ -201,6 +206,19 @@ export default async (req) => {
       presentations[idx].reviewFeedback = body.feedback || '';
       await store.setJSON('all', presentations);
       appendAudit('review_status_changed', `"${presentations[idx].address}" → rejected`);
+      return json({ ok: true, pres: presentations[idx] });
+    }
+
+    // Admin-only: kill property with reason
+    if (action === 'kill') {
+      const reason = body.reason?.trim();
+      if (!reason || !KILL_REASONS.has(reason)) return json({ error: 'Valid kill reason required' }, 400);
+      presentations[idx].reviewStatus = 'killed';
+      presentations[idx].reviewStatusUpdatedAt = new Date().toISOString();
+      presentations[idx].killedReason = reason;
+      presentations[idx].killedAt = new Date().toISOString();
+      await store.setJSON('all', presentations);
+      appendAudit('presentation_killed', `"${presentations[idx].address}" killed — ${reason}`);
       return json({ ok: true, pres: presentations[idx] });
     }
 

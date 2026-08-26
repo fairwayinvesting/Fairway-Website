@@ -180,11 +180,12 @@ export default async (req) => {
 
     // Share action — email upcoming dates to specified recipients
     if (action === 'share') {
-      const { recipients, note, clientName } = body;
+      const { recipients, note, clientName, milestoneIds } = body;
       if (!recipients?.length) return json({ error: 'recipients required' }, 400);
 
       const clientMilestones = await getClientMilestones(msKey);
-      const upcoming = clientMilestones.filter(m => !m.completed);
+      const selectedSet = milestoneIds?.length ? new Set(milestoneIds) : null;
+      const upcoming = clientMilestones.filter(m => !m.completed && (!selectedSet || selectedSet.has(m.id)));
       if (!upcoming.length) return json({ error: 'No upcoming dates to share' }, 400);
 
       const toList = recipients.map(r => r.email).filter(Boolean);

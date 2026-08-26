@@ -233,6 +233,7 @@
     .pres-review-approved{background:rgba(109,191,123,0.1);border:1px solid rgba(109,191,123,0.25);color:#6dbf7b;}
     .pres-review-allocated{background:rgba(189,122,112,0.1);border:1px solid rgba(189,122,112,0.25);color:#cf9b92;}
     .pres-review-sent{background:rgba(247,243,237,0.07);border:1px solid rgba(247,243,237,0.15);color:rgba(247,243,237,0.6);}
+    .pres-review-killed{background:rgba(112,112,112,0.1);border:1px solid rgba(112,112,112,0.25);color:rgba(247,243,237,0.3);}
 
     /* Buttons */
     .btn-primary{display:inline-flex;align-items:center;gap:8px;background:#bd7a70;border:none;border-radius:10px;padding:12px 22px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;color:#f7f3ed;cursor:pointer;transition:background .2s;}
@@ -1204,6 +1205,34 @@
       </div>
     </div>
 
+    <!-- Kill property modal -->
+    <div id="pres-kill-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;align-items:center;justify-content:center;">
+      <div style="background:#1e1c1a;border:1px solid rgba(247,243,237,0.12);border-radius:16px;padding:28px 30px;max-width:460px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.6);">
+        <div style="font-size:17px;font-weight:500;color:#f7f3ed;margin-bottom:4px;">Kill property</div>
+        <div style="font-size:13px;color:rgba(247,243,237,0.45);margin-bottom:16px;" id="pres-kill-address"></div>
+        <p style="font-size:12px;color:rgba(247,243,237,0.35);margin-bottom:14px;line-height:1.5;">This property will be removed from active consideration and moved to the Killed list. The record and history are retained.</p>
+        <label style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.35);display:block;margin-bottom:6px;">Reason *</label>
+        <select id="pres-kill-reason" style="width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:8px;padding:10px 12px;font-family:'Outfit',sans-serif;font-size:13.5px;color:#f7f3ed;outline:none;">
+          <option value="">— Select a reason —</option>
+          <option>Poor value</option>
+          <option>Building/pest issue</option>
+          <option>Strata issue</option>
+          <option>Location concern</option>
+          <option>Rental concern</option>
+          <option>Vendor expectations too high</option>
+          <option>Due diligence issue</option>
+          <option>Property sold</option>
+          <option>No longer available</option>
+          <option>Other</option>
+        </select>
+        <div id="pres-kill-err" style="display:none;font-size:12px;color:#e07070;margin-top:6px;">Select a reason before killing this property.</div>
+        <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+          <button class="btn-sm" onclick="closePresKill()">Cancel</button>
+          <button class="btn-sm" id="pres-kill-btn" style="background:rgba(224,112,112,0.12);border-color:rgba(224,112,112,0.3);color:#e07070;" onclick="confirmPresKill()">Kill property</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Bin -->
     <div id="sec-bin" class="admin-section">
       <div class="sec-header">
@@ -1243,6 +1272,7 @@
           <button class="sl-tab" onclick="setPresReviewFilter('approved',this)">Approved</button>
           <button class="sl-tab" onclick="setPresReviewFilter('rejected',this)">Rejected</button>
           <button class="sl-tab" onclick="setPresReviewFilter('sent',this)">Sent</button>
+          <button class="sl-tab" onclick="setPresReviewFilter('killed',this)">Killed</button>
         </div>
       </div>
       <div class="table-wrap">
@@ -6353,13 +6383,25 @@ function openShareModal(clientId) {
   }
 
   document.getElementById('share-client-id').value = clientId;
-  document.getElementById('share-client-label').textContent =
-    `Sending ${upcoming.length} upcoming date${upcoming.length !== 1 ? 's' : ''} for ${client.name}`;
+  document.getElementById('share-client-label').textContent = `Select which dates to include for ${client.name}`;
 
-  // Preview of dates being sent
+  // Dates with checkboxes — all checked by default
   const fmt = d => new Date(d).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
   document.getElementById('share-dates-preview').innerHTML =
-    upcoming.map(m => `<div class="share-date-item"><span class="share-date-label">${esc(m.label)}</span><span class="share-date-val">${fmt(m.date)}</span></div>`).join('');
+    upcoming.map(m => `<label class="share-date-item" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+      <input type="checkbox" data-ms-id="${m.id}" checked style="accent-color:#bd7a70;width:14px;height:14px;flex-shrink:0;">
+      <span class="share-date-label" style="flex:1;">${esc(m.label)}</span>
+      <span class="share-date-val">${fmt(m.date)}</span>
+    </label>`).join('');
+
+  // Update send button label when checkboxes change
+  function _updateShareCount() {
+    const checked = document.querySelectorAll('#share-dates-preview input[type=checkbox]:checked').length;
+    document.getElementById('share-send-btn').textContent = checked ? `Send ${checked} date${checked !== 1 ? 's' : ''}` : 'Send email';
+    document.getElementById('share-send-btn').disabled = !checked;
+  }
+  document.querySelectorAll('#share-dates-preview input[type=checkbox]').forEach(cb => cb.addEventListener('change', _updateShareCount));
+  _updateShareCount();
 
   // Pre-populate with client's email
   const recipientsEl = document.getElementById('share-recipients');
@@ -6411,8 +6453,17 @@ async function sendShareDates() {
     email: r.querySelectorAll('input')[1].value.trim(),
   })).filter(r => r.email);
 
+  const selectedIds = [...document.querySelectorAll('#share-dates-preview input[type=checkbox]:checked')].map(cb => cb.dataset.msId);
+
   if (!recipients.length) {
     statusEl.textContent = 'Add at least one recipient email.';
+    statusEl.style.color = '#e07070';
+    statusEl.style.display = 'block';
+    return;
+  }
+
+  if (!selectedIds.length) {
+    statusEl.textContent = 'Select at least one date to include.';
     statusEl.style.color = '#e07070';
     statusEl.style.display = 'block';
     return;
@@ -6427,6 +6478,7 @@ async function sendShareDates() {
     action: 'share',
     clientName: client?.name || '',
     recipients,
+    milestoneIds: selectedIds,
     note: note || null,
   });
 
@@ -6439,7 +6491,7 @@ async function sendShareDates() {
   } else {
     const err = await res.json().catch(() => ({}));
     btn.disabled = false;
-    btn.textContent = 'Send email';
+    btn.textContent = `Send ${selectedIds.length} date${selectedIds.length !== 1 ? 's' : ''}`;
     statusEl.textContent = err.error || 'Failed to send. Try again.';
     statusEl.style.color = '#e07070';
     statusEl.style.display = 'block';
@@ -10226,7 +10278,7 @@ function renderPresentations() {
   const tbody = document.getElementById('pres-tbody');
   const REVIEW_LABELS = {
     draft:'Draft', ready_for_review:'Pending Review', admin_reviewing:'Reviewing',
-    approved:'Approved', allocated:'Allocated', sent:'Sent', rejected:'Changes Requested',
+    approved:'Approved', allocated:'Allocated', sent:'Sent', rejected:'Changes Requested', killed:'Killed',
   };
   // Update badge for ready_for_review
   const reviewBadge = document.getElementById('pres-review-badge');
@@ -10293,6 +10345,7 @@ function renderPresentations() {
     const notifyLabel = unrevoked.some(cid => !sentList.includes(cid)) ? '✉ Notify' : '✉ Re-notify';
 
     // Admin review status actions
+    const isKilled = rs === 'killed';
     const reviewActions = (rs === 'ready_for_review' || rs === 'admin_reviewing')
       ? `<button class="btn-sm" onclick="adminSetReviewStatus('${p.id}','approved')" style="background:rgba(109,191,123,0.12);color:#6dbf7b;border-color:rgba(109,191,123,0.25);font-size:11.5px;">✓ Approve</button>
          <button class="btn-sm" onclick="adminRejectPresentation('${p.id}')" style="background:rgba(224,112,112,0.08);color:rgba(224,112,112,0.8);border-color:rgba(224,112,112,0.2);font-size:11.5px;">✗ Reject</button>`
@@ -10309,13 +10362,15 @@ function renderPresentations() {
       <td>
         ${reviewChip}
         ${p.reviewFeedback && rs === 'rejected' ? `<div style="margin-top:5px;font-size:11.5px;color:rgba(247,243,237,0.4);font-style:italic;max-width:220px;line-height:1.4;">${esc(p.reviewFeedback)}</div>` : ''}
+        ${isKilled && p.killedReason ? `<div style="margin-top:5px;font-size:11.5px;color:rgba(247,243,237,0.35);max-width:220px;">${esc(p.killedReason)}</div>` : ''}
         ${reviewActions ? '<div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;">' + reviewActions + '</div>' : ''}
       </td>
       <td>${clientCell}</td>
       <td><div class="actions">
-        <button class="btn-sm btn-edit" onclick="openPresModal('${p.id}')">Edit</button>
+        <button class="btn-sm btn-edit" onclick="openPresModal('${p.id}')">${isKilled ? 'View' : 'Edit'}</button>
         <button class="btn-sm btn-edit" onclick="previewPresentation('${p.id}')">Preview</button>
-        ${unrevoked.length ? `<button class="btn-sm btn-notify" onclick="notifyPresentation('${p.id}')">${notifyLabel}</button>` : ''}
+        ${!isKilled && unrevoked.length ? `<button class="btn-sm btn-notify" onclick="notifyPresentation('${p.id}')">${notifyLabel}</button>` : ''}
+        ${!isKilled ? `<button class="btn-sm" onclick="adminKillPresentation('${p.id}')" style="background:rgba(112,112,112,0.08);color:rgba(247,243,237,0.4);border-color:rgba(112,112,112,0.2);font-size:11.5px;">Kill</button>` : ''}
         <button class="btn-sm btn-delete" onclick="deletePresentation('${p.id}')">Delete</button>
       </div></td>
     </tr>`;
@@ -10393,6 +10448,38 @@ async function confirmPresReject() {
     showToast('Rejection sent to contractor');
   } else {
     showToast('Failed to send rejection', 'error');
+  }
+}
+
+// ── Kill presentation ─────────────────────────────────────────────────────────
+let _killPresId = null;
+function adminKillPresentation(presId) {
+  _killPresId = presId;
+  const pres = presentations.find(p => p.id === presId);
+  document.getElementById('pres-kill-address').textContent = pres?.address || '';
+  document.getElementById('pres-kill-reason').value = '';
+  document.getElementById('pres-kill-err').style.display = 'none';
+  document.getElementById('pres-kill-overlay').style.display = 'flex';
+}
+function closePresKill() {
+  document.getElementById('pres-kill-overlay').style.display = 'none';
+  _killPresId = null;
+}
+async function confirmPresKill() {
+  const reason = document.getElementById('pres-kill-reason').value;
+  if (!reason) { document.getElementById('pres-kill-err').style.display = 'block'; return; }
+  const btn = document.getElementById('pres-kill-btn');
+  btn.disabled = true; btn.textContent = 'Killing…';
+  const res = await api('PUT', '/api/admin/presentations', { id: _killPresId, action: 'kill', reason });
+  btn.disabled = false; btn.textContent = 'Kill property';
+  if (res.ok) {
+    const pres = presentations.find(p => p.id === _killPresId);
+    if (pres) { pres.reviewStatus = 'killed'; pres.killedReason = reason; pres.killedAt = new Date().toISOString(); }
+    closePresKill();
+    renderPresentations();
+    showToast('Property killed and moved to Killed list');
+  } else {
+    showToast('Failed to kill property', 'error');
   }
 }
 
