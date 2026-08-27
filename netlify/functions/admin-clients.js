@@ -172,7 +172,8 @@ export default async (req) => {
   const clients = (await store.get('all', { type: 'json' })) || [];
 
   if (req.method === 'GET') {
-    return json(clients.filter(c => !c.deleted).map(({ id, name, email, markets, active, createdAt, setupToken, pipelineStage, pipelineStageUpdatedAt, status, engagementNumber, referralSource, referrerId, crmContactId, acquisitions, customFields, welcomeEmailSentAt, welcomeEmailFailed, dealProfessionals, manualFee, manualFees, manualFeeDeleteLog, portalAccess }) => {
+    return json(clients.map(({ id, name, email, markets, active, deleted, createdAt, setupToken, pipelineStage, pipelineStageUpdatedAt, status, engagementNumber, referralSource, referrerId, crmContactId, acquisitions, customFields, welcomeEmailSentAt, welcomeEmailFailed, dealProfessionals, manualFee, manualFees, manualFeeDeleteLog, portalAccess }) => {
+      if (deleted) return { id, name, deleted: true };
       // Migrate legacy single manualFee → manualFees array on read
       const resolvedFees = manualFees?.length ? manualFees
         : (manualFee?.totalFee ? [{ id: 'fee-1', label: 'Acquisition 1', totalFee: manualFee.totalFee, notes: manualFee.notes || '', payments: manualFee.payments || [], createdAt: '' }] : []);
