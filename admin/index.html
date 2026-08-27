@@ -10270,6 +10270,7 @@ function renderShortlist() {
       ${item.bankValuation ? `<div style="font-size:12px;color:rgba(109,191,123,0.8);margin-top:3px;">Bank val: ${esc(item.bankValuation)}${item.bankLender ? ` <span style="color:rgba(247,243,237,0.3);">· ${esc(item.bankLender)}</span>` : ''}</div>` : ''}
       ${specs ? `<div class="sl-card-specs">${esc(specs)}</div>` : ''}
       ${item.notes ? `<div style="font-size:12px;color:rgba(247,243,237,0.35);margin-top:4px;line-height:1.5;">${esc(item.notes)}</div>` : ''}
+      ${item.links?.length ? `<div style="margin-top:6px;">${item.links.map(l => `<a href="${esc(l)}" target="_blank" rel="noopener" style="display:block;font-size:11.5px;color:rgba(181,113,90,0.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;" title="${esc(l)}">${esc(l)}</a>`).join('')}</div>` : ''}
       ${agentLine}
       <div class="sl-card-actions">
         <button onclick="openSlViewPanel('${item.id}')" class="btn-sm" style="font-size:12px;">View</button>
@@ -10470,6 +10471,10 @@ function openSlViewPanel(id) {
     ${item.notes ? `<div class="profile-section">
       <div class="profile-section-title">Notes</div>
       <p style="font-size:13.5px;color:rgba(247,243,237,0.6);line-height:1.65;white-space:pre-wrap;margin:0;">${esc(item.notes)}</p>
+    </div>` : ''}
+    ${item.links?.length ? `<div class="profile-section">
+      <div class="profile-section-title">Listing links</div>
+      ${item.links.map(l => `<a href="${esc(l)}" target="_blank" rel="noopener" style="display:block;font-size:13px;color:rgba(181,113,90,0.8);margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(l)}</a>`).join('')}
     </div>` : ''}
     ${(item.history||[]).length ? `<div class="profile-section">
       <div class="profile-section-title">History</div>

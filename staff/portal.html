@@ -741,8 +741,8 @@
               </div>
             </div>
             <div class="pfield"><label>Notes <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">(optional)</span></label><textarea id="demo-notes" style="min-height:70px;" placeholder="Any context on the area demographics…"></textarea></div>
-            <div class="pfield"><label>Demographics screenshot URL</label>
-              <input type="url" id="demo-image" class="pres-media-input" placeholder="Paste URL" style="width:100%;" oninput="updateDemoPreview(this.value)">
+            <div class="pfield"><label>Demographics screenshot</label>
+              <div style="display:flex;gap:8px;"><button class="btn-upload" onclick="triggerSectionUpload('demo')">↑ Upload screenshot</button><input type="url" id="demo-image" class="pres-media-input" placeholder="or paste URL" style="flex:1;" oninput="updateDemoPreview(this.value)"></div>
               <img id="demo-image-preview" style="display:none;margin-top:10px;max-height:120px;border-radius:8px;">
             </div>
           </div>
@@ -891,6 +891,7 @@
   </div>
 </div>
 <input type="file" id="dir-file-input" style="display:none;" onchange="uploadDirFile(this)">
+<input type="file" id="pres-file-input" style="display:none;" accept="image/*" onchange="handlePresFileUpload(this)">
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
@@ -1998,7 +1999,7 @@ async function saveSlItem() {
 }
 
 // ── Presentations ──────────────────────────────────────────────────────────
-let _presImages = [], _presVideos = [], _presSections = [], _presSales = [], _presRentals = [], _presRiskItems = [];
+let _presImages = [], _presVideos = [], _presSections = [], _presSales = [], _presRentals = [], _presRiskItems = [], _uploadTarget = null;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
 
@@ -2129,6 +2130,55 @@ function updateDemoPreview(url) {
   img.src = url; img.style.display = url ? 'block' : 'none';
 }
 
+function triggerSectionUpload(key) {
+  _uploadTarget = key;
+  document.getElementById('pres-file-input').click();
+}
+
+function compressImage(file, maxPx = 1800, quality = 0.85) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = ev => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxPx || height > maxPx) {
+          if (width >= height) { height = Math.round(height * maxPx / width); width = maxPx; }
+          else { width = Math.round(width * maxPx / height); height = maxPx; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handlePresFileUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const dataUrl = await compressImage(file).catch(() => null);
+  if (!dataUrl) { showToast('Could not process image', 'error'); input.value = ''; return; }
+  const r = await fetch('/api/staff/media-upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dataUrl, mimeType: 'image/jpeg' }) });
+  const data = await r.json().catch(() => ({}));
+  if (!data.url) { showToast('Upload failed', 'error'); input.value = ''; return; }
+  const url = data.url;
+  if (typeof _uploadTarget === 'string' && _uploadTarget.startsWith('risk-item-')) {
+    const idx = parseInt(_uploadTarget.replace('risk-item-', ''), 10);
+    if (_presRiskItems[idx]) { _presRiskItems[idx].imageUrl = url; renderRiskItems(); }
+  } else if (_uploadTarget === 'demo') {
+    document.getElementById('demo-image').value = url;
+    const prev = document.getElementById('demo-image-preview'); prev.src = url; prev.style.display = 'block';
+  }
+  _uploadTarget = null;
+  input.value = '';
+}
+
 function renderRiskItems() {
   const list = document.getElementById('risk-rows-list');
   if (!list) return;
@@ -2154,7 +2204,8 @@ function renderRiskItems() {
       </div>
       <div class="risk-row-body">
         <div style="display:flex;gap:8px;margin-bottom:8px;">
-          <input type="url" class="pres-media-input" placeholder="Paste screenshot URL" value="${esc(item.imageUrl||'')}" oninput="_presRiskItems[${idx}].imageUrl=this.value;updateRiskPreview(${idx},this.value)" style="flex:1;">
+          <button class="btn-upload" onclick="triggerSectionUpload('risk-item-${idx}')">↑ Upload</button>
+          <input type="url" class="pres-media-input" placeholder="or paste screenshot URL" value="${esc(item.imageUrl||'')}" oninput="_presRiskItems[${idx}].imageUrl=this.value;updateRiskPreview(${idx},this.value)" style="flex:1;">
         </div>
         ${item.imageUrl ? `<img src="${esc(item.imageUrl)}" id="risk-item-preview-${idx}" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;border:1px solid rgba(247,243,237,0.07);margin-bottom:8px;">` : `<img id="risk-item-preview-${idx}" style="display:none;width:100%;max-height:160px;object-fit:cover;border-radius:8px;border:1px solid rgba(247,243,237,0.07);margin-bottom:8px;">`}
         <textarea class="pres-media-input" placeholder="Notes for this risk (optional)…" rows="2" style="width:100%;resize:vertical;" oninput="_presRiskItems[${idx}].notes=this.value">${esc(item.notes||'')}</textarea>
