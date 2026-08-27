@@ -2,7 +2,7 @@ import { getStore } from '@netlify/blobs';
 import crypto from 'crypto';
 import { Resend } from 'resend';
 import { appendAudit } from './_audit.js';
-import { checkAdmin } from './_admin-auth.js';
+import { checkAdmin, getAdminActor } from './_admin-auth.js';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -66,6 +66,121 @@ function buildPropertyEmail(clientName, address, suburb, price, propertyType, be
 </table></td></tr></table></body></html>`;
 }
 
+function buildApprovalEmail(contractorName, address, suburb) {
+  const firstName = contractorName.split(' ')[0];
+  const location = suburb ? `${address}, ${suburb}` : address;
+  return `<!DOCTYPE html><html lang="en" style="background:#181614;"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Presentation approved</title>
+<style>@media only screen and (max-width:600px){.ew{padding:32px 22px!important;border-radius:14px!important;}}</style>
+</head>
+<body style="margin:0;padding:0;background:#181614;font-family:Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#181614"><tr><td align="center" style="padding:40px 16px;">
+<table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;">
+  <tr><td class="ew" style="background:#1C1815;border-radius:20px;border:1px solid rgba(181,113,90,0.2);padding:44px 48px;">
+    <p style="margin:0 0 36px;padding-bottom:32px;border-bottom:1px solid rgba(250,246,241,0.08);text-align:center;">
+      <img src="https://fairwayinvesting.com.au/logo-icon.png" width="28" height="28" alt="" style="display:inline-block;border:0;vertical-align:middle;margin-right:10px;">
+      <img src="https://fairwayinvesting.com.au/logo-word.png" width="160" height="24" alt="Fairway Investing" style="display:inline-block;border:0;vertical-align:middle;max-width:160px;">
+    </p>
+    <p style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#B5715A;margin:0 0 16px;">Staff portal</p>
+    <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;color:#FAF6F1;margin:0 0 16px;line-height:1.25;">Good work, ${firstName}.</h1>
+    <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 28px;line-height:1.65;">Your presentation has been reviewed and approved. I'll take it from here — it's ready to be sent to clients.</p>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:rgba(109,191,123,0.06);border:1px solid rgba(109,191,123,0.2);border-radius:12px;margin:0 0 32px;">
+      <tr><td style="padding:22px 26px;">
+        <p style="font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#6dbf7b;margin:0 0 10px;">Approved</p>
+        <p style="font-size:18px;color:#FAF6F1;margin:0;line-height:1.3;">${location}</p>
+      </td></tr>
+    </table>
+    <table cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="border-radius:100px;background:#B5715A;">
+        <a href="https://fairwayinvesting.com.au/staff/portal.html" style="display:inline-block;font-size:15px;font-weight:500;color:#FAF6F1;text-decoration:none;padding:14px 32px;">View in portal &rarr;</a>
+      </td>
+    </tr></table>
+  </td></tr>
+  <tr><td style="padding:24px 0 0;text-align:center;">
+    <p style="font-size:12px;color:rgba(250,246,241,0.25);margin:0;line-height:1.7;">Fairway Investing &middot; <a href="mailto:luke@fairwayinvesting.com.au" style="color:#B5715A;text-decoration:none;">luke@fairwayinvesting.com.au</a> &middot; 0416 184 333</p>
+  </td></tr>
+</table>
+</td></tr></table></body></html>`;
+}
+
+function buildRejectionEmail(contractorName, address, suburb, feedback) {
+  const firstName = contractorName.split(' ')[0];
+  const location = suburb ? `${address}, ${suburb}` : address;
+  const feedbackHtml = feedback
+    ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:rgba(232,168,124,0.06);border:1px solid rgba(232,168,124,0.2);border-radius:12px;margin:0 0 32px;"><tr><td style="padding:22px 26px;"><p style="font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#e8a87c;margin:0 0 10px;">Feedback</p><p style="font-size:15px;color:rgba(250,246,241,0.75);margin:0;line-height:1.65;white-space:pre-wrap;">${feedback.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p></td></tr></table>`
+    : '';
+  return `<!DOCTYPE html><html lang="en" style="background:#181614;"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Revisions needed</title>
+<style>@media only screen and (max-width:600px){.ew{padding:32px 22px!important;border-radius:14px!important;}}</style>
+</head>
+<body style="margin:0;padding:0;background:#181614;font-family:Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#181614"><tr><td align="center" style="padding:40px 16px;">
+<table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;">
+  <tr><td class="ew" style="background:#1C1815;border-radius:20px;border:1px solid rgba(181,113,90,0.2);padding:44px 48px;">
+    <p style="margin:0 0 36px;padding-bottom:32px;border-bottom:1px solid rgba(250,246,241,0.08);text-align:center;">
+      <img src="https://fairwayinvesting.com.au/logo-icon.png" width="28" height="28" alt="" style="display:inline-block;border:0;vertical-align:middle;margin-right:10px;">
+      <img src="https://fairwayinvesting.com.au/logo-word.png" width="160" height="24" alt="Fairway Investing" style="display:inline-block;border:0;vertical-align:middle;max-width:160px;">
+    </p>
+    <p style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#B5715A;margin:0 0 16px;">Staff portal</p>
+    <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;color:#FAF6F1;margin:0 0 16px;line-height:1.25;">${firstName}, a few revisions needed.</h1>
+    <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 28px;line-height:1.65;">I've reviewed your presentation on <strong style="color:rgba(250,246,241,0.85);">${location}</strong> and have some notes. Log in to make the changes and resubmit when you're ready.</p>
+    ${feedbackHtml}
+    <table cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="border-radius:100px;background:#B5715A;">
+        <a href="https://fairwayinvesting.com.au/staff/portal.html" style="display:inline-block;font-size:15px;font-weight:500;color:#FAF6F1;text-decoration:none;padding:14px 32px;">Edit &amp; resubmit &rarr;</a>
+      </td>
+    </tr></table>
+    <p style="font-size:13px;color:rgba(250,246,241,0.35);margin:20px 0 0;line-height:1.6;">Any questions — reply to this email or call <a href="tel:0416184333" style="color:rgba(250,246,241,0.4);text-decoration:none;">0416 184 333</a>.</p>
+  </td></tr>
+  <tr><td style="padding:24px 0 0;text-align:center;">
+    <p style="font-size:12px;color:rgba(250,246,241,0.25);margin:0;line-height:1.7;">Fairway Investing &middot; <a href="mailto:luke@fairwayinvesting.com.au" style="color:#B5715A;text-decoration:none;">luke@fairwayinvesting.com.au</a> &middot; 0416 184 333</p>
+  </td></tr>
+</table>
+</td></tr></table></body></html>`;
+}
+
+function buildKillEmail(contractorName, address, suburb, reason) {
+  const firstName = contractorName.split(' ')[0];
+  const location = suburb ? `${address}, ${suburb}` : address;
+  return `<!DOCTYPE html><html lang="en" style="background:#181614;"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Property removed from pipeline</title>
+<style>@media only screen and (max-width:600px){.ew{padding:32px 22px!important;border-radius:14px!important;}}</style>
+</head>
+<body style="margin:0;padding:0;background:#181614;font-family:Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#181614"><tr><td align="center" style="padding:40px 16px;">
+<table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;">
+  <tr><td class="ew" style="background:#1C1815;border-radius:20px;border:1px solid rgba(181,113,90,0.2);padding:44px 48px;">
+    <p style="margin:0 0 36px;padding-bottom:32px;border-bottom:1px solid rgba(250,246,241,0.08);text-align:center;">
+      <img src="https://fairwayinvesting.com.au/logo-icon.png" width="28" height="28" alt="" style="display:inline-block;border:0;vertical-align:middle;margin-right:10px;">
+      <img src="https://fairwayinvesting.com.au/logo-word.png" width="160" height="24" alt="Fairway Investing" style="display:inline-block;border:0;vertical-align:middle;max-width:160px;">
+    </p>
+    <p style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#B5715A;margin:0 0 16px;">Staff portal</p>
+    <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;color:#FAF6F1;margin:0 0 16px;line-height:1.25;">Property removed from the pipeline.</h1>
+    <p style="font-size:16px;color:rgba(250,246,241,0.6);margin:0 0 28px;line-height:1.65;">Hi ${firstName}, the following property has been removed. No further action is needed from you.</p>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:rgba(250,246,241,0.03);border:1px solid rgba(250,246,241,0.08);border-radius:12px;margin:0 0 28px;">
+      <tr><td style="padding:22px 26px;">
+        <p style="font-size:18px;color:rgba(250,246,241,0.6);margin:0 0 14px;line-height:1.3;">${location}</p>
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid rgba(250,246,241,0.07);"><tr><td style="padding:14px 0 0;">
+          <span style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(250,246,241,0.3);">Reason</span>
+          <span style="font-size:13px;color:rgba(250,246,241,0.5);margin-left:12px;">${reason.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
+        </td></tr></table>
+      </td></tr>
+    </table>
+    <p style="font-size:13px;color:rgba(250,246,241,0.35);margin:0;line-height:1.6;">Questions? Reply to this email or call <a href="tel:0416184333" style="color:rgba(250,246,241,0.4);text-decoration:none;">0416 184 333</a>.</p>
+  </td></tr>
+  <tr><td style="padding:24px 0 0;text-align:center;">
+    <p style="font-size:12px;color:rgba(250,246,241,0.25);margin:0;line-height:1.7;">Fairway Investing &middot; <a href="mailto:luke@fairwayinvesting.com.au" style="color:#B5715A;text-decoration:none;">luke@fairwayinvesting.com.au</a> &middot; 0416 184 333</p>
+  </td></tr>
+</table>
+</td></tr></table></body></html>`;
+}
+
+async function getContractorDetails(sourcedById) {
+  try {
+    const staffStore = getStore({ name: 'fairway-staff', consistency: 'strong' });
+    const staffAll = (await staffStore.get('all', { type: 'json' }).catch(() => null)) || [];
+    const user = staffAll.find(u => u.id === sourcedById && !u.deletedAt);
+    return user ? { email: user.email, name: user.name } : null;
+  } catch { return null; }
+}
+
 function defaultPres(fields) {
   return {
     id: crypto.randomUUID(),
@@ -103,6 +218,7 @@ function defaultPres(fields) {
     reviewStatusUpdatedAt: new Date().toISOString(),
     // Contractor nominations
     suitableClients: [],
+    history: [],
     createdAt: new Date().toISOString(),
     ...fields,
   };
@@ -157,6 +273,8 @@ export default async (req) => {
   if (req.method === 'POST') {
     const body = await req.json().catch(() => ({}));
     if (!body.address) return json({ error: 'address required' }, 400);
+    const postActor = await getAdminActor(req);
+    const postActorName = postActor === 'secondary' ? 'Admin (secondary)' : 'Luke';
     const tokens = {};
     const initViews = {};
     (body.assignedClients || []).forEach(cid => {
@@ -164,6 +282,7 @@ export default async (req) => {
       initViews[cid] = { firstViewedAt: null, viewCount: 0 };
     });
     const pres = defaultPres({ ...body, tokens, sentClients: [], revokedClients: [] });
+    pres.history = [{ at: pres.createdAt, by: postActorName, byId: 'admin', byRole: 'admin', action: 'created' }];
     presentations.push(pres);
     await Promise.all([
       store.setJSON('all', presentations),
@@ -177,6 +296,13 @@ export default async (req) => {
     const body = await req.json().catch(() => ({}));
     const { id, action } = body;
     if (!id) return json({ error: 'id required' }, 400);
+
+    const putActor = await getAdminActor(req);
+    const putActorName = putActor === 'secondary' ? 'Admin (secondary)' : 'Luke';
+    const histPush = (idx, entry) => {
+      if (!Array.isArray(presentations[idx].history)) presentations[idx].history = [];
+      presentations[idx].history.push({ at: new Date().toISOString(), by: putActorName, byId: 'admin', byRole: 'admin', ...entry });
+    };
 
     if (action === 'preview') {
       const sig = crypto.createHmac('sha256', process.env.ADMIN_PASSWORD || 'fp-preview')
@@ -194,8 +320,22 @@ export default async (req) => {
       presentations[idx].reviewStatus = reviewStatus;
       presentations[idx].reviewStatusUpdatedAt = new Date().toISOString();
       if (reviewStatus !== 'rejected') presentations[idx].reviewFeedback = null;
+      histPush(idx, { action: 'review_status_changed', detail: reviewStatus });
       await store.setJSON('all', presentations);
       appendAudit('review_status_changed', `"${presentations[idx].address}" → ${reviewStatus}`);
+      // Email contractor on approval
+      if (reviewStatus === 'approved' && presentations[idx].sourcedByRole === 'contractor') {
+        const contractor = await getContractorDetails(presentations[idx].sourcedById);
+        if (contractor?.email) {
+          resend.emails.send({
+            from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
+            to: [contractor.email],
+            reply_to: 'luke@fairwayinvesting.com.au',
+            subject: `Approved — ${presentations[idx].address}`,
+            html: buildApprovalEmail(contractor.name, presentations[idx].address, presentations[idx].suburb || ''),
+          }).catch(err => console.error('Approval email failed:', err?.message));
+        }
+      }
       return json({ ok: true, pres: presentations[idx] });
     }
 
@@ -204,8 +344,22 @@ export default async (req) => {
       presentations[idx].reviewStatus = 'rejected';
       presentations[idx].reviewStatusUpdatedAt = new Date().toISOString();
       presentations[idx].reviewFeedback = body.feedback || '';
+      histPush(idx, { action: 'rejected', detail: body.feedback || '' });
       await store.setJSON('all', presentations);
       appendAudit('review_status_changed', `"${presentations[idx].address}" → rejected`);
+      // Email contractor with feedback
+      if (presentations[idx].sourcedByRole === 'contractor') {
+        const contractor = await getContractorDetails(presentations[idx].sourcedById);
+        if (contractor?.email) {
+          resend.emails.send({
+            from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
+            to: [contractor.email],
+            reply_to: 'luke@fairwayinvesting.com.au',
+            subject: `Revisions needed — ${presentations[idx].address}`,
+            html: buildRejectionEmail(contractor.name, presentations[idx].address, presentations[idx].suburb || '', body.feedback || ''),
+          }).catch(err => console.error('Rejection email failed:', err?.message));
+        }
+      }
       return json({ ok: true, pres: presentations[idx] });
     }
 
@@ -217,8 +371,22 @@ export default async (req) => {
       presentations[idx].reviewStatusUpdatedAt = new Date().toISOString();
       presentations[idx].killedReason = reason;
       presentations[idx].killedAt = new Date().toISOString();
+      histPush(idx, { action: 'killed', detail: reason });
       await store.setJSON('all', presentations);
       appendAudit('presentation_killed', `"${presentations[idx].address}" killed — ${reason}`);
+      // Email contractor about removal
+      if (presentations[idx].sourcedByRole === 'contractor') {
+        const contractor = await getContractorDetails(presentations[idx].sourcedById);
+        if (contractor?.email) {
+          resend.emails.send({
+            from: 'Luke at Fairway <info@fairwayinvesting.com.au>',
+            to: [contractor.email],
+            reply_to: 'luke@fairwayinvesting.com.au',
+            subject: `Property removed — ${presentations[idx].address}`,
+            html: buildKillEmail(contractor.name, presentations[idx].address, presentations[idx].suburb || '', reason),
+          }).catch(err => console.error('Kill email failed:', err?.message));
+        }
+      }
       return json({ ok: true, pres: presentations[idx] });
     }
 
@@ -307,6 +475,7 @@ export default async (req) => {
         presentations[idx].reviewStatus = 'sent';
         presentations[idx].reviewStatusUpdatedAt = new Date().toISOString();
       }
+      if (sent > 0) histPush(idx, { action: 'sent', detail: `${sent} client${sent !== 1 ? 's' : ''}` });
       presentations[idx] = pres;
       if (tokensDirty || sent > 0) await store.setJSON('all', presentations);
       if (sent > 0) appendAudit('presentation_sent', `Sent "${pres.address}" to ${sent} client${sent !== 1 ? 's' : ''}`);
@@ -352,6 +521,12 @@ export default async (req) => {
       }
     }
 
+    if (!Array.isArray(pres.history)) pres.history = [];
+    if (body.assignedClients !== undefined) {
+      pres.history.push({ at: new Date().toISOString(), by: putActorName, byId: 'admin', byRole: 'admin', action: 'clients_assigned' });
+    } else {
+      pres.history.push({ at: new Date().toISOString(), by: putActorName, byId: 'admin', byRole: 'admin', action: 'updated' });
+    }
     presentations[idx] = pres;
     await Promise.all([
       store.setJSON('all', presentations),

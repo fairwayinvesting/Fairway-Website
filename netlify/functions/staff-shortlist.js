@@ -49,6 +49,8 @@ export default async (req) => {
       links:        Array.isArray(body.links) ? body.links : [],
       source:       body.source              || 'own',
       notes:        body.notes?.trim()       || '',
+      bankValuation: body.bankValuation?.trim() || '',
+      bankLender:    body.bankLender?.trim()    || '',
       clientId:     body.clientId            || null,
       clientName:   body.clientName?.trim()  || '',
       status:       'shortlisted',
@@ -56,6 +58,7 @@ export default async (req) => {
       sourcedById:   payload.userId,
       sourcedByName: payload.name,
       sourcedByRole: 'contractor',
+      history:     [{ at: new Date().toISOString(), by: payload.name, byId: payload.userId, byRole: 'contractor', action: 'created' }],
       createdAt:   new Date().toISOString(),
       updatedAt:   new Date().toISOString(),
     };
@@ -66,7 +69,7 @@ export default async (req) => {
 
   if (req.method === 'PUT') {
     const body = await req.json().catch(() => ({}));
-    const { id } = body;
+    const { id, action } = body;
     if (!id) return json({ error: 'id required' }, 400);
     const idx = all.findIndex(i => i.id === id);
     if (idx === -1) return json({ error: 'Not found' }, 404);
@@ -77,6 +80,45 @@ export default async (req) => {
       return json({ error: 'This property has been moved to a presentation and can no longer be edited here.' }, 403);
     }
 
+    if (action === 'move-to-presentation') {
+      const now = new Date().toISOString();
+      const presStore = getStore({ name: 'fairway-presentations', consistency: 'strong' });
+      const presAll = (await presStore.get('all', { type: 'json' }).catch(() => null)) || [];
+      const si = all[idx];
+      const pres = {
+        id: crypto.randomUUID(),
+        reviewStatus: 'draft',
+        reviewStatusUpdatedAt: now,
+        sourcedById: payload.userId,
+        sourcedByName: payload.name,
+        sourcedByRole: 'contractor',
+        address: si.address || '',
+        suburb: si.suburb || '',
+        price: si.price || '',
+        propertyType: si.propertyType || 'house',
+        bedrooms: si.bedrooms || '',
+        bathrooms: si.bathrooms || '',
+        carspaces: si.carspaces || '',
+        landSize: si.landSize || '',
+        clientId: si.clientId || null,
+        clientName: si.clientName || '',
+        shortlistId: si.id,
+        history: [{ at: now, by: payload.name, byId: payload.userId, byRole: 'contractor', action: 'created', detail: 'from shortlist' }],
+        createdAt: now,
+        updatedAt: now,
+      };
+      presAll.push(pres);
+      await presStore.setJSON('all', presAll);
+      all[idx].status = 'moved_to_presentation';
+      all[idx].movedToPresId = pres.id;
+      all[idx].movedAt = now;
+      all[idx].updatedAt = now;
+      if (!Array.isArray(all[idx].history)) all[idx].history = [];
+      all[idx].history.push({ at: now, by: payload.name, byId: payload.userId, byRole: 'contractor', action: 'moved_to_presentation' });
+      await store.setJSON('all', all);
+      return json({ ok: true, item: all[idx], presId: pres.id });
+    }
+
     const assignedClients = payload.assignedClients || [];
     if (body.clientId && !assignedClients.includes(body.clientId)) {
       return json({ error: 'You can only assign properties to your assigned clients' }, 403);
@@ -84,10 +126,17 @@ export default async (req) => {
 
     const fields = ['address','suburb','state','price','propertyType','bedrooms','bathrooms',
                     'carspaces','landSize','agentName','agentAgency','agentPhone','agentEmail',
-                    'source','notes','clientId','clientName','links'];
+                    'source','notes','clientId','clientName','links','bankValuation','bankLender'];
     fields.forEach(f => { if (body[f] !== undefined) all[idx][f] = body[f]; });
+    const prevStatus = all[idx].status;
     if (body.status && VALID_STATUSES.has(body.status)) all[idx].status = body.status;
     all[idx].updatedAt = new Date().toISOString();
+    if (!Array.isArray(all[idx].history)) all[idx].history = [];
+    if (body.status && VALID_STATUSES.has(body.status) && body.status !== prevStatus) {
+      all[idx].history.push({ at: new Date().toISOString(), by: payload.name, byId: payload.userId, byRole: 'contractor', action: 'status_changed', detail: body.status });
+    } else {
+      all[idx].history.push({ at: new Date().toISOString(), by: payload.name, byId: payload.userId, byRole: 'contractor', action: 'updated' });
+    }
     await store.setJSON('all', all);
     return json({ ok: true, item: all[idx] });
   }

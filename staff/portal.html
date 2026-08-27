@@ -512,7 +512,7 @@
 <!-- Task add modal -->
 <div class="modal-overlay" id="task-modal">
   <div class="modal-box" style="max-width:440px;">
-    <h2 class="modal-title">Add task</h2>
+    <h2 class="modal-title" id="task-modal-title">Add task</h2>
     <div class="field-group">
       <label class="field-label">Task *</label>
       <input type="text" class="field-input" id="task-title" placeholder="What needs to be done?">
@@ -538,7 +538,7 @@
     <p id="task-modal-error" style="display:none;color:#e07070;font-size:13px;margin-top:4px;"></p>
     <div class="modal-foot">
       <button class="btn-secondary" onclick="closeTaskModal()">Cancel</button>
-      <button class="btn-primary" onclick="saveTask()">Add task</button>
+      <button class="btn-primary" id="task-save-btn" onclick="saveTask()">Add task</button>
     </div>
   </div>
 </div>
@@ -587,6 +587,10 @@
       </div>
     </div>
     <div class="field-row-2" style="margin-bottom:14px;">
+      <div><label class="field-label">Bank valuation</label><input type="text" class="field-input" id="sl-bank-val" placeholder="$540,000"></div>
+      <div><label class="field-label">Lender</label><input type="text" class="field-input" id="sl-bank-lender" placeholder="e.g. ANZ, CBA"></div>
+    </div>
+    <div class="field-row-2" style="margin-bottom:14px;">
       <div>
         <label class="field-label">Assign to client</label>
         <select class="field-input" id="sl-client"><option value="">— None —</option></select>
@@ -595,7 +599,6 @@
         <label class="field-label">Status</label>
         <select class="field-input" id="sl-status">
           <option value="shortlisted">Shortlisted</option>
-          <option value="researching">Researching</option>
           <option value="rejected">Rejected / Pass</option>
         </select>
       </div>
@@ -877,8 +880,17 @@
       <button onclick="closeDirProfile()" style="background:none;border:none;color:rgba(247,243,237,0.4);font-size:22px;cursor:pointer;line-height:1;padding:4px;flex-shrink:0;">×</button>
     </div>
     <div id="dir-profile-body" style="display:flex;flex-direction:column;gap:16px;"></div>
+    <div style="margin-top:24px;border-top:1px solid rgba(247,243,237,0.07);padding-top:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <span style="font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);">Files</span>
+        <button class="btn-sm" onclick="document.getElementById('dir-file-input').click()">+ Upload file</button>
+      </div>
+      <div id="dir-profile-files"></div>
+      <div id="dir-file-upload-status" style="display:none;font-size:12px;color:rgba(247,243,237,0.4);margin-top:8px;"></div>
+    </div>
   </div>
 </div>
+<input type="file" id="dir-file-input" style="display:none;" onchange="uploadDirFile(this)">
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
@@ -897,6 +909,7 @@ let allDeals = [];
 let dirFilter = 'all';
 let taskTab = 'mine';
 let staffTaskUrgency = 'medium';
+let taskEditId = null;
 
 const STAGE_LABELS = {
   lead:'Lead', qualify:'Qualifying', brief:'Brief', search:'Searching',
@@ -1261,6 +1274,7 @@ async function kbDrop(e) {
 
 async function moveStaffStage(clientId, acqId, newStage, selectEl) {
   if (!newStage) return;
+  const prevStage = selectEl.value;
   selectEl.disabled = true;
   try {
     const body = { id: clientId, pipelineStage: newStage };
@@ -1282,7 +1296,7 @@ async function moveStaffStage(clientId, acqId, newStage, selectEl) {
     renderPipeline();
   } catch {
     selectEl.disabled = false;
-    if (selectEl.value !== undefined) selectEl.value = '';
+    selectEl.value = prevStage;
     showToast('Failed to update stage', 'error');
   }
 }
@@ -1440,9 +1454,12 @@ function renderDirectory() {
   `;
 }
 
+let _dirProfileId = null;
+
 function openDirProfile(id) {
   const p = allDirectory.find(x => x.id === id);
   if (!p) return;
+  _dirProfileId = id;
   const typeLabel = DIR_PROFESSIONS.find(d => d.key === p.type)?.label || p.type || '';
   document.getElementById('dir-profile-name').textContent = p.name;
   document.getElementById('dir-profile-company').textContent = p.company || '';
@@ -1454,7 +1471,70 @@ function openDirProfile(id) {
   if (p.state)  rows.push(`<div style="display:flex;align-items:center;gap:10px;"><span style="font-size:12px;color:rgba(247,243,237,0.3);width:56px;flex-shrink:0;">State</span><span style="font-size:14px;color:#f7f3ed;">${esc(p.state)}</span></div>`);
   if (p.notes)  rows.push(`<div style="background:rgba(247,243,237,0.04);border-radius:8px;padding:14px 16px;"><p style="font-size:12px;color:rgba(247,243,237,0.3);margin:0 0 6px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;">Notes</p><p style="font-size:13px;color:rgba(247,243,237,0.65);line-height:1.6;white-space:pre-wrap;margin:0;">${esc(p.notes)}</p></div>`);
   document.getElementById('dir-profile-body').innerHTML = rows.length ? rows.join('') : '<p style="color:rgba(247,243,237,0.3);font-size:13px;">No contact details recorded.</p>';
+  renderDirProfileFiles(p.files || []);
+  document.getElementById('dir-file-input').value = '';
+  document.getElementById('dir-file-upload-status').style.display = 'none';
   document.getElementById('dir-profile-overlay').style.display = 'block';
+}
+
+function renderDirProfileFiles(files) {
+  const el = document.getElementById('dir-profile-files');
+  if (!files.length) {
+    el.innerHTML = '<p style="font-size:13px;color:rgba(247,243,237,0.25);margin:0;">No files attached yet.</p>';
+    return;
+  }
+  const fmtSize = b => b > 1048576 ? (b/1048576).toFixed(1)+' MB' : b > 1024 ? (b/1024).toFixed(0)+' KB' : b+' B';
+  const fmtDate = s => s ? new Date(s).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '';
+  el.innerHTML = files.map(f => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(247,243,237,0.05);">
+      <div style="flex:1;min-width:0;">
+        <a href="/api/dir-file-serve?key=${esc(f.mediaKey)}&name=${encodeURIComponent(f.name)}" target="_blank" style="font-size:13.5px;color:#f7f3ed;text-decoration:none;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;" download="${esc(f.name)}">${esc(f.name)}</a>
+        <div style="font-size:11.5px;color:rgba(247,243,237,0.3);margin-top:2px;">${fmtSize(f.sizeBytes || 0)} · ${esc(f.uploadedBy)} · ${fmtDate(f.uploadedAt)}</div>
+      </div>
+      <a href="/api/dir-file-serve?key=${esc(f.mediaKey)}&name=${encodeURIComponent(f.name)}" download="${esc(f.name)}" class="btn-sm" style="font-size:11px;text-decoration:none;">↓ Download</a>
+      ${f.uploadedById === me?.id ? `<button class="btn-sm" style="color:rgba(224,112,112,0.7);border-color:rgba(224,112,112,0.2);font-size:11px;" onclick="deleteDirFile('${_dirProfileId}','${f.id}')">Remove</button>` : ''}
+    </div>`).join('');
+}
+
+async function uploadDirFile(input) {
+  const file = input.files[0];
+  if (!file || !_dirProfileId) return;
+  const statusEl = document.getElementById('dir-file-upload-status');
+  statusEl.textContent = `Uploading ${file.name}…`;
+  statusEl.style.display = 'block';
+  try {
+    const dataUrl = await new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.onload = () => res(reader.result);
+      reader.onerror = rej;
+      reader.readAsDataURL(file);
+    });
+    const r = await fetch('/api/dir-file', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contactId: _dirProfileId, dataUrl, fileName: file.name, mimeType: file.type || 'application/octet-stream' }) });
+    const data = await r.json().catch(() => ({}));
+    if (r.ok) {
+      const p = allDirectory.find(x => x.id === _dirProfileId);
+      if (p) { if (!p.files) p.files = []; p.files.push(data.file); renderDirProfileFiles(p.files); }
+      statusEl.textContent = 'Uploaded successfully.';
+      setTimeout(() => { statusEl.style.display = 'none'; }, 2000);
+    } else {
+      statusEl.textContent = data.error || 'Upload failed.';
+    }
+  } catch {
+    statusEl.textContent = 'Upload failed. Please try again.';
+  }
+  input.value = '';
+}
+
+async function deleteDirFile(contactId, fileId) {
+  const r = await fetch('/api/dir-file', { method:'DELETE', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contactId, fileId }) });
+  if (r.ok) {
+    const p = allDirectory.find(x => x.id === contactId);
+    if (p) { p.files = (p.files || []).filter(f => f.id !== fileId); renderDirProfileFiles(p.files); }
+    showToast('File removed');
+  } else {
+    const data = await r.json().catch(() => ({}));
+    showToast(data.error || 'Failed to remove file', 'error');
+  }
 }
 
 function closeDirProfile() {
@@ -1535,6 +1615,7 @@ function renderTasks() {
           ${t.notes ? `<span style="font-size:12px;color:rgba(247,243,237,0.3);">${esc(t.notes)}</span>` : ''}
         </div>
       </div>
+      ${isOwn && !done ? `<button onclick="openTaskModal('${t.id}')" style="background:none;border:none;color:rgba(247,243,237,0.2);cursor:pointer;font-size:14px;line-height:1;padding:0 4px;flex-shrink:0;" title="Edit">✎</button>` : ''}
       ${isOwn && !done ? `<button onclick="deleteTask('${t.id}')" style="background:none;border:none;color:rgba(247,243,237,0.2);cursor:pointer;font-size:18px;line-height:1;padding:0 2px;flex-shrink:0;" title="Remove">&#215;</button>` : ''}
     </div>`;
   };
@@ -1562,18 +1643,23 @@ async function deleteTask(id) {
   if (r.ok) { allTasks = allTasks.filter(t => t.id !== id); renderTasks(); showToast('Task removed'); }
 }
 
-function openTaskModal() {
+function openTaskModal(id) {
+  taskEditId = id || null;
+  const task = id ? allTasks.find(t => t.id === id) : null;
   const today = localDate();
-  document.getElementById('task-title').value = '';
-  document.getElementById('task-due-date').value = today;
-  document.getElementById('task-notes').value = '';
+  document.getElementById('task-modal-title').textContent = task ? 'Edit task' : 'Add task';
+  document.getElementById('task-save-btn').textContent = task ? 'Save changes' : 'Add task';
+  document.getElementById('task-title').value = task ? task.title : '';
+  document.getElementById('task-due-date').value = task ? (task.dueDate || today) : today;
+  document.getElementById('task-notes').value = task ? (task.notes || '') : '';
   document.getElementById('task-modal-error').style.display = 'none';
-  setStaffTaskUrg('medium', document.getElementById('task-urg-medium'));
+  const urg = task ? (task.urgency || 'medium') : 'medium';
+  setStaffTaskUrg(urg, document.getElementById('task-urg-' + urg));
   document.getElementById('task-modal').classList.add('open');
   setTimeout(() => document.getElementById('task-title').focus(), 50);
 }
 
-function closeTaskModal() { document.getElementById('task-modal').classList.remove('open'); }
+function closeTaskModal() { taskEditId = null; document.getElementById('task-modal').classList.remove('open'); }
 
 function setStaffTaskUrg(urg, btn) {
   staffTaskUrgency = urg;
@@ -1601,17 +1687,34 @@ async function saveTask() {
     dueDate: document.getElementById('task-due-date').value || localDate(),
     notes:   document.getElementById('task-notes').value.trim(),
   };
-  const r = await fetch('/api/staff/tasks', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
-  if (r.ok) {
-    const task = await r.json();
-    allTasks.push(task);
-    renderTasks();
-    closeTaskModal();
-    showToast('Task added');
+  if (taskEditId) {
+    body.id = taskEditId;
+    const r = await fetch('/api/staff/tasks', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    if (r.ok) {
+      const updated = await r.json();
+      const idx = allTasks.findIndex(t => t.id === taskEditId);
+      if (idx !== -1) allTasks[idx] = updated;
+      renderTasks();
+      closeTaskModal();
+      showToast('Task updated');
+    } else {
+      const data = await r.json().catch(() => ({}));
+      errEl.textContent = data.error || 'Failed to update task.';
+      errEl.style.display = 'block';
+    }
   } else {
-    const data = await r.json().catch(() => ({}));
-    errEl.textContent = data.error || 'Failed to add task.';
-    errEl.style.display = 'block';
+    const r = await fetch('/api/staff/tasks', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    if (r.ok) {
+      const task = await r.json();
+      allTasks.push(task);
+      renderTasks();
+      closeTaskModal();
+      showToast('Task added');
+    } else {
+      const data = await r.json().catch(() => ({}));
+      errEl.textContent = data.error || 'Failed to add task.';
+      errEl.style.display = 'block';
+    }
   }
 }
 
@@ -1706,6 +1809,25 @@ function setSlTab(tab, btn) {
 
 const SL_STATUS_LABELS = { shortlisted:'Shortlisted', researching:'Researching', rejected:'Rejected', moved_to_presentation:'Promoted' };
 
+const HISTORY_ACTION_LABELS = { created:'Added', updated:'Updated', status_changed:'Status changed', moved_to_presentation:'Promoted', submitted_for_review:'Submitted for review', review_status_changed:'Status changed', rejected:'Review rejected', killed:'Killed', sent:'Sent to clients', clients_assigned:'Clients assigned' };
+const HISTORY_STATUS_LABELS = { shortlisted:'Shortlisted', researching:'Researching', rejected:'Rejected', to_review:'To review', passed:'Passed', draft:'Draft', ready_for_review:'Pending Review', admin_reviewing:'Under Review', approved:'Approved', allocated:'Allocated', sent:'Sent' };
+
+function renderHistoryTimeline(history) {
+  if (!history || !history.length) return '';
+  const entries = [...history].reverse().slice(0, 8);
+  const rows = entries.map(h => {
+    const label = HISTORY_ACTION_LABELS[h.action] || h.action;
+    const detail = h.detail ? (HISTORY_STATUS_LABELS[h.detail] || h.detail) : '';
+    const d = new Date(h.at);
+    const dateStr = d.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+    return `<div style="display:flex;gap:10px;padding:5px 0;border-top:1px solid rgba(247,243,237,0.05);">
+      <div style="font-size:11px;color:rgba(247,243,237,0.22);white-space:nowrap;min-width:82px;padding-top:2px;">${dateStr}</div>
+      <div style="font-size:12px;color:rgba(247,243,237,0.55);">${esc(label)}${detail ? ' — ' + esc(detail) : ''}<span style="color:rgba(247,243,237,0.25);margin-left:6px;">${esc(h.by)}</span></div>
+    </div>`;
+  }).join('');
+  return `<div style="margin-top:12px;">${rows}</div>`;
+}
+
 function renderShortlist() {
   const el = document.getElementById('shortlist-list');
   if (!el) return;
@@ -1745,9 +1867,11 @@ function renderShortlist() {
           <div style="display:flex;gap:6px;flex-wrap:wrap;">${clientName}</div>
           ${item.notes ? `<div style="margin-top:10px;font-size:13px;color:rgba(247,243,237,0.5);line-height:1.5;white-space:pre-wrap;">${esc(item.notes)}</div>` : ''}
           ${isPromoted ? `<div style="margin-top:10px;font-size:12px;color:rgba(109,191,123,0.7);">Promoted to a presentation — view it in the Presentations tab.</div>` : ''}
+          ${(item.history||[]).length ? renderHistoryTimeline(item.history) : ''}
         </div>
         <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;">
           ${!isPromoted ? `<button class="btn-sm" onclick="openSlModal('${item.id}')">Edit</button>` : ''}
+          ${!isPromoted && !isRejected ? `<button class="btn-sm" style="color:rgba(181,113,90,0.9);border-color:rgba(181,113,90,0.3);" onclick="moveSlToPresentation('${item.id}')">→ Presentations</button>` : ''}
           ${!isPromoted ? (isRejected
             ? `<button class="btn-sm" onclick="updateSlStatus('${item.id}','shortlisted')">Restore</button>`
             : `<button class="btn-sm" onclick="updateSlStatus('${item.id}','rejected')" style="color:rgba(247,243,237,0.35);">Reject</button>`) : ''}
@@ -1766,7 +1890,22 @@ async function updateSlStatus(id, status) {
     if (idx !== -1) allShortlist[idx] = data.item;
     renderShortlist();
     showToast('Status updated');
-  } else { showToast('Error updating status'); }
+  } else { const d = await r.json().catch(() => ({})); showToast(d.error || 'Error updating status', 'error'); }
+}
+
+async function moveSlToPresentation(id) {
+  if (!confirm('Move this property to Presentations? You can fill in the full details and submit for review from there.')) return;
+  const r = await fetch('/api/staff/shortlist', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id, action: 'move-to-presentation' }) });
+  const data = await r.json().catch(() => ({}));
+  if (r.ok) {
+    const idx = allShortlist.findIndex(i => i.id === id);
+    if (idx !== -1) allShortlist[idx] = data.item;
+    renderShortlist();
+    await loadPresentations();
+    showToast('Moved to Presentations — find it in the Presentations tab');
+  } else {
+    showToast(data.error || 'Failed to move to presentations', 'error');
+  }
 }
 
 function openSlModal(id) {
@@ -1800,10 +1939,12 @@ function openSlModal(id) {
     document.getElementById('sl-status').value = item.status || 'shortlisted';
     document.getElementById('sl-links').value = (item.links||[]).join('\n');
     document.getElementById('sl-notes').value = item.notes || '';
+    document.getElementById('sl-bank-val').value = item.bankValuation || '';
+    document.getElementById('sl-bank-lender').value = item.bankLender || '';
   } else {
     document.getElementById('sl-modal-title').textContent = 'Add property';
     document.getElementById('sl-edit-id').value = '';
-    ['sl-address','sl-suburb','sl-price','sl-beds','sl-baths','sl-cars','sl-land','sl-agent-name','sl-agent-agency','sl-agent-phone','sl-agent-email','sl-links','sl-notes'].forEach(id => document.getElementById(id).value = '');
+    ['sl-address','sl-suburb','sl-price','sl-beds','sl-baths','sl-cars','sl-land','sl-agent-name','sl-agent-agency','sl-agent-phone','sl-agent-email','sl-links','sl-notes','sl-bank-val','sl-bank-lender'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('sl-type').value = 'house';
     document.getElementById('sl-status').value = 'shortlisted';
   }
@@ -1838,6 +1979,8 @@ async function saveSlItem() {
     status: document.getElementById('sl-status').value,
     links,
     notes: document.getElementById('sl-notes').value.trim(),
+    bankValuation: document.getElementById('sl-bank-val').value.trim(),
+    bankLender: document.getElementById('sl-bank-lender').value.trim(),
   };
   if (id) body.id = id;
   const r = await fetch('/api/staff/shortlist', { method: id ? 'PUT' : 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
@@ -1913,6 +2056,7 @@ function renderPresentations() {
           </div>
           ${details ? `<div style="font-size:13px;color:rgba(247,243,237,0.4);margin-bottom:4px;">${esc(details)}${p.propertyType ? ' · ' + esc(p.propertyType) : ''}${imgCount ? ` · ${imgCount} photo${imgCount !== 1 ? 's' : ''}` : ''}</div>` : ''}
           ${feedback}${killedInfo}
+          ${(p.history||[]).length ? renderHistoryTimeline(p.history) : ''}
         </div>
         <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;align-items:flex-start;">
           <button class="btn-sm" onclick="openPresModal('${p.id}')">${canEdit ? (rs === 'rejected' ? 'Edit & Resubmit' : 'Edit') : 'View'}</button>
@@ -2592,8 +2736,18 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFullBri
 // ── Security / MFA ──────────────────────────────────────────────────────────
 let _mfaSetupSecret = null;
 
-async function loadSecurity() {
+async function loadSecurity(forceRefresh = false) {
   try {
+    // If a setup is already in progress, don't fetch a new secret — the user
+    // may have already scanned the QR code shown on a previous visit to this tab.
+    if (!forceRefresh && _mfaSetupSecret) {
+      const r = await fetch('/api/staff/totp');
+      if (!r.ok) return;
+      const data = await r.json();
+      // If now configured, update status but keep existing secret variable for safety
+      if (data.configured) { _mfaSetupSecret = null; renderMfaStatus(data); }
+      return;
+    }
     const r = await fetch('/api/staff/totp');
     if (!r.ok) return;
     const data = await r.json();
@@ -2649,8 +2803,9 @@ async function enableMfa() {
   const r = await fetch('/api/staff/totp', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'enable', secret: _mfaSetupSecret, code }) });
   const data = await r.json().catch(() => ({}));
   if (r.ok) {
+    _mfaSetupSecret = null;
     showToast('2FA enabled successfully');
-    loadSecurity();
+    loadSecurity(true);
   } else {
     errEl.textContent = data.error || 'Failed to enable 2FA.';
     errEl.style.display = 'block';
@@ -2667,8 +2822,9 @@ async function disableMfa() {
   const r = await fetch('/api/staff/totp', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'disable', code }) });
   const data = await r.json().catch(() => ({}));
   if (r.ok) {
+    _mfaSetupSecret = null;
     showToast('2FA disabled');
-    loadSecurity();
+    loadSecurity(true);
   } else {
     errEl.textContent = data.error || 'Failed to disable 2FA.';
     errEl.style.display = 'block';

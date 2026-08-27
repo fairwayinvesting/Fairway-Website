@@ -43,8 +43,19 @@ export default async (req) => {
         email: p.email,
         type: LEGACY_MAP[p.type] || p.type,
         state: p.state,
+        region: p.region,
         location: p.location,
         notes: p.notes,
+        files: (p.files || []).map(f => ({
+          id: f.id,
+          name: f.name,
+          mimeType: f.mimeType,
+          sizeBytes: f.sizeBytes,
+          mediaKey: f.mediaKey,
+          uploadedBy: f.uploadedBy,
+          uploadedByRole: f.uploadedByRole,
+          uploadedAt: f.uploadedAt,
+        })),
       }));
 
     return json(filtered);

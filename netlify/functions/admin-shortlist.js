@@ -30,6 +30,8 @@ export default async (req) => {
     const body = await req.json().catch(() => ({}));
     if (!body.address?.trim()) return json({ error: 'address required' }, 400);
     const actor = await getAdminActor(req);
+    const actorName = actor === 'secondary' ? 'Admin (secondary)' : 'Luke';
+    const now = new Date().toISOString();
     const item = {
       id: crypto.randomUUID(),
       address:     body.address?.trim()     || '',
@@ -55,10 +57,11 @@ export default async (req) => {
       status:      'shortlisted',
       // Attribution
       sourcedById:   'admin',
-      sourcedByName: actor === 'secondary' ? 'Admin (secondary)' : 'Luke',
+      sourcedByName: actorName,
       sourcedByRole: 'admin',
-      createdAt:   new Date().toISOString(),
-      updatedAt:   new Date().toISOString(),
+      history:     [{ at: now, by: actorName, byId: 'admin', byRole: 'admin', action: 'created' }],
+      createdAt:   now,
+      updatedAt:   now,
     };
     all.push(item);
     await store.setJSON('all', all);
@@ -72,6 +75,13 @@ export default async (req) => {
     if (!id) return json({ error: 'id required' }, 400);
     const idx = all.findIndex(i => i.id === id);
     if (idx === -1) return json({ error: 'Not found' }, 404);
+
+    const putActor = await getAdminActor(req);
+    const putActorName = putActor === 'secondary' ? 'Admin (secondary)' : 'Luke';
+    const histPush = (entry) => {
+      if (!Array.isArray(all[idx].history)) all[idx].history = [];
+      all[idx].history.push({ at: new Date().toISOString(), by: putActorName, byId: 'admin', byRole: 'admin', ...entry });
+    };
 
     // Move shortlist item → new presentation
     if (action === 'move-to-presentation') {
@@ -119,6 +129,7 @@ export default async (req) => {
         reviewStatus: 'draft',
         reviewStatusUpdatedAt: new Date().toISOString(),
         suitableClients: [],
+        history: [{ at: new Date().toISOString(), by: putActorName, byId: 'admin', byRole: 'admin', action: 'created', detail: 'from shortlist' }],
         agentName:   item.agentName || '',
         agentAgency: item.agentAgency || '',
         agentPhone:  item.agentPhone || '',
@@ -132,6 +143,7 @@ export default async (req) => {
       all[idx].status = 'moved_to_presentation';
       all[idx].movedToPresId = presId;
       all[idx].updatedAt = new Date().toISOString();
+      histPush({ action: 'moved_to_presentation' });
       await store.setJSON('all', all);
       appendAudit('shortlist_moved', `Moved to presentation: ${item.address}`);
       return json({ ok: true, presId, item: all[idx] });
@@ -141,11 +153,17 @@ export default async (req) => {
                     'carspaces','landSize','agentName','agentAgency','agentPhone','agentEmail',
                     'source','notes','clientId','clientName','bankValuation','bankLender','links'];
     fields.forEach(f => { if (body[f] !== undefined) all[idx][f] = body[f]; });
+    const prevStatus = all[idx].status;
     if (body.status && VALID_STATUSES.has(body.status)) all[idx].status = body.status;
     // Admin can correct attribution
     if (body.sourcedById !== undefined) all[idx].sourcedById = body.sourcedById;
     if (body.sourcedByName !== undefined) all[idx].sourcedByName = body.sourcedByName;
     all[idx].updatedAt = new Date().toISOString();
+    if (body.status && VALID_STATUSES.has(body.status) && body.status !== prevStatus) {
+      histPush({ action: 'status_changed', detail: body.status });
+    } else {
+      histPush({ action: 'updated' });
+    }
     await store.setJSON('all', all);
     appendAudit('shortlist_updated', `Updated shortlist item: ${all[idx].address}`);
     return json({ ok: true, item: all[idx] });

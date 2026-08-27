@@ -1954,6 +1954,21 @@
   <div class="profile-actions" id="prtnr-actions"></div>
   <div class="profile-body" id="prtnr-body"></div>
 </div>
+<!-- Shortlist view panel -->
+<div class="profile-panel" id="sl-view-panel">
+  <div class="profile-panel-header">
+    <div class="profile-panel-title">
+      <div class="profile-panel-name" id="sl-vp-address"></div>
+      <div class="profile-panel-email" id="sl-vp-sub"></div>
+    </div>
+    <button class="profile-close" onclick="closeSlViewPanel()">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="profile-actions" id="sl-vp-actions"></div>
+  <div class="profile-body" id="sl-vp-body"></div>
+</div>
+<input type="file" id="admin-dir-file-input" style="display:none;" onchange="adminUploadDirFile(this)">
 
 <!-- ── Purchase Modal ─────────────────────────────────────────────── -->
 <div id="purch-modal-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:700;display:none;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto;" onclick="if(event.target===this)closePurchaseModal()">
@@ -2162,6 +2177,7 @@
         <button class="pres-tab" onclick="switchPresTab('analysis',this)">Analysis</button>
         <button class="pres-tab" onclick="switchPresTab('sections',this)">Sections</button>
         <button class="pres-tab" onclick="switchPresTab('clients',this)">Clients</button>
+        <button class="pres-tab" id="pres-tab-history-btn" onclick="switchPresTab('history',this)">History</button>
       </div>
     </div>
     <div class="pres-modal-body">
@@ -2390,6 +2406,13 @@
             <textarea id="pres-revocation-reason" placeholder="e.g. This property is now under offer and has been reserved for another buyer." style="min-height:72px;"></textarea>
           </div>
           <p class="field-note">Copy a link to share via text or WhatsApp. Use Revoke to instantly remove someone's access.</p>
+        </div>
+      </div>
+
+      <!-- History tab -->
+      <div class="pres-tab-pane" id="pres-tab-history">
+        <div id="pres-history-list" style="padding:4px 0;">
+          <p style="font-size:13px;color:rgba(247,243,237,0.25);">No history recorded yet.</p>
         </div>
       </div>
 
@@ -2761,6 +2784,34 @@
       <button class="btn-primary" onclick="saveSlItem()" id="sl-save-btn" style="font-size:13px;padding:10px 22px;">Save</button>
       <button class="btn-secondary" onclick="closeSlModal()" style="font-size:13px;padding:10px 18px;">Cancel</button>
       <button id="sl-delete-btn" onclick="deleteSlItem()" style="margin-left:auto;background:none;border:none;font-family:'Outfit',sans-serif;font-size:13px;color:rgba(240,128,128,0.65);cursor:pointer;padding:0;display:none;">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Team task edit modal -->
+<div id="team-task-edit-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:700;display:none;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)closeTeamTaskEdit()">
+  <div style="background:#22201d;border:1px solid rgba(247,243,237,0.1);border-radius:20px;padding:28px 32px;width:100%;max-width:480px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <h2 style="font-family:'Fraunces',serif;font-size:20px;font-weight:400;margin:0;">Edit task</h2>
+      <button onclick="closeTeamTaskEdit()" style="background:none;border:none;color:rgba(247,243,237,0.4);font-size:22px;cursor:pointer;line-height:1;padding:0;">&times;</button>
+    </div>
+    <input type="hidden" id="team-task-edit-id">
+    <div class="field" style="margin-bottom:14px;"><label>Task *</label><input type="text" id="team-task-edit-title" class="task-add-input" style="width:100%;box-sizing:border-box;" placeholder="What needs to be done?"></div>
+    <div class="row-2" style="margin-bottom:14px;">
+      <div class="field" style="margin-bottom:0;">
+        <label>Urgency</label>
+        <div class="task-urg-sel" id="team-task-edit-urg-sel" style="margin-top:6px;">
+          <button class="task-urg-btn" data-urg="high" onclick="setTeamTaskEditUrg('high',this)">High</button>
+          <button class="task-urg-btn active" data-urg="medium" onclick="setTeamTaskEditUrg('medium',this)">Medium</button>
+          <button class="task-urg-btn" data-urg="low" onclick="setTeamTaskEditUrg('low',this)">Low</button>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:0;"><label>Due date</label><input type="date" id="team-task-edit-date" class="task-date-input" style="width:100%;box-sizing:border-box;margin-top:6px;font-size:13px;padding:9px 12px;"></div>
+    </div>
+    <div class="field"><label>Notes <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">(optional)</span></label><textarea id="team-task-edit-notes" rows="2" style="width:100%;box-sizing:border-box;resize:vertical;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.12);border-radius:10px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:14px;padding:11px 14px;" placeholder="Any context…"></textarea></div>
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button class="btn-primary" onclick="saveTeamTaskEdit()" style="font-size:13px;padding:10px 22px;">Save changes</button>
+      <button class="btn-secondary" onclick="closeTeamTaskEdit()" style="font-size:13px;padding:10px 18px;">Cancel</button>
     </div>
   </div>
 </div>
@@ -3693,6 +3744,22 @@ function renderCrmPartnerPanel() {
         </div>`;
       }).join('') : '<p style="font-size:13px;color:rgba(247,243,237,0.25);padding:4px 0;">Not assigned to any client deals yet.</p>'}
     </div>
+
+    <div class="profile-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="profile-section-title" style="margin-bottom:0;">Files (${(p.files||[]).length})</div>
+        <button onclick="document.getElementById('admin-dir-file-input').dataset.contactId='${p.id}';document.getElementById('admin-dir-file-input').click()" style="font-size:12px;padding:5px 12px;background:none;border:1px solid rgba(247,243,237,0.15);border-radius:100px;color:rgba(247,243,237,0.5);font-family:'Outfit',sans-serif;cursor:pointer;">+ Upload file</button>
+      </div>
+      ${(p.files||[]).length ? [...(p.files||[])].reverse().map(f => `
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(247,243,237,0.06);">
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;color:rgba(247,243,237,0.85);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(f.name)}</div>
+            <div style="font-size:11.5px;color:rgba(247,243,237,0.3);margin-top:2px;">${esc(f.uploadedBy)} · ${new Date(f.uploadedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})} · ${f.sizeBytes ? (f.sizeBytes > 1048576 ? (f.sizeBytes/1048576).toFixed(1)+' MB' : Math.round(f.sizeBytes/1024)+' KB') : ''}</div>
+          </div>
+          <a href="/api/dir-file-serve?key=${encodeURIComponent(f.mediaKey)}&name=${encodeURIComponent(f.name)}" target="_blank" style="font-size:12px;color:rgba(247,243,237,0.4);text-decoration:none;padding:5px 10px;border:1px solid rgba(247,243,237,0.12);border-radius:100px;white-space:nowrap;">Download</a>
+          <button onclick="adminDeleteDirFile('${p.id}','${f.id}')" style="font-size:12px;padding:5px 10px;background:none;border:1px solid rgba(240,128,128,0.2);border-radius:100px;color:rgba(240,128,128,0.6);font-family:'Outfit',sans-serif;cursor:pointer;white-space:nowrap;">Remove</button>
+        </div>`).join('') : '<p style="font-size:13px;color:rgba(247,243,237,0.25);padding:4px 0;">No files uploaded yet.</p>'}
+    </div>
   `;
 }
 
@@ -3741,6 +3808,44 @@ async function saveLogContact(id) {
 function openContactFromProfile(contactId) {
   closeClientProfile();
   setTimeout(() => openCrmPartnerPanel(contactId), 50);
+}
+
+async function adminUploadDirFile(input) {
+  const contactId = input.dataset.contactId;
+  const file = input.files[0];
+  input.value = '';
+  if (!file || !contactId) return;
+  if (file.size > 15 * 1024 * 1024) { showToast('File too large (max 15 MB)', 'warning'); return; }
+  showToast('Uploading…');
+  const reader = new FileReader();
+  reader.onload = async (ev) => {
+    const res = await api('POST', '/api/dir-file', {
+      contactId,
+      dataUrl: ev.target.result,
+      fileName: file.name,
+      mimeType: file.type || 'application/octet-stream',
+    });
+    if (!res.ok) { showToast('Upload failed — please try again.', 'warning'); return; }
+    const { file: fileRecord } = await res.json();
+    const idx = crmPartners.findIndex(p => p.id === contactId);
+    if (idx !== -1) {
+      if (!Array.isArray(crmPartners[idx].files)) crmPartners[idx].files = [];
+      crmPartners[idx].files.push(fileRecord);
+    }
+    renderCrmPartnerPanel();
+    showToast('File uploaded ✓');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function adminDeleteDirFile(contactId, fileId) {
+  if (!confirm('Remove this file?')) return;
+  const res = await api('DELETE', '/api/dir-file', { contactId, fileId });
+  if (!res.ok) { showToast('Failed to remove file.', 'warning'); return; }
+  const idx = crmPartners.findIndex(p => p.id === contactId);
+  if (idx !== -1) crmPartners[idx].files = (crmPartners[idx].files || []).filter(f => f.id !== fileId);
+  renderCrmPartnerPanel();
+  showToast('File removed');
 }
 
 function renderProfessionalsTab() {
@@ -6989,6 +7094,56 @@ async function deleteTeamTask(id) {
   }
 }
 
+let teamTaskEditUrgency = 'medium';
+
+function setTeamTaskEditUrg(urg, btn) {
+  teamTaskEditUrgency = urg;
+  document.querySelectorAll('#team-task-edit-urg-sel .task-urg-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+function openTeamTaskEdit(id) {
+  const t = allStaffTasks.find(x => x.id === id);
+  if (!t) return;
+  document.getElementById('team-task-edit-id').value = id;
+  document.getElementById('team-task-edit-title').value = t.title || '';
+  document.getElementById('team-task-edit-date').value = t.dueDate || '';
+  document.getElementById('team-task-edit-notes').value = t.notes || '';
+  teamTaskEditUrgency = t.urgency || 'medium';
+  document.querySelectorAll('#team-task-edit-urg-sel .task-urg-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.urg === teamTaskEditUrgency);
+  });
+  document.getElementById('team-task-edit-overlay').style.display = 'flex';
+}
+
+function closeTeamTaskEdit() {
+  document.getElementById('team-task-edit-overlay').style.display = 'none';
+}
+
+async function saveTeamTaskEdit() {
+  const id = document.getElementById('team-task-edit-id').value;
+  const title = document.getElementById('team-task-edit-title').value.trim();
+  if (!title) { document.getElementById('team-task-edit-title').focus(); return; }
+  const body = {
+    id,
+    title,
+    urgency: teamTaskEditUrgency,
+    dueDate: document.getElementById('team-task-edit-date').value,
+    notes:   document.getElementById('team-task-edit-notes').value.trim(),
+  };
+  const res = await api('PUT', '/api/admin/staff-tasks', body);
+  if (res.ok) {
+    const updated = await res.json();
+    const idx = allStaffTasks.findIndex(t => t.id === id);
+    if (idx !== -1) allStaffTasks[idx] = updated;
+    renderTeamTasks();
+    closeTeamTaskEdit();
+    showToast('Task updated');
+  } else {
+    showToast('Failed to update task', 'error');
+  }
+}
+
 function renderTeamTasks() {
   const el = document.getElementById('task-team-list');
   if (!el) return;
@@ -7000,10 +7155,10 @@ function renderTeamTasks() {
     el.innerHTML = '<div style="padding:24px 0;text-align:center;color:rgba(247,243,237,0.18);font-size:13.5px;">No tasks assigned yet. Use the form above to assign a task to a team member.</div>';
     return;
   }
-  // Group active by assignee
+  // Group active by assignee (admin-assigned) or owner (contractor-created)
   const groups = {};
   active.forEach(t => {
-    const key = t.assignedToName || t.ownerId;
+    const key = t.assignedToName || t.ownerName || t.ownerId;
     if (!groups[key]) groups[key] = [];
     groups[key].push(t);
   });
@@ -7048,11 +7203,14 @@ function teamTaskItemHtml(t, today) {
           <span class="task-urg-badge" data-urg="${t.urgency}">${urgLabel}</span>
           ${dateFmt ? `<span class="task-date-badge">${dateFmt}</span>` : ''}
           ${overLabel}
-          <span style="font-size:11px;color:rgba(247,243,237,0.25);margin-left:4px;">→ ${esc(t.assignedToName || 'Unknown')}</span>
+          <span style="font-size:11px;color:rgba(247,243,237,0.25);margin-left:4px;">${t.assignedByAdmin ? '→' : '✎'} ${esc(t.assignedToName || t.ownerName || 'Unknown')}</span>
         </div>
       </div>
     </div>
     <div style="display:flex;gap:2px;flex-shrink:0;">
+      <button class="task-del" onclick="openTeamTaskEdit('${t.id}')" title="Edit task" style="color:rgba(247,243,237,0.3);">
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
       <button class="task-del" onclick="deleteTeamTask('${t.id}')" title="Remove task">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       </button>
@@ -10114,8 +10272,8 @@ function renderShortlist() {
       ${item.notes ? `<div style="font-size:12px;color:rgba(247,243,237,0.35);margin-top:4px;line-height:1.5;">${esc(item.notes)}</div>` : ''}
       ${agentLine}
       <div class="sl-card-actions">
+        <button onclick="openSlViewPanel('${item.id}')" class="btn-sm" style="font-size:12px;">View</button>
         ${canEdit ? `<button onclick="openSlModal('${item.id}')" class="btn-sm" style="font-size:12px;">Edit</button>` : ''}
-        ${item.status === 'shortlisted' || item.status === 'to_review' ? `<button onclick="updateSlStatus('${item.id}','researching')" class="btn-sm" style="font-size:12px;">Researching</button>` : ''}
         ${canPromote ? `<button onclick="moveSlToPresentation('${item.id}')" class="btn-sm btn-edit" style="font-size:12px;background:rgba(189,122,112,0.12);color:#cf9b92;">→ Presentation</button>` : ''}
         ${item.status === 'moved_to_presentation' && item.movedToPresId ? `<button onclick="showSection('presentations')" class="btn-sm" style="font-size:12px;color:rgba(247,243,237,0.4);">View presentation</button>` : ''}
         ${['shortlisted','to_review','researching'].includes(item.status) ? `<button onclick="updateSlStatus('${item.id}','rejected')" class="btn-sm" style="font-size:12px;color:rgba(247,243,237,0.3);">Reject</button>` : ''}
@@ -10240,6 +10398,90 @@ async function deleteSlItem() {
   const res = await api('DELETE', `/api/admin/shortlist?id=${slEditId}`);
   if (res.ok) { shortlistItems = shortlistItems.filter(i => i.id !== slEditId); renderShortlist(); closeSlModal(); }
   else { alert('Delete failed.'); }
+}
+
+let slViewPanelId = null;
+
+const SL_VP_STATUS_LABELS = { to_review:'Shortlisted', shortlisted:'Shortlisted', researching:'Researching', moved_to_presentation:'Promoted', rejected:'Rejected', passed:'Rejected' };
+const SL_VP_TYPE_LABELS = { house:'House', unit:'Unit', townhouse:'Townhouse', duplex:'Duplex', land:'Land' };
+const SL_VP_HISTORY_LABELS = { created:'Added', updated:'Updated', status_changed:'Status changed', moved_to_presentation:'Promoted to presentation', approved:'Approved', rejected:'Rejected' };
+const SL_VP_HISTORY_STATUS_LABELS = { shortlisted:'Shortlisted', researching:'Researching', rejected:'Rejected', moved_to_presentation:'Promoted' };
+
+function renderSlHistory(history) {
+  if (!history || !history.length) return '<p style="font-size:13px;color:rgba(247,243,237,0.25);margin:0;">No history recorded.</p>';
+  return [...history].reverse().slice(0, 10).map(h => {
+    const label = SL_VP_HISTORY_LABELS[h.action] || h.action;
+    const detail = h.detail ? (SL_VP_HISTORY_STATUS_LABELS[h.detail] || h.detail) : '';
+    const d = new Date(h.at);
+    const dateStr = d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+    return `<div style="display:flex;gap:10px;padding:6px 0;border-top:1px solid rgba(247,243,237,0.06);">
+      <div style="font-size:11px;color:rgba(247,243,237,0.25);white-space:nowrap;min-width:82px;padding-top:2px;">${dateStr}</div>
+      <div style="font-size:13px;color:rgba(247,243,237,0.55);">${esc(label)}${detail ? ' — ' + esc(detail) : ''}<span style="color:rgba(247,243,237,0.25);margin-left:6px;font-size:12px;">${esc(h.by)}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function openSlViewPanel(id) {
+  slViewPanelId = id;
+  const item = shortlistItems.find(i => i.id === id);
+  if (!item) return;
+  document.getElementById('sl-vp-address').textContent = item.address || '';
+  const sub = [item.suburb, item.state].filter(Boolean).join(', ');
+  document.getElementById('sl-vp-sub').textContent = [sub, SL_VP_STATUS_LABELS[item.status] || item.status].filter(Boolean).join(' · ');
+  const canPromote = ['shortlisted','to_review','researching'].includes(item.status);
+  const canReject  = ['shortlisted','to_review','researching'].includes(item.status);
+  document.getElementById('sl-vp-actions').innerHTML = `
+    <button class="btn-sm" onclick="openSlModal('${id}');closeSlViewPanel()">Edit</button>
+    ${canPromote ? `<button class="btn-sm btn-edit" style="background:rgba(181,113,90,0.12);color:#cf9b92;" onclick="moveSlToPresentation('${id}');closeSlViewPanel()">→ Presentation</button>` : ''}
+    ${canReject ? `<button class="btn-sm" style="color:rgba(247,243,237,0.35);" onclick="updateSlStatus('${id}','rejected');closeSlViewPanel()">Reject</button>` : ''}
+    ${['rejected','passed'].includes(item.status) ? `<button class="btn-sm" onclick="updateSlStatus('${id}','shortlisted');closeSlViewPanel()">Restore</button>` : ''}
+  `;
+  const specs = [item.bedrooms && `${item.bedrooms} bed`, item.bathrooms && `${item.bathrooms} bath`, item.carspaces && `${item.carspaces} car`, item.landSize && `${item.landSize}m²`].filter(Boolean).join(' · ');
+  const agentHtml = item.agentName ? `
+    <div class="profile-section">
+      <div class="profile-section-title">Agent</div>
+      <div class="profile-fields">
+        <div class="profile-field"><label>Name</label><div class="pf-val">${esc(item.agentName)}</div></div>
+        ${item.agentAgency ? `<div class="profile-field"><label>Agency</label><div class="pf-val">${esc(item.agentAgency)}</div></div>` : ''}
+        ${item.agentPhone ? `<div class="profile-field"><label>Phone</label><div class="pf-val">${esc(item.agentPhone)}</div></div>` : ''}
+        ${item.agentEmail ? `<div class="profile-field"><label>Email</label><div class="pf-val">${esc(item.agentEmail)}</div></div>` : ''}
+      </div>
+    </div>` : '';
+  document.getElementById('sl-vp-body').innerHTML = `
+    <div class="profile-section">
+      <div class="profile-section-title">Property details</div>
+      <div class="profile-fields">
+        <div class="profile-field"><label>Status</label><div class="pf-val">${SL_VP_STATUS_LABELS[item.status] || item.status}</div></div>
+        ${item.propertyType ? `<div class="profile-field"><label>Type</label><div class="pf-val">${SL_VP_TYPE_LABELS[item.propertyType] || item.propertyType}</div></div>` : ''}
+        ${item.price ? `<div class="profile-field"><label>Price</label><div class="pf-val">${esc(item.price)}</div></div>` : ''}
+        ${specs ? `<div class="profile-field full"><label>Specs</label><div class="pf-val">${esc(specs)}</div></div>` : ''}
+        ${item.clientName ? `<div class="profile-field"><label>Client</label><div class="pf-val">${esc(item.clientName)}</div></div>` : ''}
+        ${item.sourcedByName ? `<div class="profile-field"><label>Sourced by</label><div class="pf-val">${esc(item.sourcedByName)}</div></div>` : ''}
+      </div>
+    </div>
+    ${item.bankValuation ? `<div class="profile-section">
+      <div class="profile-section-title">Bank valuation</div>
+      <div class="profile-fields">
+        <div class="profile-field"><label>Valuation</label><div class="pf-val" style="color:rgba(109,191,123,0.9);">${esc(item.bankValuation)}</div></div>
+        ${item.bankLender ? `<div class="profile-field"><label>Lender</label><div class="pf-val">${esc(item.bankLender)}</div></div>` : ''}
+      </div>
+    </div>` : ''}
+    ${agentHtml}
+    ${item.notes ? `<div class="profile-section">
+      <div class="profile-section-title">Notes</div>
+      <p style="font-size:13.5px;color:rgba(247,243,237,0.6);line-height:1.65;white-space:pre-wrap;margin:0;">${esc(item.notes)}</p>
+    </div>` : ''}
+    ${(item.history||[]).length ? `<div class="profile-section">
+      <div class="profile-section-title">History</div>
+      ${renderSlHistory(item.history)}
+    </div>` : ''}
+  `;
+  document.getElementById('sl-view-panel').classList.add('open');
+}
+
+function closeSlViewPanel() {
+  document.getElementById('sl-view-panel').classList.remove('open');
+  slViewPanelId = null;
 }
 
 let _agentLinkCache = null;
@@ -11051,6 +11293,25 @@ function openPresModal(id) {
     document.getElementById('pres-save-btn').textContent = 'Save draft';
     renderImgList(); renderVidList(); renderSecList();
   }
+  // History tab
+  const histEl = document.getElementById('pres-history-list');
+  const histData = (id ? (presentations.find(x => x.id === id) || {}) : {}).history || [];
+  histEl.innerHTML = histData.length
+    ? [...histData].reverse().map(h => {
+        const ACTION_LABELS = { created:'Added', updated:'Details updated', status_changed:'Status changed', moved_to_presentation:'Promoted to presentation', submitted_for_review:'Submitted for review', review_status_changed:'Review status changed', rejected:'Review rejected', killed:'Killed', sent:'Sent to clients', clients_assigned:'Clients assigned' };
+        const STATUS_LABELS = { shortlisted:'Shortlisted', researching:'Researching', rejected:'Rejected', to_review:'To review', passed:'Passed', draft:'Draft', ready_for_review:'Pending Review', admin_reviewing:'Under Review', approved:'Approved', allocated:'Allocated', sent:'Sent' };
+        const label = ACTION_LABELS[h.action] || h.action;
+        const detail = h.detail ? (STATUS_LABELS[h.detail] || h.detail) : '';
+        const d = new Date(h.at);
+        const dateStr = d.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+        const timeStr = d.toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});
+        return `<div style="display:flex;gap:12px;padding:9px 0;border-bottom:1px solid rgba(247,243,237,0.06);">
+          <div style="font-size:11.5px;color:rgba(247,243,237,0.25);white-space:nowrap;min-width:88px;padding-top:2px;">${dateStr}<div style="margin-top:1px;">${timeStr}</div></div>
+          <div><div style="font-size:13px;color:rgba(247,243,237,0.75);">${esc(label)}${detail ? ` — <span style="color:rgba(247,243,237,0.5);">${esc(detail)}</span>` : ''}</div><div style="font-size:11.5px;color:rgba(247,243,237,0.3);margin-top:2px;">${esc(h.by)}${h.byRole === 'admin' ? ' · Admin' : ' · Contractor'}</div></div>
+        </div>`;
+      }).join('')
+    : '<p style="font-size:13px;color:rgba(247,243,237,0.25);">No history recorded yet. History tracking begins on new activity.</p>';
+
   overlay.style.opacity = '1'; overlay.style.pointerEvents = 'all';
   document.getElementById('pres-address').focus();
 }
