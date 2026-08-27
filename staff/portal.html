@@ -1866,7 +1866,6 @@ function renderShortlist() {
           </div>
           ${details ? `<div style="font-size:13px;color:rgba(247,243,237,0.4);margin-bottom:6px;">${esc(details)}${specs ? ' · ' + esc(specs) : ''}${item.price ? ' · ' + esc(item.price) : ''}</div>` : ''}
           <div style="display:flex;gap:6px;flex-wrap:wrap;">${clientName}</div>
-          ${item.notes ? `<div style="margin-top:10px;font-size:13px;color:rgba(247,243,237,0.5);line-height:1.5;white-space:pre-wrap;">${esc(item.notes)}</div>` : ''}
           ${isPromoted ? `<div style="margin-top:10px;font-size:12px;color:rgba(109,191,123,0.7);">Promoted to a presentation — view it in the Presentations tab.</div>` : ''}
           ${(item.history||[]).length ? renderHistoryTimeline(item.history) : ''}
         </div>
