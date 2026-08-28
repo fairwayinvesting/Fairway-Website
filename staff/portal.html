@@ -2412,12 +2412,6 @@ function openPresModal(id) {
     lockedNotice.style.borderColor = 'rgba(122,184,232,0.2)';
     lockedNotice.style.color = 'rgba(122,184,232,0.8)';
     lockedNotice.textContent = 'Edit access granted — your changes update the live presentation that clients can view.';
-  } else if (rs === 'admin_reviewing') {
-    lockedNotice.style.display = 'block';
-    lockedNotice.style.background = 'rgba(232,168,124,0.07)';
-    lockedNotice.style.borderColor = 'rgba(232,168,124,0.2)';
-    lockedNotice.style.color = 'rgba(232,168,124,0.8)';
-    lockedNotice.textContent = 'This presentation is under admin review — your edits will be visible to Luke.';
   } else if (!canEdit) {
     const lockedMsgs = { sent:'This presentation has been sent to the client — editing is locked.', killed:'This property has been killed.' };
     lockedNotice.style.display = 'block';
