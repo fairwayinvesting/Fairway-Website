@@ -2040,7 +2040,10 @@ function renderPresentations() {
     const rs = p.reviewStatus || 'draft';
     const rsLabel = PRES_REVIEW_LABELS[rs] || rs;
     const isKilled = rs === 'killed';
-    const canEdit = !isKilled && ['draft','ready_for_review','rejected'].includes(rs);
+    const canEdit = !isKilled && (
+      ['draft','ready_for_review','rejected','approved','allocated'].includes(rs) ||
+      (rs === 'sent' && p.contractorEditOverride)
+    );
     const canSubmit = !isKilled && ['draft','rejected'].includes(rs);
     const details = [p.suburb, p.price].filter(Boolean).join(' · ');
     const imgCount = (p.images||[]).length;
@@ -2380,7 +2383,8 @@ function openPresModal(id) {
   if (!p) return;
   const overlay = document.getElementById('pres-panel-overlay');
   const rs = p.reviewStatus || 'draft';
-  const canEdit = ['draft','ready_for_review','rejected'].includes(rs);
+  const canEdit = ['draft','ready_for_review','rejected','approved','allocated'].includes(rs) ||
+                  (rs === 'sent' && p.contractorEditOverride);
   const canSubmit = ['draft','rejected'].includes(rs);
 
   document.getElementById('pres-modal-error').style.display = 'none';
@@ -2402,8 +2406,14 @@ function openPresModal(id) {
     lockedNotice.style.borderColor = 'rgba(224,112,112,0.2)';
     lockedNotice.style.color = 'rgba(247,243,237,0.7)';
     lockedNotice.innerHTML = `<strong style="color:rgba(224,112,112,0.8);">Changes requested:</strong> ${esc(p.reviewFeedback)}`;
+  } else if (rs === 'sent' && p.contractorEditOverride) {
+    lockedNotice.style.display = 'block';
+    lockedNotice.style.background = 'rgba(122,184,232,0.07)';
+    lockedNotice.style.borderColor = 'rgba(122,184,232,0.2)';
+    lockedNotice.style.color = 'rgba(122,184,232,0.8)';
+    lockedNotice.textContent = 'Edit access granted — your changes update the live presentation that clients can view.';
   } else if (!canEdit) {
-    const lockedMsgs = { admin_reviewing:'This presentation is under admin review — editing is locked.', approved:'This presentation has been approved.', allocated:'This presentation has been allocated to a client.', sent:'This presentation has been sent to the client.', killed:'This property has been killed.' };
+    const lockedMsgs = { admin_reviewing:'This presentation is under admin review — editing is locked.', sent:'This presentation has been sent to the client — editing is locked.', killed:'This property has been killed.' };
     lockedNotice.style.display = 'block';
     lockedNotice.style.background = 'rgba(232,168,124,0.07)';
     lockedNotice.style.borderColor = 'rgba(232,168,124,0.2)';

@@ -136,10 +136,11 @@ export default async (req) => {
       return json({ ok: true });
     }
 
-    // Field edits — allowed while draft, ready_for_review, or rejected
-    const editableStatuses = new Set(['draft', 'ready_for_review', 'rejected']);
-    if (!editableStatuses.has(rs)) {
-      return json({ error: 'This presentation has been approved and can no longer be edited.' }, 403);
+    // Field edits — allowed up to (and including) allocated; blocked after sent unless admin granted override
+    const editableStatuses = new Set(['draft', 'ready_for_review', 'rejected', 'approved', 'allocated']);
+    const canEditSent = rs === 'sent' && all[idx].contractorEditOverride === true;
+    if (!editableStatuses.has(rs) && !canEditSent) {
+      return json({ error: 'This presentation has been sent to the client — editing is locked.' }, 403);
     }
 
     EDITABLE_FIELDS.forEach(f => { if (body[f] !== undefined) all[idx][f] = body[f]; });

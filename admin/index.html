@@ -2361,7 +2361,7 @@
             <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start;">
               <div style="flex:0 0 160px;">
                 <label class="field-note" style="display:block;margin-bottom:4px;">Amount ($)</label>
-                <input type="number" id="pres-commission-amount" placeholder="0" min="0" step="1" style="width:100%;background:rgba(247,243,237,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:9px 12px;font-family:'Outfit',sans-serif;font-size:13.5px;color:#f7f3ed;outline:none;">
+                <input type="number" id="pres-commission-amount" placeholder="0" min="0" step="1" style="width:100%;background:rgba(247,243,247,0.05);border:1px solid rgba(247,243,237,0.1);border-radius:8px;padding:9px 12px;font-family:'Outfit',sans-serif;font-size:13.5px;color:#f7f3ed;outline:none;">
               </div>
               <div style="flex:1;min-width:180px;">
                 <label class="field-note" style="display:block;margin-bottom:4px;">Note (optional)</label>
@@ -2369,6 +2369,14 @@
               </div>
               <button onclick="savePresCommission()" class="btn-secondary" style="margin-top:22px;font-size:12.5px;padding:9px 16px;flex-shrink:0;">Save commission</button>
             </div>
+          </div>
+          <!-- Contractor edit override (only shown when status is sent) -->
+          <div id="pres-edit-override-section" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid rgba(247,243,237,0.07);">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+              <input type="checkbox" id="pres-contractor-edit-override" onchange="setContractorEditOverride(this.checked)" style="width:15px;height:15px;accent-color:#bd7a70;cursor:pointer;">
+              <span style="font-size:13px;color:rgba(247,243,237,0.65);">Allow contractor to edit this presentation</span>
+            </label>
+            <p style="font-size:11.5px;color:rgba(247,243,237,0.3);margin:6px 0 0 25px;line-height:1.5;">Grants temporary edit access after the property has been sent to a client. Their changes update the live page.</p>
           </div>
         </div>
         <div class="pres-field-row-2" style="margin-bottom:20px;">
@@ -10654,6 +10662,10 @@ async function adminAdvanceReviewStatus() {
   const chip = document.getElementById('pres-review-status-chip');
   chip.textContent = REVIEW_LABELS_MODAL[status] || status;
   chip.className = `sl-status pres-review-${status}`;
+  // Show edit override section only when sent
+  document.getElementById('pres-edit-override-section').style.display = status === 'sent' ? 'block' : 'none';
+  // Show commission panel when allocated or sent
+  document.getElementById('pres-commission-panel').style.display = ['allocated','sent'].includes(status) ? 'block' : 'none';
 }
 
 async function adminSetReviewStatus(presId, status) {
@@ -10665,6 +10677,19 @@ async function adminSetReviewStatus(presId, status) {
     showToast(status === 'approved' ? 'Presentation approved' : 'Status updated');
   } else {
     showToast('Failed to update status', 'error');
+  }
+}
+
+async function setContractorEditOverride(enabled) {
+  const presId = document.getElementById('pres-edit-id').value;
+  if (!presId) return;
+  const res = await api('PUT', '/api/admin/presentations', { id: presId, action: 'set-contractor-edit-override', enabled });
+  if (res.ok) {
+    const pres = presentations.find(p => p.id === presId);
+    if (pres) pres.contractorEditOverride = enabled;
+    showToast(enabled ? 'Contractor can now edit this presentation' : 'Contractor edit access removed');
+  } else {
+    showToast('Failed to update edit access', 'error');
   }
 }
 
@@ -11268,9 +11293,14 @@ function openPresModal(id) {
         document.getElementById('pres-commission-amount').value = p.contractorCommission != null ? p.contractorCommission : '';
         document.getElementById('pres-commission-note').value = p.contractorCommissionNote || '';
       }
+      // Contractor edit override (show when sent)
+      const editOverrideSection = document.getElementById('pres-edit-override-section');
+      editOverrideSection.style.display = p.reviewStatus === 'sent' ? 'block' : 'none';
+      document.getElementById('pres-contractor-edit-override').checked = !!p.contractorEditOverride;
     } else {
       reviewPanel.style.display = 'none';
       document.getElementById('pres-commission-panel').style.display = 'none';
+      document.getElementById('pres-edit-override-section').style.display = 'none';
     }
     const unrevoked = (p.assignedClients || []).filter(cid => !revokedList.includes(cid));
     const canSend = unrevoked.some(cid => !sentList.includes(cid));

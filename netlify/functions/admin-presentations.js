@@ -363,6 +363,15 @@ export default async (req) => {
       return json({ ok: true, pres: presentations[idx] });
     }
 
+    // Admin-only: grant or revoke contractor edit access after sent
+    if (action === 'set-contractor-edit-override') {
+      presentations[idx].contractorEditOverride = !!body.enabled;
+      histPush(idx, { action: 'contractor_edit_override', detail: body.enabled ? 'granted' : 'revoked' });
+      await store.setJSON('all', presentations);
+      appendAudit('contractor_edit_override', `"${presentations[idx].address}" contractor edit ${body.enabled ? 'granted' : 'revoked'}`);
+      return json({ ok: true });
+    }
+
     // Admin-only: kill property with reason
     if (action === 'kill') {
       const reason = body.reason?.trim();
