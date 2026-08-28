@@ -2041,7 +2041,7 @@ function renderPresentations() {
     const rsLabel = PRES_REVIEW_LABELS[rs] || rs;
     const isKilled = rs === 'killed';
     const canEdit = !isKilled && (
-      ['draft','ready_for_review','rejected','approved','allocated'].includes(rs) ||
+      ['draft','ready_for_review','admin_reviewing','rejected','approved','allocated'].includes(rs) ||
       (rs === 'sent' && p.contractorEditOverride)
     );
     const canSubmit = !isKilled && ['draft','rejected'].includes(rs);
@@ -2383,7 +2383,7 @@ function openPresModal(id) {
   if (!p) return;
   const overlay = document.getElementById('pres-panel-overlay');
   const rs = p.reviewStatus || 'draft';
-  const canEdit = ['draft','ready_for_review','rejected','approved','allocated'].includes(rs) ||
+  const canEdit = ['draft','ready_for_review','admin_reviewing','rejected','approved','allocated'].includes(rs) ||
                   (rs === 'sent' && p.contractorEditOverride);
   const canSubmit = ['draft','rejected'].includes(rs);
 
@@ -2412,8 +2412,14 @@ function openPresModal(id) {
     lockedNotice.style.borderColor = 'rgba(122,184,232,0.2)';
     lockedNotice.style.color = 'rgba(122,184,232,0.8)';
     lockedNotice.textContent = 'Edit access granted — your changes update the live presentation that clients can view.';
+  } else if (rs === 'admin_reviewing') {
+    lockedNotice.style.display = 'block';
+    lockedNotice.style.background = 'rgba(232,168,124,0.07)';
+    lockedNotice.style.borderColor = 'rgba(232,168,124,0.2)';
+    lockedNotice.style.color = 'rgba(232,168,124,0.8)';
+    lockedNotice.textContent = 'This presentation is under admin review — your edits will be visible to Luke.';
   } else if (!canEdit) {
-    const lockedMsgs = { admin_reviewing:'This presentation is under admin review — editing is locked.', sent:'This presentation has been sent to the client — editing is locked.', killed:'This property has been killed.' };
+    const lockedMsgs = { sent:'This presentation has been sent to the client — editing is locked.', killed:'This property has been killed.' };
     lockedNotice.style.display = 'block';
     lockedNotice.style.background = 'rgba(232,168,124,0.07)';
     lockedNotice.style.borderColor = 'rgba(232,168,124,0.2)';
@@ -2504,7 +2510,7 @@ function openPresModal(id) {
   document.getElementById('pres-submit-review-btn').style.display = canSubmit ? 'inline-flex' : 'none';
   document.getElementById('pres-submit-review-btn').textContent = rs === 'rejected' ? 'Save & Resubmit' : 'Submit for review';
   document.getElementById('pres-save-btn').style.display = canEdit ? 'inline-flex' : 'none';
-  document.getElementById('pres-save-btn').textContent = 'Save draft';
+  document.getElementById('pres-save-btn').textContent = ['draft','rejected'].includes(rs) ? 'Save draft' : 'Save changes';
 
   overlay.classList.add('open');
 }
@@ -2554,7 +2560,7 @@ async function savePres(submitForReviewFlag = false) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
-  btn.disabled = false; btn.textContent = 'Save draft';
+  btn.disabled = false; btn.textContent = isNew ? 'Save draft' : 'Save changes';
   if (!r.ok) {
     const data = await r.json().catch(() => ({}));
     errEl.textContent = data.error || 'Failed to save.'; errEl.style.display = 'inline'; return false;

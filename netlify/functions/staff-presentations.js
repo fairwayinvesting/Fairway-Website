@@ -136,8 +136,8 @@ export default async (req) => {
       return json({ ok: true });
     }
 
-    // Field edits — allowed up to (and including) allocated; blocked after sent unless admin granted override
-    const editableStatuses = new Set(['draft', 'ready_for_review', 'rejected', 'approved', 'allocated']);
+    // Field edits — blocked only once sent to client (unless admin grants override)
+    const editableStatuses = new Set(['draft', 'ready_for_review', 'admin_reviewing', 'rejected', 'approved', 'allocated']);
     const canEditSent = rs === 'sent' && all[idx].contractorEditOverride === true;
     if (!editableStatuses.has(rs) && !canEditSent) {
       return json({ error: 'This presentation has been sent to the client — editing is locked.' }, 403);
