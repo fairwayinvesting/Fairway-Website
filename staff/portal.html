@@ -656,7 +656,7 @@
           <div class="pfield" style="margin-bottom:0;"><label>Land size</label><input type="text" id="pres-land" placeholder="612m²"></div>
         </div>
         <div class="pfield"><label>Property description <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">Factual overview visible to client</span></label><textarea id="pres-prop-desc" placeholder="Describe the property — layout, condition, street appeal, recent upgrades…" style="min-height:90px;"></textarea></div>
-        <div class="pfield"><label>Luke's assessment</label><textarea id="pres-summary" placeholder="Your commentary on this property…" style="min-height:110px;"></textarea></div>
+        <div class="pfield"><label>Assessment</label><textarea id="pres-summary" placeholder="Your commentary on this property…" style="min-height:110px;"></textarea></div>
         <div class="pfield"><label>Key highlights <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">(one per line, max 6)</span></label>
           <textarea id="pres-highlights" placeholder="0.88% rental vacancy&#10;Houses selling in 21 days&#10;Strong cashflow profile"></textarea>
         </div>
@@ -669,7 +669,10 @@
       <div class="pres-tab-pane" id="pres-tab-media">
         <p style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:14px;">Property images</p>
         <div id="pres-img-list"></div>
-        <button class="btn-upload" onclick="addImageUrl()" style="margin-bottom:28px;">+ Add image by URL</button>
+        <div style="display:flex;gap:8px;margin-bottom:28px;">
+          <button class="btn-upload" onclick="triggerPresImgUpload()">↑ Upload image</button>
+          <button class="btn-upload" onclick="addImageUrl()">+ Add by URL</button>
+        </div>
         <p style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin-bottom:14px;">Videos</p>
         <p style="font-size:13px;color:rgba(247,243,237,0.4);margin-bottom:12px;">For WhatsApp videos — upload to <strong style="color:rgba(247,243,237,0.5);">streamable.com</strong> (free, drag &amp; drop) and paste the link. Also supports YouTube &amp; Vimeo.</p>
         <div id="pres-vid-list"></div>
@@ -2129,6 +2132,11 @@ function updateDemoPreview(url) {
   img.src = url; img.style.display = url ? 'block' : 'none';
 }
 
+function triggerPresImgUpload() {
+  _uploadTarget = 'property-image';
+  document.getElementById('pres-file-input').click();
+}
+
 function triggerSectionUpload(key) {
   _uploadTarget = key;
   document.getElementById('pres-file-input').click();
@@ -2167,7 +2175,10 @@ async function handlePresFileUpload(input) {
   const data = await r.json().catch(() => ({}));
   if (!data.url) { showToast('Upload failed', 'error'); input.value = ''; return; }
   const url = data.url;
-  if (typeof _uploadTarget === 'string' && _uploadTarget.startsWith('risk-item-')) {
+  if (_uploadTarget === 'property-image') {
+    _presImages.push({ id: uid(), url, caption: '' });
+    renderImgList();
+  } else if (typeof _uploadTarget === 'string' && _uploadTarget.startsWith('risk-item-')) {
     const idx = parseInt(_uploadTarget.replace('risk-item-', ''), 10);
     if (_presRiskItems[idx]) { _presRiskItems[idx].imageUrl = url; renderRiskItems(); }
   } else if (_uploadTarget === 'demo') {
@@ -2378,21 +2389,29 @@ function openPresModal(id) {
   _presImages = []; _presVideos = []; _presSections = []; _presRiskItems = []; _presSales = []; _presRentals = [];
 
   document.getElementById('pres-panel-title').textContent = p.address || 'Edit presentation';
-  if (rs === 'rejected' && p.reviewFeedback) {
-    const lockedNotice = document.getElementById('pres-panel-locked-notice');
-    lockedNotice.style.display = 'block';
-    lockedNotice.style.background = 'rgba(224,112,112,0.07)';
-    lockedNotice.style.borderColor = 'rgba(224,112,112,0.2)';
-    lockedNotice.style.color = 'rgba(247,243,237,0.7)';
-    lockedNotice.innerHTML = `<strong style="color:rgba(224,112,112,0.8);">Changes requested:</strong> ${esc(p.reviewFeedback)}`;
-  }
   document.getElementById('pres-edit-id').value = id;
 
   const chip = document.getElementById('pres-panel-status-chip');
   chip.textContent = PRES_REVIEW_LABELS[rs] || rs;
   chip.className = `status-badge prs-${rs}`;
 
-  document.getElementById('pres-panel-locked-notice').style.display = canEdit ? 'none' : 'block';
+  const lockedNotice = document.getElementById('pres-panel-locked-notice');
+  if (rs === 'rejected' && p.reviewFeedback) {
+    lockedNotice.style.display = 'block';
+    lockedNotice.style.background = 'rgba(224,112,112,0.07)';
+    lockedNotice.style.borderColor = 'rgba(224,112,112,0.2)';
+    lockedNotice.style.color = 'rgba(247,243,237,0.7)';
+    lockedNotice.innerHTML = `<strong style="color:rgba(224,112,112,0.8);">Changes requested:</strong> ${esc(p.reviewFeedback)}`;
+  } else if (!canEdit) {
+    const lockedMsgs = { admin_reviewing:'This presentation is under admin review — editing is locked.', approved:'This presentation has been approved.', allocated:'This presentation has been allocated to a client.', sent:'This presentation has been sent to the client.', killed:'This property has been killed.' };
+    lockedNotice.style.display = 'block';
+    lockedNotice.style.background = 'rgba(232,168,124,0.07)';
+    lockedNotice.style.borderColor = 'rgba(232,168,124,0.2)';
+    lockedNotice.style.color = 'rgba(232,168,124,0.8)';
+    lockedNotice.textContent = lockedMsgs[rs] || 'Editing is locked.';
+  } else {
+    lockedNotice.style.display = 'none';
+  }
 
   // Details
   document.getElementById('pres-address').value = p.address || '';
@@ -2534,13 +2553,11 @@ async function savePres(submitForReviewFlag = false) {
   const savedPres = data.pres || body;
   const savedId = savedPres.id || id;
 
-  // Save suitable clients separately (only on existing presentations)
-  if (!isNew) {
-    await fetch('/api/staff/presentations', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: savedId, action: 'set-suitable-clients', suitableClients }) });
-  }
+  // Save suitable clients for both new and existing presentations
+  await fetch('/api/staff/presentations', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: savedId, action: 'set-suitable-clients', suitableClients }) });
 
   if (isNew) {
-    allPresentations.push({ ...savedPres, suitableClients: [] });
+    allPresentations.push({ ...savedPres, suitableClients });
     // Update the hidden id field so submitForReview can use it
     document.getElementById('pres-edit-id').value = savedId;
   } else {
