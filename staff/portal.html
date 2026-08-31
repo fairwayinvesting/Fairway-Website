@@ -176,6 +176,9 @@
     .modal-box{background:#1e1c1a;border:1px solid rgba(247,243,237,0.1);border-radius:16px;width:100%;max-width:580px;padding:28px;position:relative;}
     .modal-title{font-family:'Fraunces',serif;font-size:22px;font-weight:400;margin-bottom:24px;}
     .modal-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:24px;padding-top:20px;border-top:1px solid rgba(247,243,237,0.07);}
+    .sl-modal-tab{background:none;border:none;border-bottom:2px solid transparent;color:rgba(247,243,237,0.35);font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;padding:8px 14px 10px;margin-bottom:-1px;transition:color .15s,border-color .15s;}
+    .sl-modal-tab:hover{color:rgba(247,243,237,0.7);}
+    .sl-modal-tab.active{color:#bd7a70;border-bottom-color:#bd7a70;}
 
     /* ── Toast ───────────────────────────────────────────────────────── */
     .toast{position:fixed;bottom:28px;right:28px;background:#22201d;border:1px solid rgba(247,243,237,0.12);border-radius:10px;padding:14px 20px;font-size:13.5px;color:#f7f3ed;z-index:999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;max-width:320px;}
@@ -545,72 +548,172 @@
 
 <!-- Shortlist add/edit modal -->
 <div class="modal-overlay" id="sl-modal">
-  <div class="modal-box">
+  <div class="modal-box" style="max-width:700px;">
     <h2 class="modal-title" id="sl-modal-title">Add property</h2>
     <input type="hidden" id="sl-edit-id">
-    <div class="field-group">
-      <label class="field-label">Address *</label>
-      <input type="text" class="field-input" id="sl-address" placeholder="123 Example St">
+    <input type="file" id="sl-file-input" accept="image/*" style="display:none;" onchange="handleSlFileUpload(this)">
+    <div style="display:flex;gap:0;margin:-4px 0 20px;border-bottom:1px solid rgba(247,243,237,0.07);">
+      <button class="sl-modal-tab active" id="sl-tab-btn-details" onclick="switchSlTab('details',this)">Details</button>
+      <button class="sl-modal-tab" id="sl-tab-btn-analysis" onclick="switchSlTab('analysis',this)">Analysis</button>
     </div>
-    <div class="field-row-3">
-      <div><label class="field-label">Suburb</label><input type="text" class="field-input" id="sl-suburb" placeholder="Suburb"></div>
-      <div><label class="field-label">State</label>
-        <select class="field-input" id="sl-state">
-          <option value="">—</option>
-          <option>NSW</option><option>VIC</option><option>QLD</option><option>SA</option><option>WA</option><option>TAS</option><option>ACT</option><option>NT</option>
-        </select>
+
+    <!-- Details tab -->
+    <div id="sl-tab-details">
+      <div class="field-group">
+        <label class="field-label">Address *</label>
+        <input type="text" class="field-input" id="sl-address" placeholder="123 Example St">
       </div>
-      <div><label class="field-label">Price</label><input type="text" class="field-input" id="sl-price" placeholder="$650,000"></div>
-    </div>
-    <div class="field-row-3">
-      <div><label class="field-label">Type</label>
-        <select class="field-input" id="sl-type">
-          <option value="house">House</option><option value="unit">Unit / Apt</option><option value="townhouse">Townhouse</option><option value="land">Land</option><option value="other">Other</option>
-        </select>
+      <div class="field-row-3">
+        <div><label class="field-label">Suburb</label><input type="text" class="field-input" id="sl-suburb" placeholder="Suburb"></div>
+        <div><label class="field-label">State</label>
+          <select class="field-input" id="sl-state">
+            <option value="">—</option>
+            <option>NSW</option><option>VIC</option><option>QLD</option><option>SA</option><option>WA</option><option>TAS</option><option>ACT</option><option>NT</option>
+          </select>
+        </div>
+        <div><label class="field-label">Price</label><input type="text" class="field-input" id="sl-price" placeholder="$650,000"></div>
       </div>
-      <div><label class="field-label">Beds</label><input type="text" class="field-input" id="sl-beds" placeholder="3"></div>
-      <div><label class="field-label">Baths</label><input type="text" class="field-input" id="sl-baths" placeholder="2"></div>
-    </div>
-    <div class="field-row-2">
-      <div><label class="field-label">Car spaces</label><input type="text" class="field-input" id="sl-cars" placeholder="1"></div>
-      <div><label class="field-label">Land size (m²)</label><input type="text" class="field-input" id="sl-land" placeholder="450"></div>
-    </div>
-    <div style="border-top:1px solid rgba(247,243,237,0.07);margin:16px 0;padding-top:16px;">
-      <p class="eyebrow" style="margin-bottom:14px;">Agent details</p>
-      <div class="field-row-2">
-        <div><label class="field-label">Agent name</label><input type="text" class="field-input" id="sl-agent-name" placeholder="Jane Smith"></div>
-        <div><label class="field-label">Agency</label><input type="text" class="field-input" id="sl-agent-agency" placeholder="Ray White"></div>
+      <div class="field-row-3">
+        <div><label class="field-label">Type</label>
+          <select class="field-input" id="sl-type">
+            <option value="house">House</option><option value="unit">Unit / Apt</option><option value="townhouse">Townhouse</option><option value="land">Land</option><option value="other">Other</option>
+          </select>
+        </div>
+        <div><label class="field-label">Beds</label><input type="text" class="field-input" id="sl-beds" placeholder="3"></div>
+        <div><label class="field-label">Baths</label><input type="text" class="field-input" id="sl-baths" placeholder="2"></div>
       </div>
       <div class="field-row-2">
-        <div><label class="field-label">Phone</label><input type="text" class="field-input" id="sl-agent-phone" placeholder="0400 000 000"></div>
-        <div><label class="field-label">Email</label><input type="email" class="field-input" id="sl-agent-email" placeholder="jane@raywhite.com"></div>
+        <div><label class="field-label">Car spaces</label><input type="text" class="field-input" id="sl-cars" placeholder="1"></div>
+        <div><label class="field-label">Land size (m²)</label><input type="text" class="field-input" id="sl-land" placeholder="450"></div>
+      </div>
+      <div style="border-top:1px solid rgba(247,243,237,0.07);margin:16px 0;padding-top:16px;">
+        <p class="eyebrow" style="margin-bottom:14px;">Agent details</p>
+        <div class="field-row-2">
+          <div><label class="field-label">Agent name</label><input type="text" class="field-input" id="sl-agent-name" placeholder="Jane Smith"></div>
+          <div><label class="field-label">Agency</label><input type="text" class="field-input" id="sl-agent-agency" placeholder="Ray White"></div>
+        </div>
+        <div class="field-row-2">
+          <div><label class="field-label">Phone</label><input type="text" class="field-input" id="sl-agent-phone" placeholder="0400 000 000"></div>
+          <div><label class="field-label">Email</label><input type="email" class="field-input" id="sl-agent-email" placeholder="jane@raywhite.com"></div>
+        </div>
+      </div>
+      <div class="field-row-2" style="margin-bottom:14px;">
+        <div><label class="field-label">Bank valuation</label><input type="text" class="field-input" id="sl-bank-val" placeholder="$540,000"></div>
+        <div><label class="field-label">Lender</label><input type="text" class="field-input" id="sl-bank-lender" placeholder="e.g. ANZ, CBA"></div>
+      </div>
+      <div class="field-row-2" style="margin-bottom:14px;">
+        <div>
+          <label class="field-label">Assign to client</label>
+          <select class="field-input" id="sl-client"><option value="">— None —</option></select>
+        </div>
+        <div>
+          <label class="field-label">Status</label>
+          <select class="field-input" id="sl-status">
+            <option value="shortlisted">Shortlisted</option>
+            <option value="rejected">Rejected / Pass</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Links (one per line)</label>
+        <textarea class="field-input" id="sl-links" rows="3" placeholder="https://realestate.com.au/property/..."></textarea>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Notes</label>
+        <textarea class="field-input" id="sl-notes" rows="3" placeholder="Any observations, concerns, or context…"></textarea>
       </div>
     </div>
-    <div class="field-row-2" style="margin-bottom:14px;">
-      <div><label class="field-label">Bank valuation</label><input type="text" class="field-input" id="sl-bank-val" placeholder="$540,000"></div>
-      <div><label class="field-label">Lender</label><input type="text" class="field-input" id="sl-bank-lender" placeholder="e.g. ANZ, CBA"></div>
-    </div>
-    <div class="field-row-2" style="margin-bottom:14px;">
-      <div>
-        <label class="field-label">Assign to client</label>
-        <select class="field-input" id="sl-client"><option value="">— None —</option></select>
+
+    <!-- Analysis tab -->
+    <div id="sl-tab-analysis" style="display:none;">
+      <div class="pres-analysis-block">
+        <div class="pres-analysis-head" onclick="toggleSlAnalysis('cashflow')">
+          <span class="pres-analysis-title">Cashflow analysis</span>
+          <div class="toggle-wrap" onclick="event.stopPropagation()"><label class="toggle"><input type="checkbox" id="sl-cf-enabled" onchange="toggleSlAnalysis('cashflow',true)"><span class="toggle-slider"></span></label></div>
+        </div>
+        <div class="pres-analysis-body" id="sl-analysis-cashflow">
+          <div class="pfrow2" style="margin-bottom:12px;">
+            <div class="pfield" style="margin-bottom:0;"><label>Purchase price ($)</label><input type="text" id="sl-cf-price" placeholder="485000"></div>
+            <div class="pfield" style="margin-bottom:0;"><label>Weekly rent ($)</label><input type="text" id="sl-cf-rent" placeholder="420"></div>
+          </div>
+          <div class="pfrow4" style="margin-bottom:12px;">
+            <div class="pfield" style="margin-bottom:0;"><label>Interest rate (%)</label><input type="text" id="sl-cf-rate" placeholder="6.5"></div>
+            <div class="pfield" style="margin-bottom:0;"><label>LVR (%)</label><input type="text" id="sl-cf-lvr" placeholder="80"></div>
+            <div class="pfield" style="margin-bottom:0;"><label>Mgmt fee (%)</label><input type="text" id="sl-cf-mgmt" placeholder="8"></div>
+            <div class="pfield" style="margin-bottom:0;"><label>Council rates ($)</label><input type="text" id="sl-cf-rates" placeholder="1800"></div>
+          </div>
+          <div class="pfrow2">
+            <div class="pfield" style="margin-bottom:0;"><label>Insurance ($/yr)</label><input type="text" id="sl-cf-insurance" placeholder="1200"></div>
+            <div class="pfield" style="margin-bottom:0;"><label>Maintenance ($/yr)</label><input type="text" id="sl-cf-maint" placeholder="1000"></div>
+          </div>
+        </div>
       </div>
-      <div>
-        <label class="field-label">Status</label>
-        <select class="field-input" id="sl-status">
-          <option value="shortlisted">Shortlisted</option>
-          <option value="rejected">Rejected / Pass</option>
-        </select>
+      <div class="pres-analysis-block">
+        <div class="pres-analysis-head" onclick="toggleSlAnalysis('risk')">
+          <span class="pres-analysis-title">Risk profile</span>
+          <div class="toggle-wrap" onclick="event.stopPropagation()"><label class="toggle"><input type="checkbox" id="sl-risk-enabled" onchange="toggleSlAnalysis('risk',true)"><span class="toggle-slider"></span></label></div>
+        </div>
+        <div class="pres-analysis-body" id="sl-analysis-risk">
+          <p style="font-size:12.5px;color:rgba(247,243,237,0.4);margin-bottom:14px;line-height:1.5;">Toggle any risk on to add a screenshot and notes.</p>
+          <div id="sl-risk-rows-list"></div>
+          <button class="risk-add-custom" onclick="addCustomSlRisk()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            Add a custom risk
+          </button>
+        </div>
+      </div>
+      <div class="pres-analysis-block">
+        <div class="pres-analysis-head" onclick="toggleSlAnalysis('demo')">
+          <span class="pres-analysis-title">Area demographics</span>
+          <div class="toggle-wrap" onclick="event.stopPropagation()"><label class="toggle"><input type="checkbox" id="sl-demo-enabled" onchange="toggleSlAnalysis('demo',true)"><span class="toggle-slider"></span></label></div>
+        </div>
+        <div class="pres-analysis-body" id="sl-analysis-demo">
+          <div class="pres-demo-grid">
+            <div class="pfield"><label style="white-space:nowrap;">Owner-occupier %</label><input type="text" id="sl-demo-owner" placeholder="58" oninput="updateSlDemoBar()"></div>
+            <div class="pfield"><label style="white-space:nowrap;">Renter %</label><input type="text" id="sl-demo-renter" placeholder="38" oninput="updateSlDemoBar()"></div>
+            <div class="pfield"><label style="white-space:nowrap;">Public housing %</label><input type="text" id="sl-demo-public" placeholder="4" oninput="updateSlDemoBar()"></div>
+          </div>
+          <div style="margin-top:4px;margin-bottom:16px;">
+            <div style="height:7px;border-radius:100px;overflow:hidden;background:rgba(247,243,237,0.06);display:flex;">
+              <div id="sl-dbar-owner" style="background:#bd7a70;height:100%;width:0;transition:width .3s;"></div>
+              <div id="sl-dbar-renter" style="background:#8a9a7b;height:100%;width:0;transition:width .3s;"></div>
+              <div id="sl-dbar-public" style="background:#e8a87c;height:100%;width:0;transition:width .3s;"></div>
+            </div>
+            <div style="display:flex;gap:14px;margin-top:7px;flex-wrap:wrap;">
+              <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(247,243,237,0.35);"><span style="width:8px;height:8px;border-radius:2px;background:#bd7a70;display:inline-block;"></span>Owner</span>
+              <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(247,243,237,0.35);"><span style="width:8px;height:8px;border-radius:2px;background:#8a9a7b;display:inline-block;"></span>Renter</span>
+              <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(247,243,237,0.35);"><span style="width:8px;height:8px;border-radius:2px;background:#e8a87c;display:inline-block;"></span>Public</span>
+            </div>
+          </div>
+          <div class="pfield"><label>Notes <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">(optional)</span></label><textarea id="sl-demo-notes" style="min-height:70px;" placeholder="Any context on the area demographics…"></textarea></div>
+          <div class="pfield"><label>Screenshot</label>
+            <div style="display:flex;gap:8px;"><button class="btn-upload" onclick="triggerSlSectionUpload('demo')">↑ Upload</button><input type="url" id="sl-demo-image" class="pres-media-input" placeholder="or paste URL" style="flex:1;" oninput="updateSlDemoPreview(this.value)"></div>
+            <img id="sl-demo-image-preview" style="display:none;margin-top:10px;max-height:120px;border-radius:8px;">
+          </div>
+        </div>
+      </div>
+      <div class="pres-analysis-block">
+        <div class="pres-analysis-head" onclick="toggleSlAnalysis('sales')">
+          <span class="pres-analysis-title">Comparable sales</span>
+          <div class="toggle-wrap" onclick="event.stopPropagation()"><label class="toggle"><input type="checkbox" id="sl-sales-enabled" onchange="toggleSlAnalysis('sales',true)"><span class="toggle-slider"></span></label></div>
+        </div>
+        <div class="pres-analysis-body" id="sl-analysis-sales">
+          <div id="sl-sales-list"></div>
+          <button class="btn-upload" onclick="addSlComparable('sales')" style="margin-top:4px;">+ Add comparable sale</button>
+        </div>
+      </div>
+      <div class="pres-analysis-block">
+        <div class="pres-analysis-head" onclick="toggleSlAnalysis('rentals')">
+          <span class="pres-analysis-title">Comparable rentals</span>
+          <div class="toggle-wrap" onclick="event.stopPropagation()"><label class="toggle"><input type="checkbox" id="sl-rentals-enabled" onchange="toggleSlAnalysis('rentals',true)"><span class="toggle-slider"></span></label></div>
+        </div>
+        <div class="pres-analysis-body" id="sl-analysis-rentals">
+          <div id="sl-rentals-list"></div>
+          <button class="btn-upload" onclick="addSlComparable('rentals')" style="margin-top:4px;">+ Add comparable rental</button>
+        </div>
       </div>
     </div>
-    <div class="field-group">
-      <label class="field-label">Links (one per line)</label>
-      <textarea class="field-input" id="sl-links" rows="3" placeholder="https://realestate.com.au/property/..."></textarea>
-    </div>
-    <div class="field-group">
-      <label class="field-label">Notes</label>
-      <textarea class="field-input" id="sl-notes" rows="3" placeholder="Any observations, concerns, or context…"></textarea>
-    </div>
+
     <p id="sl-modal-error" style="display:none;color:#e07070;font-size:13px;margin-top:4px;"></p>
     <div class="modal-foot">
       <button class="btn-secondary" onclick="closeSlModal()">Cancel</button>
@@ -1919,6 +2022,8 @@ function openSlModal(id) {
   sel.innerHTML = '<option value="">— None —</option>' + allClients.map(c =>
     `<option value="${esc(c.id)}">${esc(c.name)}</option>`
   ).join('');
+  // Reset analysis state
+  _slRiskItems = []; _slSales = []; _slRentals = [];
 
   if (id) {
     const item = allShortlist.find(i => i.id === id);
@@ -1944,13 +2049,64 @@ function openSlModal(id) {
     document.getElementById('sl-notes').value = item.notes || '';
     document.getElementById('sl-bank-val').value = item.bankValuation || '';
     document.getElementById('sl-bank-lender').value = item.bankLender || '';
+    // Analysis — cashflow
+    const cf = item.cashflow || {};
+    document.getElementById('sl-cf-enabled').checked = !!cf.enabled;
+    document.getElementById('sl-analysis-cashflow').classList.toggle('open', !!cf.enabled);
+    document.getElementById('sl-cf-price').value = cf.purchasePrice || '';
+    document.getElementById('sl-cf-rent').value = cf.weeklyRent || '';
+    document.getElementById('sl-cf-rate').value = cf.interestRate || '';
+    document.getElementById('sl-cf-lvr').value = cf.lvr || '80';
+    document.getElementById('sl-cf-mgmt').value = cf.managementFee || '8';
+    document.getElementById('sl-cf-rates').value = cf.annualRates || '';
+    document.getElementById('sl-cf-insurance').value = cf.annualInsurance || '';
+    document.getElementById('sl-cf-maint').value = cf.annualMaintenance || '';
+    // Analysis — risk profile
+    const rpMigrated = migrateRisk(item.riskProfile);
+    document.getElementById('sl-risk-enabled').checked = !!rpMigrated.enabled;
+    document.getElementById('sl-analysis-risk').classList.toggle('open', !!rpMigrated.enabled);
+    _slRiskItems = rpMigrated.risks.map(i => ({ ...i, id: i.id || uid() }));
+    renderSlRiskItems();
+    // Analysis — demographics
+    const dm = item.demographics || {};
+    document.getElementById('sl-demo-enabled').checked = !!dm.enabled;
+    document.getElementById('sl-analysis-demo').classList.toggle('open', !!dm.enabled);
+    document.getElementById('sl-demo-owner').value = dm.ownerOccupier || '';
+    document.getElementById('sl-demo-renter').value = dm.renter || '';
+    document.getElementById('sl-demo-public').value = dm.publicHousing || '';
+    document.getElementById('sl-demo-notes').value = dm.notes || '';
+    document.getElementById('sl-demo-image').value = dm.imageUrl || '';
+    const slDemoImg = document.getElementById('sl-demo-image-preview');
+    slDemoImg.src = dm.imageUrl || ''; slDemoImg.style.display = dm.imageUrl ? 'block' : 'none';
+    updateSlDemoBar();
+    // Analysis — comparables
+    const cs = item.comparableSales || {};
+    document.getElementById('sl-sales-enabled').checked = !!cs.enabled;
+    document.getElementById('sl-analysis-sales').classList.toggle('open', !!cs.enabled);
+    _slSales = (cs.items||[]).map(i => ({ ...i, id: i.id || uid() }));
+    renderSlComparables('sales');
+    const cr = item.comparableRentals || {};
+    document.getElementById('sl-rentals-enabled').checked = !!cr.enabled;
+    document.getElementById('sl-analysis-rentals').classList.toggle('open', !!cr.enabled);
+    _slRentals = (cr.items||[]).map(i => ({ ...i, id: i.id || uid() }));
+    renderSlComparables('rentals');
   } else {
     document.getElementById('sl-modal-title').textContent = 'Add property';
     document.getElementById('sl-edit-id').value = '';
     ['sl-address','sl-suburb','sl-price','sl-beds','sl-baths','sl-cars','sl-land','sl-agent-name','sl-agent-agency','sl-agent-phone','sl-agent-email','sl-links','sl-notes','sl-bank-val','sl-bank-lender'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('sl-type').value = 'house';
     document.getElementById('sl-status').value = 'shortlisted';
+    // Reset analysis fields
+    ['sl-cf-enabled','sl-risk-enabled','sl-demo-enabled','sl-sales-enabled','sl-rentals-enabled'].forEach(id => { document.getElementById(id).checked = false; });
+    ['sl-analysis-cashflow','sl-analysis-risk','sl-analysis-demo','sl-analysis-sales','sl-analysis-rentals'].forEach(id => { document.getElementById(id).classList.remove('open'); });
+    ['sl-cf-price','sl-cf-rent','sl-cf-rate','sl-cf-lvr','sl-cf-mgmt','sl-cf-rates','sl-cf-insurance','sl-cf-maint','sl-demo-owner','sl-demo-renter','sl-demo-public','sl-demo-notes','sl-demo-image'].forEach(id => { document.getElementById(id).value = ''; });
+    document.getElementById('sl-cf-lvr').value = '80';
+    document.getElementById('sl-cf-mgmt').value = '8';
+    const slDemoImg = document.getElementById('sl-demo-image-preview');
+    slDemoImg.src = ''; slDemoImg.style.display = 'none';
+    renderSlRiskItems(); renderSlComparables('sales'); renderSlComparables('rentals');
   }
+  switchSlTab('details', document.getElementById('sl-tab-btn-details'));
   modal.classList.add('open');
 }
 
@@ -1965,6 +2121,7 @@ async function saveSlItem() {
   const clientId = document.getElementById('sl-client').value;
   const clientName = clientId ? (allClients.find(c => c.id === clientId)?.name || '') : '';
   const links = document.getElementById('sl-links').value.split('\n').map(l => l.trim()).filter(Boolean);
+  syncSlComparables('sales'); syncSlComparables('rentals');
   const body = {
     address, suburb: document.getElementById('sl-suburb').value.trim(),
     state: document.getElementById('sl-state').value,
@@ -1984,6 +2141,11 @@ async function saveSlItem() {
     notes: document.getElementById('sl-notes').value.trim(),
     bankValuation: document.getElementById('sl-bank-val').value.trim(),
     bankLender: document.getElementById('sl-bank-lender').value.trim(),
+    cashflow: { enabled: document.getElementById('sl-cf-enabled').checked, purchasePrice: document.getElementById('sl-cf-price').value, weeklyRent: document.getElementById('sl-cf-rent').value, interestRate: document.getElementById('sl-cf-rate').value, lvr: document.getElementById('sl-cf-lvr').value || '80', managementFee: document.getElementById('sl-cf-mgmt').value || '8', annualRates: document.getElementById('sl-cf-rates').value, annualInsurance: document.getElementById('sl-cf-insurance').value, annualMaintenance: document.getElementById('sl-cf-maint').value },
+    riskProfile: { enabled: document.getElementById('sl-risk-enabled').checked, risks: _slRiskItems.filter(i => i.on) },
+    demographics: { enabled: document.getElementById('sl-demo-enabled').checked, ownerOccupier: document.getElementById('sl-demo-owner').value.trim(), renter: document.getElementById('sl-demo-renter').value.trim(), publicHousing: document.getElementById('sl-demo-public').value.trim(), notes: document.getElementById('sl-demo-notes').value.trim(), imageUrl: document.getElementById('sl-demo-image').value.trim() },
+    comparableSales: { enabled: document.getElementById('sl-sales-enabled').checked, items: _slSales },
+    comparableRentals: { enabled: document.getElementById('sl-rentals-enabled').checked, items: _slRentals },
   };
   if (id) body.id = id;
   const r = await fetch('/api/staff/shortlist', { method: id ? 'PUT' : 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
@@ -1999,6 +2161,128 @@ async function saveSlItem() {
     errEl.style.display = 'block';
   }
 }
+
+// ── Shortlist analysis ─────────────────────────────────────────────────────
+let _slRiskItems = [], _slSales = [], _slRentals = [], _slUploadTarget = null;
+
+function switchSlTab(name, btn) {
+  ['details','analysis'].forEach(t => { document.getElementById('sl-tab-'+t).style.display = t === name ? 'block' : 'none'; });
+  document.querySelectorAll('#sl-modal .sl-modal-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+function toggleSlAnalysis(key, fromCheckbox) {
+  const body = document.getElementById('sl-analysis-' + key);
+  const cbId = key === 'cashflow' ? 'sl-cf-enabled' : 'sl-' + key + '-enabled';
+  const cb = document.getElementById(cbId);
+  if (!body) return;
+  if (fromCheckbox) { body.classList.toggle('open', cb.checked); }
+  else { const open = body.classList.toggle('open'); if (cb) cb.checked = open; }
+}
+
+function renderSlRiskItems() {
+  const list = document.getElementById('sl-risk-rows-list');
+  if (!list) return;
+  const merged = RISK_PRESETS.map(preset => {
+    const ex = _slRiskItems.find(r => r.id === preset.id);
+    return ex || { ...preset, on: false, imageUrl: '', notes: '' };
+  });
+  const customs = _slRiskItems.filter(r => !RISK_PRESETS.some(p => p.id === r.id));
+  const all = [...merged, ...customs];
+  _slRiskItems = all;
+  list.innerHTML = all.map((item, idx) => `
+    <div class="risk-row${item.on ? ' on' : ''}" id="sl-risk-row-${idx}">
+      <div class="risk-row-head" onclick="toggleSlRisk(${idx})">
+        <span class="risk-row-icon">${esc(item.icon||'⚠️')}</span>
+        <span class="risk-row-label">${esc(item.label)}</span>
+        <span class="risk-row-toggle"><label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" ${item.on ? 'checked' : ''} onchange="toggleSlRisk(${idx})"><span class="toggle-slider"></span></label></span>
+        ${item.custom ? `<button class="btn-remove" onclick="event.stopPropagation();removeCustomSlRisk(${idx})" style="margin-left:4px;">✕</button>` : ''}
+      </div>
+      <div class="risk-row-body">
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <button class="btn-upload" onclick="triggerSlSectionUpload('risk-item-${idx}')">↑ Upload</button>
+          <input type="url" class="pres-media-input" placeholder="or paste screenshot URL" value="${esc(item.imageUrl||'')}" oninput="_slRiskItems[${idx}].imageUrl=this.value;updateSlRiskPreview(${idx},this.value)" style="flex:1;">
+        </div>
+        ${item.imageUrl ? `<img src="${esc(item.imageUrl)}" id="sl-risk-preview-${idx}" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;border:1px solid rgba(247,243,237,0.07);margin-bottom:8px;">` : `<img id="sl-risk-preview-${idx}" style="display:none;width:100%;max-height:160px;object-fit:cover;border-radius:8px;border:1px solid rgba(247,243,237,0.07);margin-bottom:8px;">`}
+        <textarea class="pres-media-input" placeholder="Notes for this risk (optional)…" rows="2" style="width:100%;resize:vertical;" oninput="_slRiskItems[${idx}].notes=this.value">${esc(item.notes||'')}</textarea>
+      </div>
+    </div>`).join('');
+}
+function toggleSlRisk(idx) { _slRiskItems[idx].on = !_slRiskItems[idx].on; renderSlRiskItems(); }
+function addCustomSlRisk() { _slRiskItems.push({ id: uid(), label: 'Custom risk', icon: '⚠️', on: true, imageUrl: '', notes: '', custom: true }); renderSlRiskItems(); }
+function removeCustomSlRisk(idx) { _slRiskItems.splice(idx, 1); renderSlRiskItems(); }
+function updateSlRiskPreview(idx, url) { const img = document.getElementById('sl-risk-preview-'+idx); if (img) { img.src = url; img.style.display = url ? 'block' : 'none'; } }
+
+function renderSlComparables(type) {
+  const items = type === 'sales' ? _slSales : _slRentals;
+  const isSales = type === 'sales';
+  const list = document.getElementById('sl-' + type + '-list');
+  if (!list) return;
+  list.innerHTML = items.map((item, i) => `
+    <div class="pres-comp-item" data-sl-comp-id="${item.id}" data-sl-comp-type="${type}">
+      <div class="pres-comp-hd">
+        <span class="pres-comp-num">${isSales ? 'Sale' : 'Rental'} #${i + 1}</span>
+        <button class="btn-remove" style="font-size:13px;color:rgba(247,243,237,0.3);" onclick="removeSlComparable('${type}','${item.id}')">✕ Remove</button>
+      </div>
+      <input class="pres-media-input pres-comp-address" style="width:100%;margin-bottom:8px;" placeholder="Property address" value="${esc(item.address||'')}">
+      <div class="pfrow2" style="margin-bottom:6px;">
+        <div><label class="pres-comp-label">${isSales ? 'Sale price' : 'Weekly rent'}</label><input class="pres-media-input pres-comp-price" style="width:100%;" placeholder="${isSales ? 'e.g. $485,000' : 'e.g. $420/wk'}" value="${esc(isSales ? (item.price||'') : (item.weeklyRent||''))}"></div>
+        <div><label class="pres-comp-label">${isSales ? 'Date sold' : 'Date leased'}</label><input class="pres-media-input pres-comp-date" style="width:100%;" placeholder="e.g. March 2025" value="${esc(item.date||'')}"></div>
+      </div>
+      <div class="pfrow4" style="margin-bottom:6px;">
+        <div><label class="pres-comp-label">Beds</label><input class="pres-media-input pres-comp-beds" style="width:100%;" placeholder="3" value="${esc(item.beds||'')}"></div>
+        <div><label class="pres-comp-label">Baths</label><input class="pres-media-input pres-comp-baths" style="width:100%;" placeholder="1" value="${esc(item.baths||'')}"></div>
+        <div><label class="pres-comp-label">Cars</label><input class="pres-media-input pres-comp-cars" style="width:100%;" placeholder="1" value="${esc(item.cars||'')}"></div>
+        ${isSales ? `<div><label class="pres-comp-label">Land</label><input class="pres-media-input pres-comp-land" style="width:100%;" placeholder="612m²" value="${esc(item.landSize||'')}"></div>` : '<div></div>'}
+      </div>
+      <textarea class="pres-media-input pres-comp-notes" style="width:100%;min-height:56px;resize:vertical;" placeholder="Notes (optional)">${esc(item.notes||'')}</textarea>
+    </div>`).join('');
+}
+function syncSlComparables(type) {
+  const isSales = type === 'sales';
+  const items = [];
+  document.querySelectorAll(`[data-sl-comp-type="${type}"]`).forEach(el => {
+    const item = { id: el.dataset.slCompId, address: el.querySelector('.pres-comp-address')?.value.trim()||'', date: el.querySelector('.pres-comp-date')?.value.trim()||'', beds: el.querySelector('.pres-comp-beds')?.value.trim()||'', baths: el.querySelector('.pres-comp-baths')?.value.trim()||'', cars: el.querySelector('.pres-comp-cars')?.value.trim()||'', notes: el.querySelector('.pres-comp-notes')?.value.trim()||'' };
+    if (isSales) { item.price = el.querySelector('.pres-comp-price')?.value.trim()||''; item.landSize = el.querySelector('.pres-comp-land')?.value.trim()||''; }
+    else { item.weeklyRent = el.querySelector('.pres-comp-price')?.value.trim()||''; }
+    items.push(item);
+  });
+  if (type === 'sales') _slSales = items; else _slRentals = items;
+}
+function addSlComparable(type) { syncSlComparables(type); const item = { id: uid(), address: '', date: '', beds: '', baths: '', cars: '', notes: '' }; if (type === 'sales') { item.price = ''; item.landSize = ''; _slSales.push(item); } else { item.weeklyRent = ''; _slRentals.push(item); } renderSlComparables(type); }
+function removeSlComparable(type, id) { syncSlComparables(type); if (type === 'sales') _slSales = _slSales.filter(x => x.id !== id); else _slRentals = _slRentals.filter(x => x.id !== id); renderSlComparables(type); }
+
+function triggerSlSectionUpload(key) { _slUploadTarget = key; document.getElementById('sl-file-input').click(); }
+
+async function handleSlFileUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const dataUrl = await compressImage(file).catch(() => null);
+  if (!dataUrl) { showToast('Could not process image', 'error'); input.value = ''; return; }
+  const r = await fetch('/api/staff/media-upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dataUrl, mimeType: 'image/jpeg' }) });
+  const data = await r.json().catch(() => ({}));
+  if (!data.url) { showToast('Upload failed', 'error'); input.value = ''; return; }
+  const url = data.url;
+  if (typeof _slUploadTarget === 'string' && _slUploadTarget.startsWith('risk-item-')) {
+    const idx = parseInt(_slUploadTarget.replace('risk-item-', ''), 10);
+    if (_slRiskItems[idx]) { _slRiskItems[idx].imageUrl = url; renderSlRiskItems(); }
+  } else if (_slUploadTarget === 'demo') {
+    document.getElementById('sl-demo-image').value = url;
+    const prev = document.getElementById('sl-demo-image-preview'); prev.src = url; prev.style.display = 'block';
+  }
+  _slUploadTarget = null; input.value = '';
+}
+
+function updateSlDemoBar() {
+  const o = parseFloat(document.getElementById('sl-demo-owner').value)||0;
+  const r = parseFloat(document.getElementById('sl-demo-renter').value)||0;
+  const p = parseFloat(document.getElementById('sl-demo-public').value)||0;
+  const t = o+r+p || 100;
+  document.getElementById('sl-dbar-owner').style.width=(o/t*100)+'%';
+  document.getElementById('sl-dbar-renter').style.width=(r/t*100)+'%';
+  document.getElementById('sl-dbar-public').style.width=(p/t*100)+'%';
+}
+function updateSlDemoPreview(url) { const img = document.getElementById('sl-demo-image-preview'); img.src = url; img.style.display = url ? 'block' : 'none'; }
 
 // ── Presentations ──────────────────────────────────────────────────────────
 let _presImages = [], _presVideos = [], _presSections = [], _presSales = [], _presRentals = [], _presRiskItems = [], _uploadTarget = null;

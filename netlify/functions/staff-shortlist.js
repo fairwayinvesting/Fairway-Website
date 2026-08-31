@@ -92,6 +92,11 @@ export default async (req) => {
       bankLender:    body.bankLender?.trim()    || '',
       clientId:     body.clientId            || null,
       clientName:   body.clientName?.trim()  || '',
+      cashflow:          body.cashflow          || null,
+      riskProfile:       body.riskProfile       || null,
+      demographics:      body.demographics      || null,
+      comparableSales:   body.comparableSales   || null,
+      comparableRentals: body.comparableRentals || null,
       status:       'shortlisted',
       // Attribution auto-set from session
       sourcedById:   payload.userId,
@@ -142,6 +147,11 @@ export default async (req) => {
         clientId: si.clientId || null,
         clientName: si.clientName || '',
         shortlistId: si.id,
+        ...(si.cashflow          ? { cashflow: si.cashflow }                   : {}),
+        ...(si.riskProfile       ? { riskProfile: si.riskProfile }             : {}),
+        ...(si.demographics      ? { demographics: si.demographics }           : {}),
+        ...(si.comparableSales   ? { comparableSales: si.comparableSales }     : {}),
+        ...(si.comparableRentals ? { comparableRentals: si.comparableRentals } : {}),
         history: [{ at: now, by: payload.name, byId: payload.userId, byRole: 'contractor', action: 'created', detail: 'from shortlist' }],
         createdAt: now,
         updatedAt: now,
@@ -172,7 +182,8 @@ export default async (req) => {
 
     const fields = ['address','suburb','state','price','propertyType','bedrooms','bathrooms',
                     'carspaces','landSize','agentName','agentAgency','agentPhone','agentEmail',
-                    'source','notes','clientId','clientName','links','bankValuation','bankLender'];
+                    'source','notes','clientId','clientName','links','bankValuation','bankLender',
+                    'cashflow','riskProfile','demographics','comparableSales','comparableRentals'];
     fields.forEach(f => { if (body[f] !== undefined) all[idx][f] = body[f]; });
     const prevStatus = all[idx].status;
     if (body.status && VALID_STATUSES.has(body.status)) all[idx].status = body.status;
