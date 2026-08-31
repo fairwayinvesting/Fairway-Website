@@ -47,7 +47,7 @@ function buildSubmissionAlertEmail(contractorName, address, suburb) {
 // Fields a contractor is allowed to set/update
 const EDITABLE_FIELDS = [
   'address','suburb','price','propertyType','bedrooms','bathrooms','carspaces','landSize',
-  'propertyDescription','summary','highlights','knownIssues',
+  'propertyDescription','summary','highlights','knownIssues','notes',
   'images','videos',
   'cashflow','riskProfile','demographics','customSections',
   'comparableSales','comparableRentals',

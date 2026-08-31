@@ -766,6 +766,9 @@
         <div class="pfield"><label>Known issues / defects <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">Optional</span></label>
           <textarea id="pres-known-issues" placeholder="Any structural issues, council notices, easements, heritage overlays…" style="min-height:70px;"></textarea>
         </div>
+        <div class="pfield"><label>Notes <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">Internal only — not shown to client</span></label>
+          <textarea id="pres-notes" placeholder="Any observations, concerns, or context…" style="min-height:70px;"></textarea>
+        </div>
       </div>
 
       <!-- Media tab -->
@@ -2641,7 +2644,7 @@ function newPresModal() {
   const chip = document.getElementById('pres-panel-status-chip');
   chip.textContent = 'Draft'; chip.className = 'status-badge prs-draft';
   document.getElementById('pres-panel-locked-notice').style.display = 'none';
-  ['pres-address','pres-suburb','pres-price','pres-prop-desc','pres-summary','pres-highlights','pres-known-issues'].forEach(id => { document.getElementById(id).value = ''; });
+  ['pres-address','pres-suburb','pres-price','pres-prop-desc','pres-summary','pres-highlights','pres-known-issues','pres-notes'].forEach(id => { document.getElementById(id).value = ''; });
   document.getElementById('pres-type').value = 'house';
   ['pres-beds','pres-baths','pres-cars','pres-land'].forEach(id => { document.getElementById(id).value = ''; });
   document.getElementById('cf-enabled').checked = false; document.getElementById('analysis-cashflow').classList.remove('open');
@@ -2718,6 +2721,7 @@ function openPresModal(id) {
   document.getElementById('pres-land').value = p.landSize || '';
   document.getElementById('pres-prop-desc').value = p.propertyDescription || '';
   document.getElementById('pres-summary').value = p.summary || '';
+  document.getElementById('pres-notes').value = p.notes || '';
   document.getElementById('pres-highlights').value = (p.highlights||[]).join('\n');
   document.getElementById('pres-known-issues').value = p.knownIssues || '';
 
@@ -2820,6 +2824,7 @@ async function savePres(submitForReviewFlag = false) {
     summary: document.getElementById('pres-summary').value.trim(),
     highlights,
     knownIssues: document.getElementById('pres-known-issues').value.trim(),
+    notes: document.getElementById('pres-notes').value.trim(),
     images: _presImages.filter(i => i.url),
     videos: _presVideos.filter(v => v.url),
     cashflow: { enabled: document.getElementById('cf-enabled').checked, purchasePrice: document.getElementById('cf-price').value, weeklyRent: document.getElementById('cf-rent').value, interestRate: document.getElementById('cf-rate').value, lvr: document.getElementById('cf-lvr').value || '80', managementFee: document.getElementById('cf-mgmt').value || '8', annualRates: document.getElementById('cf-rates').value, annualInsurance: document.getElementById('cf-insurance').value, annualMaintenance: document.getElementById('cf-maint').value },

@@ -147,6 +147,7 @@ export default async (req) => {
         clientId: si.clientId || null,
         clientName: si.clientName || '',
         shortlistId: si.id,
+        ...(si.notes             ? { notes: si.notes }                         : {}),
         ...(si.cashflow          ? { cashflow: si.cashflow }                   : {}),
         ...(si.riskProfile       ? { riskProfile: si.riskProfile }             : {}),
         ...(si.demographics      ? { demographics: si.demographics }           : {}),
