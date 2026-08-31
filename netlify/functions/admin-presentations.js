@@ -224,7 +224,7 @@ function defaultPres(fields) {
   };
 }
 
-const pvStore = () => getStore('fairway-presentation-views');
+const pvStore = () => getStore({ name: 'fairway-presentation-views', consistency: 'strong' });
 
 async function getViews(presId) {
   return (await pvStore().get(presId, { type: 'json' }).catch(() => null)) || {};
@@ -444,20 +444,24 @@ export default async (req) => {
       const clientStore = getStore('fairway-clients');
       const allClients = (await clientStore.get('all', { type: 'json' })) || [];
       const pres = presentations[idx];
+      pres.tokens = pres.tokens || {};
+      pres.sentClients = pres.sentClients || [];
+      pres.assignedClients = pres.assignedClients || [];
+      pres.revokedClients = pres.revokedClients || [];
       let toSend;
       if (action === 'notify') {
-        toSend = pres.assignedClients.filter(cid => !(pres.revokedClients||[]).includes(cid));
+        toSend = pres.assignedClients.filter(cid => !pres.revokedClients.includes(cid));
       } else if (action === 'resend') {
         const { clientId } = body;
         toSend = clientId ? [clientId] : [];
       } else {
         if (Array.isArray(body.targetClients) && body.targetClients.length) {
-          toSend = body.targetClients.filter(cid => !(pres.revokedClients||[]).includes(cid));
+          toSend = body.targetClients.filter(cid => !pres.revokedClients.includes(cid));
           for (const cid of toSend) {
             if (!pres.assignedClients.includes(cid)) pres.assignedClients.push(cid);
           }
         } else {
-          toSend = pres.assignedClients.filter(cid => !pres.sentClients.includes(cid) && !(pres.revokedClients||[]).includes(cid));
+          toSend = pres.assignedClients.filter(cid => !pres.sentClients.includes(cid) && !pres.revokedClients.includes(cid));
         }
       }
       let tokensDirty = false;
@@ -509,6 +513,7 @@ export default async (req) => {
       const newSelectedSet = new Set(body.assignedClients);
       const prevActive = prevAssigned.filter(cid => !prevRevokedSet.has(cid));
       presViews = await getViews(pres.id);
+      pres.tokens = pres.tokens || {};
       for (const cid of body.assignedClients) {
         if (!pres.tokens[cid]) {
           pres.tokens[cid] = genToken();

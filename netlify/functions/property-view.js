@@ -8,7 +8,7 @@ export default async (req) => {
   const token = new URL(req.url).searchParams.get('t');
   if (!token) return json({ error: 'Token required' }, 400);
 
-  const store = getStore('fairway-presentations');
+  const store = getStore({ name: 'fairway-presentations', consistency: 'strong' });
   const presentations = (await store.get('all', { type: 'json' })) || [];
 
   let found = null, clientId = null;
@@ -78,7 +78,7 @@ export default async (req) => {
   if (req.method === 'POST') {
     if (clientId === '_preview') return json({ ok: true });
     // Write only to the per-presentation views store — avoids rewriting the entire presentations array
-    const pvStore = getStore('fairway-presentation-views');
+    const pvStore = getStore({ name: 'fairway-presentation-views', consistency: 'strong' });
     const views = (await pvStore.get(found.id, { type: 'json' }).catch(() => null)) || {};
     if (!views[clientId]) views[clientId] = { firstViewedAt: null, viewCount: 0 };
     const v = views[clientId];
