@@ -552,6 +552,8 @@
     <h2 class="modal-title" id="sl-modal-title">Add property</h2>
     <input type="hidden" id="sl-edit-id">
     <input type="file" id="sl-file-input" accept="image/*" style="display:none;" onchange="handleSlFileUpload(this)">
+    <input type="file" id="sl-cf-file-input" accept="image/*,application/pdf,.pdf,.doc,.docx" style="display:none;" onchange="uploadSlCfFile(this)">
+    <input type="file" id="cf-file-input-appraisal" accept="image/*,application/pdf,.pdf,.doc,.docx" style="display:none;" onchange="uploadCfFile(this)">
     <div style="display:flex;gap:0;margin:-4px 0 20px;border-bottom:1px solid rgba(247,243,237,0.07);">
       <button class="sl-modal-tab active" id="sl-tab-btn-details" onclick="switchSlTab('details',this)">Details</button>
       <button class="sl-modal-tab" id="sl-tab-btn-analysis" onclick="switchSlTab('analysis',this)">Analysis</button>
@@ -645,6 +647,16 @@
           <div class="pfrow2">
             <div class="pfield" style="margin-bottom:0;"><label>Insurance ($/yr)</label><input type="text" id="sl-cf-insurance" placeholder="1200"></div>
             <div class="pfield" style="margin-bottom:0;"><label>Maintenance ($/yr)</label><input type="text" id="sl-cf-maint" placeholder="1000"></div>
+          </div>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(247,243,237,0.08);">
+            <p style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin:0 0 8px;">Rental appraisal</p>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <button class="btn-upload" id="sl-cf-attach-btn" onclick="document.getElementById('sl-cf-file-input').click()">↑ Attach file</button>
+              <div id="sl-cf-file-row" style="display:none;align-items:center;gap:8px;flex:1;min-width:0;">
+                <a id="sl-cf-file-link" href="#" target="_blank" rel="noopener" style="font-size:12.5px;color:#bd7a70;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-decoration:none;"></a>
+                <button onclick="removeSlCfFile()" style="background:none;border:none;color:rgba(224,112,112,0.7);font-size:14px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;" title="Remove">✕</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -807,6 +819,16 @@
             <div class="pfrow2">
               <div class="pfield" style="margin-bottom:0;"><label>Insurance ($/yr)</label><input type="text" id="cf-insurance" placeholder="1200"></div>
               <div class="pfield" style="margin-bottom:0;"><label>Maintenance ($/yr)</label><input type="text" id="cf-maint" placeholder="1000"></div>
+            </div>
+            <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(247,243,237,0.08);">
+              <p style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(247,243,237,0.3);margin:0 0 8px;">Rental appraisal</p>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <button class="btn-upload" id="cf-attach-btn" onclick="document.getElementById('cf-file-input-appraisal').click()">↑ Attach file</button>
+                <div id="cf-file-row" style="display:none;align-items:center;gap:8px;flex:1;min-width:0;">
+                  <a id="cf-file-link" href="#" target="_blank" rel="noopener" style="font-size:12.5px;color:#bd7a70;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-decoration:none;"></a>
+                  <button onclick="removeCfFile()" style="background:none;border:none;color:rgba(224,112,112,0.7);font-size:14px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;" title="Remove">✕</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -2027,6 +2049,7 @@ function openSlModal(id) {
   ).join('');
   // Reset analysis state
   _slRiskItems = []; _slSales = []; _slRentals = [];
+  _slCfAppraisalUrl = ''; _slCfAppraisalName = ''; renderSlCfFile();
 
   if (id) {
     const item = allShortlist.find(i => i.id === id);
@@ -2064,6 +2087,7 @@ function openSlModal(id) {
     document.getElementById('sl-cf-rates').value = cf.annualRates || '';
     document.getElementById('sl-cf-insurance').value = cf.annualInsurance || '';
     document.getElementById('sl-cf-maint').value = cf.annualMaintenance || '';
+    _slCfAppraisalUrl = cf.appraisalUrl || ''; _slCfAppraisalName = cf.appraisalName || ''; renderSlCfFile();
     // Analysis — risk profile
     const rpMigrated = migrateRisk(item.riskProfile);
     document.getElementById('sl-risk-enabled').checked = !!rpMigrated.enabled;
@@ -2144,7 +2168,7 @@ async function saveSlItem() {
     notes: document.getElementById('sl-notes').value.trim(),
     bankValuation: document.getElementById('sl-bank-val').value.trim(),
     bankLender: document.getElementById('sl-bank-lender').value.trim(),
-    cashflow: { enabled: document.getElementById('sl-cf-enabled').checked, purchasePrice: document.getElementById('sl-cf-price').value, weeklyRent: document.getElementById('sl-cf-rent').value, interestRate: document.getElementById('sl-cf-rate').value, lvr: document.getElementById('sl-cf-lvr').value || '80', managementFee: document.getElementById('sl-cf-mgmt').value || '8', annualRates: document.getElementById('sl-cf-rates').value, annualInsurance: document.getElementById('sl-cf-insurance').value, annualMaintenance: document.getElementById('sl-cf-maint').value },
+    cashflow: { enabled: document.getElementById('sl-cf-enabled').checked, purchasePrice: document.getElementById('sl-cf-price').value, weeklyRent: document.getElementById('sl-cf-rent').value, interestRate: document.getElementById('sl-cf-rate').value, lvr: document.getElementById('sl-cf-lvr').value || '80', managementFee: document.getElementById('sl-cf-mgmt').value || '8', annualRates: document.getElementById('sl-cf-rates').value, annualInsurance: document.getElementById('sl-cf-insurance').value, annualMaintenance: document.getElementById('sl-cf-maint').value, appraisalUrl: _slCfAppraisalUrl, appraisalName: _slCfAppraisalName },
     riskProfile: { enabled: document.getElementById('sl-risk-enabled').checked, risks: _slRiskItems.filter(i => i.on) },
     demographics: { enabled: document.getElementById('sl-demo-enabled').checked, ownerOccupier: document.getElementById('sl-demo-owner').value.trim(), renter: document.getElementById('sl-demo-renter').value.trim(), publicHousing: document.getElementById('sl-demo-public').value.trim(), notes: document.getElementById('sl-demo-notes').value.trim(), imageUrl: document.getElementById('sl-demo-image').value.trim() },
     comparableSales: { enabled: document.getElementById('sl-sales-enabled').checked, items: _slSales },
@@ -2167,6 +2191,8 @@ async function saveSlItem() {
 
 // ── Shortlist analysis ─────────────────────────────────────────────────────
 let _slRiskItems = [], _slSales = [], _slRentals = [], _slUploadTarget = null;
+let _slCfAppraisalUrl = '', _slCfAppraisalName = '';
+let _cfAppraisalUrl = '', _cfAppraisalName = '';
 
 function switchSlTab(name, btn) {
   ['details','analysis'].forEach(t => { document.getElementById('sl-tab-'+t).style.display = t === name ? 'block' : 'none'; });
@@ -2275,6 +2301,38 @@ async function handleSlFileUpload(input) {
   }
   _slUploadTarget = null; input.value = '';
 }
+
+// Shared appraisal file uploader (PDF/image)
+async function _uploadAppraisalFile(input, btnId, onSuccess) {
+  const file = input.files[0]; if (!file) return;
+  if (file.size > 15_000_000) { showToast('File too large (max 15 MB)', 'error'); input.value = ''; return; }
+  const btn = document.getElementById(btnId);
+  if (btn) { btn.disabled = true; btn.textContent = 'Uploading…'; }
+  const dataUrl = await new Promise(res => { const r = new FileReader(); r.onload = e => res(e.target.result); r.readAsDataURL(file); });
+  const resp = await fetch('/api/staff/media-upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dataUrl, mimeType: file.type || 'application/octet-stream' }) });
+  if (btn) { btn.disabled = false; btn.textContent = '↑ Attach file'; }
+  if (!resp.ok) { showToast('Upload failed', 'error'); input.value = ''; return; }
+  const data = await resp.json();
+  onSuccess(data.url || '', file.name);
+  input.value = '';
+}
+
+function _renderAppraisalFile(url, name, btnId, rowId, linkId) {
+  const hasFile = !!url;
+  const btn = document.getElementById(btnId); if (btn) btn.style.display = hasFile ? 'none' : '';
+  const row = document.getElementById(rowId); if (row) row.style.display = hasFile ? 'flex' : 'none';
+  const link = document.getElementById(linkId); if (link && hasFile) { link.textContent = name || 'Rental appraisal'; link.href = url; }
+}
+
+// Shortlist cashflow appraisal
+function renderSlCfFile() { _renderAppraisalFile(_slCfAppraisalUrl, _slCfAppraisalName, 'sl-cf-attach-btn', 'sl-cf-file-row', 'sl-cf-file-link'); }
+async function uploadSlCfFile(input) { await _uploadAppraisalFile(input, 'sl-cf-attach-btn', (url, name) => { _slCfAppraisalUrl = url; _slCfAppraisalName = name; renderSlCfFile(); }); }
+function removeSlCfFile() { _slCfAppraisalUrl = ''; _slCfAppraisalName = ''; renderSlCfFile(); }
+
+// Presentation cashflow appraisal
+function renderCfFile() { _renderAppraisalFile(_cfAppraisalUrl, _cfAppraisalName, 'cf-attach-btn', 'cf-file-row', 'cf-file-link'); }
+async function uploadCfFile(input) { await _uploadAppraisalFile(input, 'cf-attach-btn', (url, name) => { _cfAppraisalUrl = url; _cfAppraisalName = name; renderCfFile(); }); }
+function removeCfFile() { _cfAppraisalUrl = ''; _cfAppraisalName = ''; renderCfFile(); }
 
 function updateSlDemoBar() {
   const o = parseFloat(document.getElementById('sl-demo-owner').value)||0;
@@ -2639,6 +2697,7 @@ function newPresModal() {
   document.getElementById('pres-modal-error').style.display = 'none';
   switchPresTab('details', document.querySelector('#pres-panel-overlay .pres-tab'));
   _presImages = []; _presVideos = []; _presSections = []; _presRiskItems = []; _presSales = []; _presRentals = [];
+  _cfAppraisalUrl = ''; _cfAppraisalName = ''; renderCfFile();
   document.getElementById('pres-panel-title').textContent = 'New presentation';
   document.getElementById('pres-edit-id').value = '';
   const chip = document.getElementById('pres-panel-status-chip');
@@ -2678,6 +2737,7 @@ function openPresModal(id) {
   switchPresTab('details', document.querySelector('#pres-panel-overlay .pres-tab'));
 
   _presImages = []; _presVideos = []; _presSections = []; _presRiskItems = []; _presSales = []; _presRentals = [];
+  _cfAppraisalUrl = ''; _cfAppraisalName = '';
 
   document.getElementById('pres-panel-title').textContent = p.address || 'Edit presentation';
   document.getElementById('pres-edit-id').value = id;
@@ -2742,6 +2802,7 @@ function openPresModal(id) {
   document.getElementById('cf-rates').value = cf.annualRates || '';
   document.getElementById('cf-insurance').value = cf.annualInsurance || '';
   document.getElementById('cf-maint').value = cf.annualMaintenance || '';
+  _cfAppraisalUrl = cf.appraisalUrl || ''; _cfAppraisalName = cf.appraisalName || ''; renderCfFile();
 
   const rpMigrated = migrateRisk(p.riskProfile);
   document.getElementById('risk-enabled').checked = !!rpMigrated.enabled;
@@ -2827,7 +2888,7 @@ async function savePres(submitForReviewFlag = false) {
     notes: document.getElementById('pres-notes').value.trim(),
     images: _presImages.filter(i => i.url),
     videos: _presVideos.filter(v => v.url),
-    cashflow: { enabled: document.getElementById('cf-enabled').checked, purchasePrice: document.getElementById('cf-price').value, weeklyRent: document.getElementById('cf-rent').value, interestRate: document.getElementById('cf-rate').value, lvr: document.getElementById('cf-lvr').value || '80', managementFee: document.getElementById('cf-mgmt').value || '8', annualRates: document.getElementById('cf-rates').value, annualInsurance: document.getElementById('cf-insurance').value, annualMaintenance: document.getElementById('cf-maint').value },
+    cashflow: { enabled: document.getElementById('cf-enabled').checked, purchasePrice: document.getElementById('cf-price').value, weeklyRent: document.getElementById('cf-rent').value, interestRate: document.getElementById('cf-rate').value, lvr: document.getElementById('cf-lvr').value || '80', managementFee: document.getElementById('cf-mgmt').value || '8', annualRates: document.getElementById('cf-rates').value, annualInsurance: document.getElementById('cf-insurance').value, annualMaintenance: document.getElementById('cf-maint').value, appraisalUrl: _cfAppraisalUrl, appraisalName: _cfAppraisalName },
     riskProfile: { enabled: document.getElementById('risk-enabled').checked, risks: _presRiskItems.filter(i => i.on) },
     demographics: { enabled: document.getElementById('demo-enabled').checked, ownerOccupier: document.getElementById('demo-owner').value.trim(), renter: document.getElementById('demo-renter').value.trim(), publicHousing: document.getElementById('demo-public').value.trim(), notes: document.getElementById('demo-notes').value.trim(), imageUrl: document.getElementById('demo-image').value.trim() },
     customSections: _presSections,

@@ -11,7 +11,7 @@ export default async (req) => {
   const { dataUrl, mimeType = 'image/jpeg' } = await req.json().catch(() => ({}));
   if (!dataUrl) return json({ error: 'dataUrl required' }, 400);
   const base64 = dataUrl.replace(/^data:[^;]+;base64,/, '');
-  if (base64.length > 10_000_000) return json({ error: 'File too large (max ~7 MB)' }, 413);
+  if (base64.length > 20_000_000) return json({ error: 'File too large (max ~15 MB)' }, 413);
   const buffer = Buffer.from(base64, 'base64');
   const key = crypto.randomBytes(16).toString('hex');
   const store = getStore('fairway-media');
