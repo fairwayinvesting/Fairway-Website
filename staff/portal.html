@@ -922,6 +922,7 @@
       <span id="pres-modal-error" style="display:none;flex:1;text-align:left;font-size:13px;color:#e07070;align-self:center;"></span>
       <button class="btn-primary" id="pres-submit-review-btn" onclick="submitForReview()" style="background:#e8a87c;color:#22201d;">Submit for review</button>
       <button class="btn-primary" id="pres-save-btn" onclick="savePres()">Save draft</button>
+      <button class="btn-primary" id="pres-save-notes-btn" onclick="savePresNotes()" style="display:none;">Save notes</button>
     </div>
   </div>
 </div>
@@ -2597,8 +2598,8 @@ function renderVidList() {
     <div class="pres-media-item" id="pvid-${v.id}">
       <div style="width:40px;height:40px;border-radius:6px;background:rgba(247,243,237,0.06);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;">▶</div>
       <div class="pres-media-fields">
-        <input class="pres-media-input" placeholder="Video title (optional)" value="${esc(v.title||'')}" oninput="_presVideos.find(x=>x.id==='${v.id}').title=this.value">
         <input class="pres-media-input" placeholder="Streamable / YouTube / Vimeo URL" value="${esc(v.url||'')}" oninput="_presVideos.find(x=>x.id==='${v.id}').url=this.value">
+        <input class="pres-media-input" placeholder="Video title (optional)" value="${esc(v.title||'')}" oninput="_presVideos.find(x=>x.id==='${v.id}').title=this.value">
       </div>
       <button class="btn-remove" onclick="removeVideo('${v.id}')">×</button>
     </div>`).join('');
@@ -2760,7 +2761,7 @@ function openPresModal(id) {
     lockedNotice.style.color = 'rgba(122,184,232,0.8)';
     lockedNotice.textContent = 'Edit access granted — your changes update the live presentation that clients can view.';
   } else if (!canEdit) {
-    const lockedMsgs = { sent:'This presentation has been sent to the client — editing is locked.', killed:'This property has been killed.' };
+    const lockedMsgs = { sent:'This presentation has been sent to the client — editing is locked. You can still update the notes below.', killed:'This property has been killed.' };
     lockedNotice.style.display = 'block';
     lockedNotice.style.background = 'rgba(232,168,124,0.07)';
     lockedNotice.style.borderColor = 'rgba(232,168,124,0.2)';
@@ -2781,7 +2782,7 @@ function openPresModal(id) {
   document.getElementById('pres-land').value = p.landSize || '';
   document.getElementById('pres-prop-desc').value = p.propertyDescription || '';
   document.getElementById('pres-summary').value = p.summary || '';
-  document.getElementById('pres-notes').value = p.notes || '';
+  document.getElementById('pres-notes').value = p.notes || allShortlist.find(i => i.id === p.shortlistId)?.notes || '';
   document.getElementById('pres-highlights').value = (p.highlights||[]).join('\n');
   document.getElementById('pres-known-issues').value = p.knownIssues || '';
 
@@ -2854,6 +2855,7 @@ function openPresModal(id) {
   document.getElementById('pres-submit-review-btn').textContent = rs === 'rejected' ? 'Save & Resubmit' : 'Submit for review';
   document.getElementById('pres-save-btn').style.display = canEdit ? 'inline-flex' : 'none';
   document.getElementById('pres-save-btn').textContent = ['draft','rejected'].includes(rs) ? 'Save draft' : 'Save changes';
+  document.getElementById('pres-save-notes-btn').style.display = (!canEdit && rs === 'sent') ? 'inline-flex' : 'none';
 
   overlay.classList.add('open');
 }
@@ -2927,6 +2929,23 @@ async function savePres(submitForReviewFlag = false) {
   renderPresentations();
   if (!submitForReviewFlag) { closePresModal(); showToast(isNew ? 'Presentation created' : 'Presentation saved'); }
   return true;
+}
+
+async function savePresNotes() {
+  const id = document.getElementById('pres-edit-id').value;
+  if (!id) return;
+  const btn = document.getElementById('pres-save-notes-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  const r = await fetch('/api/staff/presentations', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, notes: document.getElementById('pres-notes').value.trim() }),
+  });
+  btn.disabled = false; btn.textContent = 'Save notes';
+  if (!r.ok) { showToast('Failed to save notes', 'error'); return; }
+  const idx = allPresentations.findIndex(p => p.id === id);
+  if (idx !== -1) allPresentations[idx].notes = document.getElementById('pres-notes').value.trim();
+  showToast('Notes saved');
 }
 
 async function submitForReview() {

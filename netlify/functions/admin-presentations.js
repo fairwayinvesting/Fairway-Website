@@ -502,7 +502,7 @@ export default async (req) => {
                     'propertyType','propertyDescription','summary','highlights','knownIssues','agentSubmission','images','videos','cashflow',
                     'riskProfile','demographics','customSections',
                     'comparableSales','comparableRentals',
-                    'revocationReason','status','expiresAt','revokedClients','clientAcquisitions'];
+                    'revocationReason','status','expiresAt','revokedClients','clientAcquisitions','notes'];
     fields.forEach(f => { if (body[f] !== undefined) pres[f] = body[f]; });
 
     let viewsUpdated = false;

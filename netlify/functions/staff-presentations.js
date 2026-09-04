@@ -137,9 +137,20 @@ export default async (req) => {
     }
 
     // Field edits — blocked only once sent to client (unless admin grants override)
+    // Notes are always editable regardless of lock status
     const editableStatuses = new Set(['draft', 'ready_for_review', 'admin_reviewing', 'rejected', 'approved', 'allocated']);
     const canEditSent = rs === 'sent' && all[idx].contractorEditOverride === true;
-    if (!editableStatuses.has(rs) && !canEditSent) {
+    const isLocked = !editableStatuses.has(rs) && !canEditSent;
+
+    if (isLocked) {
+      if (body.notes !== undefined) {
+        all[idx].notes = body.notes;
+        all[idx].updatedAt = new Date().toISOString();
+        if (!Array.isArray(all[idx].history)) all[idx].history = [];
+        all[idx].history.push({ at: new Date().toISOString(), by: payload.name, byId: payload.userId, byRole: 'contractor', action: 'updated' });
+        await store.setJSON('all', all);
+        return json({ ok: true, pres: all[idx] });
+      }
       return json({ error: 'This presentation has been sent to the client — editing is locked.' }, 403);
     }
 

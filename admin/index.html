@@ -2211,6 +2211,9 @@
         <div class="field"><label>Known issues / defects <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">Optional</span></label>
           <textarea id="pres-known-issues" placeholder="Any structural issues, council notices, easements, heritage overlays, strata issues…" style="min-height:72px;"></textarea>
         </div>
+        <div class="field"><label>Notes <span style="font-weight:300;text-transform:none;letter-spacing:0;opacity:0.5;">Internal only — not shown to client</span></label>
+          <textarea id="pres-notes" placeholder="Any observations, deal updates, or progression notes…" style="min-height:70px;"></textarea>
+        </div>
       </div>
 
       <!-- Media tab -->
@@ -9257,8 +9260,8 @@ function renderDocsTab() {
     return '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;vertical-align:-2px"><rect x="1" y="1" width="12" height="12" rx="2" stroke="rgba(247,243,237,0.3)" stroke-width="1.2"/><path d="M4 5h6M4 7.5h6M4 10h4" stroke="rgba(247,243,237,0.3)" stroke-width="1.1" stroke-linecap="round"/></svg>';
   }
 
-  function acqSection(acqId, acqLabel) {
-    const acqDocs = docs.filter(d => (d.acqId || '') === acqId);
+  function acqSection(acqId, acqLabel, overrideDocs) {
+    const acqDocs = overrideDocs ?? docs.filter(d => (d.acqId || '') === acqId);
     const byType  = {};
     DOC_TYPES.forEach(dt => { byType[dt.key] = acqDocs.filter(d => d.type === dt.key); });
     const typeRows = DOC_TYPES.filter(dt => byType[dt.key].length).map(dt =>
@@ -9282,9 +9285,15 @@ function renderDocsTab() {
     </div>`;
   }
 
-  const sections = acqs.length
-    ? acqs.map(acq => acqSection(acq.id, acq.label)).join('')
-    : acqSection('', 'Documents');
+  let sections;
+  if (acqs.length) {
+    const knownAcqIds = new Set(acqs.map(a => a.id));
+    const unassigned = docs.filter(d => !knownAcqIds.has(d.acqId || ''));
+    const unassignedSection = unassigned.length ? acqSection('__unassigned__', 'Unassigned documents', unassigned) : '';
+    sections = acqs.map(acq => acqSection(acq.id, acq.label)).join('') + unassignedSection;
+  } else {
+    sections = acqSection('', 'Documents');
+  }
 
   el.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
@@ -11000,8 +11009,8 @@ function renderVidList() {
     <div class="pres-media-item" id="pvid-${v.id}">
       <div style="width:40px;height:40px;border-radius:6px;background:rgba(247,243,237,0.06);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;">▶</div>
       <div class="pres-media-fields">
-        <input class="pres-media-input" placeholder="Video title (optional)" value="${esc(v.title||'')}" oninput="_presVideos.find(x=>x.id==='${v.id}').title=this.value">
         <input class="pres-media-input" placeholder="Streamable / YouTube / Vimeo URL" value="${esc(v.url||'')}" oninput="_presVideos.find(x=>x.id==='${v.id}').url=this.value">
+        <input class="pres-media-input" placeholder="Video title (optional)" value="${esc(v.title||'')}" oninput="_presVideos.find(x=>x.id==='${v.id}').title=this.value">
       </div>
       <button class="btn-remove" onclick="removeVideo('${v.id}')">×</button>
     </div>`).join('');
@@ -11162,6 +11171,7 @@ function openPresModal(id) {
     document.getElementById('pres-summary').value = p.summary || '';
     document.getElementById('pres-highlights').value = (p.highlights || []).join('\n');
     document.getElementById('pres-known-issues').value = p.knownIssues || '';
+    document.getElementById('pres-notes').value = p.notes || '';
     // Agent callout
     const callout = document.getElementById('pres-agent-callout');
     const calloutBody = document.getElementById('pres-agent-callout-body');
@@ -11310,7 +11320,7 @@ function openPresModal(id) {
   } else {
     document.getElementById('pres-modal-title').textContent = 'New presentation';
     document.getElementById('pres-edit-id').value = '';
-    ['pres-address','pres-suburb','pres-price','pres-beds','pres-baths','pres-cars','pres-land','pres-prop-desc','pres-summary','pres-highlights','pres-known-issues','cf-price','cf-rent','cf-rate','cf-lvr','cf-mgmt','cf-rates','cf-insurance','cf-maint','demo-owner','demo-renter','demo-public','demo-notes','demo-image','pres-revocation-reason'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    ['pres-address','pres-suburb','pres-price','pres-beds','pres-baths','pres-cars','pres-land','pres-prop-desc','pres-summary','pres-highlights','pres-known-issues','pres-notes','cf-price','cf-rent','cf-rate','cf-lvr','cf-mgmt','cf-rates','cf-insurance','cf-maint','demo-owner','demo-renter','demo-public','demo-notes','demo-image','pres-revocation-reason'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.getElementById('pres-agent-callout').style.display = 'none';
     document.getElementById('pres-type').value = 'house';
     document.getElementById('pres-status').value = '';
@@ -11431,6 +11441,7 @@ async function savePresentation() {
     summary: document.getElementById('pres-summary').value.trim(),
     highlights,
     knownIssues: document.getElementById('pres-known-issues').value.trim(),
+    notes: document.getElementById('pres-notes').value.trim(),
     images: _presImages.filter(i => i.url),
     videos: _presVideos.filter(v => v.url),
     cashflow: { enabled: document.getElementById('cf-enabled').checked, purchasePrice: document.getElementById('cf-price').value, weeklyRent: document.getElementById('cf-rent').value, interestRate: document.getElementById('cf-rate').value, lvr: document.getElementById('cf-lvr').value || '80', managementFee: document.getElementById('cf-mgmt').value || '8', annualRates: document.getElementById('cf-rates').value, annualInsurance: document.getElementById('cf-insurance').value, annualMaintenance: document.getElementById('cf-maint').value },
