@@ -749,6 +749,7 @@
         <button class="pres-tab" onclick="switchPresTab('media',this)">Media</button>
         <button class="pres-tab" onclick="switchPresTab('analysis',this)">Analysis</button>
         <button class="pres-tab" onclick="switchPresTab('sections',this)">Sections</button>
+        <button class="pres-tab" onclick="switchPresTab('docs',this)">Docs</button>
         <button class="pres-tab" onclick="switchPresTab('nominate',this)">Clients</button>
       </div>
     </div>
@@ -907,6 +908,16 @@
         <p style="font-size:13px;color:rgba(247,243,237,0.4);margin-bottom:16px;line-height:1.5;">Add any extra sections — name them anything and add text, images, or videos inside each one.</p>
         <div id="pres-sec-list"></div>
         <button class="btn-primary" onclick="addCustomSection()" style="padding:10px 18px;font-size:13px;">+ Add section</button>
+      </div>
+
+      <!-- Docs tab -->
+      <div class="pres-tab-pane" id="pres-tab-docs">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <p style="font-size:13px;color:rgba(247,243,237,0.4);line-height:1.5;margin:0;">Attach any supporting documents for this property — contracts, reports, appraisals.</p>
+          <button class="btn-upload" onclick="document.getElementById('pres-doc-file-input').click()" style="flex-shrink:0;margin-left:12px;">↑ Upload</button>
+        </div>
+        <input type="file" id="pres-doc-file-input" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.webp" style="display:none;" onchange="uploadPresDoc(this)">
+        <div id="pres-doc-list"></div>
       </div>
 
       <!-- Nominate clients tab -->
@@ -2475,6 +2486,72 @@ function switchPresTab(name, btn) {
   if (btn) btn.classList.add('active');
 }
 
+// ── Presentation docs ──────────────────────────────────────────────────────
+let _presDocsPresId = '';
+let _presDocs = [];
+
+async function loadPresDocs(presId) {
+  _presDocsPresId = presId;
+  _presDocs = [];
+  renderPresDocList();
+  const r = await fetch(`/api/pres-docs?presId=${encodeURIComponent(presId)}`);
+  if (r.ok) _presDocs = await r.json().catch(() => []);
+  renderPresDocList();
+}
+
+function renderPresDocList() {
+  const el = document.getElementById('pres-doc-list');
+  if (!el) return;
+  if (!_presDocs.length) {
+    el.innerHTML = '<p style="font-size:13px;color:rgba(247,243,237,0.25);margin:8px 0;">No documents attached yet.</p>';
+    return;
+  }
+  el.innerHTML = _presDocs.map(d => {
+    const date = new Date(d.uploadedAt).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
+    const sizeKb = d.size ? `${Math.round(d.size/1024)} KB` : '';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(247,243,237,0.06);">
+      <div style="flex:1;min-width:0;">
+        <a href="/api/pres-docs?presId=${encodeURIComponent(_presDocsPresId)}&docId=${d.id}" target="_blank" rel="noopener" style="font-size:13.5px;color:#bd7a70;text-decoration:none;word-break:break-all;">${esc(d.filename)}</a>
+        <div style="font-size:11.5px;color:rgba(247,243,237,0.3);margin-top:2px;">${date}${sizeKb ? ' · '+sizeKb : ''}${d.uploadedBy ? ' · '+esc(d.uploadedBy) : ''}</div>
+      </div>
+      <button onclick="deletePresDoc('${d.id}')" style="background:none;border:none;color:rgba(247,243,237,0.2);cursor:pointer;font-size:18px;line-height:1;padding:0 2px;flex-shrink:0;" title="Remove">&#215;</button>
+    </div>`;
+  }).join('');
+}
+
+async function uploadPresDoc(input) {
+  const file = input.files[0];
+  if (!file || !_presDocsPresId) { input.value = ''; return; }
+  const btn = document.querySelector('#pres-tab-docs .btn-upload');
+  if (btn) { btn.disabled = true; btn.textContent = 'Uploading…'; }
+  const CHUNK = 4 * 1024 * 1024;
+  const total = Math.ceil(file.size / CHUNK);
+  let docId = null;
+  for (let i = 0; i < total; i++) {
+    const chunk = file.slice(i * CHUNK, (i + 1) * CHUNK);
+    const fd = new FormData();
+    fd.append('file', new File([chunk], file.name, { type: file.type }));
+    fd.append('presId', _presDocsPresId);
+    fd.append('chunkIndex', i);
+    fd.append('totalChunks', total);
+    fd.append('totalSize', file.size);
+    if (docId) fd.append('docId', docId);
+    const r = await fetch('/api/pres-docs', { method: 'POST', body: fd });
+    if (!r.ok) { showToast('Upload failed', 'error'); break; }
+    const data = await r.json();
+    if (i < total - 1) { docId = data.docId; }
+    else if (data.id) { _presDocs.push(data); renderPresDocList(); }
+  }
+  if (btn) { btn.disabled = false; btn.textContent = '↑ Upload'; }
+  input.value = '';
+}
+
+async function deletePresDoc(docId) {
+  if (!confirm('Remove this document?')) return;
+  const r = await fetch(`/api/pres-docs?presId=${encodeURIComponent(_presDocsPresId)}&docId=${encodeURIComponent(docId)}`, { method: 'DELETE' });
+  if (r.ok) { _presDocs = _presDocs.filter(d => d.id !== docId); renderPresDocList(); }
+}
+
 function toggleAnalysis(key, fromCheckbox) {
   const body = document.getElementById('analysis-' + key);
   const cbId = key === 'cashflow' ? 'cf-enabled' : key + '-enabled';
@@ -2875,6 +2952,7 @@ function openPresModal(id) {
   document.getElementById('pres-save-btn').textContent = ['draft','rejected'].includes(rs) ? 'Save draft' : 'Save changes';
   document.getElementById('pres-save-notes-btn').style.display = (!canEdit && rs === 'sent') ? 'inline-flex' : 'none';
 
+  loadPresDocs(id);
   overlay.classList.add('open');
 }
 
