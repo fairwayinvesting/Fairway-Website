@@ -69,6 +69,7 @@ export default async (req) => {
     }
     if (body.recurrenceTime !== undefined) list[idx].recurrenceTime = body.recurrenceTime || null;
     if (body.scheduledTime !== undefined) list[idx].scheduledTime = body.scheduledTime || null;
+    if (body.notes !== undefined) list[idx].notes = body.notes?.trim() || '';
 
     // Append a completed date for a recurring task check-off
     if (body.completedOnDate) {

@@ -7441,8 +7441,9 @@ function taskItemHtml(t, today) {
       </svg>
     </div>
     <div class="task-body">
-      <div id="task-view-${t.id}" onclick="toggleTask('${t.id}')" style="cursor:pointer;">
+      <div id="task-view-${t.id}" onclick="openTaskEdit('${t.id}')" style="cursor:pointer;">
         <div class="task-title">${esc(t.title)}</div>
+        ${t.notes ? `<div style="font-size:12.5px;color:rgba(247,243,237,0.4);margin-top:3px;line-height:1.5;">${esc(t.notes)}</div>` : ''}
         <div class="task-meta">
           <span class="task-urg-badge" data-urg="${t.urgency}">${urgLabel}</span>
           ${recurLabel ? `<span class="task-recur-badge">↻ ${recurLabel}</span>` : ''}
@@ -7452,8 +7453,9 @@ function taskItemHtml(t, today) {
       </div>
       <div id="task-edit-${t.id}" class="task-edit-form" style="display:none;" onclick="event.stopPropagation()">
         <input id="task-edit-title-${t.id}" type="text" class="task-edit-input" value="${esc(t.title)}"
-          onkeydown="if(event.key==='Enter')saveTaskEdit('${t.id}');else if(event.key==='Escape')closeTaskEdit('${t.id}')">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          onkeydown="if(event.key==='Escape')closeTaskEdit('${t.id}')">
+        <textarea id="task-edit-notes-${t.id}" placeholder="Notes (optional)…" style="width:100%;box-sizing:border-box;resize:vertical;background:rgba(247,243,237,0.04);border:1px solid rgba(247,243,237,0.1);border-radius:8px;color:#f7f3ed;font-family:'Outfit',sans-serif;font-size:13px;font-weight:300;padding:9px 12px;outline:none;margin-top:6px;min-height:60px;">${esc(t.notes||'')}</textarea>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px;">
           <div class="task-urg-sel" id="task-edit-urg-${t.id}" style="flex-shrink:0;">
             <button class="task-urg-btn${t.urgency==='high'?' active':''}" data-urg="high"   onclick="taskEditUrgency('${t.id}','high',this)">High</button>
             <button class="task-urg-btn${t.urgency==='medium'?' active':''}" data-urg="medium" onclick="taskEditUrgency('${t.id}','medium',this)">Medium</button>
@@ -7507,14 +7509,15 @@ function taskEditUrgency(id, u, btn) {
 async function saveTaskEdit(id) {
   const title   = document.getElementById(`task-edit-title-${id}`)?.value.trim();
   const dueDate = document.getElementById(`task-edit-date-${id}`)?.value;
+  const notes   = document.getElementById(`task-edit-notes-${id}`)?.value.trim() ?? '';
   const urgency = _taskEditUrgency[id] || 'medium';
   if (!title) return;
-  const body = { id, title, urgency };
+  const body = { id, title, urgency, notes };
   if (dueDate) body.dueDate = dueDate;
   const res = await api('PUT', '/api/admin/tasks', body);
   if (!res.ok) return;
   const task = allTasks.find(t => t.id === id);
-  if (task) { task.title = title; task.urgency = urgency; if (dueDate) task.dueDate = dueDate; }
+  if (task) { task.title = title; task.urgency = urgency; task.notes = notes; if (dueDate) task.dueDate = dueDate; }
   renderTaskList();
   renderTaskStats(_taskStatPeriod);
   if (_calListView === 'calendar') renderCalendar();

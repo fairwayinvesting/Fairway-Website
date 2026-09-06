@@ -1739,16 +1739,15 @@ function renderTasks() {
       <button onclick="toggleTask('${t.id}')" style="width:20px;height:20px;border-radius:6px;border:1.5px solid ${done?'#6dbf7b':'rgba(247,243,237,0.2)'};background:${done?'rgba(109,191,123,0.15)':'transparent'};cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all .15s;">
         ${done?'<svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="#6dbf7b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
       </button>
-      <div style="flex:1;min-width:0;">
+      <div style="flex:1;min-width:0;cursor:pointer;" onclick="openTaskModal('${t.id}')">
         <div style="font-size:14px;color:${done?'rgba(247,243,237,0.4)':'#f7f3ed'};${done?'text-decoration:line-through;':''}">${esc(t.title)}</div>
+        ${t.notes ? `<div style="font-size:12.5px;color:rgba(247,243,237,0.4);margin-top:3px;line-height:1.5;">${esc(t.notes)}</div>` : ''}
         <div style="display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;">
           ${urgDot}
           <span style="font-size:12px;color:rgba(247,243,237,0.35);">${dateFmt}</span>
           ${overdueLabel}
-          ${t.notes ? `<span style="font-size:12px;color:rgba(247,243,237,0.3);">${esc(t.notes)}</span>` : ''}
         </div>
       </div>
-      ${isOwn && !done ? `<button onclick="openTaskModal('${t.id}')" style="background:none;border:none;color:rgba(247,243,237,0.2);cursor:pointer;font-size:14px;line-height:1;padding:0 4px;flex-shrink:0;" title="Edit">✎</button>` : ''}
       ${isOwn && !done ? `<button onclick="deleteTask('${t.id}')" style="background:none;border:none;color:rgba(247,243,237,0.2);cursor:pointer;font-size:18px;line-height:1;padding:0 2px;flex-shrink:0;" title="Remove">&#215;</button>` : ''}
     </div>`;
   };
@@ -1780,19 +1779,38 @@ function openTaskModal(id) {
   taskEditId = id || null;
   const task = id ? allTasks.find(t => t.id === id) : null;
   const today = localDate();
-  document.getElementById('task-modal-title').textContent = task ? 'Edit task' : 'Add task';
-  document.getElementById('task-save-btn').textContent = task ? 'Save changes' : 'Add task';
-  document.getElementById('task-title').value = task ? task.title : '';
-  document.getElementById('task-due-date').value = task ? (task.dueDate || today) : today;
-  document.getElementById('task-notes').value = task ? (task.notes || '') : '';
+  const isReadOnly = task && (task.assignedByAdmin || !!task.completedAt);
+  document.getElementById('task-modal-title').textContent = task ? (isReadOnly ? 'Task details' : 'Edit task') : 'Add task';
+  const saveBtn = document.getElementById('task-save-btn');
+  saveBtn.style.display = isReadOnly ? 'none' : '';
+  saveBtn.textContent = task ? 'Save changes' : 'Add task';
+  const titleEl = document.getElementById('task-title');
+  titleEl.value = task ? task.title : '';
+  titleEl.readOnly = isReadOnly;
+  titleEl.style.opacity = isReadOnly ? '0.6' : '';
+  const dueDateEl = document.getElementById('task-due-date');
+  dueDateEl.value = task ? (task.dueDate || today) : today;
+  dueDateEl.readOnly = isReadOnly;
+  dueDateEl.style.opacity = isReadOnly ? '0.6' : '';
+  const notesEl = document.getElementById('task-notes');
+  notesEl.value = task ? (task.notes || '') : '';
+  notesEl.readOnly = isReadOnly;
+  notesEl.style.opacity = isReadOnly ? '0.6' : '';
   document.getElementById('task-modal-error').style.display = 'none';
   const urg = task ? (task.urgency || 'medium') : 'medium';
   setStaffTaskUrg(urg, document.getElementById('task-urg-' + urg));
+  ['high','medium','low'].forEach(u => { const b = document.getElementById('task-urg-' + u); if (b) b.disabled = isReadOnly; });
   document.getElementById('task-modal').classList.add('open');
-  setTimeout(() => document.getElementById('task-title').focus(), 50);
+  if (!isReadOnly) setTimeout(() => titleEl.focus(), 50);
 }
 
-function closeTaskModal() { taskEditId = null; document.getElementById('task-modal').classList.remove('open'); }
+function closeTaskModal() {
+  taskEditId = null;
+  document.getElementById('task-modal').classList.remove('open');
+  ['task-title','task-due-date','task-notes'].forEach(id => { const el = document.getElementById(id); if (el) { el.readOnly = false; el.style.opacity = ''; } });
+  ['high','medium','low'].forEach(u => { const b = document.getElementById('task-urg-' + u); if (b) b.disabled = false; });
+  document.getElementById('task-save-btn').style.display = '';
+}
 
 function setStaffTaskUrg(urg, btn) {
   staffTaskUrgency = urg;
